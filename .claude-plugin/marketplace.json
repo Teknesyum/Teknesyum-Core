@@ -1,0 +1,11 @@
+{
+  "name": "teknesyum",
+  "owner": { "name": "Teknesyum", "url": "https://github.com/Teknesyum" },
+  "plugins": [
+    {
+      "name": "teknesyum-core",
+      "source": "./core",
+      "description": "Contract-gated multi-agent relay. Deterministic completion gate, no per-turn token cost."
+    }
+  ]
+}

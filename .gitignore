@@ -1,0 +1,8 @@
+node_modules/
+.claude/relay/live/
+.claude/map.json
+.claude/map.md
+trash/
+Teknesyum-Base/
+*.tmp
+*.log

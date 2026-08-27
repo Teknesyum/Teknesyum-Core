@@ -1,0 +1,12 @@
+{
+  "name": "teknesyum-core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Contract gate for multi-agent work in Claude Code.",
+  "license": "Apache-2.0",
+  "scripts": {
+    "test": "node test/all.js",
+    "map": "node core/scripts/map.js .",
+    "setup": "node core/scripts/setup.js"
+  }
+}
