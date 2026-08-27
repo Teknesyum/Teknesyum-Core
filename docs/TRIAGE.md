@@ -10,7 +10,7 @@ per token in the whole codebase.
 
 | Base | Class | Core |
 |---|---|---|
-| `contract-guard.js` — blocks writes outside a contract's owned paths | Z | keep, rename `guard.js` |
+| `contract-guard.js` — done/ gate, status ladder, contract schema | Z | keep as `guard.js`; the owns boundary described here earlier was never in Base and is new in Core (D5) |
 | `denetim-kaydi.js` — single-use audit seal bound to contract+turn+HEAD | Z | keep, fold into `guard.js` |
 | `beep.js` (hook + script) — audio notify, bypasses OS toast | Z | keep |
 | `statusline.js` | Z | keep and **expand** — becomes the only status surface |

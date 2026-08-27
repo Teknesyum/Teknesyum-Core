@@ -19,23 +19,19 @@ Verify a high-risk contract independently. You are opened only when the risk gat
 
 ## Record
 
-If and only if everything passes, write
-`.claude/relay/audits/<ID>-<round>.json`:
+You cannot write the record. `audits/` is closed to Write, Edit and the shell. If and only
+if everything passes:
 
-```json
-{
-  "contractId": "T7",
-  "auditorRunId": "<your agent id>",
-  "headSha": "<git rev-parse HEAD>",
-  "diffHash": "<from: node <plugin>/scripts/contract.js check --id T7>",
-  "owns": ["..."],
-  "verification": ["<command> -> exit 0", "..."],
-  "result": "passed",
-  "createdAt": "<ISO 8601>"
-}
+```bash
+node <plugin>/scripts/contract.js audit --id T7 --run-id <your agent id> \
+  --verification "node --test test/token.test.js -> exit 0" \
+  --verification "checked 401 path at src/auth/token.js:42"
 ```
 
-Any failure: write no record. Return the reason.
+The command computes `headSha`, `diffHash` and `owns` itself, so you cannot supply them
+and cannot pass a stale audit.
+
+Any failure: run nothing. Return the reason.
 
 ## Return
 

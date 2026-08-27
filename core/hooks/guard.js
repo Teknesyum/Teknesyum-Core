@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { read, norm, relayRoot, projectRoot, logProblem, settings } = require('./lib.js');
+const { read, write, safe, norm, relayRoot, projectRoot, liveDir, logProblem, settings } = require('./lib.js');
 const { RANK, isContractName, status, isKnownStatus, list } = require('./schema.js');
 
 let raw = '';
@@ -203,13 +203,76 @@ function verifySchema(target, content) {
   );
 }
 
+const SEALED_DIRS = /(^|\/)\.claude\/relay\/(audits|live)\//i;
+
+function sealedArea(target) {
+  if (!SEALED_DIRS.test(norm(path.resolve(target)))) return;
+  return block(
+    'audits/ and live/ are written by the gate, never by hand.',
+    'An audit record is created by:',
+    '  node <plugin>/scripts/contract.js audit --id <ID> --run-id <agent> --verification "..."',
+    'That command computes headSha and diffHash itself, so they cannot be supplied.'
+  );
+}
+
+function bindingFile(relay, agentId) {
+  return path.join(liveDir(relay), safe(String(agentId)) + '.json');
+}
+
+function bind(target, agentId) {
+  if (!agentId) return;
+  const abs = canonicalContract(target);
+  if (!abs) return;
+  const relay = relayOf(abs);
+  if (!relay) return;
+  const f = bindingFile(relay, agentId);
+  const rec = read(f) || { id: safe(String(agentId)), files: [] };
+  if (rec.contract === path.basename(abs, '.md')) return;
+  rec.contract = path.basename(abs, '.md');
+  write(f, rec);
+}
+
+function ownedBy(relay, id) {
+  try {
+    return list('owns', fs.readFileSync(path.join(relay, 'contracts', id + '.md'), 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function boundary(target, agentId) {
+  if (!agentId) return;
+  const abs = path.resolve(target);
+  const n = norm(abs);
+  if (/\/\.claude\/relay\//i.test(n)) return;
+  const r = relayRoot(path.dirname(abs), { git: false });
+  if (!r) return;
+  const rec = read(bindingFile(r.relay, agentId));
+  if (!rec || !rec.contract) return;
+  const owns = ownedBy(r.relay, rec.contract);
+  if (!owns || !owns.length) return;
+  const rel = norm(path.relative(projectRoot(r.relay), abs)).toLowerCase();
+  if (owns.some((o) => norm(o).toLowerCase() === rel)) return;
+  return block(
+    rel + ' is outside the owns set of ' + rec.contract + '.',
+    'owns: ' + owns.join(', '),
+    '',
+    'Do not widen the contract to fit the edit. Record the blocker under ## Checkpoint',
+    'and return, or ask T0 for a contract that owns this file.'
+  );
+}
+
 function decide(j) {
   const tool = j.tool_name || '';
   const t = j.tool_input || {};
+  const agentId = j.agent_id || null;
 
   if (/^(Write|Edit|NotebookEdit)$/.test(tool)) {
     const target = t.file_path || t.notebook_path || '';
     if (!target) return;
+    sealedArea(target);
+    bind(target, agentId);
+    boundary(target, agentId);
     if (tool === 'Write') {
       priorArt(target);
       router(target, t.content || '');
@@ -228,6 +291,11 @@ function decide(j) {
 
   if (tool !== 'Bash') return;
   const cmd = String(t.command || '');
+  if (/relay[\\/](audits|live)/i.test(cmd) && !cmd.split(/[\n;]|&&|\|\||\|/).every(readsOnly))
+    return block(
+      'audits/ and live/ are written by the gate, never from the shell.',
+      'Use: node <plugin>/scripts/contract.js audit --id <ID> --run-id <agent> --verification "..."'
+    );
   if (!/contracts[\\/]done/i.test(cmd)) return;
   const parts = cmd.split(/[\n;]|&&|\|\||\|/).filter((x) => /contracts[\\/]done/i.test(x));
   if (!parts.length || parts.every(allowed)) return;
@@ -244,9 +312,22 @@ const READ_CMDS = new Set([
   'resolve-path','get-item',
 ]);
 
-const GIT_READ = new Set([
+const GIT_SAFE = new Set([
   'status','diff','log','show','ls-files','grep','cat-file','blame','add','commit','push',
 ]);
+
+function readsOnly(part) {
+  const p = String(part).replace(/#[^\n]*$/g, '').trim();
+  if (!/relay[\\/](audits|live)/i.test(p)) return true;
+  if (/>>?[ \t]*["']?[^\s"'|;&]*relay[\\/](audits|live)/i.test(p)) return false;
+  const m = /^[(\s]*(?:[A-Za-z_]\w*=\S*\s+)*(\S+)/.exec(p);
+  if (!m) return false;
+  const name = path
+    .basename(m[1].replace(/["']/g, ''))
+    .toLowerCase()
+    .replace(/\.(exe|cmd|bat|ps1)$/, '');
+  return READ_CMDS.has(name) || name === 'git';
+}
 
 function allowed(part) {
   const p = String(part).replace(/#[^\n]*$/g, '').trim();
@@ -262,7 +343,7 @@ function allowed(part) {
     .replace(/\.(exe|cmd|bat|ps1)$/, '');
   if (name === 'git') {
     const sub = (p.match(/\bgit\b[^\S\n]+(?:-C[^\S\n]+\S+[^\S\n]+)?([a-z-]+)/i) || [])[1];
-    return GIT_READ.has(String(sub).toLowerCase());
+    return GIT_SAFE.has(String(sub).toLowerCase());
   }
   return READ_CMDS.has(name);
 }

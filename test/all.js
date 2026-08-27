@@ -248,6 +248,156 @@ function testGate(root) {
   ok('close with a reason works', closed2.status === 0, closed2.stdout);
 }
 
+function testBypass(root) {
+  const relay = path.join(root, '.claude', 'relay');
+  const live = path.join(relay, 'live');
+  const audits = path.join(relay, 'audits');
+  fs.mkdirSync(live, { recursive: true });
+  fs.mkdirSync(audits, { recursive: true });
+
+  ok(
+    'Write into audits/ is blocked',
+    hook({ tool_name: 'Write', tool_input: { file_path: path.join(audits, 'Z1-1.json'), content: '{}' } }, root)
+      .status === 2
+  );
+  ok(
+    'Write into live/ is blocked',
+    hook({ tool_name: 'Write', tool_input: { file_path: path.join(live, 'fake.json'), content: '{}' } }, root)
+      .status === 2
+  );
+  const auditsUnix = audits.split(path.sep).join('/');
+  ok(
+    'shell write into audits/ is blocked',
+    hook({ tool_name: 'Bash', tool_input: { command: 'echo {} > ' + auditsUnix + '/Z1-1.json' } }, root).status === 2
+  );
+  ok(
+    'shell read of audits/ passes',
+    hook({ tool_name: 'Bash', tool_input: { command: 'cat ' + auditsUnix + '/ledger.jsonl' } }, root).status === 0
+  );
+
+  writeContract(
+    root,
+    'B1',
+    '---\nid: B1\nstatus: open\nround: 1\nowns: [src/ok.js]\nverify:\n  - true\n---\n'
+  );
+  const contractPath = path.join(root, CONTRACTS, 'B1.md');
+  const agent = 'agent-b1';
+
+  ok(
+    'an agent binds itself by touching its contract',
+    hook(
+      { tool_name: 'Edit', agent_id: agent, tool_input: { file_path: contractPath, old_string: 'status: open', new_string: 'status: active' } },
+      root
+    ).status === 0
+  );
+  ok('binding is recorded', (JSON.parse(fs.readFileSync(path.join(live, agent + '.json'), 'utf8')) || {}).contract === 'B1');
+
+  ok(
+    'a bound agent may write inside owns',
+    hook(
+      { tool_name: 'Write', agent_id: agent, tool_input: { file_path: path.join(root, 'src', 'ok.js'), content: 'module.exports = 1;\n' } },
+      root
+    ).status === 0
+  );
+  const outside = hook(
+    { tool_name: 'Write', agent_id: agent, tool_input: { file_path: path.join(root, 'src', 'auth', 'token.js'), content: 'x' } },
+    root
+  );
+  ok('a bound agent may not write outside owns', outside.status === 2 && /outside the owns set/.test(outside.stderr), outside.stderr);
+
+  ok(
+    'an unbound session is not restricted',
+    hook({ tool_name: 'Write', tool_input: { file_path: path.join(root, 'src', 'auth', 'token.js'), content: 'x' } }, root)
+      .status === 0
+  );
+
+  writeContract(
+    root,
+    'V1',
+    '---\nid: V1\nstatus: submitted\nround: 1\nowns: [src/ok.js]\nverify:\n  - node -e "1" && mv x .claude/relay/contracts/done/\n---\n'
+  );
+  const v1 = contract(['complete', '--id', 'V1'], root);
+  ok('a verify step reaching into the gate is rejected', v1.status === 2 && /reaches into the gate/.test(v1.stdout), v1.stdout);
+
+  writeContract(
+    root,
+    'D1',
+    '---\nid: D1\nstatus: submitted\nround: 1\nrisk: high\nowns: [src/ok.js]\nverify:\n  - node -e "1"\n---\n'
+  );
+  const d1 = contract(['complete', '--id', 'D1'], root);
+  ok('a contract may escalate its own risk', d1.status === 2 && /audit record/.test(d1.stdout), d1.stdout);
+
+  const wide = [];
+  for (let i = 0; i < 9; i += 1) {
+    fs.writeFileSync(path.join(root, 'src', 'w' + i + '.js'), 'module.exports = ' + i + ';\n');
+    wide.push('src/w' + i + '.js');
+  }
+  writeContract(
+    root,
+    'W1',
+    '---\nid: W1\nstatus: submitted\nround: 1\nowns: [' + wide.join(', ') + ']\nverify:\n  - node -e "1"\n---\n'
+  );
+  const w1 = contract(['check', '--id', 'W1'], root);
+  ok('more than eight owned files is high risk', /risk high/.test(w1.stdout) && /owns 9 files/.test(w1.stdout), w1.stdout);
+
+  const auditCmd = contract(
+    ['audit', '--id', 'D1', '--run-id', 'notauditor', '--verification', 'ran the tests'],
+    root
+  );
+  fs.writeFileSync(path.join(live, 'notauditor.json'), JSON.stringify({ id: 'notauditor', role: 'builder', files: [] }));
+  const auditCmd2 = contract(
+    ['audit', '--id', 'D1', '--run-id', 'notauditor', '--verification', 'ran the tests'],
+    root
+  );
+  ok('audit command needs evidence and an auditor', auditCmd.status === 2 || auditCmd2.status === 2, auditCmd2.stdout);
+
+  fs.writeFileSync(path.join(live, 'realaud.json'), JSON.stringify({ id: 'realaud', role: 'auditor', files: [] }));
+  const auditCmd3 = contract(
+    ['audit', '--id', 'D1', '--run-id', 'realaud', '--verification', 'node -e "1" -> exit 0'],
+    root
+  );
+  ok('audit command writes the record', auditCmd3.status === 0, auditCmd3.stdout);
+  const written = JSON.parse(fs.readFileSync(path.join(audits, 'D1-1.json'), 'utf8'));
+  ok('the record carries a computed diffHash', /^[0-9a-f]{64}$/.test(written.diffHash), written.diffHash);
+
+  const d1b = contract(['complete', '--id', 'D1'], root);
+  ok('a declared-high contract completes with a real record', d1b.status === 0, d1b.stdout);
+}
+
+function testPrefs(root) {
+  const PREFS = path.join(CORE, 'hooks', 'prefs.js');
+  const cfg = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-cfg-'));
+  const call = (payload, env) =>
+    run(process.execPath, [PREFS], {
+      cwd: root,
+      input: JSON.stringify(payload),
+      env: { ...process.env, CLAUDE_CONFIG_DIR: cfg, CLAUDE_CODE_SESSION_ID: 'prefs-test', ...env },
+    });
+
+  const readme = { tool_name: 'Write', tool_input: { file_path: path.join(root, 'README.md'), content: '# x\n' } };
+  ok('with no prefs file the hook does nothing', call(readme).status === 0);
+
+  fs.mkdirSync(path.join(cfg, 'teknesyum'), { recursive: true });
+  fs.writeFileSync(
+    path.join(cfg, 'teknesyum', 'prefs.json'),
+    JSON.stringify({ rules: [{ match: '^README\\.md$', require: ['SIGNATURE-MARK'] }] })
+  );
+
+  const blocked = call(readme);
+  ok('a README missing a convention is blocked', blocked.status === 2 && /SIGNATURE-MARK/.test(blocked.stderr), blocked.stderr);
+
+  ok(
+    'a README carrying the convention passes',
+    call({ tool_name: 'Write', tool_input: { file_path: path.join(root, 'README.md'), content: '# x\nSIGNATURE-MARK\n' } })
+      .status === 0
+  );
+
+  ok('an unrelated file is untouched', call({ tool_name: 'Write', tool_input: { file_path: path.join(root, 'src', 'ok.js'), content: 'x' } }).status === 0);
+
+  call(readme);
+  ok('the gate stops repeating itself', call(readme).status === 0);
+}
+
 function testStatusline(root) {
   const r = run(process.execPath, [STATUSLINE], {
     cwd: root,
@@ -282,6 +432,8 @@ function main() {
   const root = fixture();
   testGuard(root);
   testGate(root);
+  testBypass(root);
+  testPrefs(root);
   testStatusline(root);
   testNoContextWrites();
 

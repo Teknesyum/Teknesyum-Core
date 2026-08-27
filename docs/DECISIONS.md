@@ -89,6 +89,54 @@ The pasted README text must be **instructions with no interpretation left open**
 
 ---
 
+## D5 — Closing the bypasses
+
+A Fable review of the built Core found three holes. All three are closed.
+
+**`audits/` and `live/` were writable.** An agent could compose its own passing audit
+record with `Write` and complete a high-risk contract unaudited. Both directories now
+refuse Write, Edit and the shell. The record is produced by
+
+```bash
+node <P>/scripts/contract.js audit --id T7 --run-id <agent> --verification "..."
+```
+
+which computes `headSha`, `diffHash` and `owns` itself. The auditor supplies only what it
+observed, and cannot supply what it would need to forge.
+
+**`verify:` reached into the gate.** A verify step is shell, so a step could move a file
+into `done/` or call `contract.js`. Steps touching `done/`, `audits/`, `live/` or
+`contract.js` are now refused before anything runs.
+
+**Nothing enforced `owns:`.** Base did not enforce it either — the earlier claim in
+`TRIAGE.md` that it did was wrong. An agent binds to the first contract it edits; after
+that, writes outside that contract's `owns` are blocked. A session with no binding is
+unaffected, so the main loop is never restricted.
+
+`GIT_READ` was also renamed `GIT_SAFE`: it contains `add`, `commit` and `push`, which are
+not reads. They stay — none can place a file into `done/` — but the name lied.
+
+---
+
+## D6 — Personal conventions, off by default
+
+The author's standing conventions — license choice, README shape, signature block — are
+personal, not part of the plugin. They live in `~/.claude/teknesyum/prefs.md`, mirrored to
+a private repository, never in a published tree.
+
+A `PreToolUse` hook watches Write and Edit. If `prefs.json` does not exist it exits
+immediately, so for every other user the feature does not exist. If it does, and a README
+or LICENSE is written without the conventions it lists, the hook blocks once and names the
+file to read.
+
+The condition is on **content**, not on the filename — a filename condition would block the
+corrected write too and loop forever. A per-session counter caps it at two blocks per file,
+so a genuine disagreement stops the gate rather than the work.
+
+Cost: zero on an ordinary turn, one block message when it actually fires.
+
+---
+
 ## Standing law
 
 No feature may write to `additionalContext` or `systemMessage` on an ordinary turn.

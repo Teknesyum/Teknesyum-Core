@@ -6,6 +6,10 @@
         "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/guard.js\"" }]
       },
       {
+        "matcher": "Write|Edit",
+        "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/prefs.js\"" }]
+      },
+      {
         "matcher": "Agent|Task",
         "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/watch.js\"" }]
       }

@@ -97,6 +97,20 @@ Write. A single file written during the audit voids it; the gate reads the agent
 record and rejects the seal. This is what catches "the agent said done and the code
 disagrees".
 
+It cannot write the record either — `audits/` and `live/` refuse Write, Edit and the
+shell. The record comes from a command that computes the hashes itself:
+
+```bash
+node <plugin>/scripts/contract.js audit --id T7 --run-id <agent> --verification "..."
+```
+
+### Staying inside the lines
+
+An agent binds to the first contract it edits, and after that may write only inside that
+contract's `owns`. Verify steps that reach into `done/`, `audits/`, `live/` or
+`contract.js` are refused before they run. A session with no contract binding — yours — is
+never restricted.
+
 ---
 
 ## Agents
@@ -143,8 +157,8 @@ you or the model runs by path.
 node test/all.js
 ```
 
-45 assertions covering the guard, the completion gate, the audit chain, the ledger, and a
-check that no hook writes into context.
+68 assertions covering the guard, the completion gate, the audit chain, the ledger, the
+known bypasses, and a check that no hook writes into context.
 
 ---
 
@@ -156,4 +170,12 @@ check that no hook writes into context.
 
 ## License
 
-Apache-2.0
+AGPL-3.0-or-later. See [LICENSE](LICENSE).
+
+<div align="center">
+
+<a href="https://github.com/sponsors/Teknesyum"><img src="assets/badge-sponsor.svg" alt="Support Teknesyum" height="38"></a>
+&nbsp;
+<a href="LICENSE"><img src="assets/badge-license.svg" alt="License AGPL-3.0" height="38"></a>
+
+</div>
