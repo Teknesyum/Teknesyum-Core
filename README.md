@@ -1,3 +1,7 @@
+<!-- lang -->
+
+**English** · [Türkçe](README.tr.md)
+
 # Teknesyum Core
 
 A contract gate for multi-agent work in Claude Code.
@@ -14,20 +18,45 @@ lives in the statusline, which the model never sees. You pay once, at install.
 
 ## Install
 
+### Windows — one line
+
+```powershell
+irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.0/install.ps1 | iex
+```
+
+### macOS / Linux — one line
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.0/install.sh | bash
+```
+
+### From inside Claude Code
+
 ```
 /plugin marketplace add Teknesyum/Teknesyum-Core
+```
+
+```
 /plugin install teknesyum-core@teknesyum
 ```
 
-Then set it up. Two ways, same script.
+**Restart Claude Code after installing.**
 
-**In your own terminal — free, nothing enters a context:**
+Both one-liners point at a tag, not at `main`: what gets piped into a shell is the released
+script, not whatever the branch holds today. Each release publishes the SHA-256 of both
+installers in its notes.
+
+**Required:** Claude Code, git. **Optional:** Node.js — without it the statusline and the
+gate scripts do not run, and you are told so rather than left guessing.
+
+The installers end by running setup in your own terminal, where it asks its questions and
+costs nothing. If you skip them, either run the script yourself:
 
 ```bash
 node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js
 ```
 
-**Or paste this to Claude:**
+**or paste this to Claude:**
 
 > Set up Teknesyum Core. Run `node <plugin>/scripts/setup.js --check`, where `<plugin>` is
 > the installed teknesyum-core directory. It prints JSON. Ask me every question under
@@ -157,8 +186,9 @@ you or the model runs by path.
 node test/all.js
 ```
 
-68 assertions covering the guard, the completion gate, the audit chain, the ledger, the
-known bypasses, and a check that no hook writes into context.
+80 assertions covering the guard, the completion gate, the audit chain, the ledger, the
+known bypasses, the personal-convention gate, the scaffold, and a check that no hook writes
+into context.
 
 ---
 
@@ -166,12 +196,13 @@ known bypasses, and a check that no hook writes into context.
 
 - `docs/COST-MODEL.md` — where tokens go, and the rule that follows from it
 - `docs/TRIAGE.md` — what came over from Teknesyum Base and what was left behind
-- `docs/DECISIONS.md` — the four decisions that shaped this and why
+- `docs/DECISIONS.md` — the seven decisions that shaped this and why
 
 ## License
 
 AGPL-3.0-or-later. See [LICENSE](LICENSE).
 
+<!-- signature -->
 <div align="center">
 
 <a href="https://github.com/sponsors/Teknesyum"><img src="assets/badge-sponsor.svg" alt="Support Teknesyum" height="38"></a>

@@ -380,11 +380,20 @@ function testPrefs(root) {
   fs.mkdirSync(path.join(cfg, 'teknesyum'), { recursive: true });
   fs.writeFileSync(
     path.join(cfg, 'teknesyum', 'prefs.json'),
-    JSON.stringify({ rules: [{ match: '^README\\.md$', require: ['SIGNATURE-MARK'] }] })
+    JSON.stringify({ rules: [{ match: '^README\\.md$', doc: 'prefs/readme.md', require: ['SIGNATURE-MARK'], ask: { when: 'docs/diagram.md', line: 'DIAGRAM-QUESTION' } }] })
   );
 
   const blocked = call(readme);
   ok('a README missing a convention is blocked', blocked.status === 2 && /SIGNATURE-MARK/.test(blocked.stderr), blocked.stderr);
+
+  ok('the block names the file to read', /readme[.]md/.test(blocked.stderr), blocked.stderr);
+  ok('the block asks the recorded question', /DIAGRAM-QUESTION/.test(blocked.stderr), blocked.stderr);
+
+  const askOnly = call({ tool_name: 'Write', tool_input: { file_path: path.join(root, 'README.md'), content: 'SIGNATURE-MARK' } });
+  ok('the question alone still blocks', askOnly.status === 2 && /DIAGRAM-QUESTION/.test(askOnly.stderr), askOnly.stderr);
+
+  fs.mkdirSync(path.join(root, 'docs'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'docs', 'diagram.md'), 'banner only');
 
   ok(
     'a README carrying the convention passes',
@@ -428,12 +437,52 @@ function testNoContextWrites() {
   }
 }
 
+function testScaffold() {
+  const SCAFFOLD = path.join(CORE, 'scripts', 'scaffold.js');
+  const cfg = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-pref-'));
+  const repo = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-repo-'));
+  const prefs = path.join(cfg, 'teknesyum', 'prefs');
+  fs.mkdirSync(path.join(prefs, 'assets'), { recursive: true });
+  fs.writeFileSync(path.join(prefs, 'signature.html'), '<div>SIGNED <img src="assets/mark.svg"></div>');
+  fs.writeFileSync(path.join(prefs, 'assets', 'mark.svg'), '<svg/>');
+  fs.writeFileSync(path.join(repo, 'package.json'), JSON.stringify({ name: 'x' }, null, 2));
+  fs.writeFileSync(path.join(repo, 'README.md'), '# x');
+  fs.writeFileSync(path.join(repo, 'README.tr.md'), '# x');
+
+  const env = { ...process.env, CLAUDE_CONFIG_DIR: cfg };
+  const call = (args) => run(process.execPath, [SCAFFOLD, ...args], { cwd: repo, env });
+
+  const lic = call(['license']);
+  const licFile = path.join(repo, 'LICENSE');
+  const text = fs.existsSync(licFile) ? fs.readFileSync(licFile, 'utf8') : '';
+  ok('scaffold writes the license text', lic.status === 0 && text.includes('GNU AFFERO GENERAL PUBLIC LICENSE'), lic.stderr);
+  ok('the license text is not summarised', text.length > 30000);
+  ok(
+    'scaffold sets the license field',
+    JSON.parse(fs.readFileSync(path.join(repo, 'package.json'), 'utf8')).license === 'AGPL-3.0-or-later'
+  );
+  ok('scaffold refuses to overwrite a license', call(['license']).status !== 0);
+
+  const sig = call(['signature']);
+  ok('scaffold writes the signature block', sig.status === 0 && fs.readFileSync(path.join(repo, 'README.md'), 'utf8').includes('SIGNED'), sig.stderr);
+  ok('scaffold copies the signature assets', fs.existsSync(path.join(repo, 'assets', 'mark.svg')));
+  call(['signature']);
+  ok('the signature is written once', fs.readFileSync(path.join(repo, 'README.md'), 'utf8').split('SIGNED').length === 2);
+
+  const link = call(['langlink']);
+  const en = fs.readFileSync(path.join(repo, 'README.md'), 'utf8');
+  const tr = fs.readFileSync(path.join(repo, 'README.tr.md'), 'utf8');
+  ok('scaffold links the two languages', link.status === 0 && en.includes('README.tr.md') && tr.includes('README.md'), link.stderr);
+  ok('the language line comes first', en.trimStart().startsWith('<!-- lang -->'));
+}
+
 function main() {
   const root = fixture();
   testGuard(root);
   testGate(root);
   testBypass(root);
   testPrefs(root);
+  testScaffold();
   testStatusline(root);
   testNoContextWrites();
 

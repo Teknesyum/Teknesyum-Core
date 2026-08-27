@@ -43,8 +43,7 @@ function counterFile() {
 }
 
 function blocksFor(key) {
-  const c = read(counterFile()) || {};
-  return c[key] || 0;
+  return (read(counterFile()) || {})[key] || 0;
 }
 
 function noteBlock(key) {
@@ -62,6 +61,7 @@ function decide(j) {
   const target = (j.tool_input || {}).file_path || '';
   if (!target) return;
   const name = path.basename(target);
+  const here = path.dirname(path.resolve(target));
 
   const hits = set.filter((r) => {
     try {
@@ -74,24 +74,26 @@ function decide(j) {
 
   const text = body(target, j.tool_input || {}, tool);
   const missing = [];
-  for (const r of hits)
+  const asks = [];
+  const docs = [];
+
+  for (const r of hits) {
     for (const need of r.require || [])
       if (!text.toLowerCase().includes(String(need).toLowerCase())) missing.push(need);
-  if (!missing.length) return;
+    if (r.ask && r.ask.when && !fs.existsSync(path.join(here, r.ask.when))) asks.push(r.ask.line);
+    if (r.doc) docs.push(path.join(prefsDir(), r.doc));
+  }
+  if (!missing.length && !asks.length) return;
 
   const key = safe(path.resolve(target));
   if (blocksFor(key) >= MAX_BLOCKS) return;
   noteBlock(key);
 
-  const file = path.join(prefsDir(), 'prefs.md');
-  process.stderr.write(
-    'BLOCKED: ' +
-      [
-        name + ' is missing this author\'s standing conventions.',
-        'Missing: ' + Array.from(new Set(missing)).join(', '),
-        '',
-        'Read ' + file + ' and apply it, then write again.',
-      ].join('\n')
-  );
+  const lines = [name + ' does not match this author\'s standing conventions.'];
+  if (missing.length) lines.push('Missing: ' + Array.from(new Set(missing)).join(', '));
+  for (const a of asks) lines.push(a);
+  lines.push('', 'Read ' + Array.from(new Set(docs)).join(' and ') + ', then write again.');
+
+  process.stderr.write('BLOCKED: ' + lines.join('\n'));
   process.exit(2);
 }

@@ -137,6 +137,30 @@ Cost: zero on an ordinary turn, one block message when it actually fires.
 
 ---
 
+## D7 — Constants are written by a script, not by the model
+
+A token audit of D6 found the gate itself cheap and the thing it guards expensive. Blocking
+a bad README costs one message; making the model *produce* the license text costs 8–10k
+output tokens at output prices, every repository, forever. The same holds for the signature
+block, the badge SVGs and the language link — text that never varies between projects.
+
+So they left the model's output path. `scripts/scaffold.js` writes them:
+
+```
+license [--spdx <id>]   copy the license text, set the license field
+signature [--file F]    append the signature block, copy its assets
+langlink                link README.md and README.tr.md to each other
+```
+
+`prefs.md` also split into one file per subject with a `doc` field on each rule, so writing
+a README no longer loads the license rules. The diagram question became an `ask` line: the
+hook asks once, the answer is written to `docs/diagram.md` in the repository, and it never
+asks again there.
+
+What the model still writes is the part that differs per project — the prose.
+
+---
+
 ## Standing law
 
 No feature may write to `additionalContext` or `systemMessage` on an ordinary turn.
