@@ -451,34 +451,13 @@ function testStatusline(root) {
   ok('only markdown logs are counted', /2 logs/.test(line()), line());
 }
 
-function testTitle(root) {
-  const TITLE = path.join(CORE, 'hooks', 'title.js');
-  const call = (j) => run(process.execPath, [TITLE], { cwd: root, input: JSON.stringify(j), env: { ...process.env, NO_COLOR: '1' } });
-
-  const clean = call({ hook_event_name: 'SessionStart', cwd: os.tmpdir() });
-  ok('the title is silent outside a relay', clean.stdout.trim() === '', clean.stdout);
-  ok('a silent title still exits 0', clean.status === 0);
-
-  const r = call({ hook_event_name: 'SessionStart', cwd: root });
-  let payload = null;
-  try {
-    payload = JSON.parse(r.stdout);
-  } catch {}
-  ok('the title emits parsable JSON', payload !== null, r.stdout);
-  ok('the title uses terminalSequence', payload && typeof payload.terminalSequence === 'string');
-  ok('the title writes no model context', r.stdout.indexOf('additionalContext') === -1 && r.stdout.indexOf('systemMessage') === -1, r.stdout);
-  const seq = (payload && payload.terminalSequence) || '';
-  ok('the sequence is an OSC title', seq.startsWith(']0;') && seq.endsWith(''), JSON.stringify(seq));
-  ok('the title names the plugin', seq.includes('Teknesyum'), seq);
-  ok('the title carries no ANSI colour', !/\[/.test(seq), JSON.stringify(seq));
-  ok('the title stays short', seq.length <= 130, String(seq.length));
-
+function testTitle() {
   const hooks = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8')).hooks;
   const wired = Object.keys(hooks).filter((ev) =>
     hooks[ev].some((g) => g.hooks.some((x) => /title\.js/.test(x.command)))
   );
-  ok('the title is wired to the events that change state', wired.includes('SessionStart') && wired.includes('Stop') && wired.includes('SubagentStart') && wired.includes('SubagentStop'), wired.join(','));
-  ok('the title never runs on PreToolUse', !wired.includes('PreToolUse'), wired.join(','));
+  ok('the retired title hook is wired nowhere', wired.length === 0, wired.join(','));
+  ok('the retired title hook is out of the tree', !fs.existsSync(path.join(CORE, 'hooks', 'title.js')));
 }
 
 function testLanguage(root) {

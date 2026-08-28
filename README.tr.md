@@ -185,7 +185,7 @@ node test/all.js
 ```
 
 Kapıyı, tamamlama kapısını, denetim zincirini, defteri, bilinen atlatma yollarını ve hiçbir
-kancanın bağlama yazmadığını doğrulayan 2.251 sınama.
+kancanın bağlama yazmadığını doğrulayan 2.248 sınama.
 
 ---
 
@@ -193,7 +193,7 @@ kancanın bağlama yazmadığını doğrulayan 2.251 sınama.
 
 - `docs/COST-MODEL.md` — token nereye gidiyor ve bundan çıkan kural
 - `docs/TRIAGE.md` — Teknesyum Base'den ne geldi, ne bırakıldı
-- `docs/DECISIONS.md` — projeyi biçimlendiren on iki karar ve gerekçeleri
+- `docs/DECISIONS.md` — projeyi biçimlendiren on üç karar ve gerekçeleri
 
 ## Lisans
 

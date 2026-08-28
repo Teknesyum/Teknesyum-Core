@@ -381,60 +381,68 @@ useful and redundant counts. If useful stays near zero, drop the event.
 ## D11 — The banner that was not built
 
 The user asked for Base's session-opening banner back, on the condition that it cost
-nothing. It cannot. `systemMessage` reads like a display channel and is not one: on
-`SessionStart` the harness adds it to the model's context exactly as it adds plain stdout
-and `additionalContext`. The alternatives fail for their own reasons — `terminalSequence`
-bypasses context but is documented for a bell and a window title, not for text, and not for
-`SessionStart`; stderr with exit 2 reaches the user only by being labelled a hook error.
+nothing. At `SessionStart` it cannot. `systemMessage` reads like a display channel and is
+not one there: the harness adds it to the model's context exactly as it adds plain stdout
+and `additionalContext`. That measurement was later confirmed in the shipped binary, which
+converts a `hook_success` attachment into model context only for `SessionStart`,
+`UserPromptSubmit` and `UserPromptExpansion`.
 
 The deciding argument was not the token count. A banner would have been a **second**
 `SessionStart` context write carrying the contract IDs and live roles that `cue.js` already
-carries — paying twice for one fact. And the law's worth is that it has no judgement calls;
-the first "it is only twenty tokens, and only for the user" is how Base began.
+carries — paying twice for one fact.
 
-What the user actually wanted was to see open work on opening a session. The statusline
-already shows contracts by status, live agents with their roles, and the problem count; the
-one thing missing was open bug logs, so `statusline.js` now carries `N logs`. The statusline
-costs nothing because the model never sees it, and unlike a banner it survives scrolling.
-
-What is genuinely lost: the interruption. A banner pushes, a statusline waits to be looked
-at. Accepted knowingly.
+What this decision got wrong: it generalised one `SessionStart` measurement into a claim
+about every event. See D13.
 
 ---
 
-## D12 — The banner lives in the title bar
+## D12 — The title bar, retired
 
-The user pushed back on D11: a plugin nobody perceives feels absent, and the statusline
-waits to be looked at instead of announcing itself. That is a fair objection, and the
-answer to it is not a context write.
+`title.js` wrote the terminal window title through `terminalSequence`, from the same data
+the statusline reads. It shipped explicitly as a measurement rather than a claim, and the
+measurement failed: the user works in the desktop app, which has no window title, and
+PowerShell restores its own title within a second. The hook is in `trash/`.
 
-`terminalSequence` is a hook output field that does not enter the model's context and is
-documented to fire even on events whose output is otherwise discarded. `title.js` uses it
-to write the terminal window title from the same data the statusline reads —
-`Teknesyum ▸ Teknesyum-Core · 2 açık · builder`. It fires on `SessionStart`, `Stop`,
-`SubagentStart` and `SubagentStop`: every point where the state actually changes, and never
-inside a tool call. Zero tokens, and unlike a banner it never scrolls away.
+The reasoning it carried forward stands. An agent-start announcement through a token
+channel was costed and refused: `systemMessage` on `SubagentStart` would be ~15 tokens per
+agent into the main session, resent every later turn, and `additionalContext` on a subagent
+lifecycle event is what destroyed Base's report bodies in three cases out of four.
 
-An agent-start announcement through a token channel was costed and refused. `SubagentStart`
-stdout goes to the debug log; `systemMessage` there would be ~15 tokens per agent into the
-main session, resent every later turn — twenty parallel agents make that ~300 tokens
-compounding. And `additionalContext` on a subagent lifecycle event is what destroyed Base's
-report bodies in three cases out of four. The title carries the same fact for nothing.
+---
 
-**Unverified on purpose.** The hook reference does not publish per-event behaviour for
-`terminalSequence`, so this ships as a measurement, not a claim: if the terminal does not
-honour the sequence, or Claude Code overwrites the title, the feature is dropped rather
-than argued for. What must be checked is that the title changes and that the session
-transcript stays clean.
+## D13 — `systemMessage` on a closing event is free
+
+The user rejected the title bar in one sentence: they read the chat, so the notice belongs
+in the chat. That forced the D11 measurement to be redone per event instead of assumed.
+
+Emitted from a `Stop` hook, `systemMessage` renders as a line in the chat **and does not
+enter the model's context.** Measured twice. In the experiment session the probe string
+`TKNSYM-PROBE-7391` appears in the transcript only inside `attachment` records of type
+`hook_system_message` and in the raw hook stdout record — exactly one occurrence sits
+inside `message.content`, and that one is the user's own typed question. Asked whether it
+had seen the string, the model answered no.
+
+The binary agrees. The chat render is `hookName + " says: " + content`, and the
+context conversion for `hook_success` returns nothing unless the event is `SessionStart`,
+`UserPromptSubmit` or `UserPromptExpansion`. `Stop` is none of them.
+
+**The prefix cannot be removed.** `hookName` is computed as the event name, plus the
+matcher when one applies — there is no `name`, `label` or `displayPrefix` field on a hook
+object or a matcher group, and `hook_system_message` is the only hook attachment that
+renders into the chat at all. So an in-chat notice is available at zero tokens, on the
+condition that it is willing to be introduced by `Stop says:`.
 
 ---
 
 ## Standing law
 
-No feature may write to `additionalContext` or `systemMessage` — on any turn, on any event.
-The two are one mechanism: `systemMessage` was confirmed to enter model context at
-`SessionStart`. The sole exception is `cue.js` under its 200-character cap (D10). No feature
-may require the model to print a banner. Anything meant for the user's eyes goes to the
-statusline, the window title or a file on disk. `terminalSequence` is a permitted class-Z
-channel for its documented uses — window title, bell, desktop notification; free-form text
-lines through it stay unsupported until measured. See `COST-MODEL.md`.
+No feature may write to `additionalContext`, and no feature may write `systemMessage` on
+an event that converts it into model context — `SessionStart`, `UserPromptSubmit`,
+`UserPromptExpansion`. The sole exception is `cue.js` under its 200-character cap (D10).
+On closing events `systemMessage` is class Z and permitted, but it must be change-gated:
+a line that repeats every turn is noise even when it is free.
+
+No feature may require the model to print a banner. Anything meant for the user's eyes goes
+to a class-Z channel — the statusline, a closing-event `systemMessage`, or a file on disk.
+`terminalSequence` remains permitted for its documented uses and is currently unused.
+See `COST-MODEL.md`.

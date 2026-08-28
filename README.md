@@ -186,7 +186,7 @@ you or the model runs by path.
 node test/all.js
 ```
 
-2,251 assertions covering the guard, the completion gate, the audit chain, the ledger, the
+2,248 assertions covering the guard, the completion gate, the audit chain, the ledger, the
 known bypasses, the tier and quota locks, the personal-convention gate, the scaffold, the
 cue, and a check that no hook writes into context.
 
@@ -196,7 +196,7 @@ cue, and a check that no hook writes into context.
 
 - `docs/COST-MODEL.md` — where tokens go, and the rule that follows from it
 - `docs/TRIAGE.md` — what came over from Teknesyum Base and what was left behind
-- `docs/DECISIONS.md` — the twelve decisions that shaped this and why
+- `docs/DECISIONS.md` — the thirteen decisions that shaped this and why
 
 ## License
 

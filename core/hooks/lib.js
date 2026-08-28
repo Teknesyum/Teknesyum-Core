@@ -152,9 +152,13 @@ function strings() {
   return _strings;
 }
 
+let _lang = null;
+
 function lang() {
+  if (_lang) return _lang;
   const l = String(settings().lang || 'en').toLowerCase();
-  return /^[a-z]{2}$/.test(l) ? l : 'en';
+  _lang = /^[a-z]{2}$/.test(l) ? l : 'en';
+  return _lang;
 }
 
 function t(key) {
