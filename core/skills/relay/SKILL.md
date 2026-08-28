@@ -129,9 +129,13 @@ Read it before opening files. Regenerate after a refactor.
 
 ## Language
 
-Everything an agent reads or writes is English: contract bodies, prompts, reports,
-checkpoints, `_issues.log`. Turkish is only your chat with the user, and that summary lists
-the contract's `## Acceptance` items one for one — an abridged one approves something else.
+Read `contractLang` from `~/.claude/teknesyum/config.json` once per relay; if the file or
+the key is absent, it is `en`. Write contract bodies, prompts, reports, checkpoints and
+`_issues.log` in that language, and stamp every contract's frontmatter with `lang: <code>`
+so each agent reads it without opening the config.
+
+Your chat with the user is always the user's language, and that summary lists the
+contract's `## Acceptance` items one for one — an abridged one approves something else.
 
 A `_issues.log` line is `<contract> | <role> | <what was sought> | <what was missing> | <what was done>`.
 

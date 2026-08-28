@@ -27,6 +27,12 @@ const QUESTIONS = [
     fallback: 'en',
   },
   {
+    key: 'contractLang',
+    ask: 'ask.contractLang',
+    parse: (v) => (/^(tr|turkce|turkish)$/i.test(String(v).trim()) ? 'tr' : 'en'),
+    fallback: 'en',
+  },
+  {
     key: 'notify',
     ask: 'ask.notify',
     parse: (v) => /^(y|yes|e|evet|true|1)$/i.test(String(v)),
@@ -110,7 +116,7 @@ function apply(answers) {
   fs.writeFileSync(beep, JSON.stringify(current, null, 2) + '\n', 'utf8');
 
   const bridge = wireStatusline();
-  const labels = ['setup.config', 'setup.statusline', 'setup.sound', 'setup.research', 'setup.private'];
+  const labels = ['setup.config', 'setup.statusline', 'setup.contractLang', 'setup.sound', 'setup.research', 'setup.private'];
   const width = Math.max(...labels.map((k) => t(k).length)) + 2;
   const row = (k, v) => '  ' + t(k).padEnd(width) + v;
 
@@ -119,6 +125,7 @@ function apply(answers) {
     '',
     row('setup.config', stateFile('config')),
     row('setup.statusline', bridge),
+    row('setup.contractLang', cfg.contractLang || 'en'),
     row('setup.sound', t(cfg.notify ? 'setup.on' : 'setup.off')),
     row('setup.research', t(cfg.research ? 'setup.gated' : 'setup.off')),
     row('setup.private', cfg.privateRepo || t('setup.none')),

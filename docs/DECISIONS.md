@@ -295,6 +295,16 @@ No prose. The user opens that file without T0.
 The numbers above are unmeasured estimates. They are to be checked against the first real
 relay run and corrected here.
 
+**The contract language is a setting.** `contractLang` in `~/.claude/teknesyum/config.json`,
+default `en`, asked by `setup.js`. T0 reads it once per relay and stamps each contract's
+frontmatter with `lang:`; every agent then reads the language off the contract it was given
+and never opens the config. Switching costs one flag and changes the next contract written.
+
+The user reads contract files directly, so a contract is not backstage for them — that is
+what settles it, not the token arithmetic. Turkish costs roughly 800 more output tokens per
+contract body, and that body is re-read by every agent the contract touches. Worth it when
+the user reads the file; not worth it when they rely on the summary.
+
 **Three categories, not two.** What the model reads is English. What only the user reads is
 served in `settings().lang` from `core/strings.json`, defaulting to English so the plugin
 stays publishable: `setup.js` questions and summary, the statusline, the window title. The

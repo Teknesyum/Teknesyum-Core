@@ -3,6 +3,10 @@
     "en": "Language for what you see - messages, setup, statusline? (en/tr)",
     "tr": "Language for what you see - messages, setup, statusline? (en/tr)"
   },
+  "ask.contractLang": {
+    "en": "Language for contract bodies and agent reports - the model reads these (en/tr)",
+    "tr": "Sözleşme gövdeleri ve ajan raporları hangi dilde olsun - bunları model okur (en/tr)"
+  },
   "ask.notify": {
     "en": "Play a sound when a turn ends or needs you? (yes/no)",
     "tr": "Tur bitince ya da seni bekleyince ses çalsın mı? (evet/hayır)"
@@ -98,5 +102,9 @@
   "line.worktree": {
     "en": "worktree",
     "tr": "worktree"
+  },
+  "setup.contractLang": {
+    "en": "contracts",
+    "tr": "sözleşmeler"
   }
 }

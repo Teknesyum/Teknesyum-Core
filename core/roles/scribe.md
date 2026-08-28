@@ -35,4 +35,4 @@ verify: <each step and its exit code>
 blockers: <none | one line each>
 ```
 
-Reports, checkpoints and `_issues.log` lines are English.
+Write in the language of the contract's `lang:` field; English when it is absent.

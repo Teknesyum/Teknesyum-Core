@@ -40,4 +40,4 @@ Creating `docs/scans/` is what opens the first-contract gate.
 
 The file path and the three shortest lines from `Worth taking`.
 
-Reports, checkpoints and `_issues.log` lines are English.
+Write in the language of the contract's `lang:` field; English when it is absent.

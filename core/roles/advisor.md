@@ -29,4 +29,4 @@ or the earlier attempts, because an opinion that has already seen the answer is 
 
 Twenty lines maximum. The opinion is not binding.
 
-Reports, checkpoints and `_issues.log` lines are English.
+Write in the language of the contract's `lang:` field; English when it is absent.

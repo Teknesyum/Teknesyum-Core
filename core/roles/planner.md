@@ -27,4 +27,4 @@ output.
 
 The four sections above. Nothing else.
 
-Reports, checkpoints and `_issues.log` lines are English.
+Write in the language of the contract's `lang:` field; English when it is absent.

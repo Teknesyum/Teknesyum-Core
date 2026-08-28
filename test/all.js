@@ -518,6 +518,14 @@ function testLanguage(root) {
   setLang('zz');
   ok('an unknown language falls back to English', /open|agents|contracts/.test(statusline()), statusline());
 
+  const skill = fs.readFileSync(path.join(CORE, 'skills', 'relay', 'SKILL.md'), 'utf8');
+  ok('the contract language is a setting, not a constant', /contractLang/.test(skill), 'SKILL.md');
+  ok('the skill tells T0 to stamp the contract', /lang: <code>/.test(skill), 'SKILL.md');
+  for (const f of fs.readdirSync(path.join(CORE, 'roles'))) {
+    const body = fs.readFileSync(path.join(CORE, 'roles', f), 'utf8');
+    ok(f + ' follows the contract language', /contract's `lang:` field/.test(body), f);
+  }
+
   const modelFacing = ['guard.js', 'cue.js', 'seal.js', 'schema.js', 'watch.js'];
   for (const f of modelFacing) {
     const body = fs.readFileSync(path.join(CORE, 'hooks', f), 'utf8');
@@ -923,12 +931,12 @@ function testTierVisible(root) {
   ok('the tier rule is at most six lines', para[0].trim().split('\n').length <= 6, para[0]);
   ok('SKILL.md does not copy the table', !/\|\s*eco\s*\|/.test(skill));
 
-  const langPara = skill.split(/\n\s*\n/).filter((p) => /^Everything an agent reads or writes is English/.test(p.trim()));
+  const langPara = skill.split(/\n\s*\n/).filter((p) => /^Read `contractLang`/.test(p.trim()));
   ok('SKILL.md carries the language rule', langPara.length === 1, String(langPara.length));
-  ok('the language rule is at most three lines', langPara.length === 1 && langPara[0].trim().split('\n').length <= 3, langPara[0]);
+  ok('the language rule is at most five lines', langPara.length === 1 && langPara[0].trim().split('\n').length <= 5, langPara[0]);
   ok(
     'SKILL.md binds the summary to the acceptance items',
-    /## Acceptance` items one for one/.test(skill) && /Turkish is only your chat with the user/.test(skill)
+    /## Acceptance` items one for one/.test(skill) && /chat with the user is always the user's language/.test(skill)
   );
   ok('SKILL.md carries the _issues.log template', /`<contract> \| <role> \| <what was sought> \| <what was missing> \| <what was done>`/.test(skill));
 
