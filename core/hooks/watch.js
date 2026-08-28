@@ -54,7 +54,7 @@ function record(j) {
   rec.updated = now;
   rec.event = ev;
 
-  if (ev === 'SubagentStop' || ev === 'Stop') rec.ended = now;
+  if (ev === 'SubagentStop' || ev === 'Stop' || ev === 'SessionEnd') rec.ended = now;
   else delete rec.ended;
 
   if (ev === 'PostToolUse') {
@@ -78,7 +78,25 @@ function record(j) {
   }
 
   write(file, rec);
+  if (ev === 'SessionEnd') closeAll(live, now);
   sweep(live);
+}
+
+function closeAll(live, now) {
+  let files = [];
+  try {
+    files = fs.readdirSync(live).filter((f) => f.endsWith('.json') && !f.startsWith('_'));
+  } catch {
+    return;
+  }
+  for (const f of files) {
+    const p = path.join(live, f);
+    const a = read(p);
+    if (!a || a.ended) continue;
+    a.ended = now;
+    a.stop_reason = 'session_end';
+    write(p, a);
+  }
 }
 
 function sweep(live) {
@@ -88,9 +106,9 @@ function sweep(live) {
   } catch {
     return;
   }
-  if (files.length < 40) return;
   const cutoff = Date.now() - STALE_MS;
   for (const f of files) {
+    if (f.startsWith('_')) continue;
     const p = path.join(live, f);
     try {
       if (fs.statSync(p).mtimeMs < cutoff) fs.unlinkSync(p);

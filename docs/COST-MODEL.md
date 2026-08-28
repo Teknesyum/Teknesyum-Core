@@ -44,9 +44,13 @@ three and is the only hook allowed to write context at all:
 
 | Event | Fires | Writes when | Cost |
 |---|---|---|---|
-| `SessionStart` | once per session | open contracts or live agents exist | ~55 tok, **S** |
-| `PostCompact` | once per compaction | same | ~55 tok, **S** |
+| `SessionStart` | once per session, including the one that resumes after compaction (`source: "compact"`) | open contracts or an unended, unstale live record exist | ~25 tok, **S** |
 | `UserPromptSubmit` | every turn | the prompt matches the bug-log phrase | 0 on every other turn, **Z→O** |
+
+`PostCompact` was registered and is not any more. The event fires, but plain stdout reaches
+the model on `SessionStart`, `UserPromptSubmit` and `UserPromptExpansion` only; anywhere
+else it goes to the debug log. `SessionStart` already fires after compaction, so the branch
+was dead weight pretending to be a feature.
 
 A cue carries pointers only — contract IDs and a path. Goal, acceptance and route text
 never enter it; the model opens the file itself if it needs the body (**O**).
@@ -81,7 +85,7 @@ User-facing chat stays Turkish — that text is written once and is not a plugin
 | role file when an agent holds that role | O | 130–320 tok, once per agent |
 | statusline | Z | 0 |
 | `cue.js` on an ordinary turn | Z | **0** — asserted by `test/all.js` |
-| `cue.js` at session start / after compaction | S | ~55 tok, capped at 200 chars |
+| `cue.js` at session start / after compaction | S | ~25 tok, capped at 200 chars |
 
 Always-on: **~45 tokens per context.** Base measured ~1,211 plus ~1,500 per turn of
 injection. The per-turn figure is the one that compounded; it is now zero by construction,

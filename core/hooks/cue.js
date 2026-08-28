@@ -3,7 +3,8 @@ const path = require('path');
 const { read, relayRoot, liveDir } = require('./lib.js');
 
 const CAP = 200;
-const LOG_ASK = /(^|\s)(log|günlük|gunluk)\s*(yaz|tut)\b/i;
+const LOG_ASK = /(^|\s)(log|günlük|gunluk)\s*(yaz|tut)\w*/i;
+const STALE_MS = 12 * 60 * 60 * 1000;
 
 let raw = '';
 process.stdin.on('data', (d) => (raw += d));
@@ -19,30 +20,40 @@ process.stdin.on('end', () => {
 function cue(j) {
   const ev = j.hook_event_name || '';
   if (ev === 'UserPromptSubmit') return logCue(j);
-  if (ev === 'SessionStart' || ev === 'PostCompact') return relayCue(j);
+  if (ev === 'SessionStart') return relayCue(j);
   return '';
 }
 
 function logCue(j) {
   if (!LOG_ASK.test(String(j.prompt || ''))) return '';
   const s = path.join(path.resolve(__dirname, '..'), 'scripts', 'log.js').split(path.sep).join('/');
-  return 'Bug log requested. Run: node "' + s + '" write --title T --symptom S. Never hand-write it.';
+  return 'Never hand-write a bug log. Run: node "' + s + '" write --title T --symptom S';
 }
 
 function relayCue(j) {
-  const r = relayRoot(j.cwd || process.cwd(), { git: false });
+  const r = relayRoot(j.cwd || process.cwd());
   if (!r) return '';
   const open = names(path.join(r.relay, 'contracts'), (f) => f.endsWith('.md')).map((f) => f.slice(0, -3));
-  const live = names(liveDir(r.relay), (f) => f.endsWith('.json') && !f.startsWith('_'))
-    .map((f) => read(path.join(liveDir(r.relay), f)))
-    .filter((a) => a && !a.ended && a.role)
-    .map((a) => a.role);
+  const live = running(liveDir(r.relay));
   if (!open.length && !live.length) return '';
-  const parts = [];
-  if (open.length) parts.push('Open relay: ' + open.slice(0, 8).join(', '));
-  if (live.length) parts.push('live: ' + [...new Set(live)].slice(0, 6).join(', '));
-  parts.push('read .claude/relay/ before writing code.');
+  const parts = ['read .claude/relay/ before writing code.'];
+  if (open.length) parts.push('open: ' + open.slice(0, 8).join(', '));
+  if (live.length) parts.push('live: ' + live.slice(0, 6).join(', '));
   return parts.join(' | ');
+}
+
+function running(live) {
+  const cutoff = Date.now() - STALE_MS;
+  const out = [];
+  for (const f of names(live, (n) => n.endsWith('.json') && !n.startsWith('_'))) {
+    const p = path.join(live, f);
+    const a = read(p);
+    if (!a || a.ended || !a.role) continue;
+    const seen = Date.parse(a.updated || a.started || '') || 0;
+    if (seen && seen < cutoff) continue;
+    if (!out.includes(a.role)) out.push(a.role);
+  }
+  return out;
 }
 
 function names(dir, keep) {

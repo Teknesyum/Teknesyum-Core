@@ -186,9 +186,9 @@ you or the model runs by path.
 node test/all.js
 ```
 
-80 assertions covering the guard, the completion gate, the audit chain, the ledger, the
-known bypasses, the personal-convention gate, the scaffold, and a check that no hook writes
-into context.
+2,219 assertions covering the guard, the completion gate, the audit chain, the ledger, the
+known bypasses, the tier and quota locks, the personal-convention gate, the scaffold, the
+cue, and a check that no hook writes into context.
 
 ---
 

@@ -1,6 +1,6 @@
 # S — İşaretçi denetimi
 
-**Durum:** açık · **Rol:** T0 + advisor (fable) · **Profil:** premium
+**Durum:** kapandı — bulgular D10'a yazıldı · **Rol:** T0 + advisor (fable) · **Profil:** premium
 
 ## Bağlam
 

@@ -302,13 +302,13 @@ across a session boundary is invisible to the model, and the next unrelated requ
 over a contract someone else owns. Compaction is worse — the summary dissolves the contract
 IDs and the model starts inventing what is still open.
 
-One hook, `cue.js`, answers three events and nothing else writes context:
+One hook, `cue.js`, answers two events and nothing else writes context:
 
-- `SessionStart`, `PostCompact` — silent unless `contracts/*.md` or an unended `live/`
-  record exists. Output is one English line: contract IDs, live roles, and the relay path.
-  Never the goal, the acceptance list or the route.
-- `UserPromptSubmit` — silent unless the prompt matches `(log|günlük) (yaz|tut)`. Then it
-  points at `scripts/log.js`; the file body is written by that script, not by the model.
+- `SessionStart` — silent unless `contracts/*.md` or an unended, unstale `live/` record
+  exists. Output is one English line: the relay path first, then contract IDs and live
+  roles. Never the goal, the acceptance list or the route.
+- `UserPromptSubmit` — silent unless the prompt matches `(log|günlük) (yaz|tut)\w*`. Then
+  it points at `scripts/log.js`; the file body is written by that script, not by the model.
 
 Cap 200 characters, enforced in code and asserted in `test/all.js`. The rejected
 alternatives were a dedicated skill (~25 tok in every context and every subagent) and a
@@ -318,9 +318,41 @@ for a capability used a few times a month.
 Bug logs land in `logs/openlogs/`, which is `.gitignore`d: they are the user's Turkish
 working notes and this repo publishes in English.
 
+### What the audit changed
+
+An outside review (fable) plus a check of the hook documentation broke four things:
+
+**`PostCompact` was dead.** The event exists, but plain stdout is injected into context on
+only three events — `SessionStart`, `UserPromptSubmit`, `UserPromptExpansion`. Everywhere
+else stdout goes to the debug log and the model never sees it. The compaction cue was
+working only by accident, because `SessionStart` also fires after compaction with
+`source: "compact"`. The registration and the branch are gone; `SessionStart` covers it.
+
+**Silence leaked.** `watch.js` only swept `live/` once 40 files had piled up, so below that
+a crashed agent's record was immortal and every later session announced `live: builder`
+forever. There was no `SessionEnd` handler either — Base had one and Core had dropped it.
+Now `SessionEnd` closes every unended record, the sweep ages records out at any count, and
+`cue.js` independently ignores any record untouched for 12 hours. Two locks, because the
+first one depends on a hook that a killed process never fires.
+
+**Truncation ate the instruction.** `read .claude/relay/` was pushed last, so the 200-char
+slice cut the only actionable sentence and left bare IDs. It is now first: eight contracts
+and six roles truncate the list, never the instruction.
+
+**The positive path had no test.** Every assertion was about silence; nothing proved the
+line's content, its cap, or that it carries no contract body. It does now, including the
+stale-record and crowded-relay cases.
+
+Accepted knowingly: the cue points only at `.claude/relay/`. Work tracked in a document
+outside that tree is not named. Adding a second search path costs a directory scan at every
+session start to serve a convention that is this repository's, not the plugin's.
+
 **Open question.** `SessionStart` earns nothing if the user always opens with "devam",
-since the relay skill then reads `contracts/` anyway. Measure it on the first real run;
-if it never fires usefully, keep `PostCompact` and drop it.
+since the relay skill then reads `contracts/` anyway. The measurement is offline and costs
+nothing per turn: grep the session transcripts under `~/.claude/projects/<project>/*.jsonl`
+for whether a read of `.claude/relay/contracts` happens in the first few tool calls, and
+whether the opening prompt already said "devam". Two weeks of transcripts give fired,
+useful and redundant counts. If useful stays near zero, drop the event.
 
 ---
 

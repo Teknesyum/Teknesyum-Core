@@ -185,7 +185,7 @@ node test/all.js
 ```
 
 Kapıyı, tamamlama kapısını, denetim zincirini, defteri, bilinen atlatma yollarını ve hiçbir
-kancanın bağlama yazmadığını doğrulayan 80 sınama.
+kancanın bağlama yazmadığını doğrulayan 2.219 sınama.
 
 ---
 

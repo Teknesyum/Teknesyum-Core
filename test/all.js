@@ -451,8 +451,46 @@ function testNoContextWrites() {
   ok('cue stays under 200 chars', asked.length > 0 && asked.length <= 200, String(asked.length));
   ok(
     'cue is silent when there is no relay',
-    cue({ hook_event_name: 'PostCompact', cwd: os.tmpdir() }) === ''
+    cue({ hook_event_name: 'SessionStart', cwd: os.tmpdir() }) === ''
   );
+  ok(
+    'cue no longer answers PostCompact, whose stdout never reaches the model',
+    cue({ hook_event_name: 'PostCompact', cwd: process.cwd() }) === ''
+  );
+  ok('the log phrase survives Turkish inflection', cue({ hook_event_name: 'UserPromptSubmit', prompt: 'bunu log yazalim' }).includes('log.js'));
+
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-cue-'));
+  const relay = path.join(home, '.claude', 'relay');
+  const live = path.join(relay, 'live');
+  fs.mkdirSync(path.join(relay, 'contracts'), { recursive: true });
+  fs.mkdirSync(live, { recursive: true });
+  const start = { hook_event_name: 'SessionStart', cwd: home };
+
+  ok('cue is silent while the relay is empty', cue(start) === '');
+
+  fs.writeFileSync(path.join(relay, 'contracts', 'T7.md'), 'goal: rebuild the token store');
+  const one = cue(start);
+  ok('cue names the open contract', one.includes('T7'), one);
+  ok('cue points at the relay first', one.startsWith('read .claude/relay/'), one);
+  ok('cue carries no contract body', !one.includes('token store'), one);
+
+  fs.writeFileSync(path.join(live, 'a.json'), JSON.stringify({ role: 'builder', updated: new Date().toISOString() }));
+  ok('cue names the live role', cue(start).includes('builder'));
+
+  fs.writeFileSync(path.join(live, 'b.json'), JSON.stringify({ role: 'auditor', ended: '2026-01-01T00:00:00.000Z' }));
+  ok('an ended agent is not called live', !cue(start).includes('auditor'));
+
+  const old = new Date(Date.now() - 48 * 3600 * 1000).toISOString();
+  fs.writeFileSync(path.join(live, 'c.json'), JSON.stringify({ role: 'planner', updated: old }));
+  ok('a stale record does not speak forever', !cue(start).includes('planner'));
+
+  for (let i = 0; i < 12; i++) {
+    fs.writeFileSync(path.join(relay, 'contracts', 'LONG' + i + '.md'), 'x');
+    fs.writeFileSync(path.join(live, 'r' + i + '.json'), JSON.stringify({ role: 'ui-builder-' + i, updated: new Date().toISOString() }));
+  }
+  const full = cue(start);
+  ok('a crowded relay stays under the cap', full.length <= 200, String(full.length));
+  ok('the instruction survives truncation', full.startsWith('read .claude/relay/'), full);
 }
 
 function testScaffold() {
