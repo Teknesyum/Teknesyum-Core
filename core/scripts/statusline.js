@@ -94,7 +94,7 @@ function build(input) {
   parts.push(paint(C.cyan, path.basename(path.resolve(cwd))));
 
   const cfg = settings();
-  if (cfg.profile) parts.push(paint(C.dim, cfg.profile));
+  parts.push(paint(C.dim, String(cfg.profile || 'normal')));
 
   const r = relayRoot(cwd, { git: false });
   if (!r) {

@@ -1,7 +1,6 @@
 ---
 role: planner
-model: opus
-effort: medium
+tier: planner
 ---
 
 # Role: planner

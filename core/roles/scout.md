@@ -1,7 +1,6 @@
 ---
 role: scout
-model: sonnet
-effort: low
+tier: scout
 ---
 
 # Role: scout

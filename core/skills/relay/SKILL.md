@@ -104,12 +104,14 @@ Read <P>/roles/builder.md and follow it.
 Contract: .claude/relay/contracts/T7.md
 ```
 
-`builder`, `auditor`, `planner`, `advisor`, `scout`.
+`builder`, `ui-builder`, `auditor`, `planner`, `advisor`, `scout`, `scribe`.
 
-Model and effort live in the role file's frontmatter. `node <P>/scripts/contract.js tier
---role builder --id T7` resolves them: high risk raises the model, the profile caps it, and
-no route goes below the role's base. Pass the result as the `Agent` call's `model`, and write
-`model` and `effort` into the agent's `live/` record so the statusline can show them.
+The role file names its row; row x profile picks the cell in `<P>/tiers.json`. Resolve it,
+never restate it: `node <P>/scripts/contract.js tier --role builder --id T7`. Risk, a
+twice-repeated verify failure and `round >= 3` raise a cell; the profile caps it except for
+`auditor`, `advisor` and a signal-raised builder; nothing lowers it. Pass the result as the
+`Agent` call's `model` and write `model`/`effort` into the agent's `live/` record. Search
+subagents are not roles: `haiku/low` in every profile.
 
 - Independent contracts start together, not in sequence.
 - Past three concurrent writers, give each a git worktree.

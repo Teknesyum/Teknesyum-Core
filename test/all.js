@@ -479,82 +479,184 @@ function testScaffold() {
 const ROLES = path.join(CORE, 'roles');
 const MODELS = ['haiku', 'sonnet', 'opus'];
 const EFFORTS = ['low', 'medium', 'high'];
-const BASE = {
-  planner: ['opus', 'medium'],
-  auditor: ['opus', 'medium'],
-  advisor: ['opus', 'high'],
-  builder: ['sonnet', 'low'],
-  scout: ['sonnet', 'low'],
+
+const TABLE = {
+  t0: { eco: 'sonnet', normal: 'opus', premium: 'opus' },
+  planner: { eco: 'sonnet/medium', normal: 'opus/medium', premium: 'opus/high' },
+  builder: { eco: 'sonnet/low', normal: 'sonnet/medium', premium: 'opus/medium' },
+  'ui-builder': { eco: 'sonnet/low', normal: 'sonnet/medium', premium: 'opus/medium' },
+  scribe: { eco: 'haiku/low', normal: 'haiku/low', premium: 'sonnet/low' },
+  scout: { eco: 'haiku/low', normal: 'sonnet/low', premium: 'sonnet/medium' },
+  auditor: { eco: 'opus/medium', normal: 'opus/medium', premium: 'opus/high' },
+  advisor: { eco: 'opus/high', normal: 'opus/high', premium: 'opus/high' },
 };
 
+const PROFILES = ['eco', 'normal', 'premium'];
+
+function cellOf(t) {
+  return t.model + (t.effort ? '/' + t.effort : '');
+}
+
 function testTier(root) {
-  const { tier, roleBase, MODEL_RANK, EFFORT_RANK } = require(CONTRACT);
+  const { tier, tiers, roleBase, roleRow, MODEL_RANK, EFFORT_RANK } = require(CONTRACT);
+  const T = tiers();
+
+  ok('the table lives in tiers.json, not in prose', fs.existsSync(path.join(CORE, 'tiers.json')));
+  ok('every approved row is in the data file', Object.keys(TABLE).every((r) => !!T.cells[r]), Object.keys(T.cells).join(', '));
+  ok('the data file adds no row of its own', Object.keys(T.cells).every((r) => !!TABLE[r]), Object.keys(T.cells).join(', '));
+
+  let cells = 0;
+  for (const row of Object.keys(TABLE)) {
+    for (const p of PROFILES) {
+      cells += 1;
+      const t = tier(row, { profile: p });
+      ok('cell ' + row + ' x ' + p + ' is ' + TABLE[row][p], t && cellOf(t) === TABLE[row][p], t && cellOf(t));
+      ok('cell ' + row + ' x ' + p + ' names its own cell', t && t.cell === TABLE[row][p], t && t.cell);
+    }
+  }
+  ok('all 24 cells were asserted', cells === 24, String(cells));
+
+  ok('a search subagent is haiku/low in every profile', T.subagent.model === 'haiku' && T.subagent.effort === 'low');
+  ok('the council is 1 on eco and 2 otherwise', T.council.eco === 1 && T.council.normal === 2 && T.council.premium === 2);
 
   const files = fs.readdirSync(ROLES).filter((f) => f.endsWith('.md'));
-  ok('every role has a file', files.length === Object.keys(BASE).length, files.join(', '));
-
+  ok('the scribe role file exists', files.includes('scribe.md'), files.join(', '));
   for (const f of files) {
     const role = f.replace(/\.md$/, '');
     const body = fs.readFileSync(path.join(ROLES, f), 'utf8');
-    const model = (body.match(/^model:[ 	]*(\S+)/im) || [])[1];
-    const effort = (body.match(/^effort:[ 	]*(\S+)/im) || [])[1];
-    ok(role + ' declares a model', !!model, body.slice(0, 80));
-    ok(role + ' declares an effort', !!effort, body.slice(0, 80));
-    ok(role + ' model is in the allowed set', MODELS.includes(model), model);
-    ok(role + ' effort is in the allowed set', EFFORTS.includes(effort), effort);
-    ok(role + ' carries the decided base', BASE[role] && BASE[role][0] === model && BASE[role][1] === effort, model + '/' + effort);
-    ok(role + ' base is readable by the resolver', JSON.stringify(roleBase(role)) === JSON.stringify({ model, effort }));
+    const declared = (body.match(/^tier:[ \t]*(\S+)/im) || [])[1];
+    ok(role + ' declares a tier row', !!declared, body.slice(0, 80));
+    ok(role + ' names a row that exists', !!TABLE[declared], String(declared));
+    ok(role + ' carries no stale model line', !/^model:/im.test(body));
+    ok(role + ' carries no stale effort line', !/^effort:/im.test(body));
+    ok(role + ' resolves through the row it declares', roleRow(role) === declared, roleRow(role));
   }
 
-  ok('risk high raises a sonnet builder to opus', tier('builder', { risk: 'high', profile: 'normal' }).model === 'opus');
-  ok('risk high lifts the effort too', tier('builder', { risk: 'high', profile: 'normal' }).effort === 'medium');
-  ok('low risk leaves the base alone', tier('builder', { risk: 'low', profile: 'normal' }).model === 'sonnet');
-  ok('a caller may raise the model', tier('builder', { model: 'opus', profile: 'normal' }).model === 'opus');
-  ok('a caller may raise the effort', tier('builder', { effort: 'high', profile: 'normal' }).effort === 'high');
+  ok('ui-builder resolves without a role file in core', roleRow('ui-builder') === 'ui-builder');
+  ok('roleBase reports the cell it read', JSON.stringify(roleBase('builder', 'premium')) === JSON.stringify({ row: 'builder', profile: 'premium', model: 'opus', effort: 'medium' }));
+  ok('an unknown role resolves to nothing', tier('worker-lite', { profile: 'normal' }) === null);
 
-  for (const role of Object.keys(BASE)) {
-    const [bm, be] = BASE[role];
-    for (const m of MODELS) {
-      for (const e of EFFORTS) {
-        for (const r of ['low', 'high', '']) {
-          const t = tier(role, { model: m, effort: e, risk: r, profile: 'normal' });
-          ok(
-            'no route goes below the base: ' + role + ' asked ' + m + '/' + e + ' risk ' + (r || 'none'),
-            MODEL_RANK[t.model] >= MODEL_RANK[bm] && EFFORT_RANK[t.effort] >= EFFORT_RANK[be],
-            t.model + '/' + t.effort
-          );
+  ok('signal 1: two identical failures raise the effort', cellOf(tier('builder', { profile: 'normal', repeatFail: 2 })) === 'sonnet/high');
+  ok('signal 1: a third failure raises the model', tier('builder', { profile: 'normal', repeatFail: 3 }).model === 'opus');
+  ok('signal 2: round 3 raises the builder model', tier('builder', { profile: 'normal', round: 3 }).model === 'opus');
+  ok('signal 2: round 2 does not', tier('builder', { profile: 'normal', round: 2 }).model === 'sonnet');
+  ok('signal 2 applies to ui-builder too', tier('ui-builder', { profile: 'eco', round: 3 }).model === 'opus');
+  ok('signal 3: round 4 requires the advisor', tier('builder', { profile: 'normal', round: 4 }).advisorRequired === true);
+  ok('signal 3: round 3 does not require it', tier('builder', { profile: 'normal', round: 3 }).advisorRequired === false);
+
+  const irr = require(path.join(CORE, 'scripts', 'risk.js')).irreversible;
+  ok('signal 4: a migration path is irreversible', irr(['db/migrations/003.sql'], []).hit);
+  ok('signal 4: a history rewrite command is irreversible', irr([], ['git push --force origin main']).hit);
+  ok('signal 4: ordinary work is not', !irr(['src/ok.js'], ['node --test']).hit);
+  ok('signal 4: the tier records it', tier('builder', { profile: 'eco', irreversible: true }).notes.join(' ').includes('auditor'));
+
+  ok('risk high raises an eco builder to opus, not to sonnet/high', cellOf(tier('builder', { profile: 'eco', risk: 'high' })) === 'opus/medium');
+  ok('a risk-raised builder pierces the eco ceiling', tier('builder', { profile: 'eco', risk: 'high' }).pierced === true);
+  ok('the auditor pierces the eco ceiling', tier('auditor', { profile: 'eco' }).pierced === true && tier('auditor', { profile: 'eco' }).model === 'opus');
+  ok('the advisor pierces the eco ceiling', tier('advisor', { profile: 'eco' }).pierced === true && tier('advisor', { profile: 'eco' }).model === 'opus');
+  ok('an unraised role does not pierce it', tier('planner', { profile: 'eco', model: 'opus' }).model === 'sonnet');
+  ok('the capped role says why', /caps the model/.test(tier('planner', { profile: 'eco', model: 'opus' }).reasons.join(' ')));
+  ok('normal and premium leave the grid alone', tier('planner', { profile: 'normal' }).pierced === false);
+
+  ok('an opus asker gets a fable second opinion', cellOf(tier('advisor', { profile: 'premium', asker: 'opus' })) === 'fable/high');
+  ok('a sonnet asker still gets opus', tier('advisor', { profile: 'normal', asker: 'sonnet' }).model === 'opus');
+
+  ok('xhigh is not granted automatically', tier('builder', { profile: 'premium', effort: 'xhigh' }).effort === 'medium');
+  ok('xhigh is granted on an explicit user request', tier('builder', { profile: 'premium', effort: 'xhigh', userAsked: true }).effort === 'xhigh');
+
+  for (const row of Object.keys(TABLE)) {
+    for (const p of PROFILES) {
+      const [bm, be] = TABLE[row][p].split('/');
+      for (const m of MODELS) {
+        for (const e of EFFORTS) {
+          for (const r of ['low', 'high', '']) {
+            for (const rd of [0, 3, 4]) {
+              const t = tier(row, { model: m, effort: e, risk: r, round: rd, profile: p });
+              const floorModel = MODEL_RANK[t.model] >= MODEL_RANK[bm];
+              const floorEffort = !be || EFFORT_RANK[t.effort] >= EFFORT_RANK[be];
+              ok(
+                'no route goes below the cell: ' + row + ' x ' + p + ' asked ' + m + '/' + e + ' risk ' + (r || 'none') + ' round ' + rd,
+                floorModel && floorEffort,
+                cellOf(t)
+              );
+            }
+          }
         }
       }
     }
   }
 
-  ok('eco caps an opus base at sonnet', tier('planner', { profile: 'eco' }).model === 'sonnet');
-  ok('eco caps a raised builder too', tier('builder', { risk: 'high', profile: 'eco' }).model === 'sonnet');
-  ok('eco says why', /caps the model/.test(tier('planner', { profile: 'eco' }).reasons.join(' ')));
-  ok('normal leaves the bases as decided', tier('planner', { profile: 'normal' }).model === 'opus');
-  ok('premium leaves the bases as decided', tier('advisor', { profile: 'premium' }).model === 'opus');
-  ok('an unknown role resolves to nothing', tier('worker-lite', { profile: 'normal' }) === null);
+  const cli = contract(['tier', '--role', 'builder', '--profile', 'eco'], root);
+  ok('acceptance 1: eco builder is sonnet/low', cli.status === 0 && /^builder sonnet\/low$/m.test(cli.stdout), cli.stdout);
 
-  const cli = contract(['tier', '--role', 'builder'], root);
-  ok('the tier command prints model and effort', cli.status === 0 && /builder sonnet\/low/.test(cli.stdout), cli.stdout);
+  const cliRisk = contract(['tier', '--role', 'builder', '--profile', 'eco', '--risk', 'high'], root);
+  ok(
+    'acceptance 2: risk high gives opus/medium and says the ceiling was pierced',
+    cliRisk.status === 0 && /^builder opus\/medium$/m.test(cliRisk.stdout) && /ceiling +pierced/.test(cliRisk.stdout),
+    cliRisk.stdout
+  );
 
-  const cliLow = contract(['tier', '--role', 'advisor', '--model', 'haiku'], root);
-  ok('the tier command refuses to lower a base', /advisor opus\/high/.test(cliLow.stdout) && /below the base/.test(cliLow.stdout), cliLow.stdout);
+  const cliAdv = contract(['tier', '--role', 'advisor', '--profile', 'eco'], root);
+  ok(
+    'acceptance 3: eco advisor is opus/high and exempt',
+    cliAdv.status === 0 && /^advisor opus\/high$/m.test(cliAdv.stdout) && /exempt from the profile ceiling/.test(cliAdv.stdout),
+    cliAdv.stdout
+  );
+
+  const cliScribe = contract(['tier', '--role', 'scribe', '--profile', 'normal'], root);
+  ok('acceptance 4: normal scribe is haiku/low', cliScribe.status === 0 && /^scribe haiku\/low$/m.test(cliScribe.stdout), cliScribe.stdout);
+
+  const cliCell = contract(['tier', '--role', 'ui-builder', '--profile', 'premium'], root);
+  ok('the command names the cell it came from', /cell +ui-builder x premium = opus\/medium/.test(cliCell.stdout), cliCell.stdout);
+
+  const cliLow = contract(['tier', '--role', 'advisor', '--profile', 'normal', '--model', 'haiku'], root);
+  ok('the command refuses to lower a cell', /^advisor opus\/high$/m.test(cliLow.stdout) && /below the cell/.test(cliLow.stdout), cliLow.stdout);
 
   writeContract(
     root,
     'M1',
     ['---', 'id: M1', 'status: active', 'round: 1', 'owns: [src/auth/token.js]', 'verify:', '  - node -e "1"', '---', ''].join('\n')
   );
-  const cliRisk = contract(['tier', '--role', 'builder', '--id', 'M1'], root);
-  ok('a high-risk contract raises the builder from the command', /builder opus/.test(cliRisk.stdout), cliRisk.stdout);
-  ok('the risk comes from the contract, not a flag', /risk +high/.test(cliRisk.stdout), cliRisk.stdout);
+  const cliContract = contract(['tier', '--role', 'builder', '--id', 'M1', '--profile', 'eco'], root);
+  ok('a high-risk contract raises the builder from the command', /^builder opus/m.test(cliContract.stdout), cliContract.stdout);
+  ok('the risk comes from the contract, not a flag', /risk +high/.test(cliContract.stdout), cliContract.stdout);
 
   const cfg = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-tier-'));
   fs.mkdirSync(path.join(cfg, 'teknesyum'), { recursive: true });
   fs.writeFileSync(path.join(cfg, 'teknesyum', 'config.json'), JSON.stringify({ profile: 'eco' }));
   const cliEco = contract(['tier', '--role', 'planner'], root, { CLAUDE_CONFIG_DIR: cfg });
-  ok('the profile on disk is the ceiling', /planner sonnet\/medium/.test(cliEco.stdout), cliEco.stdout);
+  ok('the profile on disk picks the column', /^planner sonnet\/medium$/m.test(cliEco.stdout), cliEco.stdout);
+}
+
+function testQuota(root) {
+  const live = path.join(root, '.claude', 'relay', 'live');
+  fs.mkdirSync(live, { recursive: true });
+  const open = (id, forContract) =>
+    fs.writeFileSync(path.join(live, id + '.json'), JSON.stringify({ id, role: 'advisor', contract: forContract || null, files: [] }));
+
+  const none = contract(['tier', '--role', 'advisor', '--profile', 'eco'], root);
+  ok('the first eco advisor opening passes', none.status === 0 && /0\/3 advisor openings/.test(none.stdout), none.stdout);
+
+  writeContract(root, 'Q1', ['---', 'id: Q1', 'status: active', 'round: 1', 'owns: [src/ok.js]', 'verify:', '  - node -e "1"', '---', ''].join('\n'));
+  open('adv1', 'Q1');
+  const second = contract(['tier', '--role', 'advisor', '--profile', 'eco', '--id', 'Q1'], root);
+  ok('a second advisor on the same eco contract is blocked', second.status === 2 && /quota is spent/.test(second.stdout), second.stdout);
+
+  const third = contract(['tier', '--role', 'advisor', '--profile', 'eco'], root);
+  ok('a second opening elsewhere in the relay passes', third.status === 0, third.stdout);
+
+  open('adv2');
+  const thirdOpen = contract(['tier', '--role', 'advisor', '--profile', 'eco'], root);
+  ok('the third eco advisor opening passes', thirdOpen.status === 0 && /2\/3 advisor openings/.test(thirdOpen.stdout), thirdOpen.stdout);
+
+  open('adv3');
+  const fourth = contract(['tier', '--role', 'advisor', '--profile', 'eco'], root);
+  ok('the fourth eco advisor opening is blocked', fourth.status === 2 && /quota is spent/.test(fourth.stdout), fourth.stdout);
+
+  const normal = contract(['tier', '--role', 'advisor', '--profile', 'normal'], root);
+  ok('normal has no advisor quota', normal.status === 0 && !/quota/.test(normal.stdout), normal.stdout);
+
+  for (const f of ['adv1', 'adv2', 'adv3']) fs.unlinkSync(path.join(live, f + '.json'));
 }
 
 function testTierVisible(root) {
@@ -570,16 +672,50 @@ function testTierVisible(root) {
     env: { ...process.env, NO_COLOR: '1' },
   });
   ok('the statusline shows the tier of a running agent', /builder·sonnet\/low/.test(r.stdout), r.stdout);
+
+  const cfg = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-sl-'));
+  fs.mkdirSync(path.join(cfg, 'teknesyum'), { recursive: true });
+  fs.writeFileSync(path.join(cfg, 'teknesyum', 'config.json'), JSON.stringify({ profile: 'eco' }));
+  const eco = run(process.execPath, [STATUSLINE], {
+    cwd: root,
+    input: JSON.stringify({ workspace: { current_dir: root } }),
+    env: { ...process.env, NO_COLOR: '1', CLAUDE_CONFIG_DIR: cfg },
+  });
+  ok('the statusline shows the profile', /\beco\b/.test(eco.stdout), eco.stdout);
+
+  const bare = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-sl2-'));
+  const dflt = run(process.execPath, [STATUSLINE], {
+    cwd: root,
+    input: JSON.stringify({ workspace: { current_dir: root } }),
+    env: { ...process.env, NO_COLOR: '1', CLAUDE_CONFIG_DIR: bare },
+  });
+  ok('with no profile on disk the statusline says normal', /\bnormal\b/.test(dflt.stdout), dflt.stdout);
   fs.unlinkSync(path.join(live, 'shown.json'));
 
   const skill = fs.readFileSync(path.join(CORE, 'skills', 'relay', 'SKILL.md'), 'utf8');
   const lines = skill.split('\n');
   ok('SKILL.md stays under 150 lines', lines.length <= 150, lines.length + ' lines');
-  const tierLines = lines.filter((l) => /contract\.js tier|model. and .effort|below the role/.test(l));
-  ok('the tier rule in SKILL.md is at most six lines', tierLines.length <= 6, tierLines.join(' | '));
+  const para = skill.split(/\n\s*\n/).filter((p) => /contract\.js tier/.test(p));
+  ok('the tier rule is one paragraph', para.length === 1, String(para.length));
+  ok('the tier rule is at most six lines', para[0].trim().split('\n').length <= 6, para[0]);
+  ok('SKILL.md does not copy the table', !/\|\s*eco\s*\|/.test(skill));
 
   const decisions = fs.readFileSync(path.join(__dirname, '..', 'docs', 'DECISIONS.md'), 'utf8');
-  ok('the tiering decision is recorded', /^## D\d+ - Model tiering|^## D\d+ — Model tiering/m.test(decisions));
+  const d8 = decisions.slice(decisions.indexOf('## D8'), decisions.indexOf('## Standing law'));
+  ok('the tiering decision is recorded', /Model tiering/.test(d8));
+  const d8rows = d8.toLowerCase();
+  ok(
+    'D8 carries the full table',
+    PROFILES.every((p) => new RegExp('\\| ' + p + ' ').test(d8)) &&
+      Object.keys(TABLE).every((r) => d8rows.includes('| ' + r)) &&
+      Object.keys(TABLE).every((r) => PROFILES.every((p) => d8rows.includes(TABLE[r][p]))),
+    d8rows.slice(0, 200)
+  );
+  ok('D8 records the four signals', /round >= 3/.test(d8) && /round >= 4/.test(d8) && /same signature/.test(d8) && /irreversible operation/.test(d8));
+  ok('D8 justifies the pierced ceiling', /exempt from the ceiling/.test(d8));
+  ok('D8 records the advisor exemption', /Advisor is exempt/.test(d8));
+  ok('D8 records the three locks', /Tool set/.test(d8) && /Output ceiling/.test(d8) && /Quota/.test(d8));
+  ok('D8 records the two open points', /Settled by the user: opus/.test(d8) && /cost ratios/.test(d8));
 }
 
 function main() {
@@ -591,6 +727,7 @@ function main() {
   testScaffold();
   testStatusline(root);
   testTier(root);
+  testQuota(root);
   testTierVisible(root);
   testNoContextWrites();
 

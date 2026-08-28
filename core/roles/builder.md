@@ -1,7 +1,6 @@
 ---
 role: builder
-model: sonnet
-effort: low
+tier: builder
 ---
 
 # Role: builder

@@ -1,7 +1,6 @@
 ---
 role: advisor
-model: opus
-effort: high
+tier: advisor
 ---
 
 # Role: advisor

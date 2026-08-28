@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { relayRoot, projectRoot, settings } = require('../hooks/lib.js');
+const { relayRoot, projectRoot, settings, liveDir, read } = require('../hooks/lib.js');
 const { isContractName, field, list, verifySteps } = require('../hooks/schema.js');
 const seal = require('../hooks/seal.js');
 const risk = require('./risk.js');
@@ -110,104 +110,307 @@ function reportVerify(results) {
 }
 
 const ROLES_DIR = path.resolve(__dirname, '..', 'roles');
-const MODEL_RANK = { haiku: 0, sonnet: 1, opus: 2 };
-const EFFORT_RANK = { low: 0, medium: 1, high: 2 };
-const PROFILE_CEILING = { eco: 'sonnet', normal: 'opus', premium: 'opus' };
+const TIERS_FILE = path.resolve(__dirname, '..', 'tiers.json');
 
-function roleBase(role) {
-  if (!/^[a-z]+$/.test(String(role || ''))) return null;
-  let body;
+const MODEL_RANK = { haiku: 0, sonnet: 1, opus: 2, fable: 2 };
+const EFFORT_RANK = { low: 0, medium: 1, high: 2, xhigh: 3, max: 4 };
+const BUMP_CHAIN = ['haiku', 'sonnet', 'opus'];
+const EFFORT_CHAIN = ['low', 'medium', 'high'];
+
+let _tiers = null;
+
+function tiers() {
+  if (!_tiers) _tiers = JSON.parse(fs.readFileSync(TIERS_FILE, 'utf8'));
+  return _tiers;
+}
+
+const AUTO_EFFORT_CAP = tiers().autoEffortCap;
+const PROFILE_CEILING = tiers().ceiling;
+
+function parseCell(text) {
+  const parts = String(text).split('/');
+  return { model: (parts[0] || '').toLowerCase(), effort: parts[1] ? parts[1].toLowerCase() : null };
+}
+
+function bumpModel(m) {
+  const i = BUMP_CHAIN.indexOf(m);
+  return i >= 0 && i < BUMP_CHAIN.length - 1 ? BUMP_CHAIN[i + 1] : m;
+}
+
+function bumpEffort(e) {
+  if (!e) return e;
+  const i = EFFORT_CHAIN.indexOf(e);
+  if (i < 0 || EFFORT_RANK[e] >= EFFORT_RANK[AUTO_EFFORT_CAP]) return e;
+  return EFFORT_CHAIN[i + 1];
+}
+
+function roleRow(role) {
+  const name = String(role || '');
+  if (!/^[a-z][a-z0-9-]*$/.test(name)) return null;
+  const T = tiers();
+  let body = null;
   try {
-    body = fs.readFileSync(path.join(ROLES_DIR, role + '.md'), 'utf8');
+    body = fs.readFileSync(path.join(ROLES_DIR, name + '.md'), 'utf8');
   } catch {
-    return null;
+    body = null;
   }
-  const model = field('model', body).toLowerCase();
-  const effort = field('effort', body).toLowerCase();
-  if (MODEL_RANK[model] === undefined || EFFORT_RANK[effort] === undefined) return null;
-  return { model, effort };
+  const declared = body ? field('tier', body).toLowerCase() : '';
+  const row = declared || name;
+  return T.cells[row] ? row : null;
+}
+
+function profileOf(want) {
+  const T = tiers();
+  const p = String(want || settings().profile || 'normal').toLowerCase();
+  return T.profiles.indexOf(p) >= 0 ? p : 'normal';
+}
+
+function roleBase(role, profile) {
+  const row = roleRow(role);
+  if (!row) return null;
+  const p = profileOf(profile);
+  const cell = parseCell(tiers().cells[row][p]);
+  return { row, profile: p, model: cell.model, effort: cell.effort };
 }
 
 function tier(role, opt) {
   const o = opt || {};
-  const base = roleBase(role);
-  if (!base) return null;
-  const reasons = [];
+  const T = tiers();
+  const row = roleRow(role);
+  if (!row) return null;
+
+  const profile = profileOf(o.profile);
+  const cellText = T.cells[row][profile];
+  const base = parseCell(cellText);
   let model = base.model;
   let effort = base.effort;
 
+  const reasons = [];
+  const signals = [];
+  const notes = [];
+  let raisedBySignal = false;
+
   if (String(o.risk || '').toLowerCase() === 'high') {
+    signals.push('risk high');
+    raisedBySignal = true;
     if (MODEL_RANK[model] < MODEL_RANK.opus) {
       model = 'opus';
-      reasons.push('risk high raises the model');
+      reasons.push('risk high raises the model to opus');
     }
-    if (EFFORT_RANK[effort] < EFFORT_RANK.medium) effort = 'medium';
+    if (effort && EFFORT_RANK[effort] < EFFORT_RANK.medium) {
+      effort = 'medium';
+      reasons.push('risk high lifts the effort to medium');
+    }
   }
+
+  const fails = Number(o.repeatFail || 0);
+  if (fails >= T.signals.repeatFail.effortAt) {
+    signals.push('verify failed ' + fails + ' times with the same signature');
+    raisedBySignal = true;
+    const e2 = bumpEffort(effort);
+    if (e2 !== effort) {
+      effort = e2;
+      reasons.push('a repeated failure raises the effort to ' + effort);
+    }
+    if (fails >= T.signals.repeatFail.modelAt) {
+      const m2 = bumpModel(model);
+      if (m2 !== model) {
+        model = m2;
+        reasons.push('the failure survived the effort raise, so the model goes to ' + model);
+      }
+    }
+  }
+
+  const round = Number(o.round || 0);
+  if (round >= T.signals.roundModelBump && T.riskExempt.indexOf(row) >= 0) {
+    signals.push('round ' + round);
+    raisedBySignal = true;
+    const m2 = bumpModel(model);
+    if (m2 !== model) {
+      model = m2;
+      reasons.push('round >= ' + T.signals.roundModelBump + ' raises the model to ' + model);
+    }
+  }
+
+  const advisorRequired = round >= T.signals.roundAdvisorRequired;
+  if (advisorRequired)
+    notes.push('round >= ' + T.signals.roundAdvisorRequired + ' - the advisor opens before the next attempt');
+
+  const irreversible = !!o.irreversible;
+  if (irreversible)
+    notes.push('irreversible operation - the auditor opens whatever the profile says');
 
   const askedModel = String(o.model || '').toLowerCase();
   if (MODEL_RANK[askedModel] !== undefined) {
     if (MODEL_RANK[askedModel] > MODEL_RANK[model]) {
       model = askedModel;
-      reasons.push('caller raised the model');
+      reasons.push('the caller raised the model');
     } else if (MODEL_RANK[askedModel] < MODEL_RANK[model]) {
-      reasons.push('caller asked for ' + askedModel + ' - refused, no route goes below the base');
+      reasons.push('the caller asked for ' + askedModel + ' - refused, no route goes below the cell');
     }
   }
 
   const askedEffort = String(o.effort || '').toLowerCase();
-  if (EFFORT_RANK[askedEffort] !== undefined) {
-    if (EFFORT_RANK[askedEffort] > EFFORT_RANK[effort]) {
+  if (EFFORT_RANK[askedEffort] !== undefined && effort) {
+    if (EFFORT_RANK[askedEffort] > EFFORT_RANK[AUTO_EFFORT_CAP] && !o.userAsked) {
+      reasons.push(askedEffort + ' is never granted automatically - only on an explicit user request');
+    } else if (EFFORT_RANK[askedEffort] > EFFORT_RANK[effort]) {
       effort = askedEffort;
-      reasons.push('caller raised the effort');
+      reasons.push('the caller raised the effort');
     } else if (EFFORT_RANK[askedEffort] < EFFORT_RANK[effort]) {
-      reasons.push('caller asked for ' + askedEffort + ' - refused, no route goes below the base');
+      reasons.push('the caller asked for ' + askedEffort + ' - refused, no route goes below the cell');
     }
   }
 
-  const profile = String(o.profile || settings().profile || 'normal').toLowerCase();
-  const ceiling = PROFILE_CEILING[profile] || 'opus';
+  const ceiling = T.ceiling[profile] || 'opus';
+  const exemptRole = T.ceilingExempt.indexOf(row) >= 0;
+  const exemptRisk = T.riskExempt.indexOf(row) >= 0 && raisedBySignal;
+  let pierced = false;
   if (MODEL_RANK[model] > MODEL_RANK[ceiling]) {
-    model = ceiling;
-    reasons.push('profile ' + profile + ' caps the model at ' + ceiling);
+    if (exemptRole || exemptRisk) {
+      pierced = true;
+      reasons.push(
+        exemptRole
+          ? row + ' is exempt from the profile ceiling'
+          : 'a signal raised ' + row + ', and a signal-raised role is exempt from the ceiling'
+      );
+    } else {
+      model = ceiling;
+      reasons.push('profile ' + profile + ' caps the model at ' + ceiling);
+    }
   }
 
-  return { role, model, effort, base, profile, reasons };
+  const so = T.secondOpinion;
+  if (row === so.role && String(o.asker || '').toLowerCase() === so.whenAskerIs) {
+    const c = parseCell(so.becomes);
+    model = c.model;
+    effort = c.effort;
+    reasons.push('the asker is already ' + so.whenAskerIs + ' - the advisor answers as ' + so.becomes);
+  }
+
+  return {
+    role: String(role),
+    row,
+    model,
+    effort,
+    cell: cellText,
+    base,
+    profile,
+    ceiling,
+    pierced,
+    advisory: T.advisory.indexOf(row) >= 0,
+    signals,
+    reasons,
+    notes,
+    advisorRequired,
+    irreversible,
+  };
+}
+
+function advisorQuota(relay, profile, id) {
+  const T = tiers();
+  const q = T.quota[profile] && T.quota[profile].advisor;
+  if (!q) return null;
+  let files = [];
+  try {
+    files = fs.readdirSync(liveDir(relay)).filter((f) => f.endsWith('.json'));
+  } catch {
+    files = [];
+  }
+  let inRelay = 0;
+  let onContract = 0;
+  for (const f of files) {
+    const r = read(path.join(liveDir(relay), f));
+    if (!r || String(r.role || '').toLowerCase() !== 'advisor') continue;
+    inRelay += 1;
+    if (id && r.contract === id) onContract += 1;
+  }
+  return {
+    perRelay: q.perRelay,
+    perContract: q.perContract,
+    relay: inRelay,
+    contract: onContract,
+    blocked: inRelay >= q.perRelay || (!!id && onContract >= q.perContract),
+  };
 }
 
 function tierCmd() {
   const role = arg('role');
-  const t0 = roleBase(role);
-  if (!t0)
+  const row = roleRow(role);
+  if (!row)
     return stop([
-      'Unknown role or role file without model/effort: ' + (role || '(none)'),
+      'Unknown role: ' + (role || '(none)'),
+      'A role resolves through its file tier: field, or through a row name in core/tiers.json.',
       '',
-      'Usage: contract.js tier --role builder [--id T7] [--model opus] [--effort high]',
+      'Usage: contract.js tier --role builder [--profile eco] [--id T7] [--risk high]',
+      '       [--round N] [--repeat-fail N] [--model M] [--effort E] [--asker opus] [--user]',
     ]);
 
+  const id = arg('id');
   let level = null;
-  if (arg('id')) {
-    const c = load(arg('id'));
+  let irrev = null;
+  let round = arg('round');
+  let relay = null;
+
+  if (id) {
+    const c = load(id);
     if (c.error) return stop([c.error]);
-    level = risk.resolve(c.root, list('owns', c.body), field('risk', c.body));
+    relay = c.relay;
+    const owns = list('owns', c.body);
+    level = risk.resolve(c.root, owns, field('risk', c.body));
+    irrev = risk.irreversible(owns, verifySteps(c.body));
+    if (!round) round = field('round', c.body);
+  } else {
+    const where = locate();
+    relay = where ? where.relay : null;
   }
 
+  const declaredHigh = String(arg('risk') || '').toLowerCase() === 'high';
+  const riskLevel = declaredHigh || (level && level.level === 'high') ? 'high' : level ? level.level : null;
+
   const t = tier(role, {
-    risk: level && level.level,
+    profile: arg('profile'),
+    risk: riskLevel,
+    round,
+    repeatFail: arg('repeat-fail'),
+    irreversible: (irrev && irrev.hit) || has('irreversible'),
     model: arg('model'),
     effort: arg('effort'),
-    profile: arg('profile'),
+    asker: arg('asker'),
+    userAsked: has('user'),
   });
-  return out(
-    [
-      t.role + ' ' + t.model + '/' + t.effort,
-      '  base    ' + t.base.model + '/' + t.base.effort,
-      '  profile ' + t.profile,
-      ...(level ? ['  risk    ' + level.level] : []),
-      ...t.reasons.map((r) => '  ' + r),
-    ]
-  );
-}
 
+  const quota = t.row === 'advisor' && relay ? advisorQuota(relay, t.profile, id) : null;
+
+  const lines = [
+    t.role + ' ' + t.model + (t.effort ? '/' + t.effort : ''),
+    '  cell     ' + t.row + ' x ' + t.profile + ' = ' + t.cell,
+    '  profile  ' + t.profile + ' (ceiling ' + t.ceiling + ')',
+  ];
+  if (t.role !== t.row) lines.push('  row      ' + t.role + ' resolves to ' + t.row);
+  if (riskLevel)
+    lines.push('  risk     ' + riskLevel + (level && level.reasons.length ? ' (' + level.reasons.join('; ') + ')' : ''));
+  lines.push('  signals  ' + (t.signals.length ? t.signals.join(', ') : 'none'));
+  lines.push('  ceiling  ' + (t.pierced ? 'pierced' : 'held'));
+  for (const r of t.reasons) lines.push('  reason   ' + r);
+  for (const n of t.notes) lines.push('  note     ' + n);
+  if (t.advisory) lines.push('  note     this row is advice to T0, not a forced model');
+  if (quota)
+    lines.push(
+      '  quota    ' + quota.relay + '/' + quota.perRelay + ' advisor openings in this relay, ' +
+        quota.contract + '/' + quota.perContract + ' on this contract'
+    );
+
+  if (quota && quota.blocked)
+    return stop(
+      lines.concat([
+        '',
+        'Blocked - the ' + t.profile + ' advisor quota is spent. Decide without a second opinion, or ask the user.',
+      ])
+    );
+
+  return out(lines);
+}
 function complete() {
   const c = load(arg('id'));
   if (c.error) return stop([c.error, '', 'Usage: contract.js complete --id T7']);
@@ -456,8 +659,9 @@ function help() {
     '  audit --id <ID> --run-id <agent> --verification "..."',
     '                            write the audit record; hashes are computed here',
     '  ledger                    compare done/ against the ledger',
-    '  tier --role <role> [--id <ID>] [--model M] [--effort E]',
-    '                            resolve the model and effort an agent opens with',
+    '  tier --role <role> [--profile P] [--id <ID>] [--risk high] [--round N]',
+    '       [--repeat-fail N] [--model M] [--effort E] [--asker opus] [--user]',
+    '                            resolve the cell, the signals and the ceiling in one place',
   ]);
 }
 
@@ -482,7 +686,10 @@ module.exports = {
   runVerify,
   unsafeStep,
   tier,
+  tiers,
   roleBase,
+  roleRow,
+  advisorQuota,
   MODEL_RANK,
   EFFORT_RANK,
   PROFILE_CEILING,

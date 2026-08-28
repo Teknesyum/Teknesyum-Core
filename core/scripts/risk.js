@@ -53,4 +53,43 @@ function resolve(root, owns, declared) {
   return computed;
 }
 
-module.exports = { assess, resolve, HIGH_PATHS, DIFF_LIMIT, FILE_LIMIT };
+const IRREVERSIBLE_PATHS = [
+  /(^|\/)migrations?(\/|$)/i,
+  /(^|\/)releases?(\/|$)/i,
+  /(^|\/)schema\.sql$/i,
+  /(^|\/)\.github\/workflows\/[^/]*release[^/]*\.ya?ml$/i,
+];
+
+const IRREVERSIBLE_COMMANDS = [
+  /git\s+push\b[^\r\n]*(--force|-f\b)/i,
+  /git\s+(rebase|filter-branch|filter-repo)\b/i,
+  /git\s+reset\s+--hard\b/i,
+  /git\s+tag\s+-d\b/i,
+  /gh\s+release\s+(create|delete)\b/i,
+  /npm\s+publish\b/i,
+  /\b(drop\s+table|truncate\s+table)\b/i,
+  /\brm\s+-rf\b/i,
+];
+
+function irreversible(owns, steps) {
+  const reasons = [];
+  for (const p of owns || []) {
+    const n = norm(p);
+    if (IRREVERSIBLE_PATHS.some((re) => re.test(n))) reasons.push('irreversible path: ' + n);
+  }
+  for (const s of steps || [])
+    if (IRREVERSIBLE_COMMANDS.some((re) => re.test(String(s))))
+      reasons.push('irreversible command: ' + String(s).slice(0, 60));
+  return { hit: reasons.length > 0, reasons };
+}
+
+module.exports = {
+  assess,
+  resolve,
+  irreversible,
+  HIGH_PATHS,
+  DIFF_LIMIT,
+  FILE_LIMIT,
+  IRREVERSIBLE_PATHS,
+  IRREVERSIBLE_COMMANDS,
+};

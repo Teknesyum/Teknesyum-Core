@@ -1,7 +1,6 @@
 ---
 role: auditor
-model: opus
-effort: medium
+tier: auditor
 ---
 
 # Role: auditor

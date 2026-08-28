@@ -163,42 +163,85 @@ What the model still writes is the part that differs per project — the prose.
 
 ## D8 — Model tiering
 
-**The role file carries the tier. Signals raise it, the profile caps it, nothing lowers it.**
+**The cell is data. Signals raise it, the profile caps it, and three roles are exempt from
+the cap. Nothing lowers it.**
 
-Every agent opened as opus is waste on mechanical work and necessary on work that carries a
-decision. So each `core/roles/*.md` frontmatter now names its own floor:
+A single base per role was too coarse: the same builder is waste on a rename and too thin on
+a refactor, and the user's profile should move the whole grid, not clip its top. So the tier
+became a table of cells, `core/tiers.json`, resolved in one place:
 
-| Role | model | effort |
-|---|---|---|
-| planner, auditor | opus | medium |
-| advisor | opus | high |
-| builder, scout | sonnet | low |
+```bash
+node <P>/scripts/contract.js tier --role builder --profile eco --id T7
+```
 
-- **Signals raise, they never lower.** `risk: high` — computed by `contract.js` from the
-  diff, never declared by the model — pulls a builder up to opus. A caller may raise a
-  tier; no route may go under the role's base. Same law as D1: the party that saves the
-  money must not be the party that picks the quality.
-- **The profile is a ceiling.** `~/.claude/teknesyum.json`: `eco` caps at sonnet, `normal`
-  and `premium` leave the bases alone. The ceiling is the one thing that overrides a base,
-  because it is the user's own budget, not an agent's convenience.
-- **D3 holds.** Still one generic agent type. The tier is passed per spawn; no shell agent
-  (`worker-lite` and the like) is created.
+Cell is `model/effort`. Bold cells pierce the profile ceiling.
 
-`node <P>/scripts/contract.js tier --role builder --id T7` resolves base, risk and ceiling
-in one place, so the rule is not restated in prose the model has to obey.
+| Row | eco | normal | premium |
+|---|---|---|---|
+| T0 (advice only, not forced) | sonnet | opus | opus |
+| planner | sonnet/medium | opus/medium | opus/high |
+| builder | sonnet/low | sonnet/medium | opus/medium |
+| ui-builder | sonnet/low | sonnet/medium | opus/medium |
+| scribe | haiku/low | haiku/low | sonnet/low |
+| scout | haiku/low | sonnet/low | sonnet/medium |
+| auditor | **opus/medium** | opus/medium | opus/high |
+| advisor | **opus/high** | opus/high | opus/high + fable/high |
 
-**Cost class.** Frontmatter on a role file: **O**, four lines, paid once by the agent that
-actually holds the role. Tier resolution: **Z**, a script that writes to the terminal. The
-display: **Z** — `statusline.js` reads `model` and `effort` from the agent's `live/` record
-and prints `builder·sonnet/low`. Per-turn injection stays **0**; no banner is asked for,
-which would have been **C×5**.
+Search subagents are not roles: `haiku/low` in every profile, fixed. The plan council is
+1 member on eco, 2 on normal, 2 plus a fable pass on premium.
+
+**Four signals, on top of the risk gate.** All four are computed, never declared:
+
+1. The same verify step failed twice with the same signature → `effort` +1; a third time
+   → `model` +1.
+2. `round >= 3` → the builder's model +1.
+3. `round >= 4` → the advisor opens **before** the next attempt.
+4. An irreversible operation — migration, release, history rewrite, detected by
+   `risk.js` from the owned paths and the verify commands — opens the auditor whatever
+   the profile says.
+
+**Why the ceiling is pierced.** The profile is a budget, and a budget that silently buys a
+weaker auditor is not saving money, it is removing the check that the money was spent well.
+Every role the risk gate opens is therefore exempt from the ceiling: `auditor`, `advisor`,
+and a `builder`/`ui-builder` that a signal has raised. On eco a risk-raised builder goes to
+opus; it does not stop at `sonnet/high`. The user decided this: eco is for ordinary work,
+and work that tripped the gate is not ordinary work.
+
+**Advisor is exempt outright.** A second opinion that is cheaper than the first opinion is
+not a second opinion. Eco opens opus like everyone else. When the asker is already opus the
+advisor answers as `fable/high` — the same model cannot give itself a second opinion.
+
+**Three structural locks.** Exemption without a limit is just a higher ceiling, so each
+exempt role is fenced:
+
+- **Tool set** — the auditor reads and runs, never writes; one written file voids the
+  audit and the gate rejects the record (D5). The advisor writes no file at all.
+- **Output ceiling** — the advisor returns three headings and at most twenty lines. An
+  expensive model on a bounded output is a bounded cost.
+- **Quota** — on eco, at most 1 advisor opening per contract and 3 per relay.
+  `contract.js` counts them from the `live/` records and blocks the overflow. Normal and
+  premium have no quota.
+
+`xhigh` and `max` effort are never granted automatically. They exist only on the user's
+explicit request.
+
+**Cost class.** `tiers.json` is **Z** — a file the resolver reads, never the model.
+Role frontmatter is **O**, two lines, paid once by the agent that holds the role. The
+display is **Z**: `statusline.js` prints the profile and `builder·sonnet/low` from the
+agent's `live/` record. Per-turn injection stays **0**.
 
 *Fable's objection, rejected:* "the Task tool may not be able to pass a model, so the tier
 would have to be encoded as separate agent definitions." It can. The `Agent` tool takes a
 `model` parameter that takes precedence over the agent definition's frontmatter — verified
-against the live tool contract before this was written. Splitting one agent into a tier
-per model would have reinstated the D3 cost that Core was built to remove: agent
-descriptions are class **S**, paid in every context and repaid inside every subagent.
+against the live tool contract. Splitting one agent into a tier per model would reinstate
+the class **S** cost D3 removed.
+
+*Fable's two open points, recorded:*
+
+- Eco ceiling-piercing was left ambiguous — "is an eco builder raised to opus, or to
+  `sonnet/high`?" Settled by the user: opus.
+- The cost ratios behind the grid are estimates. They are to be checked against the first
+  real relay run, and the grid revised there rather than argued here.
 
 ---
 
