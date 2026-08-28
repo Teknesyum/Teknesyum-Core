@@ -106,6 +106,11 @@ Contract: .claude/relay/contracts/T7.md
 
 `builder`, `auditor`, `planner`, `advisor`, `scout`.
 
+Model and effort live in the role file's frontmatter. `node <P>/scripts/contract.js tier
+--role builder --id T7` resolves them: high risk raises the model, the profile caps it, and
+no route goes below the role's base. Pass the result as the `Agent` call's `model`, and write
+`model` and `effort` into the agent's `live/` record so the statusline can show them.
+
 - Independent contracts start together, not in sequence.
 - Past three concurrent writers, give each a git worktree.
 - The auditor never writes; one written file voids the audit and the gate rejects it.

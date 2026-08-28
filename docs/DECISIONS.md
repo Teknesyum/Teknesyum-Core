@@ -161,6 +161,47 @@ What the model still writes is the part that differs per project — the prose.
 
 ---
 
+## D8 — Model tiering
+
+**The role file carries the tier. Signals raise it, the profile caps it, nothing lowers it.**
+
+Every agent opened as opus is waste on mechanical work and necessary on work that carries a
+decision. So each `core/roles/*.md` frontmatter now names its own floor:
+
+| Role | model | effort |
+|---|---|---|
+| planner, auditor | opus | medium |
+| advisor | opus | high |
+| builder, scout | sonnet | low |
+
+- **Signals raise, they never lower.** `risk: high` — computed by `contract.js` from the
+  diff, never declared by the model — pulls a builder up to opus. A caller may raise a
+  tier; no route may go under the role's base. Same law as D1: the party that saves the
+  money must not be the party that picks the quality.
+- **The profile is a ceiling.** `~/.claude/teknesyum.json`: `eco` caps at sonnet, `normal`
+  and `premium` leave the bases alone. The ceiling is the one thing that overrides a base,
+  because it is the user's own budget, not an agent's convenience.
+- **D3 holds.** Still one generic agent type. The tier is passed per spawn; no shell agent
+  (`worker-lite` and the like) is created.
+
+`node <P>/scripts/contract.js tier --role builder --id T7` resolves base, risk and ceiling
+in one place, so the rule is not restated in prose the model has to obey.
+
+**Cost class.** Frontmatter on a role file: **O**, four lines, paid once by the agent that
+actually holds the role. Tier resolution: **Z**, a script that writes to the terminal. The
+display: **Z** — `statusline.js` reads `model` and `effort` from the agent's `live/` record
+and prints `builder·sonnet/low`. Per-turn injection stays **0**; no banner is asked for,
+which would have been **C×5**.
+
+*Fable's objection, rejected:* "the Task tool may not be able to pass a model, so the tier
+would have to be encoded as separate agent definitions." It can. The `Agent` tool takes a
+`model` parameter that takes precedence over the agent definition's frontmatter — verified
+against the live tool contract before this was written. Splitting one agent into a tier
+per model would have reinstated the D3 cost that Core was built to remove: agent
+descriptions are class **S**, paid in every context and repaid inside every subagent.
+
+---
+
 ## Standing law
 
 No feature may write to `additionalContext` or `systemMessage` on an ordinary turn.

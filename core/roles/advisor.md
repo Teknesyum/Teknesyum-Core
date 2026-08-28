@@ -1,3 +1,9 @@
+---
+role: advisor
+model: opus
+effort: high
+---
+
 # Role: advisor
 
 One decision, one opinion. No plan, no code, no files.

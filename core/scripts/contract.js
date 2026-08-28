@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { relayRoot, projectRoot } = require('../hooks/lib.js');
+const { relayRoot, projectRoot, settings } = require('../hooks/lib.js');
 const { isContractName, field, list, verifySteps } = require('../hooks/schema.js');
 const seal = require('../hooks/seal.js');
 const risk = require('./risk.js');
@@ -107,6 +107,105 @@ function reportVerify(results) {
     }
   }
   return lines;
+}
+
+const ROLES_DIR = path.resolve(__dirname, '..', 'roles');
+const MODEL_RANK = { haiku: 0, sonnet: 1, opus: 2 };
+const EFFORT_RANK = { low: 0, medium: 1, high: 2 };
+const PROFILE_CEILING = { eco: 'sonnet', normal: 'opus', premium: 'opus' };
+
+function roleBase(role) {
+  if (!/^[a-z]+$/.test(String(role || ''))) return null;
+  let body;
+  try {
+    body = fs.readFileSync(path.join(ROLES_DIR, role + '.md'), 'utf8');
+  } catch {
+    return null;
+  }
+  const model = field('model', body).toLowerCase();
+  const effort = field('effort', body).toLowerCase();
+  if (MODEL_RANK[model] === undefined || EFFORT_RANK[effort] === undefined) return null;
+  return { model, effort };
+}
+
+function tier(role, opt) {
+  const o = opt || {};
+  const base = roleBase(role);
+  if (!base) return null;
+  const reasons = [];
+  let model = base.model;
+  let effort = base.effort;
+
+  if (String(o.risk || '').toLowerCase() === 'high') {
+    if (MODEL_RANK[model] < MODEL_RANK.opus) {
+      model = 'opus';
+      reasons.push('risk high raises the model');
+    }
+    if (EFFORT_RANK[effort] < EFFORT_RANK.medium) effort = 'medium';
+  }
+
+  const askedModel = String(o.model || '').toLowerCase();
+  if (MODEL_RANK[askedModel] !== undefined) {
+    if (MODEL_RANK[askedModel] > MODEL_RANK[model]) {
+      model = askedModel;
+      reasons.push('caller raised the model');
+    } else if (MODEL_RANK[askedModel] < MODEL_RANK[model]) {
+      reasons.push('caller asked for ' + askedModel + ' - refused, no route goes below the base');
+    }
+  }
+
+  const askedEffort = String(o.effort || '').toLowerCase();
+  if (EFFORT_RANK[askedEffort] !== undefined) {
+    if (EFFORT_RANK[askedEffort] > EFFORT_RANK[effort]) {
+      effort = askedEffort;
+      reasons.push('caller raised the effort');
+    } else if (EFFORT_RANK[askedEffort] < EFFORT_RANK[effort]) {
+      reasons.push('caller asked for ' + askedEffort + ' - refused, no route goes below the base');
+    }
+  }
+
+  const profile = String(o.profile || settings().profile || 'normal').toLowerCase();
+  const ceiling = PROFILE_CEILING[profile] || 'opus';
+  if (MODEL_RANK[model] > MODEL_RANK[ceiling]) {
+    model = ceiling;
+    reasons.push('profile ' + profile + ' caps the model at ' + ceiling);
+  }
+
+  return { role, model, effort, base, profile, reasons };
+}
+
+function tierCmd() {
+  const role = arg('role');
+  const t0 = roleBase(role);
+  if (!t0)
+    return stop([
+      'Unknown role or role file without model/effort: ' + (role || '(none)'),
+      '',
+      'Usage: contract.js tier --role builder [--id T7] [--model opus] [--effort high]',
+    ]);
+
+  let level = null;
+  if (arg('id')) {
+    const c = load(arg('id'));
+    if (c.error) return stop([c.error]);
+    level = risk.resolve(c.root, list('owns', c.body), field('risk', c.body));
+  }
+
+  const t = tier(role, {
+    risk: level && level.level,
+    model: arg('model'),
+    effort: arg('effort'),
+    profile: arg('profile'),
+  });
+  return out(
+    [
+      t.role + ' ' + t.model + '/' + t.effort,
+      '  base    ' + t.base.model + '/' + t.base.effort,
+      '  profile ' + t.profile,
+      ...(level ? ['  risk    ' + level.level] : []),
+      ...t.reasons.map((r) => '  ' + r),
+    ]
+  );
 }
 
 function complete() {
@@ -357,6 +456,8 @@ function help() {
     '  audit --id <ID> --run-id <agent> --verification "..."',
     '                            write the audit record; hashes are computed here',
     '  ledger                    compare done/ against the ledger',
+    '  tier --role <role> [--id <ID>] [--model M] [--effort E]',
+    '                            resolve the model and effort an agent opens with',
   ]);
 }
 
@@ -367,8 +468,22 @@ function main() {
   if (cmd === 'check') return check();
   if (cmd === 'audit') return audit();
   if (cmd === 'ledger') return ledger();
+  if (cmd === 'tier') return tierCmd();
   return help();
 }
 
 if (require.main === module) main();
-module.exports = { complete, close, check, audit, ledger, runVerify, unsafeStep };
+module.exports = {
+  complete,
+  close,
+  check,
+  audit,
+  ledger,
+  runVerify,
+  unsafeStep,
+  tier,
+  roleBase,
+  MODEL_RANK,
+  EFFORT_RANK,
+  PROFILE_CEILING,
+};

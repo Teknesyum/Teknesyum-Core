@@ -1,3 +1,9 @@
+---
+role: auditor
+model: opus
+effort: medium
+---
+
 # Role: auditor
 
 Verify a high-risk contract independently. You are opened only when the risk gate said

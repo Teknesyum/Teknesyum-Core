@@ -37,8 +37,8 @@ function hook(payload, cwd) {
   return run(process.execPath, [GUARD], { cwd, input: JSON.stringify(payload) });
 }
 
-function contract(args, cwd) {
-  return run(process.execPath, [CONTRACT].concat(args), { cwd });
+function contract(args, cwd, env) {
+  return run(process.execPath, [CONTRACT].concat(args), { cwd, env: env ? { ...process.env, ...env } : process.env });
 }
 
 function fixture() {
@@ -476,6 +476,112 @@ function testScaffold() {
   ok('the language line comes first', en.trimStart().startsWith('<!-- lang -->'));
 }
 
+const ROLES = path.join(CORE, 'roles');
+const MODELS = ['haiku', 'sonnet', 'opus'];
+const EFFORTS = ['low', 'medium', 'high'];
+const BASE = {
+  planner: ['opus', 'medium'],
+  auditor: ['opus', 'medium'],
+  advisor: ['opus', 'high'],
+  builder: ['sonnet', 'low'],
+  scout: ['sonnet', 'low'],
+};
+
+function testTier(root) {
+  const { tier, roleBase, MODEL_RANK, EFFORT_RANK } = require(CONTRACT);
+
+  const files = fs.readdirSync(ROLES).filter((f) => f.endsWith('.md'));
+  ok('every role has a file', files.length === Object.keys(BASE).length, files.join(', '));
+
+  for (const f of files) {
+    const role = f.replace(/\.md$/, '');
+    const body = fs.readFileSync(path.join(ROLES, f), 'utf8');
+    const model = (body.match(/^model:[ 	]*(\S+)/im) || [])[1];
+    const effort = (body.match(/^effort:[ 	]*(\S+)/im) || [])[1];
+    ok(role + ' declares a model', !!model, body.slice(0, 80));
+    ok(role + ' declares an effort', !!effort, body.slice(0, 80));
+    ok(role + ' model is in the allowed set', MODELS.includes(model), model);
+    ok(role + ' effort is in the allowed set', EFFORTS.includes(effort), effort);
+    ok(role + ' carries the decided base', BASE[role] && BASE[role][0] === model && BASE[role][1] === effort, model + '/' + effort);
+    ok(role + ' base is readable by the resolver', JSON.stringify(roleBase(role)) === JSON.stringify({ model, effort }));
+  }
+
+  ok('risk high raises a sonnet builder to opus', tier('builder', { risk: 'high', profile: 'normal' }).model === 'opus');
+  ok('risk high lifts the effort too', tier('builder', { risk: 'high', profile: 'normal' }).effort === 'medium');
+  ok('low risk leaves the base alone', tier('builder', { risk: 'low', profile: 'normal' }).model === 'sonnet');
+  ok('a caller may raise the model', tier('builder', { model: 'opus', profile: 'normal' }).model === 'opus');
+  ok('a caller may raise the effort', tier('builder', { effort: 'high', profile: 'normal' }).effort === 'high');
+
+  for (const role of Object.keys(BASE)) {
+    const [bm, be] = BASE[role];
+    for (const m of MODELS) {
+      for (const e of EFFORTS) {
+        for (const r of ['low', 'high', '']) {
+          const t = tier(role, { model: m, effort: e, risk: r, profile: 'normal' });
+          ok(
+            'no route goes below the base: ' + role + ' asked ' + m + '/' + e + ' risk ' + (r || 'none'),
+            MODEL_RANK[t.model] >= MODEL_RANK[bm] && EFFORT_RANK[t.effort] >= EFFORT_RANK[be],
+            t.model + '/' + t.effort
+          );
+        }
+      }
+    }
+  }
+
+  ok('eco caps an opus base at sonnet', tier('planner', { profile: 'eco' }).model === 'sonnet');
+  ok('eco caps a raised builder too', tier('builder', { risk: 'high', profile: 'eco' }).model === 'sonnet');
+  ok('eco says why', /caps the model/.test(tier('planner', { profile: 'eco' }).reasons.join(' ')));
+  ok('normal leaves the bases as decided', tier('planner', { profile: 'normal' }).model === 'opus');
+  ok('premium leaves the bases as decided', tier('advisor', { profile: 'premium' }).model === 'opus');
+  ok('an unknown role resolves to nothing', tier('worker-lite', { profile: 'normal' }) === null);
+
+  const cli = contract(['tier', '--role', 'builder'], root);
+  ok('the tier command prints model and effort', cli.status === 0 && /builder sonnet\/low/.test(cli.stdout), cli.stdout);
+
+  const cliLow = contract(['tier', '--role', 'advisor', '--model', 'haiku'], root);
+  ok('the tier command refuses to lower a base', /advisor opus\/high/.test(cliLow.stdout) && /below the base/.test(cliLow.stdout), cliLow.stdout);
+
+  writeContract(
+    root,
+    'M1',
+    ['---', 'id: M1', 'status: active', 'round: 1', 'owns: [src/auth/token.js]', 'verify:', '  - node -e "1"', '---', ''].join('\n')
+  );
+  const cliRisk = contract(['tier', '--role', 'builder', '--id', 'M1'], root);
+  ok('a high-risk contract raises the builder from the command', /builder opus/.test(cliRisk.stdout), cliRisk.stdout);
+  ok('the risk comes from the contract, not a flag', /risk +high/.test(cliRisk.stdout), cliRisk.stdout);
+
+  const cfg = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-tier-'));
+  fs.mkdirSync(path.join(cfg, 'teknesyum'), { recursive: true });
+  fs.writeFileSync(path.join(cfg, 'teknesyum', 'config.json'), JSON.stringify({ profile: 'eco' }));
+  const cliEco = contract(['tier', '--role', 'planner'], root, { CLAUDE_CONFIG_DIR: cfg });
+  ok('the profile on disk is the ceiling', /planner sonnet\/medium/.test(cliEco.stdout), cliEco.stdout);
+}
+
+function testTierVisible(root) {
+  const live = path.join(root, '.claude', 'relay', 'live');
+  fs.mkdirSync(live, { recursive: true });
+  fs.writeFileSync(
+    path.join(live, 'shown.json'),
+    JSON.stringify({ id: 'shown', role: 'builder', model: 'sonnet', effort: 'low', files: [] })
+  );
+  const r = run(process.execPath, [STATUSLINE], {
+    cwd: root,
+    input: JSON.stringify({ workspace: { current_dir: root } }),
+    env: { ...process.env, NO_COLOR: '1' },
+  });
+  ok('the statusline shows the tier of a running agent', /builder·sonnet\/low/.test(r.stdout), r.stdout);
+  fs.unlinkSync(path.join(live, 'shown.json'));
+
+  const skill = fs.readFileSync(path.join(CORE, 'skills', 'relay', 'SKILL.md'), 'utf8');
+  const lines = skill.split('\n');
+  ok('SKILL.md stays under 150 lines', lines.length <= 150, lines.length + ' lines');
+  const tierLines = lines.filter((l) => /contract\.js tier|model. and .effort|below the role/.test(l));
+  ok('the tier rule in SKILL.md is at most six lines', tierLines.length <= 6, tierLines.join(' | '));
+
+  const decisions = fs.readFileSync(path.join(__dirname, '..', 'docs', 'DECISIONS.md'), 'utf8');
+  ok('the tiering decision is recorded', /^## D\d+ - Model tiering|^## D\d+ — Model tiering/m.test(decisions));
+}
+
 function main() {
   const root = fixture();
   testGuard(root);
@@ -484,6 +590,8 @@ function main() {
   testPrefs(root);
   testScaffold();
   testStatusline(root);
+  testTier(root);
+  testTierVisible(root);
   testNoContextWrites();
 
   process.stdout.write('\n' + pass + ' passed, ' + fail + ' failed\n');

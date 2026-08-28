@@ -1,3 +1,9 @@
+---
+role: builder
+model: sonnet
+effort: low
+---
+
 # Role: builder
 
 Write the code a contract asks for.

@@ -1,3 +1,9 @@
+---
+role: scout
+model: sonnet
+effort: low
+---
+
 # Role: scout
 
 Read prior art before a project from scratch gets an architecture. You are given the

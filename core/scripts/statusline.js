@@ -60,9 +60,14 @@ function agents(relay) {
     } catch {}
     if (m < cutoff) continue;
     running += 1;
-    if (r.role) roles.push(r.role);
+    if (r.role) roles.push(label(r));
   }
   return { running, roles };
+}
+
+function label(r) {
+  if (!r.model) return r.role;
+  return r.role + '·' + r.model + (r.effort ? '/' + r.effort : '');
 }
 
 function problems(relay) {
