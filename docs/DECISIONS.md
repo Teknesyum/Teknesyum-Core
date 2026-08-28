@@ -481,6 +481,13 @@ zero model tokens, one hook run per message, ~43 ms of node startup. For scale, 
 spends about 1.3 s per turn across twenty tool calls; the notice is 3% of what the plugin
 already costs in latency and 0% of what it costs in tokens.
 
+Because the channel is free, the line says more than the statusline does. `banner()` reports
+the profile, that the gate is on, contracts by status, running agents with their roles, how
+many tool calls the plugin has watched, problems and open logs — in the user's language,
+Title Cased with `toLocaleUpperCase('tr')` so a Turkish dotted İ survives. What it reports
+is what the plugin does that the bare client does not; the point of the line is the
+difference, not the decoration.
+
 What is lost: the line is part of the assistant's message, not an element beside it. It
 scrolls away with the message instead of standing still. Accepted — the statusline still
 serves terminal users, and this is the only thing the desktop user can actually see.

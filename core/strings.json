@@ -114,5 +114,13 @@
   "notice.closed": {
     "en": "closed",
     "tr": "kapandı"
+  },
+  "line.gate": {
+    "en": "gate on",
+    "tr": "kapı etkin"
+  },
+  "line.steps": {
+    "en": "steps watched",
+    "tr": "adım izlendi"
   }
 }

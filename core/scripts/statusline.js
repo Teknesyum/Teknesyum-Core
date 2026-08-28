@@ -87,6 +87,56 @@ function tally(roles) {
   return [...m.entries()].map(([r, n]) => (n > 1 ? r + '×' + n : r)).join(' ');
 }
 
+function steps(relay) {
+  const live = liveDir(relay);
+  let files = [];
+  try {
+    files = fs.readdirSync(live).filter((f) => f.endsWith('.json') && !f.startsWith('_'));
+  } catch {
+    return 0;
+  }
+  let n = 0;
+  for (const f of files) {
+    const r = read(path.join(live, f));
+    if (r && r.steps) n += r.steps;
+  }
+  return n;
+}
+
+function titleCase(s) {
+  return String(s).replace(/(^|[\s·×])(\p{L})/gu, (m, a, b) => a + b.toLocaleUpperCase('tr'));
+}
+
+function banner(cwd) {
+  const r = relayRoot(cwd, { git: false });
+  if (!r) return '';
+  const bits = [String(settings().profile || 'normal'), t('line.gate')];
+
+  const c = contracts(r.relay);
+  if (c && c.total) {
+    const sub = [];
+    if (c.count.active) sub.push(c.count.active + ' ' + t('line.active'));
+    if (c.count.submitted) sub.push(c.count.submitted + ' ' + t('line.submitted'));
+    if (c.count.open) sub.push(c.count.open + ' ' + t('line.open'));
+    if (c.count.blocked) sub.push(c.count.blocked + ' ' + t('line.blocked'));
+    bits.push(sub.length ? sub.join(' ') : c.total + ' ' + t('line.contracts'));
+  }
+
+  const a = agents(r.relay);
+  if (a.running) bits.push(a.running + ' ' + t('line.agents') + (a.roles.length ? ' ' + tally(a.roles) : ''));
+
+  const st = steps(r.relay);
+  if (st) bits.push(st + ' ' + t('line.steps'));
+
+  const p = problems(r.relay);
+  if (p) bits.push(p + ' ' + t('line.problems'));
+
+  const logs = openLogCount();
+  if (logs) bits.push(logs + ' ' + t('line.logs'));
+
+  return 'Teknesyum ▸ ' + titleCase(bits.join(' · '));
+}
+
 function build(input) {
   const cwd = (input && input.workspace && input.workspace.current_dir) || process.cwd();
   const parts = [];
@@ -155,4 +205,4 @@ function summary(cwd) {
 }
 
 if (require.main === module) main();
-module.exports = { build, main, summary };
+module.exports = { build, main, summary, banner };

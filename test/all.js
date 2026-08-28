@@ -451,6 +451,24 @@ function testStatusline(root) {
   ok('only markdown logs are counted', /2 logs/.test(line()), line());
 }
 
+function testBanner(root) {
+  const { banner } = require(path.join(CORE, 'scripts', 'statusline.js'));
+  const line = banner(root);
+
+  ok('the banner opens with the plugin mark', line.startsWith('Teknesyum ▸ '), line);
+  ok('the banner names the gate', /Kapı Etkin|Gate On/.test(line), line);
+  ok('the banner carries no ANSI colour', !/\[/.test(line), JSON.stringify(line));
+  ok('the banner is one line', line.indexOf(String.fromCharCode(10)) === -1, line);
+
+  const words = line.replace('Teknesyum ▸ ', '').split(' · ').join(' ').split(' ');
+  const lower = words.filter((w) => /^\p{Ll}/u.test(w));
+  ok('every word is capitalised', lower.length === 0, lower.join(','));
+
+  ok('Turkish uppercase keeps the dot', !/Izlendi/.test(line), line);
+
+  ok('the banner is silent outside a relay', banner(os.tmpdir()) === '');
+}
+
 function testMessageDisplay(root) {
   const HOOK = path.join(CORE, 'hooks', 'notice.js');
   const call = (j) => run(process.execPath, [HOOK], { cwd: root, input: JSON.stringify(j), env: { ...process.env, NO_COLOR: '1' } });
@@ -1060,6 +1078,7 @@ function main() {
   testStatusline(root);
   testTitle();
   testNotice(root);
+  testBanner(root);
   testMessageDisplay(root);
   testLanguage(root);
   testTier(root);

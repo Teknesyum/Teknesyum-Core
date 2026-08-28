@@ -32,12 +32,8 @@ function build(j) {
 
 function notice(cwd) {
   try {
-    const { relayRoot } = require('./lib.js');
-    if (!relayRoot(cwd, { git: false })) return '';
-    const { summary } = require(path.join(__dirname, '..', 'scripts', 'statusline.js'));
-    const t = summary(cwd);
-    if (!t) return '';
-    return ('Teknesyum ▸ ' + t.replace(/^[^·]*·\s*/, '')).slice(0, CAP);
+    const { banner } = require(path.join(__dirname, '..', 'scripts', 'statusline.js'));
+    return banner(cwd).slice(0, CAP);
   } catch {
     return '';
   }

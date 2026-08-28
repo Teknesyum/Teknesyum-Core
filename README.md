@@ -21,13 +21,13 @@ lives in the statusline, which the model never sees. You pay once, at install.
 ### Windows — one line
 
 ```powershell
-irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.7/install.ps1 | iex
+irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.8/install.ps1 | iex
 ```
 
 ### macOS / Linux — one line
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.7/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.8/install.sh | bash
 ```
 
 ### From inside Claude Code
@@ -186,7 +186,7 @@ you or the model runs by path.
 node test/all.js
 ```
 
-2,288 assertions covering the guard, the completion gate, the audit chain, the ledger, the
+2,295 assertions covering the guard, the completion gate, the audit chain, the ledger, the
 known bypasses, the tier and quota locks, the personal-convention gate, the scaffold, the
 cue, and a check that no hook writes into context.
 
