@@ -271,6 +271,32 @@ the class **S** cost D3 removed.
 
 ---
 
+## D9 — Agent language
+
+Every artifact an agent reads or writes is English: contract bodies, agent prompts,
+reports, checkpoints, `_issues.log`. Contract frontmatter, role files, `map.md`, `live/`
+and `tiers.json` were already English; what changes is T0's writing habit. Turkish keeps
+exactly one channel: T0's chat with the user.
+
+**Cost.** A contract body of ~2,500 output tokens in Turkish is ~1,700 in English. Output
+is priced ~5× input, so the saving is worth roughly 4k input-equivalent tokens per
+contract. Agent reports shrink ~40%, and unlike the body a report stays in T0's context
+for the rest of the relay, so the saving is paid once and collected on every later turn.
+
+**Approval fidelity.** The user no longer approves the contract; they approve T0's Turkish
+summary of it. A summary that drops an acceptance item makes the user approve something
+else. Rule: the summary lists the contract's `## Acceptance` items one for one, unabridged.
+`## Goal` and the work list may be summarised; `## Acceptance` may not.
+
+**`_issues.log` format.** Lines stay short and templated —
+`<contract> | <role> | <what was sought> | <what was missing> | <what was done>`.
+No prose. The user opens that file without T0.
+
+The numbers above are unmeasured estimates. They are to be checked against the first real
+relay run and corrected here.
+
+---
+
 ## Standing law
 
 No feature may write to `additionalContext` or `systemMessage` on an ordinary turn.

@@ -127,6 +127,14 @@ given the goal, the acceptance and the evidence, never your draft answer.
 `node <P>/scripts/map.js` writes `.claude/relay/map.md` — hubs, cycles, orphans, edges.
 Read it before opening files. Regenerate after a refactor.
 
+## Language
+
+Everything an agent reads or writes is English: contract bodies, prompts, reports,
+checkpoints, `_issues.log`. Turkish is only your chat with the user, and that summary lists
+the contract's `## Acceptance` items one for one — an abridged one approves something else.
+
+A `_issues.log` line is `<contract> | <role> | <what was sought> | <what was missing> | <what was done>`.
+
 ## Reporting
 
 What changed, where, what the gate said. The statusline already shows contracts, agents and

@@ -39,3 +39,5 @@ Creating `docs/scans/` is what opens the first-contract gate.
 ## Return
 
 The file path and the three shortest lines from `Worth taking`.
+
+Reports, checkpoints and `_issues.log` lines are English.

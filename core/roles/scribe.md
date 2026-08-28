@@ -34,3 +34,5 @@ files: <paths touched>
 verify: <each step and its exit code>
 blockers: <none | one line each>
 ```
+
+Reports, checkpoints and `_issues.log` lines are English.

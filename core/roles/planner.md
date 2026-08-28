@@ -26,3 +26,5 @@ output.
 ## Return
 
 The four sections above. Nothing else.
+
+Reports, checkpoints and `_issues.log` lines are English.

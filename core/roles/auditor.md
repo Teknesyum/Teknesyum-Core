@@ -45,3 +45,5 @@ verdict: passed | failed
 findings: <none | one line each, file:line>
 record: <path written | none>
 ```
+
+Reports, checkpoints and `_issues.log` lines are English.

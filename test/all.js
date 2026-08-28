@@ -759,6 +759,15 @@ function testTierVisible(root) {
   ok('the tier rule is at most six lines', para[0].trim().split('\n').length <= 6, para[0]);
   ok('SKILL.md does not copy the table', !/\|\s*eco\s*\|/.test(skill));
 
+  const langPara = skill.split(/\n\s*\n/).filter((p) => /^Everything an agent reads or writes is English/.test(p.trim()));
+  ok('SKILL.md carries the language rule', langPara.length === 1, String(langPara.length));
+  ok('the language rule is at most three lines', langPara.length === 1 && langPara[0].trim().split('\n').length <= 3, langPara[0]);
+  ok(
+    'SKILL.md binds the summary to the acceptance items',
+    /## Acceptance` items one for one/.test(skill) && /Turkish is only your chat with the user/.test(skill)
+  );
+  ok('SKILL.md carries the _issues.log template', /`<contract> \| <role> \| <what was sought> \| <what was missing> \| <what was done>`/.test(skill));
+
   const decisions = fs.readFileSync(path.join(__dirname, '..', 'docs', 'DECISIONS.md'), 'utf8');
   const d8 = decisions.slice(decisions.indexOf('## D8'), decisions.indexOf('## Standing law'));
   ok('the tiering decision is recorded', /Model tiering/.test(d8));
@@ -778,6 +787,12 @@ function testTierVisible(root) {
   ok('D8 records the frequency rule', /Frequency, in force now/.test(d8) && /same message/.test(d8));
   ok('D8 records the three-member premium council', /3 on premium/.test(d8) && /no fable \*pass\*/.test(d8));
   ok('D8 records the unarbitrated divergence', /unarbitrated/.test(d8) && /exit code/.test(d8));
+
+  const d9 = decisions.slice(decisions.indexOf('## D9'), decisions.indexOf('## Standing law'));
+  ok('the agent language decision is recorded', /Agent language/.test(d9));
+  ok('D9 records the cost estimate', /2,500/.test(d9) && /1,700/.test(d9) && /5×/.test(d9));
+  ok('D9 records the approval fidelity rule', /one for one, unabridged/.test(d9));
+  ok('D9 marks the numbers as unmeasured', /unmeasured estimates/.test(d9));
   ok('D8 records the three locks', /Tool set/.test(d8) && /Output ceiling/.test(d8) && /Quota/.test(d8));
   ok('D8 records the two open points', /Settled by the user: opus/.test(d8) && /cost ratios/.test(d8));
 }
