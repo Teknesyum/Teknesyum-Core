@@ -39,6 +39,18 @@ Base measured 20 agents in one turn — that is 20 repayments of the same text.
 normal turn.** Allowed only on a condition that is rare and actionable, and then
 it must be under 200 characters.
 
+Three events are not normal turns and are exempt under that cap. `cue.js` owns all
+three and is the only hook allowed to write context at all:
+
+| Event | Fires | Writes when | Cost |
+|---|---|---|---|
+| `SessionStart` | once per session | open contracts or live agents exist | ~55 tok, **S** |
+| `PostCompact` | once per compaction | same | ~55 tok, **S** |
+| `UserPromptSubmit` | every turn | the prompt matches the bug-log phrase | 0 on every other turn, **Z→O** |
+
+A cue carries pointers only — contract IDs and a path. Goal, acceptance and route text
+never enter it; the model opens the file itself if it needs the body (**O**).
+
 ## Where each need goes instead
 
 | Need | Base did | Core does |
@@ -68,6 +80,8 @@ User-facing chat stays Turkish — that text is written once and is not a plugin
 | `SKILL.md` body when relay is invoked | O | ~950 tok, once |
 | role file when an agent holds that role | O | 130–320 tok, once per agent |
 | statusline | Z | 0 |
+| `cue.js` on an ordinary turn | Z | **0** — asserted by `test/all.js` |
+| `cue.js` at session start / after compaction | S | ~55 tok, capped at 200 chars |
 
 Always-on: **~45 tokens per context.** Base measured ~1,211 plus ~1,500 per turn of
 injection. The per-turn figure is the one that compounded; it is now zero by construction,

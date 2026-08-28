@@ -295,6 +295,35 @@ No prose. The user opens that file without T0.
 The numbers above are unmeasured estimates. They are to be checked against the first real
 relay run and corrected here.
 
+## D10 — Cues, not injections
+
+A statusline is **Z**: the user sees it, the model never does. So a relay left half-open
+across a session boundary is invisible to the model, and the next unrelated request walks
+over a contract someone else owns. Compaction is worse — the summary dissolves the contract
+IDs and the model starts inventing what is still open.
+
+One hook, `cue.js`, answers three events and nothing else writes context:
+
+- `SessionStart`, `PostCompact` — silent unless `contracts/*.md` or an unended `live/`
+  record exists. Output is one English line: contract IDs, live roles, and the relay path.
+  Never the goal, the acceptance list or the route.
+- `UserPromptSubmit` — silent unless the prompt matches `(log|günlük) (yaz|tut)`. Then it
+  points at `scripts/log.js`; the file body is written by that script, not by the model.
+
+Cap 200 characters, enforced in code and asserted in `test/all.js`. The rejected
+alternatives were a dedicated skill (~25 tok in every context and every subagent) and a
+line in the user's `CLAUDE.md` (the same rent, in every project) — both class **S** rent
+for a capability used a few times a month.
+
+Bug logs land in `logs/openlogs/`, which is `.gitignore`d: they are the user's Turkish
+working notes and this repo publishes in English.
+
+**Open question.** `SessionStart` earns nothing if the user always opens with "devam",
+since the relay skill then reads `contracts/` anyway. Measure it on the first real run;
+if it never fires usefully, keep `PostCompact` and drop it.
+
+---
+
 ---
 
 ## Standing law

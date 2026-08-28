@@ -6,3 +6,4 @@ trash/
 Teknesyum-Base/
 *.tmp
 *.log
+logs/openlogs/

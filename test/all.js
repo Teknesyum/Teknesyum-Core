@@ -435,6 +435,24 @@ function testNoContextWrites() {
     ok('no additionalContext in ' + path.basename(f), !body.includes('additionalContext'));
     ok('no systemMessage in ' + path.basename(f), !body.includes('systemMessage'));
   }
+
+  const CUE = path.join(CORE, 'hooks', 'cue.js');
+  const cue = (j) => run('node', [CUE], { input: JSON.stringify(j) }).stdout;
+
+  for (const ev of ['PreToolUse', 'PostToolUse', 'Stop', 'SubagentStop', 'Notification']) {
+    ok('cue is silent on ' + ev, cue({ hook_event_name: ev, cwd: os.tmpdir() }) === '');
+  }
+  ok(
+    'cue is silent on an ordinary prompt',
+    cue({ hook_event_name: 'UserPromptSubmit', prompt: 'blog yazalim mi' }) === ''
+  );
+  const asked = cue({ hook_event_name: 'UserPromptSubmit', prompt: 'tamam log yaz' });
+  ok('cue answers the log phrase', asked.includes('log.js'));
+  ok('cue stays under 200 chars', asked.length > 0 && asked.length <= 200, String(asked.length));
+  ok(
+    'cue is silent when there is no relay',
+    cue({ hook_event_name: 'PostCompact', cwd: os.tmpdir() }) === ''
+  );
 }
 
 function testScaffold() {
