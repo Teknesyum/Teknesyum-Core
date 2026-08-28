@@ -107,11 +107,15 @@ Contract: .claude/relay/contracts/T7.md
 `builder`, `ui-builder`, `auditor`, `planner`, `advisor`, `scout`, `scribe`.
 
 The role file names its row; row x profile picks the cell in `<P>/tiers.json`. Resolve it,
-never restate it: `node <P>/scripts/contract.js tier --role builder --id T7`. Risk, a
-twice-repeated verify failure and `round >= 3` raise a cell; the profile caps it except for
-`auditor`, `advisor` and a signal-raised builder; nothing lowers it. Pass the result as the
-`Agent` call's `model` and write `model`/`effort` into the agent's `live/` record. Search
-subagents are not roles: `haiku/low` in every profile.
+never restate it: `node <P>/scripts/contract.js tier --role builder --id T7`. Signals raise
+a cell, the profile caps it, nothing lowers it. Pass the result as the `Agent` call's
+`model`, and write `model`/`effort` into the agent's `live/` record. Council size and
+member cells come from `contract.js council --profile P`; members never see each other.
+
+The advisor must run a different model than the asker - the resolver blocks it otherwise,
+with the reason. On premium it opens beside every `builder`/`ui-builder` contract, in the
+same message as that agent, and also when work you did yourself trips `risk.js`. It is
+given the goal, the acceptance and the evidence, never your draft answer.
 
 - Independent contracts start together, not in sequence.
 - Past three concurrent writers, give each a git worktree.

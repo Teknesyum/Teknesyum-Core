@@ -280,13 +280,19 @@ function tier(role, opt) {
     }
   }
 
-  const so = T.secondOpinion;
-  if (row === so.role && String(o.asker || '').toLowerCase() === so.whenAskerIs) {
-    const c = parseCell(so.becomes);
-    model = c.model;
-    effort = c.effort;
-    reasons.push('the asker is already ' + so.whenAskerIs + ' - the advisor answers as ' + so.becomes);
-  }
+  const ad = T.advisorDefault && T.advisorDefault[profile];
+  if (ad && ad.onContractOpen.indexOf(row) >= 0)
+    notes.push(
+      'profile ' + profile + ' opens the advisor alongside this contract, in the same message - ' +
+        ad.perContract + ' per contract'
+    );
+
+  const asker = String(o.asker || '').toLowerCase();
+  let blocked = '';
+  if (row === 'advisor' && T.advisorModelGap && asker && asker === model)
+    blocked =
+      'the asker already runs ' + asker + ' and the ' + profile + ' advisor cell is ' + model +
+      ' - the same model cannot give itself a second opinion';
 
   return {
     role: String(role),
@@ -304,7 +310,20 @@ function tier(role, opt) {
     notes,
     advisorRequired,
     irreversible,
+    asker: asker || null,
+    blocked,
   };
+}
+
+function council(profile) {
+  const T = tiers();
+  const p = profileOf(profile);
+  const size = T.council[p];
+  const base = T.cells.planner[p];
+  const override = (T.councilMemberOverride && T.councilMemberOverride[p]) || {};
+  const members = [];
+  for (let i = 1; i <= size; i += 1) members.push(override[String(i)] || base);
+  return { profile: p, size, members };
 }
 
 function advisorQuota(relay, profile, id) {
@@ -390,6 +409,7 @@ function tierCmd() {
   if (t.role !== t.row) lines.push('  row      ' + t.role + ' resolves to ' + t.row);
   if (riskLevel)
     lines.push('  risk     ' + riskLevel + (level && level.reasons.length ? ' (' + level.reasons.join('; ') + ')' : ''));
+  if (t.asker) lines.push('  asker    ' + t.asker);
   lines.push('  signals  ' + (t.signals.length ? t.signals.join(', ') : 'none'));
   lines.push('  ceiling  ' + (t.pierced ? 'pierced' : 'held'));
   for (const r of t.reasons) lines.push('  reason   ' + r);
@@ -401,6 +421,17 @@ function tierCmd() {
         quota.contract + '/' + quota.perContract + ' on this contract'
     );
 
+  if (t.blocked) {
+    lines[0] = t.role + ' does not open';
+    return stop(
+      lines.concat([
+        '',
+        'Blocked - ' + t.blocked + '.',
+        'The advisor does not open. Ask the user, or raise the profile so the cell lands on another model.',
+      ])
+    );
+  }
+
   if (quota && quota.blocked)
     return stop(
       lines.concat([
@@ -411,6 +442,14 @@ function tierCmd() {
 
   return out(lines);
 }
+function councilCmd() {
+  const c = council(arg('profile'));
+  const lines = [c.profile + ' council - ' + c.size + ' member' + (c.size === 1 ? '' : 's')];
+  c.members.forEach((cell, i) => lines.push('  ' + (i + 1) + '  ' + cell));
+  lines.push('Members plan independently and do not see one another.');
+  return out(lines);
+}
+
 function complete() {
   const c = load(arg('id'));
   if (c.error) return stop([c.error, '', 'Usage: contract.js complete --id T7']);
@@ -662,6 +701,7 @@ function help() {
     '  tier --role <role> [--profile P] [--id <ID>] [--risk high] [--round N]',
     '       [--repeat-fail N] [--model M] [--effort E] [--asker opus] [--user]',
     '                            resolve the cell, the signals and the ceiling in one place',
+    '  council [--profile P]     council size and the cell of each member',
   ]);
 }
 
@@ -673,6 +713,7 @@ function main() {
   if (cmd === 'audit') return audit();
   if (cmd === 'ledger') return ledger();
   if (cmd === 'tier') return tierCmd();
+  if (cmd === 'council') return councilCmd();
   return help();
 }
 
@@ -686,6 +727,7 @@ module.exports = {
   runVerify,
   unsafeStep,
   tier,
+  council,
   tiers,
   roleBase,
   roleRow,

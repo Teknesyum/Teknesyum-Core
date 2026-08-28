@@ -12,20 +12,24 @@
     "scribe": { "eco": "haiku/low", "normal": "haiku/low", "premium": "sonnet/low" },
     "scout": { "eco": "haiku/low", "normal": "sonnet/low", "premium": "sonnet/medium" },
     "auditor": { "eco": "opus/medium", "normal": "opus/medium", "premium": "opus/high" },
-    "advisor": { "eco": "opus/high", "normal": "opus/high", "premium": "opus/high" }
+    "advisor": { "eco": "opus/high", "normal": "opus/high", "premium": "fable/high" }
   },
   "advisory": ["t0"],
   "ceilingExempt": ["auditor", "advisor"],
   "riskExempt": ["builder", "ui-builder"],
-  "secondOpinion": { "role": "advisor", "whenAskerIs": "opus", "becomes": "fable/high" },
-  "council": { "eco": 1, "normal": 2, "premium": 2 },
-  "councilFablePass": ["premium"],
+  "advisorModelGap": true,
+  "advisorDefault": {
+    "premium": { "onContractOpen": ["builder", "ui-builder"], "perContract": 1 }
+  },
+  "council": { "eco": 1, "normal": 2, "premium": 3 },
+  "councilMemberOverride": { "premium": { "3": "fable/high" } },
   "subagent": { "model": "haiku", "effort": "low" },
   "signals": {
     "repeatFail": { "effortAt": 2, "modelAt": 3 },
     "roundModelBump": 3,
     "roundAdvisorRequired": 4,
-    "irreversibleOpensAuditor": true
+    "irreversibleOpensAuditor": true,
+    "selfRiskOpensAdvisor": true
   },
   "quota": {
     "eco": { "advisor": { "perContract": 1, "perRelay": 3 } }

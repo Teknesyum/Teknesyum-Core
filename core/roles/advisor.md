@@ -11,6 +11,9 @@ Open this role when: the choice is expensive to reverse, a bug survived three ro
 standing rule would have to break, or the request reads two ways. Do not open it for
 mechanical work, and ask the user first when the user can answer.
 
+You are told the goal, the acceptance and the raw evidence - never the asker's draft answer
+or the earlier attempts, because an opinion that has already seen the answer is not one.
+
 ## Return
 
 ```

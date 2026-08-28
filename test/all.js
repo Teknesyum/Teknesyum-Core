@@ -488,7 +488,7 @@ const TABLE = {
   scribe: { eco: 'haiku/low', normal: 'haiku/low', premium: 'sonnet/low' },
   scout: { eco: 'haiku/low', normal: 'sonnet/low', premium: 'sonnet/medium' },
   auditor: { eco: 'opus/medium', normal: 'opus/medium', premium: 'opus/high' },
-  advisor: { eco: 'opus/high', normal: 'opus/high', premium: 'opus/high' },
+  advisor: { eco: 'opus/high', normal: 'opus/high', premium: 'fable/high' },
 };
 
 const PROFILES = ['eco', 'normal', 'premium'];
@@ -517,7 +517,24 @@ function testTier(root) {
   ok('all 24 cells were asserted', cells === 24, String(cells));
 
   ok('a search subagent is haiku/low in every profile', T.subagent.model === 'haiku' && T.subagent.effort === 'low');
-  ok('the council is 1 on eco and 2 otherwise', T.council.eco === 1 && T.council.normal === 2 && T.council.premium === 2);
+  ok('the council is 1 on eco, 2 on normal, 3 on premium', T.council.eco === 1 && T.council.normal === 2 && T.council.premium === 3);
+  ok('the fable pass is gone', T.councilFablePass === undefined && !/councilFablePass/.test(fs.readFileSync(path.join(CORE, 'tiers.json'), 'utf8')));
+  ok('the second-opinion rewrite is gone', T.secondOpinion === undefined && !/secondOpinion/.test(fs.readFileSync(path.join(CORE, 'tiers.json'), 'utf8')));
+  ok('the model gap is on', T.advisorModelGap === true);
+  ok(
+    'the premium advisor default names the two builder rows',
+    T.advisorDefault.premium.perContract === 1 &&
+      T.advisorDefault.premium.onContractOpen.join(',') === 'builder,ui-builder',
+    JSON.stringify(T.advisorDefault)
+  );
+
+  const { council } = require(CONTRACT);
+  const prem = council('premium');
+  ok('the premium council returns 3 members', prem.size === 3 && prem.members.length === 3, JSON.stringify(prem));
+  ok('the third premium member is fable/high', prem.members[2] === 'fable/high', JSON.stringify(prem.members));
+  ok('the first two premium members are opus/high', prem.members[0] === 'opus/high' && prem.members[1] === 'opus/high');
+  ok('the eco council is a single planner', council('eco').members.join(',') === 'sonnet/medium');
+  ok('the normal council is two planners', council('normal').members.join(',') === 'opus/medium,opus/medium');
 
   const files = fs.readdirSync(ROLES).filter((f) => f.endsWith('.md'));
   ok('the scribe role file exists', files.includes('scribe.md'), files.join(', '));
@@ -558,8 +575,15 @@ function testTier(root) {
   ok('the capped role says why', /caps the model/.test(tier('planner', { profile: 'eco', model: 'opus' }).reasons.join(' ')));
   ok('normal and premium leave the grid alone', tier('planner', { profile: 'normal' }).pierced === false);
 
-  ok('an opus asker gets a fable second opinion', cellOf(tier('advisor', { profile: 'premium', asker: 'opus' })) === 'fable/high');
+  ok('an opus asker on premium gets fable', cellOf(tier('advisor', { profile: 'premium', asker: 'opus' })) === 'fable/high');
+  ok('an opus asker on premium is not blocked', !tier('advisor', { profile: 'premium', asker: 'opus' }).blocked);
   ok('a sonnet asker still gets opus', tier('advisor', { profile: 'normal', asker: 'sonnet' }).model === 'opus');
+  ok('a sonnet asker is not blocked', !tier('advisor', { profile: 'normal', asker: 'sonnet' }).blocked);
+  ok('an opus asker on normal is blocked', !!tier('advisor', { profile: 'normal', asker: 'opus' }).blocked);
+  ok('the block says why', /same model cannot give itself/.test(tier('advisor', { profile: 'normal', asker: 'opus' }).blocked));
+  ok('an opus asker on eco is blocked too', !!tier('advisor', { profile: 'eco', asker: 'opus' }).blocked);
+  ok('a premium builder is told the advisor opens with it', tier('builder', { profile: 'premium' }).notes.join(' ').includes('opens the advisor alongside'));
+  ok('a premium scribe is not', !tier('scribe', { profile: 'premium' }).notes.join(' ').includes('advisor'));
 
   ok('xhigh is not granted automatically', tier('builder', { profile: 'premium', effort: 'xhigh' }).effort === 'medium');
   ok('xhigh is granted on an explicit user request', tier('builder', { profile: 'premium', effort: 'xhigh', userAsked: true }).effort === 'xhigh');
@@ -601,6 +625,41 @@ function testTier(root) {
     'acceptance 3: eco advisor is opus/high and exempt',
     cliAdv.status === 0 && /^advisor opus\/high$/m.test(cliAdv.stdout) && /exempt from the profile ceiling/.test(cliAdv.stdout),
     cliAdv.stdout
+  );
+
+  const gapNormal = contract(['tier', '--role', 'advisor', '--profile', 'normal', '--asker', 'opus'], root);
+  ok(
+    'acceptance: a normal opus asker gets no advisor, with the reason',
+    gapNormal.status === 2 && /does not open/.test(gapNormal.stdout) && /same model cannot give itself/.test(gapNormal.stdout),
+    gapNormal.stdout
+  );
+
+  const gapSonnet = contract(['tier', '--role', 'advisor', '--profile', 'normal', '--asker', 'sonnet'], root);
+  ok(
+    'acceptance: a normal sonnet asker gets opus/high',
+    gapSonnet.status === 0 && /^advisor opus\/high$/m.test(gapSonnet.stdout),
+    gapSonnet.stdout
+  );
+
+  const gapPrem = contract(['tier', '--role', 'advisor', '--profile', 'premium', '--asker', 'opus'], root);
+  ok(
+    'acceptance: a premium opus asker gets fable/high',
+    gapPrem.status === 0 && /^advisor fable\/high$/m.test(gapPrem.stdout),
+    gapPrem.stdout
+  );
+
+  const gapEco = contract(['tier', '--role', 'advisor', '--profile', 'eco', '--asker', 'sonnet'], root);
+  ok(
+    'acceptance: an eco sonnet asker gets opus/high with the exemption note',
+    gapEco.status === 0 && /^advisor opus\/high$/m.test(gapEco.stdout) && /exempt from the profile ceiling/.test(gapEco.stdout),
+    gapEco.stdout
+  );
+
+  const cliCouncil = contract(['council', '--profile', 'premium'], root);
+  ok(
+    'acceptance: the premium council is 3 members and the third is fable/high',
+    cliCouncil.status === 0 && /premium council - 3 members/.test(cliCouncil.stdout) && /3 {2}fable\/high/.test(cliCouncil.stdout),
+    cliCouncil.stdout
   );
 
   const cliScribe = contract(['tier', '--role', 'scribe', '--profile', 'normal'], root);
@@ -714,6 +773,11 @@ function testTierVisible(root) {
   ok('D8 records the four signals', /round >= 3/.test(d8) && /round >= 4/.test(d8) && /same signature/.test(d8) && /irreversible operation/.test(d8));
   ok('D8 justifies the pierced ceiling', /exempt from the ceiling/.test(d8));
   ok('D8 records the advisor exemption', /Advisor is exempt/.test(d8));
+  ok('D8 records the model gap', /advisorModelGap/.test(d8) && /does not open/.test(d8));
+  ok('D8 records the blinding rule', /Blinding/.test(d8) && /draft decision/.test(d8));
+  ok('D8 records the frequency rule', /Frequency, in force now/.test(d8) && /same message/.test(d8));
+  ok('D8 records the three-member premium council', /3 on premium/.test(d8) && /no fable \*pass\*/.test(d8));
+  ok('D8 records the unarbitrated divergence', /unarbitrated/.test(d8) && /exit code/.test(d8));
   ok('D8 records the three locks', /Tool set/.test(d8) && /Output ceiling/.test(d8) && /Quota/.test(d8));
   ok('D8 records the two open points', /Settled by the user: opus/.test(d8) && /cost ratios/.test(d8));
 }

@@ -185,10 +185,13 @@ Cell is `model/effort`. Bold cells pierce the profile ceiling.
 | scribe | haiku/low | haiku/low | sonnet/low |
 | scout | haiku/low | sonnet/low | sonnet/medium |
 | auditor | **opus/medium** | opus/medium | opus/high |
-| advisor | **opus/high** | opus/high | opus/high + fable/high |
+| advisor | **opus/high** | opus/high | **fable/high** |
 
 Search subagents are not roles: `haiku/low` in every profile, fixed. The plan council is
-1 member on eco, 2 on normal, 2 plus a fable pass on premium.
+1 member on eco, 2 on normal, 3 on premium — two opus planners and one fable planner, each
+working independently and unaware of the others. There is no fable *pass* over finished
+plans: showing one planner another's work is the same leak the blinding rule forbids.
+Resolve it with `contract.js council --profile premium`.
 
 **Four signals, on top of the risk gate.** All four are computed, never declared:
 
@@ -208,8 +211,27 @@ opus; it does not stop at `sonnet/high`. The user decided this: eco is for ordin
 and work that tripped the gate is not ordinary work.
 
 **Advisor is exempt outright.** A second opinion that is cheaper than the first opinion is
-not a second opinion. Eco opens opus like everyone else. When the asker is already opus the
-advisor answers as `fable/high` — the same model cannot give itself a second opinion.
+not a second opinion. Eco opens opus like everyone else.
+
+**The advisor must run a different model than the asker.** `advisorModelGap` is the whole
+rule: if the resolved advisor cell equals the asker's model, the advisor **does not open**
+and `contract.js tier` exits 2 with the reason. The question goes to the user, or the
+profile is raised so the cell lands elsewhere. A fake second opinion is not bought. This is
+why premium's advisor is `fable/high` alone and no longer a double cell: on premium the
+asker is opus, opus already decides as T0 and already audits irreversible work, so a second
+opus adds cost and no new angle. On normal the advisor's real customer is a stuck sonnet
+builder — sonnet → opus is a genuine upgrade — and a normal opus T0 gets no advisor at all.
+
+**Blinding.** The advisor is given the contract's Goal and Acceptance, the raw evidence and
+the file paths. It is not given the draft decision or the history of earlier attempts; an
+opinion that has already seen the answer is a review, not an opinion.
+
+**Frequency, in force now.** On premium the advisor opens alongside every `builder` and
+`ui-builder` contract — same message, in parallel with that agent, never a serial step.
+`scribe` and `scout` are exempt. One opening per contract by default; signals may add more.
+Work T0 does without a contract is not a hole: if it trips a `risk.js` signal — irreversible
+operation, protected path, new dependency — the advisor opens there too. Computed, never
+declared.
 
 **Three structural locks.** Exemption without a limit is just a higher ceiling, so each
 exempt role is fenced:
@@ -242,6 +264,10 @@ the class **S** cost D3 removed.
   `sonnet/high`?" Settled by the user: opus.
 - The cost ratios behind the grid are estimates. They are to be checked against the first
   real relay run, and the grid revised there rather than argued here.
+- Divergence between the advisor and the asker has no referee, and no cross-examination
+  round is built: a second round would mostly buy an agreement, not a truth. A factual,
+  testable divergence is settled by verification, not by more opinion — run the command and
+  read the exit code. What stays genuinely open is presented to the user unarbitrated.
 
 ---
 
