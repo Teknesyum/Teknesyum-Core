@@ -38,4 +38,5 @@ if (!target) {
   process.stdout.write('teknesyum-core: plugin not found');
   process.exit(0);
 }
-require(target);
+const mod = require(target);
+if (require.main !== mod && typeof mod.main === 'function') mod.main();

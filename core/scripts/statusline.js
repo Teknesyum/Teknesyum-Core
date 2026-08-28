@@ -141,4 +141,4 @@ function main() {
 }
 
 if (require.main === module) main();
-module.exports = { build };
+module.exports = { build, main };

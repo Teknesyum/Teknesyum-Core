@@ -3,3 +3,4 @@
 2026-08-28 03:40 | Sozlesme P danisma mimarisi | advisorModelGap, premium advisor fable/high, konsey 3 uye, korleme+siklik, secondOpinion/councilFablePass silindi; 2189 test gecti | teslim edildi
 2026-08-28 04:10 | Sozlesme R ajan dili | SKILL.md ## Language 3 satir + _sorun.log sablonu, 6 rol dosyasina tek satir, D9, 9 yeni test; 2197 test gecti | teslim edildi
 2026-08-28 05:10 | Sozlesme S isaretci denetimi | PostCompact kaldirildi (stdout modele gitmiyor), SessionEnd kancasi + sweep esigi kaldirildi + 12 saat bayatlik, talimat basa alindi, LOG_ASK cekimli, relayCue pozitif testleri, D10 yeniden yazildi; 2219 test gecti | teslim edildi
+2026-08-28 05:40 | Base kaldirildi Core kuruldu | marketplace teknesyum -> Teknesyum-Core, teknesyum@teknesyum kaldirildi, teknesyum-core@teknesyum kuruldu, setup calisti; bridge.js statusline hicbir sey basmiyordu (require.main korumasi) - duzeltildi + 2 test; 2221 test gecti | teslim edildi

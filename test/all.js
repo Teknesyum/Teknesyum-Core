@@ -415,6 +415,20 @@ function testStatusline(root) {
   });
   ok('statusline renders', r.status === 0 && r.stdout.length > 0, r.stdout);
   ok('statusline names the project', r.stdout.includes(path.basename(root)), r.stdout);
+
+  const BRIDGE = path.join(CORE, 'scripts', 'bridge.js');
+  const cache = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-brg-'));
+  const home = path.join(cache, 'plugins', 'cache', 'teknesyum', 'teknesyum-core', '9.9.9', 'scripts');
+  fs.mkdirSync(home, { recursive: true });
+  fs.cpSync(path.join(CORE, 'scripts'), home, { recursive: true });
+  fs.cpSync(path.join(CORE, 'hooks'), path.join(path.dirname(home), 'hooks'), { recursive: true });
+  const viaBridge = run(process.execPath, [BRIDGE], {
+    cwd: root,
+    input: JSON.stringify({ workspace: { current_dir: root } }),
+    env: { ...process.env, NO_COLOR: '1', CLAUDE_CONFIG_DIR: cache },
+  });
+  ok('the bridge renders the statusline it resolves', viaBridge.stdout.trim().length > 0, viaBridge.stdout + viaBridge.stderr);
+  ok('the bridge names the project', viaBridge.stdout.includes(path.basename(root)), viaBridge.stdout);
 }
 
 function testNoContextWrites() {
