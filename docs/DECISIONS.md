@@ -482,11 +482,19 @@ spends about 1.3 s per turn across twenty tool calls; the notice is 3% of what t
 already costs in latency and 0% of what it costs in tokens.
 
 Because the channel is free, the line says more than the statusline does. `banner()` reports
-the profile, that the gate is on, contracts by status, running agents with their roles, how
-many tool calls the plugin has watched, problems and open logs — in the user's language,
-Title Cased with `toLocaleUpperCase('tr')` so a Turkish dotted İ survives. What it reports
-is what the plugin does that the bare client does not; the point of the line is the
-difference, not the decoration.
+the profile, contracts by status, running agents with their roles, how many tool calls the
+plugin has watched, problems and open logs — in the user's language, Title Cased with
+`toLocaleUpperCase('tr')` so a Turkish dotted İ survives.
+
+Free of tokens is not free of everything, and the first version paid twice. It trimmed the
+delta on the opening flush as well as the closing one, so a batch ending mid-word lost the
+space that held the next batch off it. And it counted steps by opening every record under
+`live/` — 0.13 ms per file, twice per message, over a directory that only grows. `watch.js`
+now keeps the count in `_tally.json` as it goes and the banner reads that one file.
+
+Two segments were cut on the same principle: a field that never changes is decoration, not
+information. The gate is named only when it is **off**, and the mark at the head of the line
+already says the plugin is here.
 
 What is lost: the line is part of the assistant's message, not an element beside it. It
 scrolls away with the message instead of standing still. Accepted — the statusline still

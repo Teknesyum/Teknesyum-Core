@@ -21,13 +21,13 @@ model hiç görmez. Bedel bir kez, kurulumda ödenir.
 ### Windows — tek satır
 
 ```powershell
-irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.8/install.ps1 | iex
+irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.9/install.ps1 | iex
 ```
 
 ### macOS / Linux — tek satır
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.8/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.9/install.sh | bash
 ```
 
 ### Claude Code içinden
@@ -185,7 +185,7 @@ node test/all.js
 ```
 
 Kapıyı, tamamlama kapısını, denetim zincirini, defteri, bilinen atlatma yollarını ve hiçbir
-kancanın bağlama yazmadığını doğrulayan 2.295 sınama.
+kancanın bağlama yazmadığını doğrulayan 2.305 sınama.
 
 ---
 

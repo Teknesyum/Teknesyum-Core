@@ -452,11 +452,12 @@ function testStatusline(root) {
 }
 
 function testBanner(root) {
+  const lib = require(path.join(CORE, 'hooks', 'lib.js'));
   const { banner } = require(path.join(CORE, 'scripts', 'statusline.js'));
   const line = banner(root);
 
   ok('the banner opens with the plugin mark', line.startsWith('Teknesyum ▸ '), line);
-  ok('the banner names the gate', /Kapı Etkin|Gate On/.test(line), line);
+  ok('the banner stays quiet while the gate holds', !/KAPI|GATE OFF/.test(line), line);
   ok('the banner carries no ANSI colour', !/\[/.test(line), JSON.stringify(line));
   ok('the banner is one line', line.indexOf(String.fromCharCode(10)) === -1, line);
 
@@ -467,6 +468,23 @@ function testBanner(root) {
   ok('Turkish uppercase keeps the dot', !/Izlendi/.test(line), line);
 
   ok('the banner is silent outside a relay', banner(os.tmpdir()) === '');
+
+  ok('the banner stays inside its cap', line.length <= 120, String(line.length));
+  ok('the banner never cuts mid-word', !/·\s*$/.test(line), line);
+
+  const tally = path.join(lib.liveDir(path.join(root, '.claude', 'relay')), '_tally.json');
+  fs.writeFileSync(tally, JSON.stringify({ steps: 41 }));
+  ok('the banner reads the step tally', /41 /.test(banner(root)), banner(root));
+  fs.rmSync(tally, { force: true });
+  ok('a missing tally drops the segment', !/\d+ Adım/.test(banner(root)), banner(root));
+
+  const many = lib.liveDir(path.join(root, '.claude', 'relay'));
+  for (let i = 0; i < 60; i++) fs.writeFileSync(path.join(many, 'bulk' + i + '.json'), JSON.stringify({ id: 'b' + i, role: 'builder', ended: '2020-01-01' }));
+  const t0 = Date.now();
+  banner(root);
+  const spent = Date.now() - t0;
+  for (let i = 0; i < 60; i++) fs.rmSync(path.join(many, 'bulk' + i + '.json'), { force: true });
+  ok('the banner does not scan every record', spent < 40, spent + 'ms');
 }
 
 function testMessageDisplay(root) {
@@ -517,8 +535,22 @@ function testMessageDisplay(root) {
   const junk = run(process.execPath, [HOOK], { cwd: root, input: 'not json' });
   ok('malformed input is survived', junk.status === 0 && junk.stdout.trim() === '', junk.stdout);
 
+  const NLc = String.fromCharCode(10);
+  const kept = JSON.parse(call(ev({ index: 0, final: false, delta: 'yarim kelime ' })).stdout).hookSpecificOutput.displayContent;
+  ok('a head flush keeps its trailing space', kept.endsWith('yarim kelime '), JSON.stringify(kept));
+  const wrapped = JSON.parse(call(ev({ index: 0, final: false, delta: 'satir' + NLc })).stdout).hookSpecificOutput.displayContent;
+  ok('a head flush keeps its trailing newline', wrapped.endsWith('satir' + NLc), JSON.stringify(wrapped));
+
+  const lateEmpty = JSON.parse(call(ev({ index: 4, final: true, delta: '' })).stdout).hookSpecificOutput.displayContent;
+  ok('a late empty final flush leads with the notice', lateEmpty.startsWith('Teknesyum'), JSON.stringify(lateEmpty));
+  ok('a late empty final flush is one line', lateEmpty.indexOf(NLc) === -1, JSON.stringify(lateEmpty));
+
+  const framed = JSON.parse(call(ev({ index: 0, final: true, delta: 'x' })).stdout).hookSpecificOutput.displayContent;
+  const bands = framed.split(NLc).filter((l) => l.startsWith('Teknesyum'));
+  ok('both bands read the same', bands.length === 2 && bands[0] === bands[1], bands.join(' | '));
+
   const src = fs.readFileSync(HOOK, 'utf8');
-  ok('the notice hook caps its line', /CAP = \d+/.test(src));
+  ok('the notice hook delegates its line', /banner\(cwd\)/.test(src));
   ok('the notice hook keeps no debug log', !/TKNSYM|appendFileSync/.test(src), 'instrumentation left behind');
 
   const hooks = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8')).hooks;

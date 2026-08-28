@@ -3,6 +3,8 @@ const path = require('path');
 const { read, relayRoot, liveDir, settings, openLogCount, getNotice, t } = require('../hooks/lib.js');
 const { status } = require('../hooks/schema.js');
 
+const BANNER_CAP = 120;
+
 const C = {
   dim: '\x1b[2m',
   off: '\x1b[0m',
@@ -88,19 +90,8 @@ function tally(roles) {
 }
 
 function steps(relay) {
-  const live = liveDir(relay);
-  let files = [];
-  try {
-    files = fs.readdirSync(live).filter((f) => f.endsWith('.json') && !f.startsWith('_'));
-  } catch {
-    return 0;
-  }
-  let n = 0;
-  for (const f of files) {
-    const r = read(path.join(live, f));
-    if (r && r.steps) n += r.steps;
-  }
-  return n;
+  const t = read(path.join(liveDir(relay), '_tally.json'));
+  return (t && t.steps) || 0;
 }
 
 function titleCase(s) {
@@ -110,7 +101,7 @@ function titleCase(s) {
 function banner(cwd) {
   const r = relayRoot(cwd, { git: false });
   if (!r) return '';
-  const bits = [String(settings().profile || 'normal'), t('line.gate')];
+  const bits = [String(settings().profile || 'normal')];
 
   const c = contracts(r.relay);
   if (c && c.total) {
@@ -134,7 +125,25 @@ function banner(cwd) {
   const logs = openLogCount();
   if (logs) bits.push(logs + ' ' + t('line.logs'));
 
-  return 'Teknesyum ▸ ' + titleCase(bits.join(' · '));
+  if (!gateOn()) bits.push(t('line.gateOff'));
+
+  return 'Teknesyum ▸ ' + trim(titleCase(bits.join(' · ')));
+}
+
+function gateOn() {
+  try {
+    const h = path.join(__dirname, '..', 'hooks', 'hooks.json');
+    return /guard\.js/.test(fs.readFileSync(h, 'utf8'));
+  } catch {
+    return false;
+  }
+}
+
+function trim(line) {
+  if (line.length <= BANNER_CAP) return line;
+  const cut = line.slice(0, BANNER_CAP);
+  const back = cut.lastIndexOf(' · ');
+  return back > 20 ? cut.slice(0, back) : cut;
 }
 
 function build(input) {

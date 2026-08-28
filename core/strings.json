@@ -115,12 +115,20 @@
     "en": "closed",
     "tr": "kapandı"
   },
-  "line.gate": {
-    "en": "gate on",
-    "tr": "kapı etkin"
-  },
   "line.steps": {
     "en": "steps watched",
     "tr": "adım izlendi"
+  },
+  "ask.profile": {
+    "en": "Tier profile - eco, normal or premium? (normal)",
+    "tr": "Katman profili - eco, normal, premium? (normal)"
+  },
+  "setup.profile": {
+    "en": "profile",
+    "tr": "profil"
+  },
+  "line.gateOff": {
+    "en": "GATE OFF",
+    "tr": "KAPI KAPALI"
   }
 }

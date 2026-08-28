@@ -32,6 +32,12 @@ function roleOf(j) {
   return m ? m[1].toLowerCase() : '';
 }
 
+function bumpTally(live) {
+  const f = path.join(live, '_tally.json');
+  const cur = read(f) || {};
+  write(f, { steps: (cur.steps || 0) + 1 });
+}
+
 function record(j) {
   const cwd = j.cwd || process.cwd();
   const r = relayRoot(cwd, { git: false });
@@ -61,6 +67,7 @@ function record(j) {
 
   if (ev === 'PostToolUse') {
     rec.steps = (rec.steps || 0) + 1;
+    bumpTally(live);
     rec.tool = j.tool_name || '';
     if (WRITE_TOOLS.test(j.tool_name || '')) {
       const t = j.tool_input || {};
