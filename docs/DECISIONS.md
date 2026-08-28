@@ -457,15 +457,48 @@ answer to what the user was asking for — presence, permanently visible, for no
 
 ---
 
+## D15 — The notice rides on the message, not beside it
+
+Every channel in D11-D14 failed the same test: the user reads the chat, and nothing we
+could write reached the chat cleanly. The statusline is an Ink component the desktop app
+never draws. `terminalSequence` needs a window title the desktop app does not have.
+`systemMessage` renders, free, on every event that forwards it — but the CLI bakes
+`hookName + " says: "` into the content before it leaves, and the desktop client wraps the
+result in a collapsed "Claude Code notice" chip. That chip is folded on arrival and no hook
+input opens it: the client expands only on `level: "warning"` or the viewer's own verbose
+mode, and the hook path pins `level` to `"notice"`.
+
+`MessageDisplay` is the answer, and it was found by asking a second model after two
+exhaustive sweeps had closed the question. The event fires as an assistant message streams,
+carrying `turn_id`, `message_id`, `index`, `final` and `delta`. Answering with
+`hookSpecificOutput.displayContent` replaces what is drawn. The binary's own words:
+*"Display-only: the stored message and what the model sees are untouched."*
+
+So `notice.js` answers only the `final` flush, appends one line after the message, and stays
+silent everywhere else — outside a relay, on other events, on malformed input. Measured:
+zero model tokens, one hook run per message, ~43 ms of node startup. For scale, `watch.js`
+spends about 1.3 s per turn across twenty tool calls; the notice is 3% of what the plugin
+already costs in latency and 0% of what it costs in tokens.
+
+What is lost: the line is part of the assistant's message, not an element beside it. It
+scrolls away with the message instead of standing still. Accepted — the statusline still
+serves terminal users, and this is the only thing the desktop user can actually see.
+
+---
+
 ## Standing law
 
-No feature may write to `additionalContext`, and no feature may write `systemMessage` on
-an event that converts it into model context — `SessionStart`, `UserPromptSubmit`,
+No feature may write to `additionalContext`, and no feature may write `systemMessage` on an
+event that converts it into model context — `SessionStart`, `UserPromptSubmit`,
 `UserPromptExpansion`. The sole exception is `cue.js` under its 200-character cap (D10).
-On closing events `systemMessage` is class Z and permitted, but it must be change-gated:
-a line that repeats every turn is noise even when it is free.
 
-No feature may require the model to print a banner. Anything meant for the user's eyes goes
-to a class-Z channel — the statusline, a closing-event `systemMessage`, or a file on disk.
-`terminalSequence` remains permitted for its documented uses and is currently unused.
-See `COST-MODEL.md`.
+Anything meant for the user's eyes goes to a class-Z channel: `MessageDisplay`
+`displayContent` (D15), the statusline, or a file on disk. No feature may require the model
+to print a banner.
+
+Two channels look available and are not. `systemMessage` is free on every event but arrives
+in a chip that cannot be opened; wire it only where the fold does not matter. And these
+events discard a hook's `systemMessage` outright — never wire one there expecting to be
+seen: `Notification`, `SessionEnd`, `StopFailure`, `PreCompact`, `PostCompact`,
+`ConfigChange`, `Elicitation`, `InstructionsLoaded`, `WorktreeCreate`, `WorktreeRemove`,
+`SubagentStart` and `SubagentStop`. See `COST-MODEL.md`.

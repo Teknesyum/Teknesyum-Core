@@ -21,13 +21,13 @@ model hiç görmez. Bedel bir kez, kurulumda ödenir.
 ### Windows — tek satır
 
 ```powershell
-irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.5/install.ps1 | iex
+irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.6/install.ps1 | iex
 ```
 
 ### macOS / Linux — tek satır
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.5/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.6/install.sh | bash
 ```
 
 ### Claude Code içinden
@@ -185,7 +185,7 @@ node test/all.js
 ```
 
 Kapıyı, tamamlama kapısını, denetim zincirini, defteri, bilinen atlatma yollarını ve hiçbir
-kancanın bağlama yazmadığını doğrulayan 2.262 sınama.
+kancanın bağlama yazmadığını doğrulayan 2.282 sınama.
 
 ---
 
@@ -193,7 +193,7 @@ kancanın bağlama yazmadığını doğrulayan 2.262 sınama.
 
 - `docs/COST-MODEL.md` — token nereye gidiyor ve bundan çıkan kural
 - `docs/TRIAGE.md` — Teknesyum Base'den ne geldi, ne bırakıldı
-- `docs/DECISIONS.md` — projeyi biçimlendiren on dört karar ve gerekçeleri
+- `docs/DECISIONS.md` — projeyi biçimlendiren on beş karar ve gerekçeleri
 
 ## Lisans
 

@@ -59,28 +59,27 @@ never enter it; the model opens the file itself if it needs the body (**O**).
 
 ## What reaches the user without reaching the model
 
-Two channels, both measured rather than assumed.
+Three channels, all measured rather than assumed.
 
-The **statusline** is the older one: terminal only, the model never sees it, and it survives
-scrolling because it is not part of the transcript.
+**`MessageDisplay` `displayContent`** is the one the plugin uses. The event fires as an
+assistant message streams; answering it replaces what is drawn on screen. The binary states
+the guarantee itself: *"Display-only: the stored message and what the model sees are
+untouched."* `notice.js` answers only the `final` flush and appends one line. Zero tokens,
+one hook run per message, ~43 ms of node startup — against the ~1.3 s `watch.js` already
+spends per turn across twenty tool calls.
 
-The second is **`systemMessage` on a closing event**. On `SessionStart` and
-`UserPromptSubmit` the harness converts a hook's output into model context — plain stdout
-and `systemMessage` alike — so a banner there is class C. On `Stop` it does not: the line
-renders in the chat and the model cannot see it. Verified in a live session, and again in
-the shipped binary, whose context conversion for hook output returns nothing unless the
-event is `SessionStart`, `UserPromptSubmit` or `UserPromptExpansion`.
+**The statusline** is terminal-only. The desktop app draws its own React UI from the CLI's
+stream and never renders the Ink statusline component, so this channel does not exist for
+desktop users.
 
-It is free and still unused, because the chat renders it as `<event> says: <text>` with no
-way to change or drop the prefix. `additionalContext` has no prefix and is class C, and on
-`Stop` the model can only act on it by writing a new message — in trials it reproduced the
-whole answer.
+**`systemMessage`** is free on every event — the attachment→API table maps
+`hook_system_message` to nothing, with no event gate, and the compaction summariser reads
+the same normalisation. But the CLI bakes `hookName + " says: "` into the content before it
+leaves, and the desktop client wraps it in a collapsed "Claude Code notice" chip that no
+hook input can open. Free, and nearly unreadable.
 
-So the notice takes a third route, owned at both ends: the hook writes
-`live/_duyuru.json`, the statusline reads it. No prefix, no tokens. It is change-gated at
-the writer and expires after two minutes, because a line that repeats every turn stops
-being read whether or not it is free.
-
-`terminalSequence` also bypasses context, but the one thing it was tried for — the terminal
-window title — does not exist in the desktop app. Stderr with exit 2 reaches the user and
-the harness labels it a hook error, which is a lie about what happened.
+Not channels, though they look like ones: `terminalSequence` (OSC only — a window title
+the desktop app does not have), `statusMessage` (Ink spinner only), `taskDecorations`
+(Ink only, fed by a user setting), `sessionNoticesPoll` (injects into model context),
+`pluginMonitors` (disabled in the capability map), and tool-call chips (the `description`
+is model output and the `tool_use` block is resent every turn).

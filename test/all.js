@@ -451,6 +451,56 @@ function testStatusline(root) {
   ok('only markdown logs are counted', /2 logs/.test(line()), line());
 }
 
+function testMessageDisplay(root) {
+  const HOOK = path.join(CORE, 'hooks', 'notice.js');
+  const call = (j) => run(process.execPath, [HOOK], { cwd: root, input: JSON.stringify(j), env: { ...process.env, NO_COLOR: '1' } });
+  const ev = (over) => Object.assign({ hook_event_name: 'MessageDisplay', turn_id: 't1', message_id: 'm1', index: 0, final: true, delta: 'son satir.', cwd: root }, over);
+
+  const mid = call(ev({ final: false, index: 1 }));
+  ok('a non-final flush says nothing', mid.stdout.trim() === '', mid.stdout);
+  ok('a non-final flush still exits 0', mid.status === 0);
+
+  const other = call(ev({ hook_event_name: 'Stop' }));
+  ok('another event says nothing', other.stdout.trim() === '', other.stdout);
+
+  const out = call(ev({}));
+  let p2 = null;
+  try {
+    p2 = JSON.parse(out.stdout);
+  } catch {}
+  ok('the final flush emits parsable JSON', p2 !== null, out.stdout);
+  const spec = p2 && p2.hookSpecificOutput;
+  ok('it names the MessageDisplay event', spec && spec.hookEventName === 'MessageDisplay');
+  ok('it answers with displayContent', spec && typeof spec.displayContent === 'string');
+  ok('it writes no model context', out.stdout.indexOf('additionalContext') === -1 && out.stdout.indexOf('systemMessage') === -1, out.stdout);
+
+  const body = (spec && spec.displayContent) || '';
+  ok('the delta is kept', body.startsWith('son satir.'), body);
+  ok('the notice is appended, not substituted', body.indexOf('Teknesyum') > 0, body);
+  const NL = String.fromCharCode(10);
+  ok('a blank line separates the notice', body.indexOf('son satir.' + NL + NL + 'Teknesyum') === 0, JSON.stringify(body));
+  ok('the notice is the last line', body.trim().split(String.fromCharCode(10)).pop().startsWith('Teknesyum'), body);
+
+  const empty = call(ev({ delta: '' }));
+  const eb = JSON.parse(empty.stdout).hookSpecificOutput.displayContent;
+  ok('an empty delta yields no leading blank line', eb.startsWith('Teknesyum'), JSON.stringify(eb));
+
+  const outside = call(ev({ cwd: os.tmpdir() }));
+  ok('the notice is silent outside a relay', outside.stdout.trim() === '', outside.stdout);
+
+  const junk = run(process.execPath, [HOOK], { cwd: root, input: 'not json' });
+  ok('malformed input is survived', junk.status === 0 && junk.stdout.trim() === '', junk.stdout);
+
+  const src = fs.readFileSync(HOOK, 'utf8');
+  ok('the notice hook caps its line', /CAP = \d+/.test(src));
+  ok('the notice hook keeps no debug log', !/TKNSYM|appendFileSync/.test(src), 'instrumentation left behind');
+
+  const hooks = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8')).hooks;
+  ok('the notice is wired to MessageDisplay', Array.isArray(hooks.MessageDisplay) && /notice\.js/.test(hooks.MessageDisplay[0].hooks[0].command));
+  const elsewhere = Object.keys(hooks).filter((e) => e !== 'MessageDisplay' && hooks[e].some((g) => g.hooks.some((x) => /notice\.js/.test(x.command))));
+  ok('the notice runs on no other event', elsewhere.length === 0, elsewhere.join(','));
+}
+
 function testNotice(root) {
   const lib = require(path.join(CORE, 'hooks', 'lib.js'));
   const relay = path.join(root, '.claude', 'relay');
@@ -1002,6 +1052,7 @@ function main() {
   testStatusline(root);
   testTitle();
   testNotice(root);
+  testMessageDisplay(root);
   testLanguage(root);
   testTier(root);
   testQuota(root);
