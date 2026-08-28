@@ -110,7 +110,9 @@ function apply(answers) {
   fs.writeFileSync(beep, JSON.stringify(current, null, 2) + '\n', 'utf8');
 
   const bridge = wireStatusline();
-  const row = (k, v) => '  ' + t(k).padEnd(12) + v;
+  const labels = ['setup.config', 'setup.statusline', 'setup.sound', 'setup.research', 'setup.private'];
+  const width = Math.max(...labels.map((k) => t(k).length)) + 2;
+  const row = (k, v) => '  ' + t(k).padEnd(width) + v;
 
   return [
     t('setup.done'),

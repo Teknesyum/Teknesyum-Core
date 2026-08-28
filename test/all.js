@@ -509,6 +509,12 @@ function testLanguage(root) {
   ok('the statusline follows the language', /açık|ajan|sözleşme/.test(statusline()), statusline());
   ok('setup asks in the chosen language', /çalsın|bekletilsin/.test(ask()), ask());
 
+  setLang('tr');
+  const applied = run(process.execPath, [path.join(CORE, 'scripts', 'setup.js'), '--apply', '--lang', 'tr', '--notify', 'no', '--research', 'no'], { cwd: root, env: env() }).stdout;
+  const rows = applied.split(String.fromCharCode(10)).filter((l) => l.startsWith('  ') && l.trim());
+  ok('every summary label is padded clear of its value', rows.every((l) => /^ {2}\S.*\s{2,}\S/.test(l)), JSON.stringify(rows));
+  ok('the summary is translated', /kuruldu/.test(applied), applied);
+
   setLang('zz');
   ok('an unknown language falls back to English', /open|agents|contracts/.test(statusline()), statusline());
 
