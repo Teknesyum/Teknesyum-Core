@@ -474,8 +474,9 @@ carrying `turn_id`, `message_id`, `index`, `final` and `delta`. Answering with
 `hookSpecificOutput.displayContent` replaces what is drawn. The binary's own words:
 *"Display-only: the stored message and what the model sees are untouched."*
 
-So `notice.js` answers only the `final` flush, appends one line after the message, and stays
-silent everywhere else — outside a relay, on other events, on malformed input. Measured:
+So `notice.js` answers the first flush and the last one — the line sits above the message
+and below it, framing the answer rather than trailing it, because a footer alone scrolls out
+of sight on a long reply. Every flush in between is silent, and so is everything else — outside a relay, on other events, on malformed input. Measured:
 zero model tokens, one hook run per message, ~43 ms of node startup. For scale, `watch.js`
 spends about 1.3 s per turn across twenty tool calls; the notice is 3% of what the plugin
 already costs in latency and 0% of what it costs in tokens.

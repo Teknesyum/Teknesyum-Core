@@ -456,7 +456,7 @@ function testMessageDisplay(root) {
   const call = (j) => run(process.execPath, [HOOK], { cwd: root, input: JSON.stringify(j), env: { ...process.env, NO_COLOR: '1' } });
   const ev = (over) => Object.assign({ hook_event_name: 'MessageDisplay', turn_id: 't1', message_id: 'm1', index: 0, final: true, delta: 'son satir.', cwd: root }, over);
 
-  const mid = call(ev({ final: false, index: 1 }));
+  const mid = call(ev({ final: false, index: 2 }));
   ok('a non-final flush says nothing', mid.stdout.trim() === '', mid.stdout);
   ok('a non-final flush still exits 0', mid.status === 0);
 
@@ -475,15 +475,23 @@ function testMessageDisplay(root) {
   ok('it writes no model context', out.stdout.indexOf('additionalContext') === -1 && out.stdout.indexOf('systemMessage') === -1, out.stdout);
 
   const body = (spec && spec.displayContent) || '';
-  ok('the delta is kept', body.startsWith('son satir.'), body);
-  ok('the notice is appended, not substituted', body.indexOf('Teknesyum') > 0, body);
+  ok('the delta is kept', body.indexOf('son satir.') !== -1, body);
+  ok('the notice is added, not substituted', body.indexOf('son satir.') !== -1 && body.indexOf('Teknesyum') !== -1, body);
   const NL = String.fromCharCode(10);
-  ok('a blank line separates the notice', body.indexOf('son satir.' + NL + NL + 'Teknesyum') === 0, JSON.stringify(body));
+  ok('a blank line separates the notice', body.indexOf('son satir.' + NL + NL + 'Teknesyum') > 0, JSON.stringify(body));
+  ok('a single flush is framed above and below', body.split('Teknesyum').length === 3, body);
+  const first = JSON.parse(call(ev({ index: 0, final: false, delta: 'ilk parca.' })).stdout).hookSpecificOutput.displayContent;
+  ok('the first flush carries the notice on top', first.startsWith('Teknesyum'), first);
+  ok('the first flush keeps its delta below', first.trim().endsWith('ilk parca.'), first);
+  const last = JSON.parse(call(ev({ index: 4, final: true, delta: 'son parca.' })).stdout).hookSpecificOutput.displayContent;
+  ok('a later final flush carries it below only', last.startsWith('son parca.') && last.split('Teknesyum').length === 2, last);
   ok('the notice is the last line', body.trim().split(String.fromCharCode(10)).pop().startsWith('Teknesyum'), body);
+  ok('the notice is also the first line', body.split(String.fromCharCode(10))[0].startsWith('Teknesyum'), body);
 
   const empty = call(ev({ delta: '' }));
   const eb = JSON.parse(empty.stdout).hookSpecificOutput.displayContent;
   ok('an empty delta yields no leading blank line', eb.startsWith('Teknesyum'), JSON.stringify(eb));
+  ok('an empty delta is not doubled', eb.split('Teknesyum').length === 2, JSON.stringify(eb));
 
   const outside = call(ev({ cwd: os.tmpdir() }));
   ok('the notice is silent outside a relay', outside.stdout.trim() === '', outside.stdout);

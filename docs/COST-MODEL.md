@@ -64,7 +64,7 @@ Three channels, all measured rather than assumed.
 **`MessageDisplay` `displayContent`** is the one the plugin uses. The event fires as an
 assistant message streams; answering it replaces what is drawn on screen. The binary states
 the guarantee itself: *"Display-only: the stored message and what the model sees are
-untouched."* `notice.js` answers only the `final` flush and appends one line. Zero tokens,
+untouched."* `notice.js` answers the first and last flush, framing the message with one line. Zero tokens,
 one hook run per message, ~43 ms of node startup — against the ~1.3 s `watch.js` already
 spends per turn across twenty tool calls.
 

@@ -14,11 +14,17 @@ process.stdin.on('end', () => {
 });
 
 function build(j) {
-  if (j.hook_event_name !== 'MessageDisplay' || !j.final) return '';
+  if (j.hook_event_name !== 'MessageDisplay') return '';
+  const head = j.index === 0;
+  const foot = !!j.final;
+  if (!head && !foot) return '';
   const line = notice(j.cwd || process.cwd());
   if (!line) return '';
-  const delta = String(j.delta || '');
-  const body = delta ? delta.replace(/\s+$/, '') + '\n\n' + line : line;
+
+  let body = String(j.delta || '').replace(/\s+$/, '');
+  if (head) body = body ? line + '\n\n' + body : line;
+  if (foot && body !== line) body = body + '\n\n' + line;
+
   return JSON.stringify({
     hookSpecificOutput: { hookEventName: 'MessageDisplay', displayContent: body },
   });
