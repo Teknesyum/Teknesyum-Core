@@ -2,33 +2,9 @@
 
 const fs = require('fs');
 const path = require('path');
-const { configRoot, read, settings } = require('../hooks/lib.js');
+const { openLogs } = require('../hooks/lib.js');
 
 const PREFIX = 'BUG-';
-
-function repoRoot() {
-  const seen = [process.env.TEKNESYUM_CORE, settings().coreRepo];
-  let d = path.resolve(__dirname, '..', '..');
-  for (;;) {
-    seen.push(d);
-    const up = path.dirname(d);
-    if (up === d) break;
-    d = up;
-  }
-  for (const c of seen) {
-    try {
-      if (c && fs.existsSync(path.join(c, 'core', '.claude-plugin', 'plugin.json'))) return c;
-    } catch {}
-  }
-  return null;
-}
-
-function openDir() {
-  const repo = repoRoot();
-  return repo
-    ? path.join(repo, 'logs', 'openlogs')
-    : path.join(configRoot(), 'teknesyum', 'openlogs');
-}
 
 function slug(s) {
   return String(s)
@@ -57,7 +33,7 @@ function flags(argv) {
 }
 
 function list() {
-  const dir = openDir();
+  const dir = openLogs();
   let f = [];
   try {
     f = fs.readdirSync(dir).filter((x) => x.endsWith('.md'));
@@ -68,7 +44,7 @@ function list() {
 
 function write(o) {
   if (!o.title) die('--title is required');
-  const dir = openDir();
+  const dir = openLogs();
   fs.mkdirSync(dir, { recursive: true });
   const name = PREFIX + slug(o.title) + '.md';
   const file = path.join(dir, name);
@@ -98,7 +74,7 @@ function write(o) {
 
 function move(o, archive) {
   if (!o.id) die('--id is required');
-  const dir = openDir();
+  const dir = openLogs();
   const from = path.join(dir, o.id.endsWith('.md') ? o.id : PREFIX + slug(o.id) + '.md');
   if (!fs.existsSync(from)) die('not found: ' + path.basename(from));
   if (!archive) {

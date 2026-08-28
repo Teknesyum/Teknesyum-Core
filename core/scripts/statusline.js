@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { read, relayRoot, liveDir, settings } = require('../hooks/lib.js');
+const { read, relayRoot, liveDir, settings, openLogCount } = require('../hooks/lib.js');
 const { status } = require('../hooks/schema.js');
 
 const C = {
@@ -96,9 +96,12 @@ function build(input) {
   const cfg = settings();
   parts.push(paint(C.dim, String(cfg.profile || 'normal')));
 
+  const logs = openLogCount();
+
   const r = relayRoot(cwd, { git: false });
   if (!r) {
     parts.push(paint(C.dim, 'no relay'));
+    if (logs) parts.push(paint(C.yellow, logs + ' logs'));
     return parts.join(SEP);
   }
 
@@ -117,6 +120,8 @@ function build(input) {
 
   const p = problems(r.relay);
   if (p) parts.push(paint(C.red, p + ' problems'));
+
+  if (logs) parts.push(paint(C.yellow, logs + ' logs'));
 
   if (r.worktree) parts.push(paint(C.dim, 'worktree'));
 

@@ -429,6 +429,26 @@ function testStatusline(root) {
   });
   ok('the bridge renders the statusline it resolves', viaBridge.stdout.trim().length > 0, viaBridge.stdout + viaBridge.stderr);
   ok('the bridge names the project', viaBridge.stdout.includes(path.basename(root)), viaBridge.stdout);
+
+  const logHome = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-log-'));
+  const logEnv = { ...process.env, NO_COLOR: '1', CLAUDE_CONFIG_DIR: logHome, TEKNESYUM_CORE: logHome };
+  const line = () =>
+    run(process.execPath, [STATUSLINE], {
+      cwd: root,
+      input: JSON.stringify({ workspace: { current_dir: root } }),
+      env: logEnv,
+    }).stdout;
+  ok('a clean tree shows no log count', !/logs/.test(line()), line());
+
+  const openlogs = path.join(logHome, 'logs', 'openlogs');
+  fs.mkdirSync(openlogs, { recursive: true });
+  fs.mkdirSync(path.join(logHome, 'core', '.claude-plugin'), { recursive: true });
+  fs.writeFileSync(path.join(logHome, 'core', '.claude-plugin', 'plugin.json'), '{"name":"teknesyum-core"}');
+  fs.writeFileSync(path.join(openlogs, 'BUG-one.md'), '# one');
+  fs.writeFileSync(path.join(openlogs, 'BUG-two.md'), '# two');
+  ok('the statusline counts open bug logs', /2 logs/.test(line()), line());
+  fs.writeFileSync(path.join(openlogs, 'notes.txt'), 'x');
+  ok('only markdown logs are counted', /2 logs/.test(line()), line());
 }
 
 function testNoContextWrites() {

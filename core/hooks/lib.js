@@ -144,6 +144,38 @@ function settings() {
   return read(stateFile('config')) || {};
 }
 
+function coreRepo() {
+  const seen = [process.env.TEKNESYUM_CORE, settings().coreRepo];
+  let d = path.resolve(__dirname, '..', '..');
+  for (;;) {
+    seen.push(d);
+    const up = path.dirname(d);
+    if (up === d) break;
+    d = up;
+  }
+  for (const c of seen) {
+    try {
+      if (c && fs.existsSync(path.join(c, 'core', '.claude-plugin', 'plugin.json'))) return c;
+    } catch {}
+  }
+  return null;
+}
+
+function openLogs() {
+  const repo = coreRepo();
+  return repo
+    ? path.join(repo, 'logs', 'openlogs')
+    : path.join(configRoot(), 'teknesyum', 'openlogs');
+}
+
+function openLogCount() {
+  try {
+    return fs.readdirSync(openLogs()).filter((f) => f.endsWith('.md')).length;
+  } catch {
+    return 0;
+  }
+}
+
 module.exports = {
   home,
   configRoot,
@@ -161,4 +193,7 @@ module.exports = {
   logProblem,
   pluginRoot,
   settings,
+  coreRepo,
+  openLogs,
+  openLogCount,
 };

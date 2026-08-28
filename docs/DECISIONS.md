@@ -358,7 +358,34 @@ useful and redundant counts. If useful stays near zero, drop the event.
 
 ---
 
+## D11 — The banner that was not built
+
+The user asked for Base's session-opening banner back, on the condition that it cost
+nothing. It cannot. `systemMessage` reads like a display channel and is not one: on
+`SessionStart` the harness adds it to the model's context exactly as it adds plain stdout
+and `additionalContext`. The alternatives fail for their own reasons — `terminalSequence`
+bypasses context but is documented for a bell and a window title, not for text, and not for
+`SessionStart`; stderr with exit 2 reaches the user only by being labelled a hook error.
+
+The deciding argument was not the token count. A banner would have been a **second**
+`SessionStart` context write carrying the contract IDs and live roles that `cue.js` already
+carries — paying twice for one fact. And the law's worth is that it has no judgement calls;
+the first "it is only twenty tokens, and only for the user" is how Base began.
+
+What the user actually wanted was to see open work on opening a session. The statusline
+already shows contracts by status, live agents with their roles, and the problem count; the
+one thing missing was open bug logs, so `statusline.js` now carries `N logs`. The statusline
+costs nothing because the model never sees it, and unlike a banner it survives scrolling.
+
+What is genuinely lost: the interruption. A banner pushes, a statusline waits to be looked
+at. Accepted knowingly.
+
+---
+
 ## Standing law
 
-No feature may write to `additionalContext` or `systemMessage` on an ordinary turn.
-No feature may require the model to print a banner. See `COST-MODEL.md`.
+No feature may write to `additionalContext` or `systemMessage` — on any turn, on any event.
+The two are one mechanism: `systemMessage` was confirmed to enter model context at
+`SessionStart`. The sole exception is `cue.js` under its 200-character cap (D10). No feature
+may require the model to print a banner. Anything meant for the user's eyes goes to the
+statusline or to a file on disk. See `COST-MODEL.md`.

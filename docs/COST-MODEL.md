@@ -24,7 +24,7 @@ Where tokens actually go in Claude Code. Every Core decision cites a row here.
 | MCP tool schema | S | deferred schemas cost a name only |
 | Hook exit code / block reason | Z→O | blocking text is paid once, only on a real block |
 | Hook `additionalContext` | **C** | worst case: written per turn **and** resent in every later request |
-| Hook `systemMessage` | **C** | same |
+| Hook `systemMessage` | **C** | not a display channel: measured at `SessionStart`, it enters the model's context exactly like `additionalContext`, and it interrupts the user as well |
 | Model forced to print a banner | **C×5** | output tokens, ~5× input price, then resent as input forever |
 | Statusline | **Z** | terminal only, never reaches the model |
 | File on disk the model may read | **Z** until read | |
@@ -35,12 +35,13 @@ A 1,500-token injection is not 1,500 tokens. In an `n`-turn session it is
 `1500 × n` carried tokens, and every subagent repeats it in its own context.
 Base measured 20 agents in one turn — that is 20 repayments of the same text.
 
-**Core law: no feature may write to `additionalContext` or `systemMessage` on a
-normal turn.** Allowed only on a condition that is rare and actionable, and then
-it must be under 200 characters.
+**Core law: no feature may write to `additionalContext` or `systemMessage` at all.**
+The two are one mechanism, not two — whatever reaches the model on an event, both reach it.
+The single exception is `cue.js`, under a 200-character cap, on a condition that is rare
+and actionable.
 
-Three events are not normal turns and are exempt under that cap. `cue.js` owns all
-three and is the only hook allowed to write context at all:
+Two events are not ordinary turns. `cue.js` owns both and is the only hook allowed to
+write context at all:
 
 | Event | Fires | Writes when | Cost |
 |---|---|---|---|
@@ -54,6 +55,19 @@ was dead weight pretending to be a feature.
 
 A cue carries pointers only — contract IDs and a path. Goal, acceptance and route text
 never enter it; the model opens the file itself if it needs the body (**O**).
+
+## What reaches the user without reaching the model
+
+There is exactly one such channel, and it is not a hook: the **statusline**. Everything a
+hook prints on `SessionStart` — plain stdout and `systemMessage` alike — is added to the
+model's context; this was checked against the hook reference, not assumed. `terminalSequence`
+does bypass context but is documented for a bell, a window title and a desktop notification,
+not for lines of text, and is not documented for `SessionStart` at all. Stderr with exit 2
+reaches the user but the harness labels it a hook error, which is a lie about what happened.
+
+So anything meant for the user's eyes goes to the statusline or to a file the user opens.
+A session-opening banner was designed, costed and rejected on this ground: it would have
+been a second `SessionStart` context write carrying facts `cue.js` already carries.
 
 ## Where each need goes instead
 
