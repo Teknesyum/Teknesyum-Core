@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { read, write, safe, relayRoot, liveDir, sessionId } = require('./lib.js');
+const { read, write, safe, relayRoot, liveDir, sessionId, setNotice, t } = require('./lib.js');
 
 let raw = '';
 process.stdin.on('data', (d) => (raw += d));
@@ -56,6 +56,8 @@ function record(j) {
 
   if (ev === 'SubagentStop' || ev === 'Stop' || ev === 'SessionEnd') rec.ended = now;
   else delete rec.ended;
+
+  if (ev === 'SubagentStop' && rec.role) setNotice(r.relay, rec.role + ' ' + t('notice.done'));
 
   if (ev === 'PostToolUse') {
     rec.steps = (rec.steps || 0) + 1;

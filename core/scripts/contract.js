@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { relayRoot, projectRoot, settings, liveDir, read } = require('../hooks/lib.js');
+const { relayRoot, projectRoot, settings, liveDir, read, setNotice, t } = require('../hooks/lib.js');
 const { isContractName, field, list, verifySteps } = require('../hooks/schema.js');
 const seal = require('../hooks/seal.js');
 const risk = require('./risk.js');
@@ -520,6 +520,7 @@ function complete() {
 
   fs.mkdirSync(path.dirname(c.dst), { recursive: true });
   fs.renameSync(c.src, c.dst);
+  setNotice(c.relay, c.id + ' ' + t('notice.closed'));
   if (recordFile) seal.consume(recordFile, headSha);
   seal.ledgerInit(c.relay);
   seal.ledgerAppend(c.relay, {
@@ -571,6 +572,7 @@ function close() {
   );
   fs.mkdirSync(path.dirname(c.dst), { recursive: true });
   fs.renameSync(c.src, c.dst);
+  setNotice(c.relay, c.id + ' ' + t('notice.closed'));
   seal.ledgerInit(c.relay);
   seal.ledgerAppend(c.relay, { id: c.id, result: 'unmet', reason: reason.trim(), headSha, at });
 

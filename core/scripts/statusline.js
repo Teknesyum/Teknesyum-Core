@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { read, relayRoot, liveDir, settings, openLogCount, t } = require('../hooks/lib.js');
+const { read, relayRoot, liveDir, settings, openLogCount, getNotice, t } = require('../hooks/lib.js');
 const { status } = require('../hooks/schema.js');
 
 const C = {
@@ -91,7 +91,7 @@ function build(input) {
   const cwd = (input && input.workspace && input.workspace.current_dir) || process.cwd();
   const parts = [];
 
-  parts.push(paint(C.cyan, path.basename(path.resolve(cwd))));
+  parts.push(paint(C.cyan, 'Teknesyum') + ' ' + paint(C.dim, '▸') + ' ' + path.basename(path.resolve(cwd)));
 
   const cfg = settings();
   parts.push(paint(C.dim, String(cfg.profile || 'normal')));
@@ -124,6 +124,9 @@ function build(input) {
   if (logs) parts.push(paint(C.yellow, logs + ' ' + t('line.logs')));
 
   if (r.worktree) parts.push(paint(C.dim, t('line.worktree')));
+
+  const n = getNotice(r.relay);
+  if (n) parts.push(paint(C.dim, '⤷ ') + n);
 
   return parts.join(SEP);
 }

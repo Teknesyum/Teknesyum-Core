@@ -106,5 +106,13 @@
   "setup.contractLang": {
     "en": "contracts",
     "tr": "sözleşmeler"
+  },
+  "notice.done": {
+    "en": "finished",
+    "tr": "bitti"
+  },
+  "notice.closed": {
+    "en": "closed",
+    "tr": "kapandı"
   }
 }

@@ -451,6 +451,50 @@ function testStatusline(root) {
   ok('only markdown logs are counted', /2 logs/.test(line()), line());
 }
 
+function testNotice(root) {
+  const lib = require(path.join(CORE, 'hooks', 'lib.js'));
+  const relay = path.join(root, '.claude', 'relay');
+  const live = lib.liveDir(relay);
+  fs.mkdirSync(live, { recursive: true });
+  const file = path.join(live, '_duyuru.json');
+
+  fs.rmSync(file, { force: true });
+  ok('an empty notice reads as nothing', lib.getNotice(relay) === '');
+
+  ok('a notice is written', lib.setNotice(relay, 'builder bitti') === true);
+  ok('the notice lands in live/', fs.existsSync(file));
+  ok('the notice reads back', lib.getNotice(relay) === 'builder bitti');
+
+  ok('the same notice is not rewritten', lib.setNotice(relay, 'builder bitti') === false);
+  ok('a changed notice is written', lib.setNotice(relay, 'T7 kapandi') === true);
+  ok('the newest notice wins', lib.getNotice(relay) === 'T7 kapandi');
+
+  const long = 'x'.repeat(200);
+  lib.setNotice(relay, long);
+  ok('a notice is capped at 80 chars', lib.getNotice(relay).length === 80);
+
+  const stale = JSON.parse(fs.readFileSync(file, 'utf8'));
+  stale.at = Date.now() - 10 * 60 * 1000;
+  fs.writeFileSync(file, JSON.stringify(stale));
+  ok('a stale notice expires', lib.getNotice(relay) === '');
+
+  lib.setNotice(relay, 'builder bitti');
+  const line = require(path.join(CORE, 'scripts', 'statusline.js'))
+    .summary(root);
+  ok('the statusline prints the notice', line.includes('builder bitti'), line);
+  ok('the statusline carries the brand mark', line.startsWith('Teknesyum'), line);
+
+  const notice = fs.readFileSync(file, 'utf8');
+  ok('the notice file is not a hook payload', !/systemMessage|additionalContext/.test(notice));
+
+  const watch = fs.readFileSync(path.join(CORE, 'hooks', 'watch.js'), 'utf8');
+  ok('watch.js announces a finished agent', /SubagentStop' && rec\.role\) setNotice/.test(watch));
+  const contract = fs.readFileSync(path.join(CORE, 'scripts', 'contract.js'), 'utf8');
+  ok('contract.js announces a closed contract', contract.split('setNotice(').length - 1 === 2, contract.split('setNotice(').length - 1);
+
+  fs.rmSync(file, { force: true });
+}
+
 function testTitle() {
   const hooks = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8')).hooks;
   const wired = Object.keys(hooks).filter((ev) =>
@@ -956,7 +1000,8 @@ function main() {
   testPrefs(root);
   testScaffold();
   testStatusline(root);
-  testTitle(root);
+  testTitle();
+  testNotice(root);
   testLanguage(root);
   testTier(root);
   testQuota(root);

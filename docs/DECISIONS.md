@@ -429,8 +429,31 @@ context conversion for `hook_success` returns nothing unless the event is `Sessi
 **The prefix cannot be removed.** `hookName` is computed as the event name, plus the
 matcher when one applies — there is no `name`, `label` or `displayPrefix` field on a hook
 object or a matcher group, and `hook_system_message` is the only hook attachment that
-renders into the chat at all. So an in-chat notice is available at zero tokens, on the
-condition that it is willing to be introduced by `Stop says:`.
+renders into the chat at all. `additionalContext` has no prefix but is the wrong shape
+twice over: it is class C, and on `Stop` the model's only way to act on it is to write a
+new message, which in three trials out of three meant reproducing the whole answer.
+
+So the channel is free and unusable as it stands. The notice goes through the statusline
+instead — see D14.
+
+---
+
+## D14 — The hook does not speak, it writes
+
+The hook stopped trying to reach the user directly. It writes one line to
+`live/_duyuru.json`; `statusline.js` reads it and renders it. No prefix, because we own
+both ends. No tokens, because the statusline is class Z and the file is only read by our
+own script.
+
+The line is change-gated at the writer: `setNotice` compares against what is already on
+disk and does nothing when the text is unchanged, so a repeated event does not re-stamp the
+clock. It expires after two minutes, capped at 80 characters, so the statusline returns to
+standing state on its own instead of showing a receipt from an hour ago.
+
+Two writers, both announcing something the statusline cannot derive from counts: `watch.js`
+on `SubagentStop` names the role that just finished, and `contract.js` names the contract
+it just closed. The statusline also now opens with `Teknesyum ▸`, which is the honest
+answer to what the user was asking for — presence, permanently visible, for nothing.
 
 ---
 

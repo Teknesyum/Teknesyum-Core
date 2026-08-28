@@ -71,9 +71,15 @@ renders in the chat and the model cannot see it. Verified in a live session, and
 the shipped binary, whose context conversion for hook output returns nothing unless the
 event is `SessionStart`, `UserPromptSubmit` or `UserPromptExpansion`.
 
-The cost of that channel is not tokens but attention. The chat renders it as
-`<event> says: <text>`, with no way to change or drop the prefix, and a line that repeats
-every turn stops being read. Any use must be change-gated.
+It is free and still unused, because the chat renders it as `<event> says: <text>` with no
+way to change or drop the prefix. `additionalContext` has no prefix and is class C, and on
+`Stop` the model can only act on it by writing a new message — in trials it reproduced the
+whole answer.
+
+So the notice takes a third route, owned at both ends: the hook writes
+`live/_duyuru.json`, the statusline reads it. No prefix, no tokens. It is change-gated at
+the writer and expires after two minutes, because a line that repeats every turn stops
+being read whether or not it is free.
 
 `terminalSequence` also bypasses context, but the one thing it was tried for — the terminal
 window title — does not exist in the desktop app. Stderr with exit 2 reaches the user and

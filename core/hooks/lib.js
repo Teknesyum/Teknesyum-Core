@@ -199,6 +199,29 @@ function openLogCount() {
   }
 }
 
+const NOTICE = '_duyuru.json';
+const NOTICE_TTL = 120 * 1000;
+
+function noticeFile(relay) {
+  return path.join(liveDir(relay), NOTICE);
+}
+
+function setNotice(relay, text) {
+  if (!relay || !text) return false;
+  const f = noticeFile(relay);
+  const cur = read(f);
+  if (cur && cur.text === text) return false;
+  write(f, { text: String(text).slice(0, 80), at: Date.now() });
+  return true;
+}
+
+function getNotice(relay) {
+  const cur = read(noticeFile(relay));
+  if (!cur || !cur.text) return '';
+  if (!cur.at || Date.now() - cur.at > NOTICE_TTL) return '';
+  return String(cur.text);
+}
+
 module.exports = {
   home,
   configRoot,
@@ -221,4 +244,6 @@ module.exports = {
   t,
   openLogs,
   openLogCount,
+  setNotice,
+  getNotice,
 };
