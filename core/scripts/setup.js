@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { configRoot, stateFile, read, write } = require('../hooks/lib.js');
+const { configRoot, stateFile, read, write, t } = require('../hooks/lib.js');
 
 const argv = process.argv.slice(2);
 
@@ -21,20 +21,26 @@ function has(name) {
 
 const QUESTIONS = [
   {
+    key: 'lang',
+    ask: 'ask.lang',
+    parse: (v) => (/^(tr|turkce|turkish)$/i.test(String(v).trim()) ? 'tr' : 'en'),
+    fallback: 'en',
+  },
+  {
     key: 'notify',
-    ask: 'Play a sound when a turn ends or needs you? (yes/no)',
+    ask: 'ask.notify',
     parse: (v) => /^(y|yes|e|evet|true|1)$/i.test(String(v)),
     fallback: true,
   },
   {
     key: 'research',
-    ask: 'Block the first contract of a new project until prior art is read? (yes/no)',
+    ask: 'ask.research',
     parse: (v) => /^(y|yes|e|evet|true|1)$/i.test(String(v)),
     fallback: true,
   },
   {
     key: 'privateRepo',
-    ask: 'Private mirror repository for untouchable files, if any (git URL, or blank)',
+    ask: 'ask.privateRepo',
     parse: (v) => (String(v).trim() ? String(v).trim() : null),
     fallback: null,
   },
@@ -70,7 +76,7 @@ function inspect() {
     answered: QUESTIONS.filter((q) => cfg[q.key] !== undefined).map((q) => q.key),
     missing: QUESTIONS.filter((q) => cfg[q.key] === undefined).map((q) => ({
       flag: '--' + q.key,
-      ask: q.ask,
+      ask: t(q.ask),
     })),
     config: cfg,
   };
@@ -104,17 +110,18 @@ function apply(answers) {
   fs.writeFileSync(beep, JSON.stringify(current, null, 2) + '\n', 'utf8');
 
   const bridge = wireStatusline();
+  const row = (k, v) => '  ' + t(k).padEnd(12) + v;
 
   return [
-    'Teknesyum Core is set up.',
+    t('setup.done'),
     '',
-    '  config      ' + stateFile('config'),
-    '  statusline  ' + bridge,
-    '  sound       ' + (cfg.notify ? 'on' : 'off'),
-    '  prior art   ' + (cfg.research ? 'gated' : 'off'),
-    '  private     ' + (cfg.privateRepo || 'none'),
+    row('setup.config', stateFile('config')),
+    row('setup.statusline', bridge),
+    row('setup.sound', t(cfg.notify ? 'setup.on' : 'setup.off')),
+    row('setup.research', t(cfg.research ? 'setup.gated' : 'setup.off')),
+    row('setup.private', cfg.privateRepo || t('setup.none')),
     '',
-    'The statusline applies at the next session start.',
+    t('setup.applies'),
   ].join('\n');
 }
 

@@ -47,6 +47,14 @@
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/watch.js\""
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/title.js\""
+          }
+        ]
       }
     ],
     "Stop": [
@@ -65,6 +73,14 @@
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/notify.js\"",
             "async": true,
             "timeout": 10
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/title.js\""
           }
         ]
       }
@@ -101,6 +117,14 @@
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/cue.js\""
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/title.js\""
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
@@ -119,6 +143,16 @@
           {
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/watch.js\""
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/title.js\""
           }
         ]
       }

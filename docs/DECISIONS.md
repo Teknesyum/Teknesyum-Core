@@ -295,6 +295,16 @@ No prose. The user opens that file without T0.
 The numbers above are unmeasured estimates. They are to be checked against the first real
 relay run and corrected here.
 
+**Three categories, not two.** What the model reads is English. What only the user reads is
+served in `settings().lang` from `core/strings.json`, defaulting to English so the plugin
+stays publishable: `setup.js` questions and summary, the statusline, the window title. The
+third category is text both of them read — gate refusals, `cue.js`, `contract.js` output —
+and it stays **English**, because its first reader is the model, which must parse it and
+correct itself. The user is not left out: the model's very next sentence is Turkish chat,
+so the refusal is explained in their language for free, in the same turn. A Turkish line
+appended to the block message would cost tokens inside model context to say what the
+paraphrase already says.
+
 ## D10 — Cues, not injections
 
 A statusline is **Z**: the user sees it, the model never does. So a relay left half-open
@@ -382,10 +392,39 @@ at. Accepted knowingly.
 
 ---
 
+## D12 — The banner lives in the title bar
+
+The user pushed back on D11: a plugin nobody perceives feels absent, and the statusline
+waits to be looked at instead of announcing itself. That is a fair objection, and the
+answer to it is not a context write.
+
+`terminalSequence` is a hook output field that does not enter the model's context and is
+documented to fire even on events whose output is otherwise discarded. `title.js` uses it
+to write the terminal window title from the same data the statusline reads —
+`Teknesyum ▸ Teknesyum-Core · 2 açık · builder`. It fires on `SessionStart`, `Stop`,
+`SubagentStart` and `SubagentStop`: every point where the state actually changes, and never
+inside a tool call. Zero tokens, and unlike a banner it never scrolls away.
+
+An agent-start announcement through a token channel was costed and refused. `SubagentStart`
+stdout goes to the debug log; `systemMessage` there would be ~15 tokens per agent into the
+main session, resent every later turn — twenty parallel agents make that ~300 tokens
+compounding. And `additionalContext` on a subagent lifecycle event is what destroyed Base's
+report bodies in three cases out of four. The title carries the same fact for nothing.
+
+**Unverified on purpose.** The hook reference does not publish per-event behaviour for
+`terminalSequence`, so this ships as a measurement, not a claim: if the terminal does not
+honour the sequence, or Claude Code overwrites the title, the feature is dropped rather
+than argued for. What must be checked is that the title changes and that the session
+transcript stays clean.
+
+---
+
 ## Standing law
 
 No feature may write to `additionalContext` or `systemMessage` — on any turn, on any event.
 The two are one mechanism: `systemMessage` was confirmed to enter model context at
 `SessionStart`. The sole exception is `cue.js` under its 200-character cap (D10). No feature
 may require the model to print a banner. Anything meant for the user's eyes goes to the
-statusline or to a file on disk. See `COST-MODEL.md`.
+statusline, the window title or a file on disk. `terminalSequence` is a permitted class-Z
+channel for its documented uses — window title, bell, desktop notification; free-form text
+lines through it stay unsupported until measured. See `COST-MODEL.md`.

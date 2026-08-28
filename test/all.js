@@ -451,6 +451,74 @@ function testStatusline(root) {
   ok('only markdown logs are counted', /2 logs/.test(line()), line());
 }
 
+function testTitle(root) {
+  const TITLE = path.join(CORE, 'hooks', 'title.js');
+  const call = (j) => run(process.execPath, [TITLE], { cwd: root, input: JSON.stringify(j), env: { ...process.env, NO_COLOR: '1' } });
+
+  const clean = call({ hook_event_name: 'SessionStart', cwd: os.tmpdir() });
+  ok('the title is silent outside a relay', clean.stdout.trim() === '', clean.stdout);
+  ok('a silent title still exits 0', clean.status === 0);
+
+  const r = call({ hook_event_name: 'SessionStart', cwd: root });
+  let payload = null;
+  try {
+    payload = JSON.parse(r.stdout);
+  } catch {}
+  ok('the title emits parsable JSON', payload !== null, r.stdout);
+  ok('the title uses terminalSequence', payload && typeof payload.terminalSequence === 'string');
+  ok('the title writes no model context', r.stdout.indexOf('additionalContext') === -1 && r.stdout.indexOf('systemMessage') === -1, r.stdout);
+  const seq = (payload && payload.terminalSequence) || '';
+  ok('the sequence is an OSC title', seq.startsWith(']0;') && seq.endsWith(''), JSON.stringify(seq));
+  ok('the title names the plugin', seq.includes('Teknesyum'), seq);
+  ok('the title carries no ANSI colour', !/\[/.test(seq), JSON.stringify(seq));
+  ok('the title stays short', seq.length <= 130, String(seq.length));
+
+  const hooks = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8')).hooks;
+  const wired = Object.keys(hooks).filter((ev) =>
+    hooks[ev].some((g) => g.hooks.some((x) => /title\.js/.test(x.command)))
+  );
+  ok('the title is wired to the events that change state', wired.includes('SessionStart') && wired.includes('Stop') && wired.includes('SubagentStart') && wired.includes('SubagentStop'), wired.join(','));
+  ok('the title never runs on PreToolUse', !wired.includes('PreToolUse'), wired.join(','));
+}
+
+function testLanguage(root) {
+  const { t } = require(path.join(CORE, 'hooks', 'lib.js'));
+  ok('an unknown key returns itself', t('no.such.key') === 'no.such.key');
+
+  const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
+  const keys = Object.keys(table);
+  ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
+  ok('the table is small', JSON.stringify(table).length < 8000, String(JSON.stringify(table).length));
+
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
+  fs.mkdirSync(path.join(home, 'teknesyum'), { recursive: true });
+  const setLang = (v) =>
+    fs.writeFileSync(path.join(home, 'teknesyum', 'config.json'), JSON.stringify(v === null ? {} : { lang: v }));
+  const env = (extra) => ({ ...process.env, CLAUDE_CONFIG_DIR: home, NO_COLOR: '1', ...extra });
+  const statusline = () =>
+    run(process.execPath, [STATUSLINE], { cwd: root, input: JSON.stringify({ workspace: { current_dir: root } }), env: env() }).stdout;
+  const ask = () =>
+    JSON.parse(run(process.execPath, [path.join(CORE, 'scripts', 'setup.js'), '--check'], { cwd: root, env: env() }).stdout)
+      .missing.map((m) => m.ask)
+      .join(' | ');
+
+  setLang(null);
+  ok('English is the default', /open|agents|contracts/.test(statusline()), statusline());
+
+  setLang('tr');
+  ok('the statusline follows the language', /açık|ajan|sözleşme/.test(statusline()), statusline());
+  ok('setup asks in the chosen language', /çalsın|bekletilsin/.test(ask()), ask());
+
+  setLang('zz');
+  ok('an unknown language falls back to English', /open|agents|contracts/.test(statusline()), statusline());
+
+  const modelFacing = ['guard.js', 'cue.js', 'seal.js', 'schema.js', 'watch.js'];
+  for (const f of modelFacing) {
+    const body = fs.readFileSync(path.join(CORE, 'hooks', f), 'utf8');
+    ok(f + ' stays English - it is read by the model', !/t\(/.test(body.replace(/\w+t\(/g, '')), f);
+  }
+}
+
 function testNoContextWrites() {
   const watch = path.join(CORE, 'hooks', 'watch.js');
   const r = run(process.execPath, [watch], {
@@ -895,6 +963,8 @@ function main() {
   testPrefs(root);
   testScaffold();
   testStatusline(root);
+  testTitle(root);
+  testLanguage(root);
   testTier(root);
   testQuota(root);
   testTierVisible(root);

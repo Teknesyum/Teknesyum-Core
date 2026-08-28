@@ -1,0 +1,102 @@
+{
+  "ask.lang": {
+    "en": "Language for what you see - messages, setup, statusline? (en/tr)",
+    "tr": "Language for what you see - messages, setup, statusline? (en/tr)"
+  },
+  "ask.notify": {
+    "en": "Play a sound when a turn ends or needs you? (yes/no)",
+    "tr": "Tur bitince ya da seni bekleyince ses çalsın mı? (evet/hayır)"
+  },
+  "ask.research": {
+    "en": "Block the first contract of a new project until prior art is read? (yes/no)",
+    "tr": "Yeni projede ilk sözleşme, benzer işler taranana kadar bekletilsin mi? (evet/hayır)"
+  },
+  "ask.privateRepo": {
+    "en": "Private mirror repository for untouchable files, if any (git URL, or blank)",
+    "tr": "Dışarı çıkmayacak dosyalar için özel ayna deposu, varsa (git adresi, yoksa boş bırak)"
+  },
+  "setup.done": {
+    "en": "Teknesyum Core is set up.",
+    "tr": "Teknesyum Core kuruldu."
+  },
+  "setup.config": {
+    "en": "config",
+    "tr": "ayar"
+  },
+  "setup.statusline": {
+    "en": "statusline",
+    "tr": "durum satırı"
+  },
+  "setup.sound": {
+    "en": "sound",
+    "tr": "ses"
+  },
+  "setup.research": {
+    "en": "prior art",
+    "tr": "ön tarama"
+  },
+  "setup.private": {
+    "en": "private",
+    "tr": "özel depo"
+  },
+  "setup.on": {
+    "en": "on",
+    "tr": "açık"
+  },
+  "setup.off": {
+    "en": "off",
+    "tr": "kapalı"
+  },
+  "setup.gated": {
+    "en": "gated",
+    "tr": "bekletilir"
+  },
+  "setup.none": {
+    "en": "none",
+    "tr": "yok"
+  },
+  "setup.applies": {
+    "en": "The statusline applies at the next session start.",
+    "tr": "Durum satırı bir sonraki oturum açılışında yürürlüğe girer."
+  },
+  "line.noRelay": {
+    "en": "no relay",
+    "tr": "röle yok"
+  },
+  "line.active": {
+    "en": "active",
+    "tr": "etkin"
+  },
+  "line.submitted": {
+    "en": "submitted",
+    "tr": "sunuldu"
+  },
+  "line.open": {
+    "en": "open",
+    "tr": "açık"
+  },
+  "line.blocked": {
+    "en": "blocked",
+    "tr": "engelli"
+  },
+  "line.contracts": {
+    "en": "contracts",
+    "tr": "sözleşme"
+  },
+  "line.agents": {
+    "en": "agents",
+    "tr": "ajan"
+  },
+  "line.problems": {
+    "en": "problems",
+    "tr": "sorun"
+  },
+  "line.logs": {
+    "en": "logs",
+    "tr": "günlük"
+  },
+  "line.worktree": {
+    "en": "worktree",
+    "tr": "worktree"
+  }
+}

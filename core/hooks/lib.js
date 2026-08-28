@@ -144,6 +144,25 @@ function settings() {
   return read(stateFile('config')) || {};
 }
 
+let _strings = null;
+
+function strings() {
+  if (_strings) return _strings;
+  _strings = read(path.join(__dirname, '..', 'strings.json')) || {};
+  return _strings;
+}
+
+function lang() {
+  const l = String(settings().lang || 'en').toLowerCase();
+  return /^[a-z]{2}$/.test(l) ? l : 'en';
+}
+
+function t(key) {
+  const row = strings()[key];
+  if (!row) return key;
+  return row[lang()] || row.en || key;
+}
+
 function coreRepo() {
   const seen = [process.env.TEKNESYUM_CORE, settings().coreRepo];
   let d = path.resolve(__dirname, '..', '..');
@@ -194,6 +213,8 @@ module.exports = {
   pluginRoot,
   settings,
   coreRepo,
+  lang,
+  t,
   openLogs,
   openLogCount,
 };

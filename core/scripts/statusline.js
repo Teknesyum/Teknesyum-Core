@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { read, relayRoot, liveDir, settings, openLogCount } = require('../hooks/lib.js');
+const { read, relayRoot, liveDir, settings, openLogCount, t } = require('../hooks/lib.js');
 const { status } = require('../hooks/schema.js');
 
 const C = {
@@ -100,30 +100,30 @@ function build(input) {
 
   const r = relayRoot(cwd, { git: false });
   if (!r) {
-    parts.push(paint(C.dim, 'no relay'));
-    if (logs) parts.push(paint(C.yellow, logs + ' logs'));
+    parts.push(paint(C.dim, t('line.noRelay')));
+    if (logs) parts.push(paint(C.yellow, logs + ' ' + t('line.logs')));
     return parts.join(SEP);
   }
 
   const c = contracts(r.relay);
   if (c && c.total) {
     const bits = [];
-    if (c.count.active) bits.push(paint(C.green, c.count.active + ' active'));
-    if (c.count.submitted) bits.push(paint(C.yellow, c.count.submitted + ' submitted'));
-    if (c.count.open) bits.push(c.count.open + ' open');
-    if (c.count.blocked) bits.push(paint(C.red, c.count.blocked + ' blocked'));
-    parts.push(bits.length ? bits.join(' ') : c.total + ' contracts');
+    if (c.count.active) bits.push(paint(C.green, c.count.active + ' ' + t('line.active')));
+    if (c.count.submitted) bits.push(paint(C.yellow, c.count.submitted + ' ' + t('line.submitted')));
+    if (c.count.open) bits.push(c.count.open + ' ' + t('line.open'));
+    if (c.count.blocked) bits.push(paint(C.red, c.count.blocked + ' ' + t('line.blocked')));
+    parts.push(bits.length ? bits.join(' ') : c.total + ' ' + t('line.contracts'));
   }
 
   const a = agents(r.relay);
-  if (a.running) parts.push(paint(C.magenta, a.running + ' agents') + (a.roles.length ? ' ' + paint(C.dim, tally(a.roles)) : ''));
+  if (a.running) parts.push(paint(C.magenta, a.running + ' ' + t('line.agents')) + (a.roles.length ? ' ' + paint(C.dim, tally(a.roles)) : ''));
 
   const p = problems(r.relay);
-  if (p) parts.push(paint(C.red, p + ' problems'));
+  if (p) parts.push(paint(C.red, p + ' ' + t('line.problems')));
 
-  if (logs) parts.push(paint(C.yellow, logs + ' logs'));
+  if (logs) parts.push(paint(C.yellow, logs + ' ' + t('line.logs')));
 
-  if (r.worktree) parts.push(paint(C.dim, 'worktree'));
+  if (r.worktree) parts.push(paint(C.dim, t('line.worktree')));
 
   return parts.join(SEP);
 }
@@ -145,5 +145,11 @@ function main() {
   process.stdin.on('error', () => process.stdout.write(''));
 }
 
+function summary(cwd) {
+  return build({ workspace: { current_dir: cwd } })
+    .replace(/\[[0-9;]*m/g, '')
+    .trim();
+}
+
 if (require.main === module) main();
-module.exports = { build, main };
+module.exports = { build, main, summary };
