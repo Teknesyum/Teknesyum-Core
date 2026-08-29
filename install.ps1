@@ -1,5 +1,5 @@
 # Teknesyum Core
-# Install:  irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.9/install.ps1 | iex
+# Install:  irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.2.0/install.ps1 | iex
 
 $ErrorActionPreference = 'Stop'
 $repo = 'Teknesyum/Teknesyum-Core'

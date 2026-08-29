@@ -71,13 +71,13 @@ Bir kısmını yapıyor: subagent çağırır, paralel çalıştırır, plan tut
 ### Windows — tek satır
 
 ```powershell
-irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.9/install.ps1 | iex
+irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.2.0/install.ps1 | iex
 ```
 
 ### macOS / Linux — tek satır
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.9/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.2.0/install.sh | bash
 ```
 
 ### Claude Code içinden
