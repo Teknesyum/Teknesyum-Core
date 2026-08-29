@@ -101,6 +101,30 @@ function cellName(model, effort) {
   return model + (effort ? '-' + effort : '');
 }
 
+const CELLS = {};
+
+function tierCell(role) {
+  if (!role) return null;
+  const key = String(role).toLowerCase();
+  if (CELLS[key] !== undefined) return CELLS[key];
+  let cell = null;
+  try {
+    const t = require('./contract.js').tier;
+    const r = t(key, {}) || t('t0', {});
+    if (r && r.model) cell = { model: r.model, effort: r.effort || '' };
+  } catch {}
+  CELLS[key] = cell;
+  return cell;
+}
+
+function seatCell(row, c) {
+  const model = row.model || (c && c.model) || '';
+  const effort = row.effort || (c && c.effort) || '';
+  if (model) return cellName(model, effort);
+  const t = tierCell(row.role);
+  return t ? cellName(t.model, t.effort) : '';
+}
+
 function crew(relay) {
   const a = agents(relay);
   if (!a.running) return '';
@@ -109,7 +133,7 @@ function crew(relay) {
     const c = taskFor(row, pool);
     return {
       role: roleName(row.role),
-      cell: cellName(row.model || (c && c.model) || '', row.effort || (c && c.effort) || ''),
+      cell: seatCell(row, c),
       task: (c && c.task) || '',
     };
   });
@@ -117,13 +141,13 @@ function crew(relay) {
   if (seats.length === 1) {
     const one = seats[0];
     const head = [one.cell, one.role].filter(Boolean).join(' ');
-    return one.task ? head + ' — ' + one.task : head + ' ' + t('line.working');
+    return one.task ? head + ' — ' + one.task : head + ' ' + t('line.assigned');
   }
 
   const same = seats.every((x) => x.role === seats[0].role && x.cell === seats[0].cell);
   if (same) {
     const one = seats[0];
-    return seats.length + ' ' + [one.cell, one.role].filter(Boolean).join(' ') + ' ' + t('line.working');
+    return seats.length + '× ' + [one.cell, one.role].filter(Boolean).join(' ') + ' ' + t('line.assigned');
   }
 
   const groups = [];
@@ -134,8 +158,8 @@ function crew(relay) {
     else groups.push({ key, n: 1, role: x.role, cell: x.cell });
   }
   return groups
-    .map((g) => (g.n > 1 ? g.n + ' ' : '') + [g.cell, g.role].filter(Boolean).join(' '))
-    .join(' · ') + ' ' + t('line.working');
+    .map((g) => (g.n > 1 ? g.n + '× ' : '') + [g.cell, g.role].filter(Boolean).join(' '))
+    .join(' · ') + ' ' + t('line.assigned');
 }
 
 function label(r) {
@@ -186,7 +210,7 @@ function banner(cwd, phase) {
   const c = crew(r.relay);
   if (c) return say(c);
 
-  const bits = [String(settings().profile || 'normal')];
+  const bits = [];
   const k = contracts(r.relay);
   if (k && k.total) {
     const sub = [];
@@ -200,6 +224,7 @@ function banner(cwd, phase) {
   if (p) bits.push(p + ' ' + t('line.problems'));
   if (!gateOn()) bits.push(t('line.gateOff'));
 
+  if (!bits.length) return '';
   return say(bits.join(' · '));
 }
 

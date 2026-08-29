@@ -514,8 +514,21 @@ function testBanner(root) {
   fs.rmSync(path.join(liveB, '_duyuru.json'), { force: true });
   fs.rmSync(path.join(liveB, 'a1.json'), { force: true });
   fs.rmSync(path.join(liveB, '_calls.json'), { force: true });
-  ok('with nothing running the banner falls back to the profile', /Premium|Normal|Eco/.test(banner(root)), banner(root));
+  ok('with nothing running the banner reports the work, not the profile again', !/Premium|Normal|Eco/.test(banner(root)), banner(root));
+  const quiet = fixture();
+  ok('and with nothing to say at all it says nothing', banner(quiet) === '', banner(quiet));
+  try {
+    fs.rmSync(quiet, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
   ok('bookkeeping files are not counted as agents', !/1 Ajan|2 Ajan/.test(banner(root)), banner(root));
+  fs.writeFileSync(path.join(liveB, 'a9.json'), JSON.stringify({ id: 'a9', role: 'scout', updated: new Date().toISOString(), files: [] }));
+  ok('a seat with no model of its own is named from the tier table', /Sonnet|Opus|Haiku/.test(banner(root)), banner(root));
+  ok('and the banner says it was assigned, not merely that it is busy', /Görevlendirildi|Assigned/i.test(banner(root)), banner(root));
+  fs.writeFileSync(path.join(liveB, 'a8.json'), JSON.stringify({ id: 'a8', role: 'scout', updated: new Date().toISOString(), files: [] }));
+  ok('two of the same seat are counted, not listed twice', /2×/.test(banner(root)), banner(root));
+  fs.writeFileSync(path.join(liveB, 'a7.json'), JSON.stringify({ id: 'a7', role: 'Explore', updated: new Date().toISOString(), files: [] }));
+  ok('a built-in agent with no row of its own is named from the session cell', /Kâşif|Explorer/i.test(banner(root)) && /Opus|Sonnet|Haiku/.test(banner(root)), banner(root));
+  for (const x of ['a7', 'a8', 'a9']) fs.rmSync(path.join(liveB, x + '.json'), { force: true });
   for (const x of parked) fs.renameSync(path.join(liveB, x + '.parked'), path.join(liveB, x));
 
   const many = lib.liveDir(path.join(root, '.claude', 'relay'));

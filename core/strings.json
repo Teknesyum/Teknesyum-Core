@@ -156,6 +156,10 @@
     "en": "contract",
     "tr": "sözleşme"
   },
+  "line.assigned": {
+    "en": "assigned",
+    "tr": "olarak görevlendirildi"
+  },
   "line.working": {
     "en": "at work",
     "tr": "çalışıyor"
