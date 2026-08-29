@@ -662,6 +662,14 @@ function reopen() {
   }
   if (fs.existsSync(back)) return stop([id + ' is already open under contracts/.']);
   const round = String(Number(field('round', body) || '1') + 1);
+  const cap = Number((tiers().signals || {}).roundCap || 0);
+  if (cap && Number(round) > cap && !has('force'))
+    return stop([
+      id + ' has been round ' + cap + ' already, and a round ' + round + ' is a sign the contract is wrong,',
+      'not that the agent is unlucky. Split it, or narrow what it owns, and open a new one.',
+      '',
+      'If you really mean it: add --force.',
+    ]);
   let next = stampStatus(body, 'active');
   next = /^round:.*$/im.test(next)
     ? next.replace(/^round:.*$/im, 'round: ' + round)
@@ -835,8 +843,8 @@ function help() {
     '  check --id <ID> [--run]   report risk and verify steps; --run executes them',
     '  submit --id <ID>          mark the work finished and ready for the gate',
     '  complete --id <ID>        run verify, check risk, record, move to done/',
-    '  reopen --id <ID> --reason "..."',
-    '                            take a closed contract back, round + 1',
+    '  reopen --id <ID> --reason "..." [--force]',
+    '                            take a closed contract back, round + 1; capped at round 6',
     '  close --id <ID> --reason "..."',
     '                            close an unmet contract without a seal',
     '  audit --id <ID> --run-id <agent> --verification "..."',

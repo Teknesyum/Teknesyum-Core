@@ -93,6 +93,7 @@
       "effortAt": 2,
       "modelAt": 2
     },
+    "roundCap": 6,
     "roundModelBump": 3,
     "roundAdvisorRequired": 4,
     "irreversibleOpensAuditor": true,

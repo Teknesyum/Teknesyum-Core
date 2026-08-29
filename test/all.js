@@ -1279,6 +1279,14 @@ function testLadder() {
   ok('the closed round stays in the ledger', /reopened/.test(fs.readFileSync(path.join(root, '.claude', 'relay', 'audits', 'ledger.jsonl'), 'utf8')));
   ok('reopen refuses without a reason', contract(['reopen', '--id', 'L1'], root).status === 2);
 
+  writeContract(root, 'L9', '# L9\nstatus: submitted\nround: 6\nowns: [src/ok.js]\nverify:\n  - true\n');
+  contract(['complete', '--id', 'L9'], root);
+  const capped = contract(['reopen', '--id', 'L9', '--reason', 'this one will not converge'], root);
+  ok('a seventh round is refused - the contract is wrong, not the agent', capped.status === 2, capped.stdout + capped.stderr);
+  ok('and the refusal says to split it instead', /Split it/.test(capped.stdout + capped.stderr), capped.stdout);
+  const forced = contract(['reopen', '--id', 'L9', '--reason', 'this one will not converge', '--force'], root);
+  ok('the cap can still be overridden on purpose', forced.status === 0, forced.stdout + forced.stderr);
+
   writeContract(root, 'L2', '# L2\nstatus: submitted\nowns: [src/gone.js]\nverify:\n  - true\n');
   const gone = contract(['complete', '--id', 'L2'], root);
   ok('a contract that owns a file nobody wrote cannot close', gone.status === 2, gone.stdout + gone.stderr);
@@ -1430,6 +1438,21 @@ function testTools() {
   const asked = contract(['tier', '--role', 'builder', '--profile', 'premium'], root);
   ok('an explicit profile still wins over the project file', /premium/.test(asked.stdout), asked.stdout);
   fs.rmSync(path.join(relay, 'config.json'), { force: true });
+
+  const RELEASE = path.join(CORE, 'scripts', 'release.js');
+  run(process.execPath, [RELEASE, 'note', '--bump', 'minor', 'the gate stops reading shell'], { cwd: root });
+  const waiting = run(process.execPath, [RELEASE, 'status'], { cwd: root });
+  ok('a note decides the next version, memory does not', /→ v/.test(waiting.stdout), waiting.stdout);
+  ok('and a minor note makes it a minor release', /\(minor\)/.test(waiting.stdout), waiting.stdout);
+  ok('the note text is what ships', /stops reading shell/.test(waiting.stdout), waiting.stdout);
+  for (const f of fs.readdirSync(path.join(CORE, '..', '.changes'))) {
+    if (/stops-reading-shell/.test(f)) fs.rmSync(path.join(CORE, '..', '.changes', f), { force: true });
+  }
+
+  const rel = require(path.join(CORE, 'scripts', 'release.js'));
+  ok('a patch note moves the last figure', rel.next('0.1.12', 'patch') === '0.1.13');
+  ok('a minor note zeroes the one below it', rel.next('0.1.12', 'minor') === '0.2.0');
+  ok('a major note zeroes both', rel.next('0.1.12', 'major') === '1.0.0');
 
   const doc = run(process.execPath, [DOCTOR, '--json'], { cwd: root });
   let rows = [];
