@@ -505,15 +505,16 @@ function testBanner(root) {
   fs.writeFileSync(path.join(liveB, 'a1.json'), JSON.stringify({ id: 'a1', role: 'advisor', model: 'fable', effort: 'medium' }));
   fs.writeFileSync(path.join(liveB, '_calls.json'), JSON.stringify([{ role: 'advisor', model: 'fable', task: 'banner tasarimi soruldu', at: Date.now() }]));
   const crewLine = banner(root);
-  ok('the banner names the role', /Advisor/.test(crewLine), crewLine);
-  ok('the banner names the model and effort', /Fable\/Medium/.test(crewLine), crewLine);
+  ok('the banner names the role in the user language', /Dan\u0131\u015fman|Advisor/.test(crewLine), crewLine);
+  ok('no English role name survives', !/Worker|Builder|Auditor|Scout|Scribe/.test(crewLine), crewLine);
+  ok('the banner names the model and effort', /Fable-Medium/.test(crewLine), crewLine);
   ok('the banner says what the agent was asked', /Banner Tasarimi Soruldu/.test(crewLine), crewLine);
   ok('a working agent pushes the profile off the line', !/Premium|Normal|Eco/.test(crewLine), crewLine);
   ok('the counters are gone from the busy line', !/Ad\u0131m|G\u00fcnl\u00fck/i.test(crewLine), crewLine);
 
   fs.writeFileSync(path.join(liveB, '_duyuru.json'), JSON.stringify({ text: 'T7 kapandi', at: Date.now() }));
   ok('the closing band reports what finished', /T7 Kapandi/.test(banner(root, 'foot')), banner(root, 'foot'));
-  ok('the opening band still reports what is running', /Advisor/.test(banner(root, 'head')), banner(root, 'head'));
+  ok('the opening band still reports what is running', /Dan\u0131\u015fman|Advisor/.test(banner(root, 'head')), banner(root, 'head'));
   fs.rmSync(path.join(liveB, '_duyuru.json'), { force: true });
   fs.rmSync(path.join(liveB, 'a1.json'), { force: true });
   fs.rmSync(path.join(liveB, '_calls.json'), { force: true });

@@ -530,9 +530,16 @@ which swept up `_tally.json` as an agent with no role. That is where "2 Ajan Exp
 from — one real agent and one bookkeeping file. Records are now the files that do not
 start with `_`.
 
-All of it in the user's language, Title Cased with `toLocaleUpperCase('tr')` so a Turkish
-dotted İ survives, and the case break now includes `/` and the em dash so `Fable/Medium`
-does not come out `Fable/medium`.
+**Every word is in the user's language, role names included.** The first pass translated the
+frame and left the payload: `3 Ajan Worker×2`, `1 Sunuldu 1 Açık`. Role keys, contract
+statuses and the × shorthand are all internal vocabulary, and a banner nobody can read is
+worse than no banner. Roles resolve through `role.<name>` in `strings.json`, contract
+statuses read as sentences — `1 Sözleşme Onay Bekliyor` — and identical agents are counted
+in words: `3 Opus-Medium İşçi Çalışıyor`.
+
+The whole line is Title Cased with `toLocaleUpperCase('tr')` so a Turkish dotted İ
+survives, and the case break includes `/`, `-` and the em dash so `Opus-Medium` does not
+come out `Opus-medium`.
 
 Free of tokens is not free of everything, and the first version paid twice. It trimmed the
 delta on the opening flush as well as the closing one, so a batch ending mid-word lost the

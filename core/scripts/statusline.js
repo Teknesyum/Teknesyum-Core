@@ -84,25 +84,53 @@ function taskFor(row, pool) {
   return null;
 }
 
+function roleName(role) {
+  if (!role) return t('line.agent');
+  const key = 'role.' + String(role).toLowerCase();
+  const name = t(key);
+  return name === key ? String(role) : name;
+}
+
+function cellName(model, effort) {
+  if (!model) return '';
+  return model + (effort ? '-' + effort : '');
+}
+
 function crew(relay) {
   const a = agents(relay);
   if (!a.running) return '';
   const pool = calls(relay);
-  const tasks = [];
-  const parts = a.rows.map((row) => {
+  const seats = a.rows.map((row) => {
     const c = taskFor(row, pool);
-    tasks.push((c && c.task) || '');
-    const model = row.model || (c && c.model) || '';
-    const cell = model ? ' ' + model + (row.effort ? '/' + row.effort : '') : '';
-    const task = c && c.task ? ' — ' + c.task : '';
-    return (row.role || t('line.agent')) + cell + task;
+    return {
+      role: roleName(row.role),
+      cell: cellName(row.model || (c && c.model) || '', row.effort || (c && c.effort) || ''),
+      task: (c && c.task) || '',
+    };
   });
-  if (parts.length === 1) return parts[0];
-  const brief = a.rows.map((row, i) => {
-    const task = tasks[i];
-    return (row.role || t('line.agent')) + (task ? ' ' + task : '');
-  });
-  return a.running + ' ' + t('line.agents') + ': ' + brief.join(' · ');
+
+  if (seats.length === 1) {
+    const one = seats[0];
+    const head = [one.cell, one.role].filter(Boolean).join(' ');
+    return one.task ? head + ' — ' + one.task : head + ' ' + t('line.working');
+  }
+
+  const same = seats.every((x) => x.role === seats[0].role && x.cell === seats[0].cell);
+  if (same) {
+    const one = seats[0];
+    return seats.length + ' ' + [one.cell, one.role].filter(Boolean).join(' ') + ' ' + t('line.working');
+  }
+
+  const groups = [];
+  for (const x of seats) {
+    const key = x.role + '|' + x.cell;
+    const hit = groups.find((g) => g.key === key);
+    if (hit) hit.n += 1;
+    else groups.push({ key, n: 1, role: x.role, cell: x.cell });
+  }
+  return groups
+    .map((g) => (g.n > 1 ? g.n + ' ' : '') + [g.cell, g.role].filter(Boolean).join(' '))
+    .join(' · ') + ' ' + t('line.working');
 }
 
 function label(r) {
@@ -133,7 +161,7 @@ function counters(relay) {
 }
 
 function titleCase(s) {
-  return String(s).replace(/(^|[\s·×—/])(\p{L})/gu, (m, a, b) => a + b.toLocaleUpperCase('tr'));
+  return String(s).replace(/(^|[\s·×—/-])(\p{L})/gu, (m, a, b) => a + b.toLocaleUpperCase('tr'));
 }
 
 function banner(cwd, phase) {
@@ -157,11 +185,11 @@ function banner(cwd, phase) {
   const k = contracts(r.relay);
   if (k && k.total) {
     const sub = [];
-    if (k.count.active) sub.push(k.count.active + ' ' + t('line.active'));
-    if (k.count.submitted) sub.push(k.count.submitted + ' ' + t('line.submitted'));
-    if (k.count.open) sub.push(k.count.open + ' ' + t('line.open'));
-    if (k.count.blocked) sub.push(k.count.blocked + ' ' + t('line.blocked'));
-    bits.push(sub.length ? sub.join(' ') : k.total + ' ' + t('line.contracts'));
+    if (k.count.blocked) sub.push(k.count.blocked + ' ' + t('line.contract') + ' ' + t('line.blocked'));
+    if (k.count.submitted) sub.push(k.count.submitted + ' ' + t('line.contract') + ' ' + t('line.submitted'));
+    if (k.count.active) sub.push(k.count.active + ' ' + t('line.contract') + ' ' + t('line.active'));
+    if (k.count.open) sub.push(k.count.open + ' ' + t('line.contract') + ' ' + t('line.open'));
+    bits.push(sub.length ? sub.join(' · ') : k.total + ' ' + t('line.contracts'));
   }
   const p = problems(r.relay);
   if (p) bits.push(p + ' ' + t('line.problems'));

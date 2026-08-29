@@ -68,20 +68,20 @@
     "tr": "röle yok"
   },
   "line.active": {
-    "en": "active",
-    "tr": "etkin"
+    "en": "under way",
+    "tr": "sürüyor"
   },
   "line.submitted": {
-    "en": "submitted",
-    "tr": "sunuldu"
+    "en": "waiting at the gate",
+    "tr": "onay bekliyor"
   },
   "line.open": {
-    "en": "open",
-    "tr": "açık"
+    "en": "not started",
+    "tr": "başlanmadı"
   },
   "line.blocked": {
-    "en": "blocked",
-    "tr": "engelli"
+    "en": "stuck",
+    "tr": "tıkandı"
   },
   "line.contracts": {
     "en": "contracts",
@@ -144,6 +144,62 @@
     "tr": "araç çağrısı üst üste başarısız"
   },
   "line.agent": {
+    "en": "agent",
+    "tr": "ajan"
+  },
+  "line.contract": {
+    "en": "contract",
+    "tr": "sözleşme"
+  },
+  "line.working": {
+    "en": "at work",
+    "tr": "çalışıyor"
+  },
+  "line.idle": {
+    "en": "nothing running",
+    "tr": "iş yok"
+  },
+  "role.builder": {
+    "en": "builder",
+    "tr": "yapıcı"
+  },
+  "role.ui-builder": {
+    "en": "ui builder",
+    "tr": "arayüz yapıcı"
+  },
+  "role.planner": {
+    "en": "planner",
+    "tr": "planlayıcı"
+  },
+  "role.auditor": {
+    "en": "auditor",
+    "tr": "denetçi"
+  },
+  "role.advisor": {
+    "en": "advisor",
+    "tr": "danışman"
+  },
+  "role.scout": {
+    "en": "scout",
+    "tr": "izci"
+  },
+  "role.scribe": {
+    "en": "scribe",
+    "tr": "yazıcı"
+  },
+  "role.worker": {
+    "en": "worker",
+    "tr": "işçi"
+  },
+  "role.explore": {
+    "en": "explorer",
+    "tr": "kâşif"
+  },
+  "role.plan": {
+    "en": "planner",
+    "tr": "planlayıcı"
+  },
+  "role.general-purpose": {
     "en": "agent",
     "tr": "ajan"
   }
