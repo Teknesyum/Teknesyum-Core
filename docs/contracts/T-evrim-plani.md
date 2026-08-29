@@ -197,3 +197,44 @@ CI'da gerçekten denemek ya da README'de desteklenen platformu daraltmak. Üçü
 
 **L8 — Sürüm hattı tek komut.** Sürümü tek kaynaktan yaz, etiketle, sağlamaları yayımla,
 CHANGELOG satırını üret, sürüm sapmasında CI kırılsın. A1/A2 bir daha yaşanmasın.
+
+---
+
+## M — Fable'ın değerlendirmesi (advisor)
+
+Her öneri tek tek geçirildi. Kararlar:
+
+| Öneri | Karar | Gerekçe |
+|---|---|---|
+| L1 iddia testi | **Değiştir** | Cümle-teste birebir eşleme tek geliştiricide bürokrasiye döner. README'deki 5-6 çekirdek garantiyi test et, "her cümle" şartını at. |
+| L2 tahminden kanıta | **Katıl** | Kabuk ayrıştırma kazanılamaz bir savaş; guard hız filtresi, karar seal'de. |
+| L3 worktree | **Değiştir** | Kapanışı merge'e çevirmek çakışma çözme angaryası yükler, Windows köşeleri bol. Yalnız yüksek riskli sözleşmede opsiyonel, varsayılan değil. |
+| L4 ölçü defteri | **Yarısına katıl** | Deftere yaz ve `stats` göster; "tablo veriden ayarlansın" ertelensin — n küçükken otomatik ayar gürültü kovalamaktır. |
+| L5 G/B tehdit modeli | **Katıl** | Ucuz, dürüst; ayrımı zaten L2 doğuruyor. |
+| L6 proje profili | **Katıl** | Küçük iş, bariz doğru. |
+| L7 platform dürüstlüğü | **Katıl** | Bugün README'yi "Windows'ta test edildi"ye daralt, CI gelince genişlet. |
+| L8 sürüm hattı | **Katıl** | 404 bunun kanıtı; ama CI yokken tek `release.js` yeter, hattı büyütme. |
+| Sole: işlem + kurtarma | **Katıl** | Kapanış çok dosyaya dokunuyor, yarıda kesilme gerçek senaryo. |
+| Sole: kanıt komuta bağlansın | **Katıl** | Sahte run-id deliğini kapatan en ucuz yol. |
+| Sole: boş verify tanımı | **Katıl, genişlet** | Tek şema kontrolüyle biter; sözleşmenin tamamını yüklerken doğrula. |
+| Sole: `plugin eval` katmanı | **Karşı çık** | Model davranış testi pahalı ve kararsız; deterministik kapı asıl garanti. Ürün olgunlaşınca. |
+
+**Ağırlığından çökecekler:** L1'in tam biçimi, L3'ün varsayılan hâli, L4'ün otomatik ayar yarısı,
+eval katmanı. Dördü de bakım yükü tek kişinin omzunda büyüyen altyapı.
+
+**Listede olmayan, eklenenler:**
+
+| # | Ne |
+|---|---|
+| M1 | **Asgari CI birçok maddenin ön koşulu.** Üç işletim sisteminde mevcut test dosyasını koşturan tek workflow; L7 ve L8'i bedavaya getirir. "CI yok" bir tercihti, artık engel. |
+| M2 | **Atomik yazma yardımcısı.** `_tally` yarışını nokta yamayla değil, her kancanın kullandığı tek `writeAtomic` (tmp + rename) ile çöz. |
+| M3 | **Setup yedeği.** `settings.json`'a dokunmadan önce `.bak`. Silme hatasının düzeltmesi ayrı, yedek ayrı sigorta. |
+| M4 | **Uçtan uca duman testi.** Sahte bir sözleşmeyi `open → done` tam yaşam döngüsünde koşturan tek test; 2294 iddia birim seviyesinde, boru hattının bütününü kimse test etmiyor. |
+
+**Kabul edilen sıra:**
+
+`A (yayın) → settings.json silinmesi → kapı (sahte run-id, status merdiveni, Bash sahipliği)
+→ guard'ın kapalı düşmesi → yarışlar (M2 ile) → L2 → Sole 1-3 → L5 / L6 / L7 / L8`
+
+Fable'ın tek sıra değişikliği: kullanıcının tüm ayarını yok eden hata, kapının gevşekliğinden
+acildir; F1 kapı düzeltmelerinin önüne alındı.
