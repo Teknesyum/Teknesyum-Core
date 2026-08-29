@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { read, write, safe, relayRoot, liveDir, sessionId, setNotice, t } = require('./lib.js');
+const { read, write, merge, safe, relayRoot, liveDir, sessionId, setNotice, t } = require('./lib.js');
 
 let raw = '';
 process.stdin.on('data', (d) => (raw += d));
@@ -32,10 +32,18 @@ function roleOf(j) {
   return m ? m[1].toLowerCase() : '';
 }
 
-function bumpTally(live, step, fails) {
+function bumpTally(live, step, fails, agent, contract) {
   const f = path.join(live, '_tally.json');
-  const cur = read(f) || {};
-  write(f, { steps: (cur.steps || 0) + (step ? 1 : 0), fails: fails });
+  merge(f, (cur) => {
+    const by = cur.byAgent && typeof cur.byAgent === 'object' ? Object.assign({}, cur.byAgent) : {};
+    if (agent) {
+      if (fails) by[agent] = { fails: fails, contract: contract || '' };
+      else delete by[agent];
+    }
+    let worst = 0;
+    for (const k of Object.keys(by)) worst = Math.max(worst, Number(by[k].fails || 0));
+    return { steps: (cur.steps || 0) + (step ? 1 : 0), fails: worst, byAgent: by };
+  });
 }
 
 function logCall(live, role, input) {
@@ -81,16 +89,15 @@ function record(j) {
   if (ev === 'PostToolUseFailure') {
     rec.fails = (rec.fails || 0) + 1;
     rec.failedTool = j.tool_name || '';
-    bumpTally(live, false, rec.fails);
-    write(file, rec);
-    sweep(live);
+    bumpTally(live, false, rec.fails, key, rec.contract || '');
+    save(file, rec);
     return;
   }
 
   if (ev === 'PostToolUse') {
     rec.steps = (rec.steps || 0) + 1;
     rec.fails = 0;
-    bumpTally(live, true, 0);
+    bumpTally(live, true, 0, key, rec.contract || '');
     rec.tool = j.tool_name || '';
     if (WRITE_TOOLS.test(j.tool_name || '')) {
       const t = j.tool_input || {};
@@ -110,9 +117,22 @@ function record(j) {
     }
   }
 
-  write(file, rec);
+  save(file, rec);
   if (ev === 'SessionEnd') closeAll(live, now);
-  sweep(live);
+  if (ev === 'SessionEnd' || ev === 'Stop' || ev === 'SubagentStop') sweep(live);
+}
+
+function save(file, rec) {
+  merge(file, (cur) => {
+    const next = Object.assign({}, cur, rec);
+    if (cur.contract && !rec.contract) next.contract = cur.contract;
+    if (Array.isArray(cur.files)) {
+      const seen = new Set(next.files || []);
+      for (const f of cur.files) if (!seen.has(f)) (next.files = next.files || []).push(f);
+    }
+    if (!rec.ended) delete next.ended;
+    return next;
+  });
 }
 
 function closeAll(live, now) {

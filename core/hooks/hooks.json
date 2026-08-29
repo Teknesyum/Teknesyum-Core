@@ -31,6 +31,7 @@
     ],
     "PostToolUseFailure": [
       {
+        "matcher": "Write|Edit|NotebookEdit|Bash|Agent|Task",
         "hooks": [
           {
             "type": "command",
@@ -41,6 +42,7 @@
     ],
     "PostToolUse": [
       {
+        "matcher": "Write|Edit|NotebookEdit|Bash|Agent|Task",
         "hooks": [
           {
             "type": "command",

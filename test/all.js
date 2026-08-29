@@ -939,8 +939,8 @@ function testTier(root) {
   ok('roleBase reports the cell it read', JSON.stringify(roleBase('builder', 'premium')) === JSON.stringify({ row: 'builder', profile: 'premium', model: 'opus', effort: 'medium' }));
   ok('an unknown role resolves to nothing', tier('worker-lite', { profile: 'normal' }) === null);
 
-  ok('signal 1: two identical failures raise the effort', cellOf(tier('builder', { profile: 'normal', repeatFail: 2 })) === 'sonnet/high');
-  ok('signal 1: a third failure raises the model', tier('builder', { profile: 'normal', repeatFail: 3 }).model === 'opus');
+  ok('signal 1: one failure changes nothing', cellOf(tier('builder', { profile: 'normal', repeatFail: 1 })) === 'sonnet/medium');
+  ok('signal 1: the second failure raises the model, we do not wait for a third', tier('builder', { profile: 'normal', repeatFail: 2 }).model === 'opus');
   ok('signal 2: round 3 raises the builder model', tier('builder', { profile: 'normal', round: 3 }).model === 'opus');
   ok('signal 2: round 2 does not', tier('builder', { profile: 'normal', round: 2 }).model === 'sonnet');
   ok('signal 2 applies to ui-builder too', tier('ui-builder', { profile: 'eco', round: 3 }).model === 'opus');
@@ -1341,6 +1341,59 @@ function testSafety() {
   } catch {}
 }
 
+function testRaces() {
+  const root = fixture();
+  const relay = path.join(root, '.claude', 'relay');
+  const lib = require(path.join(CORE, 'hooks', 'lib.js'));
+  const live = lib.liveDir(relay);
+  const WATCH = path.join(CORE, 'hooks', 'watch.js');
+  const tally = path.join(live, '_tally.json');
+  fs.mkdirSync(live, { recursive: true });
+
+  const fire = (ev, tool, agent) =>
+    run(process.execPath, [WATCH], {
+      cwd: root,
+      input: JSON.stringify({ hook_event_name: ev, tool_name: tool, agent_id: agent, cwd: root }),
+    });
+
+  fs.rmSync(tally, { force: true });
+  fire('PostToolUseFailure', 'Bash', 'a1');
+  fire('PostToolUseFailure', 'Bash', 'a1');
+  fire('PostToolUse', 'Bash', 'a2');
+  const t1 = JSON.parse(fs.readFileSync(tally, 'utf8'));
+  ok('the failing agent is named, not just counted', (t1.byAgent && t1.byAgent.a1 && t1.byAgent.a1.fails) === 2, JSON.stringify(t1));
+  ok('a working agent leaves no failure behind it', !(t1.byAgent && t1.byAgent.a2), JSON.stringify(t1));
+
+  const shown = require(path.join(CORE, 'scripts', 'statusline.js'));
+  ok('the banner still reports the worst run it can see', /Dikkat|Heads/i.test(shown.banner(root)), shown.banner(root));
+
+  fire('PostToolUse', 'Bash', 'a1');
+  const t2 = JSON.parse(fs.readFileSync(tally, 'utf8'));
+  ok('a clean step wipes that agent off the failure list', !(t2.byAgent && t2.byAgent.a1), JSON.stringify(t2));
+  ok('and the relay figure falls with it', (t2.fails || 0) === 0, JSON.stringify(t2));
+
+  writeContract(root, 'R1', '# R1\nstatus: active\nowns: [src/ok.js]\nverify:\n  - true\n');
+  const mine = path.join(live, 'a3.json');
+  fs.writeFileSync(mine, JSON.stringify({ id: 'a3', files: [], contract: 'R1' }));
+  fire('PostToolUse', 'Bash', 'a3');
+  const kept = JSON.parse(fs.readFileSync(mine, 'utf8'));
+  ok('the tool hook does not wipe the contract the gate bound', kept.contract === 'R1', JSON.stringify(kept));
+
+  const merged = path.join(live, '_m.json');
+  lib.write(merged, { a: 1, files: ['x'] });
+  lib.merge(merged, (cur) => Object.assign({}, cur, { b: 2 }));
+  const m = JSON.parse(fs.readFileSync(merged, 'utf8'));
+  ok('a merge keeps the field it did not come for', m.a === 1 && m.b === 2, JSON.stringify(m));
+
+  const hooks = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8')).hooks;
+  ok('the tool hook no longer runs on every read', /Write\|Edit/.test(hooks.PostToolUse[0].matcher || ''), String(hooks.PostToolUse[0].matcher));
+  ok('nor does the failure hook', /Write\|Edit/.test(hooks.PostToolUseFailure[0].matcher || ''), String(hooks.PostToolUseFailure[0].matcher));
+
+  try {
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}
+
 function main() {
   const root = fixture();
   testGuard(root);
@@ -1359,6 +1412,7 @@ function main() {
   testTierVisible(root);
   testLadder();
   testSafety();
+  testRaces();
   testFigures();
   testNoContextWrites();
 

@@ -40,6 +40,14 @@ function write(f, data) {
   }
 }
 
+function merge(f, patch) {
+  const now = read(f);
+  const base = now && typeof now === 'object' && !Array.isArray(now) ? now : {};
+  const next = typeof patch === 'function' ? patch(base) : Object.assign({}, base, patch);
+  write(f, next);
+  return next;
+}
+
 function norm(p) {
   return path.normalize(String(p)).replace(/\\/g, '/');
 }
@@ -229,6 +237,7 @@ module.exports = {
   stateFile,
   read,
   write,
+  merge,
   norm,
   safe,
   exists,

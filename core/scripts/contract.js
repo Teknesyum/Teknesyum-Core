@@ -330,10 +330,13 @@ function tier(role, opt) {
   };
 }
 
-function tallyFails(relay) {
+function tallyFails(relay, agent) {
   if (!relay) return 0;
   try {
     const t = JSON.parse(fs.readFileSync(path.join(liveDir(relay), '_tally.json'), 'utf8'));
+    const by = t.byAgent || {};
+    if (agent && by[agent]) return Number(by[agent].fails || 0);
+    if (agent) return 0;
     return Number(t.fails || 0);
   } catch {
     return 0;
@@ -405,7 +408,7 @@ function tierCmd() {
     profile: arg('profile'),
     risk: riskLevel,
     round,
-    repeatFail: arg('repeat-fail') || tallyFails(relay),
+    repeatFail: arg('repeat-fail') || tallyFails(relay, arg('run-id') || arg('agent')),
     irreversible: (irrev && irrev.hit) || has('irreversible'),
     model: arg('model'),
     effort: arg('effort'),

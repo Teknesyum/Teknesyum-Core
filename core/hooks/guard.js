@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { read, write, safe, norm, relayRoot, projectRoot, liveDir, logProblem, settings } = require('./lib.js');
+const { read, write, merge, safe, norm, relayRoot, projectRoot, liveDir, logProblem, settings } = require('./lib.js');
 const { RANK, isContractName, status, isKnownStatus, list, owned } = require('./schema.js');
 
 let raw = '';
@@ -231,10 +231,13 @@ function bind(target, agentId) {
   const relay = relayOf(abs);
   if (!relay) return;
   const f = bindingFile(relay, agentId);
-  const rec = read(f) || { id: safe(String(agentId)), files: [] };
+  const rec = read(f) || {};
   if (rec.contract === path.basename(abs, '.md')) return;
-  rec.contract = path.basename(abs, '.md');
-  write(f, rec);
+  merge(f, (cur) =>
+    Object.assign({ id: safe(String(agentId)), files: [] }, cur, {
+      contract: path.basename(abs, '.md'),
+    })
+  );
 }
 
 function ownedBy(relay, id) {

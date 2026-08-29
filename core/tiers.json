@@ -91,7 +91,7 @@
   "signals": {
     "repeatFail": {
       "effortAt": 2,
-      "modelAt": 3
+      "modelAt": 2
     },
     "roundModelBump": 3,
     "roundAdvisorRequired": 4,
