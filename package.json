@@ -1,6 +1,6 @@
 {
   "name": "teknesyum-core",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "private": true,
   "description": "Contract gate for multi-agent work in Claude Code.",
   "license": "AGPL-3.0-or-later",

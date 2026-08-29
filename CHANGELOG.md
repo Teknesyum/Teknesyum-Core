@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.4
+
+- The support section speaks to the reader
+
 ## v0.4.3
 
 - The last section says what support does instead of repeating the license

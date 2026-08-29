@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Teknesyum Core
-# Install:  curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.4.3/install.sh | bash
+# Install:  curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.4.4/install.sh | bash
 set -e
 
 REPO="Teknesyum/Teknesyum-Core"
