@@ -262,7 +262,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,310 assertions over the guard, the completion gate, the audit chain, the ledger, the
+2,317 assertions over the guard, the completion gate, the audit chain, the ledger, the
 known bypasses, the tier and quota locks, the personal-convention gate, the scaffold, the
 cue, the banner, and one check that no hook writes into context.
 

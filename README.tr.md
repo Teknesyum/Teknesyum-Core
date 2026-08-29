@@ -260,7 +260,7 @@ kenarlar. Okuması dosya açmaktan ucuz ve dosya açmanın cevaplamadığı şey
 node test/all.js
 ```
 
-2.310 doğrulama: guard, kapanış kapısı, denetim zinciri, defter, bilinen aşma yolları,
+2.317 doğrulama: guard, kapanış kapısı, denetim zinciri, defter, bilinen aşma yolları,
 kademe ve kota kilitleri, kişisel sözleşme kapısı, scaffold, cue, banner ve hiçbir kancanın
 bağlama yazmadığına dair tek bir denetim.
 

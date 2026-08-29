@@ -15,13 +15,18 @@ process.stdin.on('end', () => {
   try {
     decide(j);
   } catch (e) {
-    return failClosed('the gate threw: ' + String((e && e.message) || e));
+    return failClosed('the gate threw: ' + String((e && e.message) || e), j.cwd);
   }
   process.exit(0);
 });
 
-function failClosed(why) {
+function failClosed(why, cwd) {
   if (process.env.TEKNESYUM_GATE_OPEN === '1') return process.exit(0);
+  try {
+    if (!relayRoot(cwd || process.cwd(), { git: false })) return process.exit(0);
+  } catch {
+    return process.exit(0);
+  }
   return block(
     why + '.',
     'The gate could not verify and fell closed.',

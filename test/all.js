@@ -1304,6 +1304,43 @@ function testLadder() {
   } catch {}
 }
 
+function testSafety() {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-cfg-'));
+  const settings = path.join(home, 'settings.json');
+  const SETUP = path.join(CORE, 'scripts', 'setup.js');
+
+  const mine = '{ "model": "opus", // yorum\n  "permissions": {} }';
+  fs.writeFileSync(settings, mine, 'utf8');
+  const broke = run(process.execPath, [SETUP, '--apply', '--lang', 'tr'], {
+    env: { ...process.env, CLAUDE_CONFIG_DIR: home },
+  });
+  ok('setup refuses a settings.json it cannot parse', broke.status !== 0, broke.stdout + broke.stderr);
+  ok(
+    'and leaves every one of the user settings where they were',
+    fs.readFileSync(settings, 'utf8') === mine,
+    fs.readFileSync(settings, 'utf8')
+  );
+
+  fs.writeFileSync(settings, JSON.stringify({ model: 'opus', env: { A: '1' } }, null, 2), 'utf8');
+  const fine = run(process.execPath, [SETUP, '--apply', '--lang', 'tr'], {
+    env: { ...process.env, CLAUDE_CONFIG_DIR: home },
+  });
+  ok('setup writes when the file is readable', fine.status === 0, fine.stdout + fine.stderr);
+  const after = JSON.parse(fs.readFileSync(settings, 'utf8'));
+  ok('the settings it did not come for survive', after.model === 'opus' && after.env && after.env.A === '1', JSON.stringify(after));
+  ok('the statusline is wired', !!(after.statusLine && after.statusLine.command), JSON.stringify(after.statusLine));
+  ok('and the previous file is kept as a backup', fs.existsSync(settings + '.bak'));
+
+  const plain = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-plain-'));
+  const thrown = run(process.execPath, [GUARD], { cwd: plain, input: 'not json at all' });
+  ok('the gate stays out of the way in a project that has no relay', thrown.status === 0, thrown.stdout + thrown.stderr);
+
+  try {
+    fs.rmSync(home, { recursive: true, force: true, maxRetries: 3 });
+    fs.rmSync(plain, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}
+
 function main() {
   const root = fixture();
   testGuard(root);
@@ -1321,6 +1358,7 @@ function main() {
   testQuota(root);
   testTierVisible(root);
   testLadder();
+  testSafety();
   testFigures();
   testNoContextWrites();
 

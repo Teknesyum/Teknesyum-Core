@@ -99,7 +99,25 @@ function inspect() {
 
 function wireStatusline() {
   const p = settingsPath();
-  const s = read(p) || {};
+  let s = {};
+  let had = false;
+  try {
+    const raw = fs.readFileSync(p, 'utf8');
+    had = true;
+    s = JSON.parse(raw);
+    if (!s || typeof s !== 'object' || Array.isArray(s)) throw new Error('not an object');
+    fs.writeFileSync(p + '.bak', raw, 'utf8');
+  } catch (e) {
+    if (had)
+      throw new Error(
+        'refusing to touch ' +
+          p +
+          ' - it is there but cannot be read as JSON (' +
+          String((e && e.message) || e) +
+          '). Fix or move it, then run setup again. Nothing was written.'
+      );
+    s = {};
+  }
   const bridge = path.join(pluginDir(), 'scripts', 'bridge.js').replace(/\\/g, '/');
   s.statusLine = { type: 'command', command: 'node "' + bridge + '"', padding: 0 };
   fs.mkdirSync(path.dirname(p), { recursive: true });
