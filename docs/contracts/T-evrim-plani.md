@@ -238,3 +238,52 @@ eval katmanı. Dördü de bakım yükü tek kişinin omzunda büyüyen altyapı.
 
 Fable'ın tek sıra değişikliği: kullanıcının tüm ayarını yok eden hata, kapının gevşekliğinden
 acildir; F1 kapı düzeltmelerinin önüne alındı.
+
+---
+
+## N — Yetenek tablosu, maliyetiyle (fable)
+
+Maliyet üç ayrı sütun: **yapım** (bir kerelik iş), **bakım** (her sürümde bıraktığı yük),
+**çalışma** (kullanıcının her tur ya da her kapanışta ödediği). Kırmızı çizgi: sıradan turda
+modele tek kelime yazılmaz.
+
+| Özellik | Ne işe yarar | Yapım | Bakım | Çalışma | Değer | Karar |
+|---|---|---|---|---|---|---|
+| reopen | Kapanmış sözleşmeyi gerekçeyle geri açar | S | S | Sıfır, elle | Yüksek | **Şimdi** |
+| stale | Uzun süre dokunulmayanı işaretler | S | S | Bir mtime bakışı | Orta | **Şimdi** |
+| needs: | Bağımlısı kapanmadan iş başlamaz | M | M — döngü tespiti hep sizinle | Kapanışta grafik taraması | Yüksek | **Şimdi** |
+| stats | Rol/model/tur/süre defteri + özet | S | S | Kapanış başına bir append | Yüksek | **Şimdi** |
+| doctor | Ortam denetimi: node, git, kanca kaydı, bozuk sözleşme | M | M — her yeni özellik satır ister | Sıfır, elle | Yüksek | **Şimdi** |
+| Proje profili | Proje ayarı makine ayarını ezer | S | S | Bir dosya okuma | Yüksek | **Şimdi** |
+| release betiği | Sürüm/etiket/CHANGELOG tek kaynaktan | S-M | S — şema değişmedikçe uyur | Sıfır, yayında | Yüksek | **Şimdi** |
+| Asgari CI | Üç OS'te mevcut testi koşturur | S | M — kırmızıya dönene siz bakarsınız | Sıfır | Yüksek | **Şimdi** |
+| Duman testi | `open → done` tam turu koşar | M | M — boru hattı değişince kırılır, iyi ki | Sıfır | Yüksek | **Şimdi** |
+| Seal anlık görüntü | Adım öncesi/sonrası ağaç hash'i, fark kanıt olur | M | M — guard'la görev ayrımı ister | Adım başına bir hash | Yüksek | **Şimdi** |
+| audit verify | Mühür zincirini baştan doğrular | S | S | Sıfır, elle | Orta | Sonra |
+| Sözleşme şablonları | bugfix/refactor/feature kalıpları | S | M — şema değişince hepsi | Sıfır | Orta | Sonra |
+| Sözleşme kirası | İki oturum aynı sözleşmeyi alamaz | M | M — ölü kilit temizliği köşeli | Alışta bir kontrol | Orta | Sonra |
+| Takılan ajan bekçisi | Süre aşan ajanı işaretler, sözleşmeyi bırakır | M | M — eşik hep tartışmalı | Bir zaman bakışı | Orta | Sonra |
+| Kapanış bildirimi | Kapanışta toast | S | S | Kapanış başına süreç | Düşük | Sonra |
+| Arşivleme | Kapanan sözleşme `trash/`'e | S | S | Bir taşıma | Orta | Sonra |
+| Worktree (yüksek risk) | Riskli sözleşme izole kopyada | L | L — Windows, IDE, node_modules | Disk + kurulum saniyeleri | Orta | Sonra |
+| Sözleşme grafiği panosu | `needs:` grafiğini HTML'e çizer | M | M | Sıfır | Düşük | **Yapma** — statusline aynısını tek satırda söylüyor |
+| Verify önbelleği | Değişmeyen owns'ta verify atlanır | M | L — yanlış atlama kapının itibarını yer | Hash karşılaştırma | Düşük | **Yapma** — kapının tek işi koşmak |
+| Monorepo / çoklu repo | Sözleşme birden çok repoya yayılır | L | L — her mekanizma iki kez | Her hook'ta repo çözümleme | Düşük | **Yapma** — tek geliştirici, tek repo |
+| Modele yönlendirme notu | Tur başında bağlama öneri satırı | S | S | **0-token çizgisini ihlal eder** | — | **Yapma** — çizgi tartışmaya kapalı |
+
+Kırmızı çizgiyi ihlal eden tek satır: modele yönlendirme notu. Gerisi kanca/betik tarafında kalıyor.
+
+### Worktree kararı
+
+Gerçek maliyet yapımda değil sonrasında: sözleşme başına tam çalışma kopyası, kurulumda
+saniyeler, kapanışta **birleştirme** — çakışma çıkınca çözen kişi geliştiricinin kendisi ve
+paralel ajanların bütün kazancı o kuyrukta eriyor. Windows'ta uzun yol adları, kilitli
+dosyalar, IDE'nin hangi kopyaya baktığı karmaşası cabası.
+
+Amorti eşiği: aynı dosyalara dokunmayan ama **aynı anda koşan 3+ sözleşme** düzenli hâle
+geldiğinde ve guard/seal ihlalleri gerçekten yaşandığında. Bugün o eşikte değiliz.
+
+Ucuz yarı yol zaten listede: **seal anlık görüntüsü** + kapanışta "owns dışında dosya
+değişmiş mi" kontrolü. Bu ikili, worktree'nin verdiği garantinin büyük kısmını sıfır
+birleştirme angaryasıyla veriyor. Worktree yüksek riskli sözleşmede opsiyonel bayrak olarak
+arka cepte kalsın; seal verisi ihlal göstermedikçe cepten çıkmasın.
