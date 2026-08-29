@@ -102,22 +102,6 @@ modunu `.claude/relay/config.json` içinde sabitleyebilir.
 
 ---
 
-## Neyi yapmıyor
-
-- **Ajanlarınızı akıllandırmıyor.** Kötü kapanışı reddeder, o kadar.
-- **Kum havuzu değil.** `guard.js` bir politika, çekirdek değil. Düzenleme araçlarının
-  önünde durur; kabuğa çıkan bir ajan hâlâ her yere yazabilir.
-- **`verify` sizin kabuğunuz.** Doğrulama adımı, on beş dakika zaman aşımıyla bir komut
-  olarak koşar; kabuğunuzun yapabildiği her şeyi yapabilir. Çalıştırmadan önce sözleşmeyi
-  okuyun.
-- **Denetim kayıtları zincirli değil.** Her kayıt kendi sözleşmesine, HEAD'e ve sahiplendiği
-  dosyaların içeriğine bağlı — ama kayıtlar birbirine bağlı değil.
-- **Slash komutu yok, bilerek.** Giriş noktası `relay` skill'i; gerisi betik.
-- **Claude Code'u çeviremiyor.** Core sizin dilinizde konuşur, istemcinin etiketleri değil.
-- **Git'inize dokunmuyor.** Commit yok, dal yok, push yok.
-
----
-
 ## Kurulum
 
 ### Windows — tek satır
@@ -445,9 +429,14 @@ Vaktinizden kazandırıyorsa [çalışmayı destekleyebilirsiniz](https://github
 
 ---
 
-## Lisans
+## Destek
 
-AGPL-3.0-or-later. Bkz. [LICENSE](LICENSE).
+Teknesyum Core tek kişinin işi ve kendi uygulamalarımı her gün onunla geliştiriyorum; destek
+gelse de gelmese de iş sürüyor. Destek, var olup olmayacağını değil, ne kadar vakit alacağını
+değiştiriyor.
+
+Lisans her durumda AGPL-3.0-or-later. Destek özellik ya da öncelik satın almıyor; buradaki
+her şey, destekleyenler dahil herkes için ücretsiz kalıyor.
 
 <!-- signature -->
 <div align="center">

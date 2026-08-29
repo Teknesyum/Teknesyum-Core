@@ -103,23 +103,6 @@ repository can pin its own in `.claude/relay/config.json`.
 
 ---
 
-## What it does not do
-
-- **It will not make your agents smarter.** It refuses bad closes, that is all.
-- **It is not a sandbox.** `guard.js` is a policy, not a kernel. It stands in front of the
-  editing tools; an agent that shells out can still write anywhere.
-- **`verify` is your shell.** A verify step runs as a command with a fifteen-minute
-  timeout, so it can do whatever your shell can do. Read a contract before you run it.
-- **Audit records are not chained.** Each record is bound to its own contract, to HEAD and
-  to the contents of the files it owns — but the records are not linked to one another.
-- **No slash commands, on purpose.** The entry point is the `relay` skill; the rest are
-  scripts.
-- **It cannot translate Claude Code.** Core speaks your language; the client's own labels
-  are out of reach.
-- **It does not touch your git.** No commits, no branches, no pushes.
-
----
-
 ## Install
 
 ### Windows — one line
@@ -450,9 +433,14 @@ If it saves you time, you can [sponsor the work](https://github.com/sponsors/Tek
 
 ---
 
-## License
+## Support
 
-AGPL-3.0-or-later. See [LICENSE](LICENSE).
+Teknesyum Core is one developer's work, and I use it daily to build my own applications, so
+the work continues whether it is sponsored or not. Sponsorship changes how much time it gets,
+not whether it exists.
+
+The license is AGPL-3.0-or-later either way. Sponsoring buys no features and no priority;
+everything here stays free for everyone, sponsors included.
 
 <!-- signature -->
 <div align="center">
