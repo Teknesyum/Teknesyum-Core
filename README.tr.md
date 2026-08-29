@@ -14,26 +14,26 @@
 
 ## Nedir
 
-Teknesyum Core, Claude Code için tasarlanmış çok amaçlı bir plugindir. Büyük işleri küçük
-sözleşmelere böler: her sözleşme hangi dosyalara dokunacağını ve bittiğini nasıl
-kanıtlayacağını baştan yazar. Ajanlar paralel çalışır, her iş kendine uygun modelde koşar ve
-doğrulama komutları geçmeden hiçbir sözleşme kapanmaz.
+Teknesyum Core, Claude Code için tasarlanmış çok amaçlı bir plugindir. Büyük işi küçük
+sözleşmelere böler: her sözleşme hangi dosyalara sahip olduğunu ve bittiğini nasıl
+kanıtlayacağını yazar. Ajanlar paralel çalışır, her işe boyuna uygun model gider ve hiçbir
+sözleşme doğrulama komutları gerçekten geçmeden kapanmaz.
 
 ---
 
 ## Bunu native Claude Code zaten yapmıyor mu?
 
-Bir kısmını yapıyor: subagent çağırır, paralel çalıştırır, plan tutar. Core'un eklediği şu:
+Bir kısmını yapıyor: alt ajan açar, paralel çalıştırır, plan tutar. Core'un eklediği:
 
-- **"Bitti"yi model değil betik söyler.** Native'de ajan "bitti" der, iş biter. Core'da
-  sözleşme, doğrulama komutları gerçekten geçmeden kapanmaz; komutları `contract.js` kendisi
-  çalıştırır.
-- **Dosya sahipliği zorlanır.** Native'de iki paralel ajan aynı dosyayı ezebilir. Core'da
-  guard, sözleşmesinde yazmayan dosyaya yazdırmaz.
-- **İş diskte yaşar.** Sözleşme bir dosyadır; oturum kapanır, sözleşme kalır. Yarın kaldığı
-  yerden devam edersiniz.
-- **Bağlamda yer kaplamaz.** Komut listesi, kural bloğu, ajan tanımı — hiçbiri her mesaja
-  eklenmiyor. Her şey kancalarda dönüyor: tur başına 0 token.
+- **"Bitti"ye model değil betik karar verir.** Native'de ajan bitirdim der ve iş biter.
+  Core'da sözleşme, verify komutları gerçekten geçmeden kapanamaz — komutları
+  `contract.js` kendi çalıştırır.
+- **Dosya sahipliği uygulanır.** Native'de paralel iki ajan aynı dosyayı ezebilir. Core'un
+  kapısı, sözleşmenin sahip olmadığı dosyaya yazmayı engeller.
+- **İş diskte durur.** Sözleşme bir dosyadır; oturum biter, sözleşme kalır. Yarın kaldığın
+  yerden devam edersin.
+- **Bağlamda yer kaplamaz.** Her mesaja komut listesi, kural bloğu, ajan açıklaması
+  eklenmez. Her şey kancalarda çalışır: tur başına 0 token.
 
 ---
 
@@ -46,9 +46,9 @@ Bir kısmını yapıyor: subagent çağırır, paralel çalıştırır, plan tut
 - **Rol dosyaları** — Yapıcı, planlayıcı, denetçi, danışman. Rol metnini yalnızca o rolü
   taşıyan ajan ödüyor, sizin oturumunuz değil.
 - **Banner ve statusline** — O an ne olduğunu tek satırda söyler. Pano değil.
-- **Devir notu** — `.claude/relay/HANDOFF.md` projenin nerede olduğunu yazar: ne açık, en son
-  ne kapandı, hangi dal. Oturum biterken bir kanca tazeler, yani bedeli yok; Claude değil,
-  herhangi bir model okuyabilir.
+- **Devir notu** — `.claude/relay/HANDOFF.md` projenin nerede olduğunu yazar: ne açık, en
+  son ne kapandı, hangi dal. Oturum biterken bir kanca tazeler, yani bedeli yok; Claude
+  değil, herhangi bir model okuyabilir.
 - **Ajanı çağırmadan sor** — `contract.js precheck` verify adımlarını önce çalıştırır.
   Zaten geçiyorsa iş bitmiştir, ajan açmaya değmez.
 - **`doctor`** — Kurulumun sağlam olup olmadığını tek komut söyler: sürümler, tablo, roller,
@@ -59,10 +59,46 @@ Bir kısmını yapıyor: subagent çağırır, paralel çalıştırır, plan tut
 ## Neyi yapmıyor
 
 - **Ajanlarınızı akıllandırmıyor.** Kötü kapanışı reddeder, o kadar.
+- **Kum havuzu değil.** `guard.js` bir politika, çekirdek değil. Düzenleme araçlarının
+  önünde durur; kabuğa çıkan bir ajan hâlâ her yere yazabilir.
+- **`verify` sizin kabuğunuz.** Doğrulama adımı, on beş dakika zaman aşımıyla bir komut
+  olarak koşar; kabuğunuzun yapabildiği her şeyi yapabilir. Çalıştırmadan önce sözleşmeyi
+  okuyun.
+- **Denetim kayıtları zincirli değil.** Her kayıt kendi sözleşmesine, HEAD'e ve sahiplendiği
+  dosyaların içeriğine bağlı — ama kayıtlar birbirine bağlı değil.
 - **Slash komutu yok, bilerek.** Giriş noktası `relay` skill'i; gerisi betik.
-- **Kum havuzu değil.** `guard.js` bir politika, çekirdek değil.
 - **Claude Code'u çeviremiyor.** Core sizin dilinizde konuşur, istemcinin etiketleri değil.
 - **Git'inize dokunmuyor.** Commit yok, dal yok, push yok.
+
+---
+
+## Kurmalı mısınız?
+
+Tek depoda paralel birkaç ajan çalıştırıyorsanız ve bir ajanın "bitti" dediği işin bitmemiş
+olması sizi yaktıysa kurun. Bu eklentinin gerçekten çözdüğü sorun bu:
+`contract.js complete` kabul komutlarını kendisi yeniden çalıştırır, geçmeyen kapanışı
+reddeder, yüksek riskte de dosya içeriklerine ve HEAD'e bağlı bir denetim kaydı ister.
+Native Claude Code'da bunun karşılığı yok — ajanın başarı iddiası sözüne inanılarak kabul
+edilir.
+
+Bir de daha nadir bir şey alıyorsunuz: bağlam penceresi konusunda disiplin. Sıradan bir
+turda hiçbir kanca modelin bağlamına tek token yazmaz; durum statusline'dan ve yalnızca
+çizilen bir banner'dan gider. Bu alandaki eklentilerin çoğu size her mesajda token'a mal
+olur. Bu, ölçülebilir biçimde olmuyor.
+
+Küçük iş için kurmayın. Tek dosyalık düzeltmenin sözleşmeye ihtiyacı yok, eklentinin kendi
+skill'i de bunu söylüyor. Güvenlik sınırı arıyorsanız da geçin: `guard.js` düzenleme
+araçlarından geçen yazımı engeller, ama kabuğa çıkan ajan her yere yazabilir, verify
+adımları on beş dakikaya kadar serbest kabuk çalıştırır ve relay'i olmayan bir projede kapı
+kapalı değil açık düşer.
+
+Olgunluğu da dürüstçe tartın. Tek geliştirici, v0.2.0, ilk açık etiketler bu ay. Denetim
+kayıtları tek tek bağlı ama birbirine zincirli değil. Geliştirme Windows öncelikli; Linux ve
+macOS'u günlük kullanım değil CI kapsıyor. Test takımı (2.352 assertion, üç platform)
+gerçek, ama sahadaki geçmiş yıllarla değil haftalarla ölçülüyor.
+
+*Kaynak üzerinden Claude (Fable 5) değerlendirdi; dışarıdan görüş istendi ve olduğu gibi
+yayımlandı.*
 
 ---
 
@@ -90,19 +126,18 @@ curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.2.0/ins
 /plugin install teknesyum-core@teknesyum
 ```
 
-**Sonrasında Claude Code'u yeniden başlatın.** Kancalar oturum ortasında yeniden yükleniyor
-ama masaüstü istemci ürettiklerini yeniden başlatana kadar çizmiyor. Bunu herkes bir kez
-unutuyor.
+**Sonrasında Claude Code'u yeniden başlatın.** Kancalar oturum ortasında yeniden yüklenir
+ama masaüstü istemci ürettiklerini yeniden çizmez. Bunu herkes bir kez unutuyor.
 
-İki tek satırlık komut da `main`'e değil bir etikete bakıyor — kabuğa borulanan şey
-yayınlanmış betik olmalı, dalın o gün taşıdığı şey değil. Her sürüm iki kurulum betiğinin
-SHA-256 özetini yayınlıyor.
+İki tek satırlık kurulum da bir etikete bakıyor, `main`'e değil — kabuğa borulayacağınız
+şey, dalın bugün ne taşıdığı değil, yayımlanmış betik olmalı. Her sürüm iki kurulum
+betiğinin de SHA-256'sını yayımlıyor.
 
-**Gerekli:** Claude Code, git. **İsteğe bağlı:** Node.js. O olmadan durum satırı ve kapı
-betikleri çalışmıyor; bu size söyleniyor, tahmine bırakılmıyorsunuz.
+**Gerekli:** Claude Code, git. **İsteğe bağlı:** Node.js. O olmadan statusline ve kapı
+betikleri çalışmaz; tahmin ettirilmez, size söylenir.
 
-Kurulum betikleri sonunda kurulumu kendi terminalinizde çalıştırıyor, soruları orada bedava
-soruyor. Atladıysanız betiği kendiniz çalıştırın:
+Kurulum betikleri sonunda kurulumu kendi terminalinizde çalıştırıyor; sorularını orada
+bedavaya soruyor. Atladınız mı? Betiği kendiniz çalıştırın:
 
 ```bash
 node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js
@@ -110,13 +145,13 @@ node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js
 
 **ya da şunu Claude'a yapıştırın:**
 
-> Teknesyum Core'u kur. `node <plugin>/scripts/setup.js --check` çalıştır; `<plugin>`
-> kurulu teknesyum-core dizinidir. JSON basar. `missing` altındaki her soruyu tek bir
-> mesajda bana sor, sonra karşılık gelen bayraklarla `node <plugin>/scripts/setup.js
-> --apply` çağır. Hiçbir ayar dosyasını kendin yazma.
+> Teknesyum Core'u kur. `node <plugin>/scripts/setup.js --check` çalıştır; `<plugin>` kurulu
+> teknesyum-core dizini. JSON basar. `missing` altındaki bütün soruları bana tek mesajda
+> sor, sonra `node <plugin>/scripts/setup.js --apply` komutunu uygun bayraklarla çağır.
+> Hiçbir ayar dosyasını kendin yazma.
 
-Kurulum `~/.claude/teknesyum/config.json` yazıyor ve durum satırını bağlıyor. Bir sonraki
-oturumda geçerli oluyor.
+Kurulum `~/.claude/teknesyum/config.json` dosyasını yazıyor ve statusline'ı bağlıyor. Bir
+sonraki oturum başında geçerli oluyor.
 
 ---
 
@@ -124,8 +159,8 @@ oturumda geçerli oluyor.
 
 ### Sözleşme
 
-`.claude/relay/contracts/` altında bir markdown dosyası. Bir hedef, sahip olduğu dosyalar,
-bunu kanıtlayan komutlar.
+`.claude/relay/contracts/` altında bir markdown dosyası. Bir hedef, sahiplendiği dosyalar,
+onu kanıtlayan komutlar.
 
 ```markdown
 ## Goal
@@ -139,121 +174,194 @@ core/strings.json
 node test/all.js
 ```
 
-`owns:` dosya listeliyor, dizin değil — dizin, henüz var olmayan dosyalar hakkında verilmiş
-bir söz. Sözleşmeyi kapatılabilir kılan kısım `verify:`. Kabul ölçütü 0 ile çıkan bir komut
-olarak yazılamıyorsa bölme yanlış demektir, planlayıcıya da onay kutusu uydurmak yerine
-bunu açıkça söylemesi söylenir.
+`owns` dosya sayıyor, dizin değil — dizin, henüz var olmayan dosyalar hakkında verilmiş bir
+söz demek. Mutlak yol ya da proje dışı bir yol yazamıyor, ve kimsenin yaratmadığı bir
+dosyayı sahiplenen sözleşme kapanamıyor: okunamayan dosya eskiden boş sayılıyor ve
+yapılmamış iş geçiyordu.
+
+`verify`, sözleşmeyi kapatılabilir kılan kısım. Kabul ölçütü 0 ile çıkan bir komut olarak
+yazılamıyorsa bölme yanlıştır; planlayıcıya da uydurma bir onay kutusu icat etmek yerine
+bunu söylemesi söyleniyor.
 
 <div align="center">
-<img src="assets/flow-contract.tr.svg" alt="Bir sözleşmenin ömrü: açılır, bir ajan onu çalışılıyor duruma alır, ajan sunar ve kapı sözleşmenin kendi verify komutlarını çalıştırır. Başarısız bir komut sözleşmeyi geri gönderir. Her komut sıfırla çıktığında kapı riski diff'ten hesaplar; yüksek riskte ayrıca denetim kaydı ister ve ancak o zaman sözleşme biter." width="900">
+<img src="assets/flow-contract.tr.svg" alt="Bir sözleşmenin ömrü: açılıyor, bir ajan onu aktife alıyor, ajan teslim ediyor ve kapı sözleşmenin kendi verify komutlarını çalıştırıyor. Başarısız komut sözleşmeyi aktife geri gönderiyor. Her komut sıfırla çıkınca kapı riski diff'ten hesaplıyor; yüksek riskte ayrıca denetim kaydı istiyor ve sözleşme ancak o zaman done'a geçiyor." width="900">
 </div>
 
 ### Kapı
 
 Bir sözleşmeyi kapatabilen tek şey `contract.js complete`. Rapora inanmak yerine verify
-komutlarını kendisi çalıştırıyor, riski diff'ten çıkarıyor ve yüksek riskli bir sözleşmeyi,
-ajanı ve neyi doğruladığını yazan bir denetim kaydı olmadan kapatmıyor. Kayıt, sahiplenilen
-dosyalara ve HEAD'e bağlı ve kapanışta tükeniyor: ne yeniden kullanılabiliyor ne de değişmiş
-bir iş için sonradan yazılabiliyor.
+komutlarını kendisi çalıştırıyor ve riski, değişikliğin tarifinden değil diff'ten çıkarıyor.
 
 Sözleşme bir merdiven çıkıyor: `open`, `active`, `submitted`, `done`. Yalnız submitted olan
-kapanıyor, arşivlenen dosyaya `done` damgası vuruluyor, yanlış kapanan iş `contract.js reopen`
-ile turu artırılarak geri alınıyor ve kapanan tur defterde kalıyor.
+kapanıyor, arşivlenen dosyaya `done` damgası vuruluyor; böylece `done/` altında hâlâ "devam
+ediyor" diyen bir dosya kalmıyor.
 
-Dosya sisteminin önünde iki kanca duruyor. `guard.js` mevcut sözleşmenin sahip olmadığı
-dosyalara yazmayı engelliyor. Kabuk komutlarını okumuyor: kabuğu ayrıştırmaya çalışan bir
-kapı `cd` ile aşılan kapıdır, güvence de kaydın kendisinde — kapanış, elle yazılan hiçbir
-dosyanın karşılayamayacağı bir kayıt istiyor. `prefs.js` gerekli işaretleri taşımayan
-README ya da LICENSE yazımını engelliyor; yazarın tercih dosyası yoksa hemen çıkıyor, yani
-başkası için hiçbir şey yapmıyor.
+`contract.js reopen --reason "..."` yanlış kapanan sözleşmeyi turunu artırarak geri alıyor;
+kapanan tur defterde kalıyor, yani geri alma bir silme değil bir kayıt. Geri alma altıncı
+turda duruyor. Yedinci tur, ajanın şanssız değil sözleşmenin yanlış olduğunu söyler — böl,
+ya da sahiplendiğini daralt. Katılmadığınız gün için `--force` duruyor.
 
-### Maliyet
+Bunların hepsinden önce, `contract.js precheck --id X` iş hiç başlamamışken verify adımlarını
+çalıştırıyor. Zaten geçiyorlarsa iş bitmiştir ve ajan açmak israftır.
 
-Claude Code'un sunduğu her mekanizma bedelini ne zaman ödediğinize göre sınıflanıyor: **S**
-bağlam başına bir kez, **O** yalnız özellik çalışınca, **C** her mesajda sonsuza kadar,
-**Z** hiç. Bu tablodan tek bir kural çıkıyor — sıradan bir turda hiçbir kanca bağlama
-yazmaz.
+### Denetim kaydı
 
-<div align="center">
-<img src="assets/flow-cost.tr.svg" alt="Bir turun eklenti kancalarından geçişi ve her birinin modelin bağlamına ne yazdığı. Cue kancası susar; guard sözleşme dışı yazımı engeller; prefs işaretsiz README'yi engeller; izleyici adımı diske yazar; notice kancası bannerı yalnızca görüntü olarak çizer; bildirici sonunda ses çalar. Bağlam sütunundaki her hücre boştur, yani tur başına maliyet sıfır tokendir." width="900">
-</div>
+Yüksek riskte kapanış, kayıt olmadan reddediliyor ve kayıt dört yerden bağlı:
 
-Sohbetteki banner `MessageDisplay` kancasında gidiyor; çizileni değiştiriyor, saklananı ve
-modelin gördüğünü değiştirmiyor. Binary'nin kendi cümlesi: *"Display-only: the stored
-message and what the model sees are untouched."* Mesaj başına yaklaşık 43 ms node açılışı,
-token yok. Ondan önce on beş kanal denendi ve gömüldü; taziyeler
-[docs/DECISIONS.md](docs/DECISIONS.md) içinde.
+- sözleşmenin sahiplendiği dosyaların **içeriğine** — denetimden sonra oynayan ağaç artık
+  tutmuyor
+- **HEAD'e** — başka bir commit için yazılmış kayıt burada geçmiyor
+- **gerçekten koşmuş bir run-id'ye** — diskte canlı kaydı olan, rolü denetçi olan ve denetim
+  boyunca hiçbir dosyaya yazmamış bir ajan
+- **tek kullanıma** — kayıt sözleşme kapanırken tükeniyor, tekrar oynatılamıyor
+
+Her kapanış, her karşılanmamış kapanış ve her geri alma `audits/ledger.jsonl` dosyasına
+ekleniyor; `contract.js ledger` de `done/` altında oturan ama defterin hiç duymadığı
+sözleşmeyi bildiriyor. Kayıtlar birbirine zincirli değil; her biri kendi bağlarıyla ayakta.
+
+### Kapı kancası
+
+`guard.js`, `Write`, `Edit` ve `NotebookEdit` önünde çalışıyor. Mevcut sözleşmenin `owns`
+kümesi dışındaki her dosyaya yazmayı engelliyor — ajan sözleşmesine dokunarak kendini ona
+bağlıyor — `audits/` ve `live/` dizinlerini yalnız kapıya bırakıyor, `contracts/done/`
+dizinini salt okunur tutuyor. `prefs.js` gerekli işaretleri taşımayan README ya da LICENSE
+yazımını engelliyor; yazarın tercih dosyası yoksa hemen çıkıyor, yani başkası için hiçbir
+şey yapmıyor.
+
+Kabuk komutlarınızı okumuyor. Bu denetim v0.2.0'a kadar vardı ve düz metin eşleşmesiydi:
+`cd` içinden geçip gidiyordu, buna karşılık defteri okuyan meşru bir tek satır
+reddediliyordu. Kabuk metnini tahmin etmeye çalışan kapı, korumayı değil koruma sanısını
+satın alır — güvence bunun yerine kaydın kendisinde.
+
+Relay'i olmayan bir projede kapı kapalı değil açık düşüyor. Birinin ilgisiz deposunu bozan
+bir kanca, kaçırılan bir denetimden daha kötü bir arıza.
 
 ### Ajanlar
 
 <div align="center">
-<img src="assets/flow-agents.tr.svg" alt="İşin nasıl dağıtıldığı. Ana ajan işi sözleşmelere böler. Her sözleşme bir rol adı taşır; rol çarpı profil kademe tablosundan tek bir hücre seçer, hücre bir model ve efora çözülür. Ajanlar paralel çalışır ve her biri diske kendi kaydını bırakır. Yanlarında danışman soranın bir üst basamağında açılır: sonnet sorar opus cevaplar, opus sorar fable cevaplar." width="900">
+<img src="assets/flow-agents.tr.svg" alt="İşin nasıl dağıtıldığı. Ana ajan işi sözleşmelere bölüyor. Her sözleşme bir rol adı taşıyor, rol çarpı profil tablodan tek bir hücre seçiyor, hücre de bir modele ve bir efora karşılık geliyor. Ajanlar paralel çalışıyor, her biri diske kendi kaydını bırakıyor. Yanlarında danışman, soranın bir üst basamağında açılıyor: sonnet soruyor opus cevaplıyor, opus soruyor fable cevaplıyor." width="900">
 </div>
 
-Tek ajan türü: `worker`. Rol, istemde adı geçen bir dosya:
+Tek ajan türü var: `worker`. Rol, istemde adı geçen bir dosya:
 
 ```
 Read <plugin>/roles/builder.md and follow it.
 Contract: .claude/relay/contracts/T7.md
 ```
 
-`builder`, `ui-builder`, `planner`, `auditor`, `advisor`, `scout`, `scribe`. Her bağlamda
-oturan yedi ajan açıklaması bire indi; rol metnini yalnız o rolü taşıyan ajan ödüyor.
+Her bağlamda oturan yedi ajan açıklaması tek açıklamaya indi; rol metnini de yalnızca o rolü
+taşıyan ajan ödüyor.
 
-Rol ve profil [core/tiers.json](core/tiers.json) içinden bir hücre seçiyor; hücre bir model
-ve bir efor. Üç profil — `eco`, `normal`, `premium` — bütün ızgarayı kaydırıyor. Sinyaller
-hücreyi yükseltiyor, profil tavan koyuyor, hiçbir şey aşağı çekmiyor. Tekrarlayan hata önce
-eforu sonra modeli yükseltiyor; art arda hata sayısını kimsenin hafızası değil bir kanca
-tutuyor.
+Rol ve profil, [core/tiers.json](core/tiers.json) içinden bir hücre seçiyor; hücre bir model
+ve bir efor.
 
-**Danışman** soranın bir üst basamağında çalışıyor: sonnet sorar, opus cevaplar; opus sorar,
-fable cevaplar. Bir model kendine ikinci görüş veremez. Uygunluk listesi yok — istemek
-yeterli sebep — ve kendisine hedef, kabul ölçütü ve ham kanıt veriliyor, taslak cevabınız
-asla.
+| Rol | `eco` | `normal` | `premium` |
+|---|---|---|---|
+| `t0` — oturumun kendisi | sonnet | opus | opus |
+| `planner` | sonnet/medium | opus/medium | opus/high |
+| `builder` · `ui-builder` | sonnet/low | sonnet/medium | opus/medium |
+| `scout` | haiku/low | sonnet/low | sonnet/medium |
+| `scribe` | haiku/low | haiku/low | sonnet/low |
+| `auditor` | opus/medium | opus/medium | opus/high |
+| `advisor` | opus/medium | kapalı | fable/medium |
+
+Sinyaller hücreyi yükseltiyor, profil tavanı koyuyor, hiçbir şey aşağı çekmiyor.
+
+| Sinyal | Etkisi |
+|---|---|
+| Üst üste iki araç çağrısı başarısız | önce efor, sonra model yükseliyor |
+| Tur 3 | model yükseliyor |
+| Tur 4 | danışman önerilmiyor, zorunlu oluyor |
+| Değişiklik geri alınamaz bir yola dokunuyor | denetçi açılıyor |
+
+Üst üste hataları kanca ajan başına sayıyor; bir ajanın kötü günü başka bir ajanın bütçesini
+harcayamıyor. Üstelik ikinci hatada davranıyor, çünkü üçüncüyü beklemek bile bile lades
+demek.
+
+Proje kendi profilini `.claude/relay/config.json` içinde tutabiliyor; `premium` bir makinede
+`eco` bir depo `eco` kalıyor.
+
+**Danışman** soranın bir üst basamağında çalışıyor: sonnet soruyor, opus cevaplıyor; opus
+soruyor, fable cevaplıyor. Bir model kendine ikinci görüş veremiyor. Hak kazanma listesi yok
+— istemek yeterli sebep — ve danışmana hedef, kabul ölçütü ve kanıt gidiyor; sizin taslak
+cevabınız asla.
+
+### Maliyet
+
+Claude Code'un sunduğu her mekanizma bedelini ne zaman ödediğinize göre sınıflanıyor: **S**
+bağlam başına bir kez, **O** yalnız özellik çalışınca, **C** her mesajda sonsuza kadar,
+**Z** hiç. Bu tablodan tek bir kural çıkıyor — sıradan bir turda hiçbir kanca bağlama
+yazmıyor.
+
+<div align="center">
+<img src="assets/flow-cost.tr.svg" alt="Eklentinin kancalarından geçen bir tur ve her birinin modelin bağlamına ne yazdığı. İşaret kancası susuyor; kapı sözleşme dışına yazmayı engelliyor; tercih kancası işaretsiz README'yi engelliyor; izleyici adımı diske yazıyor; bildirim kancası banner'ı yalnızca çizim olarak basıyor; ses kancası sonda bir ses çalıyor. Bağlam sütunundaki her hücre boş, yani tur başına maliyet sıfır token." width="900">
+</div>
+
+Sohbet banner'ı `MessageDisplay` kancasında duruyor; bu kanca çizileni değiştiriyor,
+saklanana ve modelin gördüğüne dokunmuyor. İkilinin kendi ifadesiyle: *"Display-only: the
+stored message and what the model sees are untouched."* Mesaj başına yaklaşık 30 ms node
+açılışı, sıfır token. Ondan önce on beş kanal denendi ve gömüldü; taziyeler
+[docs/DECISIONS.md](docs/DECISIONS.md) içinde.
+
+Araç çağrılarını izleyen kancalar artık matcher taşıyor, yani dosya okumak süreç açtırmıyor.
+
+### Yalnız çağrılınca çalışan araçlar
+
+| Betik | Ne yapıyor |
+|---|---|
+| `contract.js precheck` | ajan açılmadan önce verify adımlarını çalıştırıyor |
+| `handoff.js` | `.claude/relay/HANDOFF.md` dosyasını, projenin durumunu yazıyor |
+| `doctor.js` | kurulum sağlam mı söylüyor |
+| `release.js` | sonraki sürümü `.changes/` içindeki notlardan belirliyor |
+| `map.js` | import haritası — merkezler, döngüler, öksüzler |
+| `log.js` | hata günlüğü; elle yazılmıyor |
+| `setup.js` | makine ayarı ve statusline bağlama |
+
+Devir notu ikiye ayrılıyor. Mekanik yarısı — açık sözleşmeler, durumları ve turları, son
+kapanışlar, dal, baş, ne kadarı commit edilmemiş, hangi ajan takılmış — oturum sonu
+kancasıyla tazeleniyor; bedeli yok ve hiç bayatlamıyor. Öteki yarısı makinenin yazamayacağı
+tek paragraf, yani niyet; tazeleme onu koruyor. Dosya düz markdown, yani projeyi sonra açan
+model Claude olmasa da okuyabiliyor.
+
+`doctor.js` `{name, ok, message}` satırlarıyla cevap veriyor ve `--json` alıyor. Neyi
+denetlediği, bastığı şeydir; okumak yerine çalıştırın.
 
 ---
 
 ## Kullanımda nasıl görünüyor
 
-Her cevabın üstünde ve altında tek satır, olan biten en önemli tek şeyi söylüyor. Gösterge
-paneli değil.
+Her cevabın altında ve üstünde tek satır; o an olup biten en önemli tek şeyi söylüyor. Pano
+değil.
 
 ```
 Teknesyum ▸ Opus-Medium İşçi — Banner Kodunu Yazıyor
 Teknesyum ▸ 3 Opus-Medium İşçi Çalışıyor
-Teknesyum ▸ Dikkat — 4 Araç Çağrısı Üst Üste Başarısız
-Teknesyum ▸ Premium · 1 Sözleşme Onay Bekliyor · 1 Sözleşme Başlanmadı
+Teknesyum ▸ Dikkat — Üst Üste 4 Araç Çağrısı Başarısız
+Teknesyum ▸ Premium · 1 Sözleşme Kapıda · 1 Sözleşme Başlamadı
 ```
 
-Art arda başarısız araç çağrısı her şeyi geçiyor. Kapanış satırı ne bittiğini söylüyor,
-çünkü mesajdan sonra hesaplandığı için daha çok biliyor. Yalnızca büyüyen sayaçlar — atılan
-adım, açık günlük — kesildi: karşılaştıracak bir şeyi olmayan sayı süstür.
+Üst üste başarısız araç çağrısı her şeyin önüne geçiyor. Kapanış satırı biteni bildiriyor,
+çünkü mesajdan sonra hesaplanıyor ve daha fazlasını biliyor. Yalnızca büyüyen sayaçlar —
+atılan adım, açık günlük — kesildi: karşılaştıracak bir şeyi olmayan sayı süstür.
 
 ---
 
 ## Komutlar
 
-Yok. Giriş noktası `relay` skill'i; gerisi betik.
-
-| Betik | Ne yapıyor |
-|---|---|
-| `contract.js` | açma, sunma, kapatma, denetim kaydı, kademe çözümü |
-| `map.js` | import haritası — merkezler, döngüler, öksüzler |
-| `risk.js` | diff'ten ve geri alınamaz yollardan risk |
-| `log.js` | hata günlüğü; elle yazılmaz |
-| `setup.js` | makine ayarı, durum satırı bağlama |
-| `scaffold.js` | lisans, imza, dil bağlantıları |
-| `statusline.js` | durum satırı ve sohbet bannerı |
+Yok. Giriş noktası `relay` skill'i; gerisi betik ve betikler yukarıdaki tabloda.
 
 ---
 
-## Dizin
+## Yerleşim
 
 ```
 .claude/relay/
-  contracts/           açık işler, sözleşme başına bir dosya
-  audits/              denetim kayıtları ve ledger.jsonl
+  contracts/           açık iş, sözleşme başına bir dosya
+  contracts/done/      kapanan iş, damgalanmış ve arşivlenmiş
+  audits/              kayıtlar ve ledger.jsonl
   live/                ajan kayıtları, kanca yazıyor
+  config.json          bu projenin profili, sabitlediyse
+  HANDOFF.md           proje nerede
   map.md               import haritası
 ```
 
@@ -268,15 +376,16 @@ kenarlar. Okuması dosya açmaktan ucuz ve dosya açmanın cevaplamadığı şey
 node test/all.js
 ```
 
-2.317 doğrulama: guard, kapanış kapısı, denetim zinciri, defter, bilinen aşma yolları,
-kademe ve kota kilitleri, kişisel sözleşme kapısı, scaffold, cue, banner ve hiçbir kancanın
-bağlama yazmadığına dair tek bir denetim.
+Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
+kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu ve hiçbir kancanın
+bağlama yazmadığı denetimi üzerine 2.352 assertion. Aynı takımı CI Linux, Windows ve
+macOS'ta koşuyor; geliştirme Windows öncelikli.
 
 ---
 
 ## Tasarım notları
 
-- [docs/COST-MODEL.md](docs/COST-MODEL.md) — token nereye gidiyor, bundan çıkan kural ne
+- [docs/COST-MODEL.md](docs/COST-MODEL.md) — token nereye gidiyor ve bundan çıkan kural
 - [docs/TRIAGE.md](docs/TRIAGE.md) — Teknesyum Base'den ne geldi, ne gelmedi
 - [docs/DECISIONS.md](docs/DECISIONS.md) — bunu şekillendiren kararlar ve gerekçeleri
 
@@ -284,14 +393,14 @@ bağlama yazmadığına dair tek bir denetim.
 
 ## Katkı
 
-Kod yazmadan önce bir issue açın — yamanızın başka bir şeye çarptığını sonradan öğrenmekten
+Kod yazmadan önce bir issue açın — yamanızın bir şeyle çarpıştığını sonradan öğrenmekten
 hızlıdır. Pull request'i küçük tutun; tek iş yapan diff aynı gün okunur, beş iş yapan diff
 hiç okunmaz.
 
 Depo İngilizce yazılıyor. Katkılar buradaki her şeyle aynı lisansla, AGPL-3.0-or-later
-altında kabul ediliyor; imzalanacak CLA ya da yapılacak bir tören yok.
+altında geliyor; imzalanacak CLA ve yapılacak tören yok.
 
-İşinize yaradıysa [sponsor olabilirsiniz](https://github.com/sponsors/Teknesyum).
+Vaktinizden kazandırıyorsa [çalışmayı destekleyebilirsiniz](https://github.com/sponsors/Teknesyum).
 
 ---
 
@@ -302,7 +411,7 @@ AGPL-3.0-or-later. Bkz. [LICENSE](LICENSE).
 <!-- signature -->
 <div align="center">
 
-<a href="https://github.com/sponsors/Teknesyum"><img src="assets/badge-sponsor.svg" alt="Teknesyum'a destek ol" height="38"></a>
+<a href="https://github.com/sponsors/Teknesyum"><img src="assets/badge-sponsor.svg" alt="Teknesyum'u Destekle" height="38"></a>
 &nbsp;
 <a href="LICENSE"><img src="assets/badge-license.svg" alt="Lisans AGPL-3.0" height="38"></a>
 

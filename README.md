@@ -60,12 +60,46 @@ Some of it, yes: it spawns subagents, runs them in parallel, keeps a plan. What 
 ## What it does not do
 
 - **It will not make your agents smarter.** It refuses bad closes, that is all.
+- **It is not a sandbox.** `guard.js` is a policy, not a kernel. It stands in front of the
+  editing tools; an agent that shells out can still write anywhere.
+- **`verify` is your shell.** A verify step runs as a command with a fifteen-minute
+  timeout, so it can do whatever your shell can do. Read a contract before you run it.
+- **Audit records are not chained.** Each record is bound to its own contract, to HEAD and
+  to the contents of the files it owns — but the records are not linked to one another.
 - **No slash commands, on purpose.** The entry point is the `relay` skill; the rest are
   scripts.
-- **It is not a sandbox.** `guard.js` is a policy, not a kernel.
 - **It cannot translate Claude Code.** Core speaks your language; the client's own labels
   are out of reach.
 - **It does not touch your git.** No commits, no branches, no pushes.
+
+---
+
+## Should you install this?
+
+Install it if you run several agents in parallel on one repository and have been burned by
+an agent reporting done when it wasn't. That is the one problem this plugin actually solves:
+`contract.js complete` re-runs the acceptance commands itself, refuses a close that fails
+them, and at high risk demands an audit record bound to the file contents and to HEAD.
+Native Claude Code has nothing equivalent — an agent's claim of success is taken at its word.
+
+You also get something rarer: discipline about your context window. On an ordinary turn no
+hook writes a single token into the model's context; status goes through the statusline and
+a display-only banner. Most plugins in this space cost you tokens every message. This one
+measurably doesn't.
+
+Do not install it for small work. A single-file fix does not need a contract, and the
+plugin's own skill says so. Skip it too if you need a security boundary: `guard.js` blocks
+writes through the editing tools, but an agent that shells out can write anywhere, verify
+steps run arbitrary shell for up to fifteen minutes, and outside a relay project the gate
+falls open, not closed.
+
+Weigh the maturity honestly. One developer, v0.2.0, first public tags this month. Audit
+records are individually bound but not chained to each other. Development is Windows-first;
+Linux and macOS are covered by CI, not daily use. The test suite (2,352 assertions, three
+platforms) is real, but the field history is weeks, not years.
+
+*Reviewed from the source by Claude (Fable 5), asked for an outside opinion and published
+unedited.*
 
 ---
 
@@ -141,10 +175,14 @@ core/strings.json
 node test/all.js
 ```
 
-`owns:` lists files, not directories — a directory is a promise about files that do not
-exist yet. `verify:` is the part that makes a contract closable at all. If the acceptance
-cannot be written as a command that exits 0, the split is wrong, and the planner is told to
-say so rather than invent a checkbox.
+`owns` lists files, not directories — a directory is a promise about files that do not
+exist yet. It cannot name an absolute path or anything outside the project, and a contract
+that owns a file nobody ever created cannot close: an unreadable file used to count as an
+empty one, which let unwritten work through.
+
+`verify` is the part that makes a contract closable at all. If the acceptance cannot be
+written as a command that exits 0, the split is wrong, and the planner is told to say so
+rather than invent a checkbox.
 
 <div align="center">
 <img src="assets/flow-contract.svg" alt="A contract's life: it is opened, an agent takes it to active, the agent submits it, and the gate then runs the contract's own verify commands. A failing command sends the contract back to active. When every command exits zero, the gate computes risk from the diff; at high risk it also demands an audit record, and only then does the contract move to done." width="900">
@@ -153,37 +191,53 @@ say so rather than invent a checkbox.
 ### The gate
 
 `contract.js complete` is the only thing that can close a contract. It runs the verify
-commands itself instead of believing the report, works risk out from the diff, and will not
-close a high-risk contract until an audit record names the agent and what it checked. The
-record is bound to the owned files and to HEAD, and it is spent when the contract closes, so
-it cannot be reused or written after the fact for work that has since changed.
+commands itself instead of believing the report, and it works risk out from the diff rather
+than from anyone's description of the change.
 
-A contract climbs a ladder: `open`, `active`, `submitted`, `done`. Only a submitted
-contract closes, the archived file is stamped `done`, and `contract.js reopen` takes a
-wrongly closed one back with its round raised and the closed round left in the ledger.
+A contract climbs a ladder: `open`, `active`, `submitted`, `done`. Only a submitted contract
+closes, and the archived file is stamped `done`, so nothing under `done/` still claims to be
+in progress.
 
-Two hooks stand in front of the filesystem. `guard.js` blocks writes to files the current
-contract does not own. It does not read your shell commands: a gate that tries to parse
-shell is a gate you get past with `cd`, and the guarantee lives in the record instead —
-a close needs a record no hand-written file can satisfy. `prefs.js` blocks a README or LICENSE missing
-its required markers, and exits immediately when the author's preference file is absent, so
-for everyone else it does nothing at all.
+`contract.js reopen --reason "..."` takes a wrongly closed contract back with its round
+raised; the closed round stays in the ledger, so reopening is a fact on the record and not
+an erasure. Reopening stops at round six. A seventh round says the contract is wrong, not
+that the agent is unlucky — split it, or narrow what it owns. `--force` is there for the day
+you disagree.
 
-### The cost
+Before any of that, `contract.js precheck --id X` runs the verify steps while the work is
+still unstarted. If they already pass, the work is done and spawning an agent is a waste.
 
-Every mechanism Claude Code offers gets classed by when you pay: **S** once per context,
-**O** only when the feature runs, **C** every message forever, **Z** never. One rule falls
-out of that table — on an ordinary turn, no hook writes into context.
+### The audit record
 
-<div align="center">
-<img src="assets/flow-cost.svg" alt="One turn through the plugin's hooks and what each writes into the model's context. The cue hook stays silent; the guard blocks a write outside the contract; the prefs hook blocks a README missing its markers; the watcher records the step to disk; the notice hook draws the banner as display only; the notifier plays a sound at the end. Every entry in the context column is empty, so the per-turn cost is zero tokens." width="900">
-</div>
+At high risk the close is refused until a record exists, and the record is bound four ways:
 
-The chat banner rides on the `MessageDisplay` hook, which changes what is drawn without
-touching what is stored or what the model sees. The binary's own words: *"Display-only: the
-stored message and what the model sees are untouched."* About 43 ms of node startup per
-message, no tokens. Fifteen other channels were tried and buried first; the funeral notices
-are in [docs/DECISIONS.md](docs/DECISIONS.md).
+- to the **contents** of the files the contract owns, so a tree that moved after the audit
+  no longer matches
+- to **HEAD**, so a record written for another commit does not apply here
+- to a **run-id that actually ran** — a live record on disk, whose role is auditor, and
+  which wrote no files during the audit
+- to **one use**: the record is spent when the contract closes and cannot be replayed
+
+Every close, every unmet close and every reopen is appended to `audits/ledger.jsonl`, and
+`contract.js ledger` reports any contract sitting in `done/` that the ledger has never heard
+of. The records are not chained to each other; each stands on its own bindings.
+
+### The guard
+
+`guard.js` runs in front of `Write`, `Edit` and `NotebookEdit`. It blocks a write to any
+file outside the current contract's `owns` set — an agent binds itself to a contract by
+touching it — keeps `audits/` and `live/` for the gate alone, and holds `contracts/done/`
+read-only. `prefs.js` blocks a README or LICENSE missing its required markers, and exits
+immediately when the author's preference file is absent, so for everyone else it does
+nothing at all.
+
+It does not read your shell commands. That check existed until v0.2.0 and was plain-text
+matching: `cd` walked through it while a legitimate one-liner reading the ledger was
+refused. A gate that guesses at shell strings buys the belief in protection, not protection
+— the guarantee lives in the record instead.
+
+Outside a project with a relay, the gate falls open rather than closed. A hook that breaks
+someone's unrelated repository is a worse failure than a missed check.
 
 ### The agents
 
@@ -198,19 +252,82 @@ Read <plugin>/roles/builder.md and follow it.
 Contract: .claude/relay/contracts/T7.md
 ```
 
-`builder`, `ui-builder`, `planner`, `auditor`, `advisor`, `scout`, `scribe`. Seven agent
-descriptions sitting in every context became one, and the role text is paid for only by the
-agent holding it.
+Seven agent descriptions sitting in every context became one, and the role text is paid for
+only by the agent holding it.
 
 Role and profile pick a cell out of [core/tiers.json](core/tiers.json); the cell is a model
-and an effort. Three profiles — `eco`, `normal`, `premium` — slide the whole grid. Signals
-raise a cell, the profile caps it, nothing lowers it. Repeated failure raises the effort and
-then the model, and the run of failures is counted by a hook rather than by anyone's memory.
+and an effort.
+
+| Role | `eco` | `normal` | `premium` |
+|---|---|---|---|
+| `t0` — the session itself | sonnet | opus | opus |
+| `planner` | sonnet/medium | opus/medium | opus/high |
+| `builder` · `ui-builder` | sonnet/low | sonnet/medium | opus/medium |
+| `scout` | haiku/low | sonnet/low | sonnet/medium |
+| `scribe` | haiku/low | haiku/low | sonnet/low |
+| `auditor` | opus/medium | opus/medium | opus/high |
+| `advisor` | opus/medium | off | fable/medium |
+
+Signals raise a cell, the profile caps it, nothing lowers it.
+
+| Signal | Effect |
+|---|---|
+| Two tool calls fail in a row | the effort goes up, then the model |
+| Round 3 | the model goes up |
+| Round 4 | the advisor is required, not offered |
+| The change touches an irreversible path | the auditor opens |
+
+The run of failures is counted per agent by a hook, so one agent's bad afternoon cannot
+spend another agent's budget — and it acts on the second failure, because waiting for a
+third is knowing better and doing nothing about it.
+
+A project can pin its own profile in `.claude/relay/config.json`, so an `eco` repository
+stays `eco` on a `premium` machine.
 
 The **advisor** runs one rung above whoever asked: sonnet asks, opus answers; opus asks,
 fable answers. A model cannot give itself a second opinion. There is no qualifying list —
 wanting one is reason enough — and it gets the goal, the acceptance and the evidence, never
 your draft answer.
+
+### The cost
+
+Every mechanism Claude Code offers gets classed by when you pay: **S** once per context,
+**O** only when the feature runs, **C** every message forever, **Z** never. One rule falls
+out of that table — on an ordinary turn, no hook writes into context.
+
+<div align="center">
+<img src="assets/flow-cost.svg" alt="One turn through the plugin's hooks and what each writes into the model's context. The cue hook stays silent; the guard blocks a write outside the contract; the prefs hook blocks a README missing its markers; the watcher records the step to disk; the notice hook draws the banner as display only; the notifier plays a sound at the end. Every entry in the context column is empty, so the per-turn cost is zero tokens." width="900">
+</div>
+
+The chat banner rides on the `MessageDisplay` hook, which changes what is drawn without
+touching what is stored or what the model sees. The binary's own words: *"Display-only: the
+stored message and what the model sees are untouched."* Around 30 ms of node startup per
+message, no tokens. Fifteen other channels were tried and buried first; the funeral notices
+are in [docs/DECISIONS.md](docs/DECISIONS.md).
+
+The hooks that watch tool calls carry a matcher, so reading a file does not start a process.
+
+### Tools that only run when called
+
+| Script | What it does |
+|---|---|
+| `contract.js precheck` | runs the verify steps before an agent is spawned |
+| `handoff.js` | writes `.claude/relay/HANDOFF.md`, the state of the project |
+| `doctor.js` | says whether the install is sound |
+| `release.js` | decides the next version from notes left in `.changes/` |
+| `map.js` | the import graph — hubs, cycles, orphans |
+| `log.js` | the error log; not written by hand |
+| `setup.js` | machine setup and statusline wiring |
+
+The handoff note is split in two. The mechanical half — open contracts with their status and
+round, the last closes, the branch, the head, how much is uncommitted, which agents are stuck
+— is refreshed by the session-end hook, so it costs nothing and is never out of date. The
+other half is the one paragraph a machine cannot write, the intent, and a refresh preserves
+it. The file is plain markdown, so the next model to open the project can read it whether or
+not it is Claude.
+
+`doctor.js` answers in `{name, ok, message}` rows and takes `--json`. What it checks is what
+it prints; run it rather than read about it.
 
 ---
 
@@ -235,17 +352,8 @@ decoration.
 
 ## Commands
 
-None. The entry point is the `relay` skill; everything else is a script.
-
-| Script | What it does |
-|---|---|
-| `contract.js` | open, submit, complete, audit, tier resolution |
-| `map.js` | import graph — hubs, cycles, orphans |
-| `risk.js` | risk from the diff and from irreversible paths |
-| `log.js` | the error log; not written by hand |
-| `setup.js` | machine setup, statusline wiring |
-| `scaffold.js` | licence, signature, language links |
-| `statusline.js` | the statusline and the chat banner |
+None. The entry point is the `relay` skill; everything else is a script, and the scripts are
+in the table above.
 
 ---
 
@@ -254,8 +362,11 @@ None. The entry point is the `relay` skill; everything else is a script.
 ```
 .claude/relay/
   contracts/           open work, one file per contract
+  contracts/done/      closed work, stamped and archived
   audits/              records and ledger.jsonl
   live/                agent records, written by the hook
+  config.json          this project's profile, if it pins one
+  HANDOFF.md           where the project stands
   map.md               import graph
 ```
 
@@ -270,9 +381,10 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,317 assertions over the guard, the completion gate, the audit chain, the ledger, the
-known bypasses, the tier and quota locks, the personal-convention gate, the scaffold, the
-cue, the banner, and one check that no hook writes into context.
+2,352 assertions over the guard, the completion gate, the ladder, the audit record, the
+ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
+scaffold, the cue, the banner, the handoff note, and one check that no hook writes into
+context. CI runs the same suite on Linux, Windows and macOS; development is Windows-first.
 
 ---
 
