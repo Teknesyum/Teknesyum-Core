@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.2
+
+- The README says what the three modes are and how to set one
+
 ## v0.4.1
 
 - The banner names the seat and the cell instead of repeating the profile
