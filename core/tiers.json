@@ -1,38 +1,116 @@
 {
   "version": 1,
-  "models": ["haiku", "sonnet", "opus", "fable"],
-  "efforts": ["low", "medium", "high"],
-  "profiles": ["eco", "normal", "premium"],
-  "ceiling": { "eco": "sonnet", "normal": "opus", "premium": "opus" },
+  "models": [
+    "haiku",
+    "sonnet",
+    "opus",
+    "fable"
+  ],
+  "efforts": [
+    "low",
+    "medium",
+    "high"
+  ],
+  "profiles": [
+    "eco",
+    "normal",
+    "premium"
+  ],
+  "ceiling": {
+    "eco": "sonnet",
+    "normal": "opus",
+    "premium": "opus"
+  },
   "cells": {
-    "t0": { "eco": "sonnet", "normal": "opus", "premium": "opus" },
-    "planner": { "eco": "sonnet/medium", "normal": "opus/medium", "premium": "opus/high" },
-    "builder": { "eco": "sonnet/low", "normal": "sonnet/medium", "premium": "opus/medium" },
-    "ui-builder": { "eco": "sonnet/low", "normal": "sonnet/medium", "premium": "opus/medium" },
-    "scribe": { "eco": "haiku/low", "normal": "haiku/low", "premium": "sonnet/low" },
-    "scout": { "eco": "haiku/low", "normal": "sonnet/low", "premium": "sonnet/medium" },
-    "auditor": { "eco": "opus/medium", "normal": "opus/medium", "premium": "opus/high" },
-    "advisor": { "eco": "opus/high", "normal": "opus/high", "premium": "fable/high" }
+    "t0": {
+      "eco": "sonnet",
+      "normal": "opus",
+      "premium": "opus"
+    },
+    "planner": {
+      "eco": "sonnet/medium",
+      "normal": "opus/medium",
+      "premium": "opus/high"
+    },
+    "builder": {
+      "eco": "sonnet/low",
+      "normal": "sonnet/medium",
+      "premium": "opus/medium"
+    },
+    "ui-builder": {
+      "eco": "sonnet/low",
+      "normal": "sonnet/medium",
+      "premium": "opus/medium"
+    },
+    "scribe": {
+      "eco": "haiku/low",
+      "normal": "haiku/low",
+      "premium": "sonnet/low"
+    },
+    "scout": {
+      "eco": "haiku/low",
+      "normal": "sonnet/low",
+      "premium": "sonnet/medium"
+    },
+    "auditor": {
+      "eco": "opus/medium",
+      "normal": "opus/medium",
+      "premium": "opus/high"
+    },
+    "advisor": {
+      "eco": "opus/high",
+      "normal": "fable/high",
+      "premium": "fable/high"
+    }
   },
-  "advisory": ["t0"],
-  "ceilingExempt": ["auditor", "advisor"],
-  "riskExempt": ["builder", "ui-builder"],
+  "advisory": [
+    "t0"
+  ],
+  "ceilingExempt": [
+    "auditor",
+    "advisor"
+  ],
+  "riskExempt": [
+    "builder",
+    "ui-builder"
+  ],
   "advisorModelGap": true,
-  "advisorDefault": {
-    "premium": { "onContractOpen": ["builder", "ui-builder"], "perContract": 1 }
+  "advisorPair": {
+    "opus": "fable/high",
+    "fable": "opus/high",
+    "sonnet": "opus/high",
+    "haiku": "opus/high"
   },
-  "council": { "eco": 1, "normal": 2, "premium": 3 },
-  "councilMemberOverride": { "premium": { "3": "fable/high" } },
-  "subagent": { "model": "haiku", "effort": "low" },
+  "advisorDefault": {
+    "premium": {
+      "onContractOpen": [
+        "builder",
+        "ui-builder"
+      ],
+      "perContract": 1
+    }
+  },
+  "subagent": {
+    "model": "haiku",
+    "effort": "low"
+  },
   "signals": {
-    "repeatFail": { "effortAt": 2, "modelAt": 3 },
+    "repeatFail": {
+      "effortAt": 2,
+      "modelAt": 3
+    },
     "roundModelBump": 3,
     "roundAdvisorRequired": 4,
     "irreversibleOpensAuditor": true,
     "selfRiskOpensAdvisor": true
   },
   "quota": {
-    "eco": { "advisor": { "perContract": 1, "perRelay": 3 } }
+    "eco": {
+      "advisor": {
+        "perContract": 1,
+        "perRelay": 3
+      }
+    }
   },
   "autoEffortCap": "high"
 }

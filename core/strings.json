@@ -130,5 +130,9 @@
   "line.gateOff": {
     "en": "GATE OFF",
     "tr": "KAPI KAPALI"
+  },
+  "line.fails": {
+    "en": "failed",
+    "tr": "hata"
   }
 }

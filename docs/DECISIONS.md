@@ -185,18 +185,27 @@ Cell is `model/effort`. Bold cells pierce the profile ceiling.
 | scribe | haiku/low | haiku/low | sonnet/low |
 | scout | haiku/low | sonnet/low | sonnet/medium |
 | auditor | **opus/medium** | opus/medium | opus/high |
-| advisor | **opus/high** | opus/high | **fable/high** |
+| advisor | **opus/high** | **fable/high** | **fable/high** |
 
-Search subagents are not roles: `haiku/low` in every profile, fixed. The plan council is
-1 member on eco, 2 on normal, 3 on premium — two opus planners and one fable planner, each
-working independently and unaware of the others. There is no fable *pass* over finished
-plans: showing one planner another's work is the same leak the blinding rule forbids.
-Resolve it with `contract.js council --profile premium`.
+The advisor cell is a fallback. When the asker names its own model the pairing in
+`advisorPair` decides instead, and the pairing is the real rule: opus asks, fable answers;
+anything else asks, opus answers. The row above is what a caller gets who did not say.
+
+Search subagents are not roles: `haiku/low` in every profile, fixed.
+
+**The council is retired.** It ran N planners on one question, blind to each other, and it
+was never once convened. The user's reading, accepted: T0 is opus and already thinks about
+the question; a second opus planner is that same thought a second time, at full price. What
+widens the view is a *different* model, and that is exactly what the advisor already is.
+One mechanism instead of two. `council`, `councilMemberOverride`, `contract.js council` and
+the whole member table are gone.
 
 **Four signals, on top of the risk gate.** All four are computed, never declared:
 
 1. The same verify step failed twice with the same signature → `effort` +1; a third time
-   → `model` +1.
+   → `model` +1. The run of consecutive failures is counted by the `PostToolUseFailure`
+   hook into `live/_tally.json`; `contract.js tier` reads it when `--repeat-fail` is
+   absent, and the banner shows it from two upward. No one has to remember to count.
 2. `round >= 3` → the builder's model +1.
 3. `round >= 4` → the advisor opens **before** the next attempt.
 4. An irreversible operation — migration, release, history rewrite, detected by
@@ -213,14 +222,18 @@ and work that tripped the gate is not ordinary work.
 **Advisor is exempt outright.** A second opinion that is cheaper than the first opinion is
 not a second opinion. Eco opens opus like everyone else.
 
-**The advisor must run a different model than the asker.** `advisorModelGap` is the whole
-rule: if the resolved advisor cell equals the asker's model, the advisor **does not open**
-and `contract.js tier` exits 2 with the reason. The question goes to the user, or the
-profile is raised so the cell lands elsewhere. A fake second opinion is not bought. This is
-why premium's advisor is `fable/high` alone and no longer a double cell: on premium the
-asker is opus, opus already decides as T0 and already audits irreversible work, so a second
-opus adds cost and no new angle. On normal the advisor's real customer is a stuck sonnet
-builder — sonnet → opus is a genuine upgrade — and a normal opus T0 gets no advisor at all.
+**The advisor must run a different model than the asker.** A model cannot give itself a
+second opinion. This began as `advisorModelGap`, a *block*: same model, advisor refused to
+open, exit code 2. That was the wrong shape — it punished the asker for a table entry it
+did not choose. `advisorPair` replaces it: the resolver reads the asker's model and hands
+back the other one. Opus asks, fable answers; sonnet, haiku or fable asks, opus answers.
+The block survives only as a backstop, for a model with no pair.
+
+**No gate on the advisor.** The four signals below open it on their own, but they are not
+conditions of entry. Wanting a second opinion is reason enough, and the role file says so:
+the list is a reminder of the moments that are easy to walk past, not a permission slip.
+The gate was built to make asking *easier*, and a list read as a whitelist does the
+opposite.
 
 **Blinding.** The advisor is given the contract's Goal and Acceptance, the raw evidence and
 the file paths. It is not given the draft decision or the history of earlier attempts; an

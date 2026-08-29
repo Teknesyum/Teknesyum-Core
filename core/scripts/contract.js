@@ -180,7 +180,13 @@ function tier(role, opt) {
   if (!row) return null;
 
   const profile = profileOf(o.profile);
-  const cellText = T.cells[row][profile];
+  const askerModel = String(o.asker || '').toLowerCase();
+  let cellText = T.cells[row][profile];
+  let pairedFrom = '';
+  if (row === 'advisor' && askerModel && T.advisorPair && T.advisorPair[askerModel]) {
+    cellText = T.advisorPair[askerModel];
+    pairedFrom = askerModel;
+  }
   const base = parseCell(cellText);
   let model = base.model;
   let effort = base.effort;
@@ -189,6 +195,9 @@ function tier(role, opt) {
   const signals = [];
   const notes = [];
   let raisedBySignal = false;
+
+  if (pairedFrom)
+    reasons.push('the asker runs ' + pairedFrom + ', so the advisor is paired to ' + cellText);
 
   if (String(o.risk || '').toLowerCase() === 'high') {
     signals.push('risk high');
@@ -287,11 +296,11 @@ function tier(role, opt) {
         ad.perContract + ' per contract'
     );
 
-  const asker = String(o.asker || '').toLowerCase();
+  const asker = askerModel;
   let blocked = '';
   if (row === 'advisor' && T.advisorModelGap && asker && asker === model)
     blocked =
-      'the asker already runs ' + asker + ' and the ' + profile + ' advisor cell is ' + model +
+      'the asker already runs ' + asker + ' and no other model is paired to it' +
       ' - the same model cannot give itself a second opinion';
 
   return {
@@ -315,15 +324,14 @@ function tier(role, opt) {
   };
 }
 
-function council(profile) {
-  const T = tiers();
-  const p = profileOf(profile);
-  const size = T.council[p];
-  const base = T.cells.planner[p];
-  const override = (T.councilMemberOverride && T.councilMemberOverride[p]) || {};
-  const members = [];
-  for (let i = 1; i <= size; i += 1) members.push(override[String(i)] || base);
-  return { profile: p, size, members };
+function tallyFails(relay) {
+  if (!relay) return 0;
+  try {
+    const t = JSON.parse(fs.readFileSync(path.join(liveDir(relay), '_tally.json'), 'utf8'));
+    return Number(t.fails || 0);
+  } catch {
+    return 0;
+  }
 }
 
 function advisorQuota(relay, profile, id) {
@@ -391,7 +399,7 @@ function tierCmd() {
     profile: arg('profile'),
     risk: riskLevel,
     round,
-    repeatFail: arg('repeat-fail'),
+    repeatFail: arg('repeat-fail') || tallyFails(relay),
     irreversible: (irrev && irrev.hit) || has('irreversible'),
     model: arg('model'),
     effort: arg('effort'),
@@ -442,14 +450,6 @@ function tierCmd() {
 
   return out(lines);
 }
-function councilCmd() {
-  const c = council(arg('profile'));
-  const lines = [c.profile + ' council - ' + c.size + ' member' + (c.size === 1 ? '' : 's')];
-  c.members.forEach((cell, i) => lines.push('  ' + (i + 1) + '  ' + cell));
-  lines.push('Members plan independently and do not see one another.');
-  return out(lines);
-}
-
 function complete() {
   const c = load(arg('id'));
   if (c.error) return stop([c.error, '', 'Usage: contract.js complete --id T7']);
@@ -703,8 +703,7 @@ function help() {
     '  tier --role <role> [--profile P] [--id <ID>] [--risk high] [--round N]',
     '       [--repeat-fail N] [--model M] [--effort E] [--asker opus] [--user]',
     '                            resolve the cell, the signals and the ceiling in one place',
-    '  council [--profile P]     council size and the cell of each member',
-  ]);
+    ]);
 }
 
 function main() {
@@ -715,7 +714,6 @@ function main() {
   if (cmd === 'audit') return audit();
   if (cmd === 'ledger') return ledger();
   if (cmd === 'tier') return tierCmd();
-  if (cmd === 'council') return councilCmd();
   return help();
 }
 
@@ -729,7 +727,6 @@ module.exports = {
   runVerify,
   unsafeStep,
   tier,
-  council,
   tiers,
   roleBase,
   roleRow,

@@ -89,9 +89,9 @@ function tally(roles) {
   return [...m.entries()].map(([r, n]) => (n > 1 ? r + '×' + n : r)).join(' ');
 }
 
-function steps(relay) {
+function counters(relay) {
   const t = read(path.join(liveDir(relay), '_tally.json'));
-  return (t && t.steps) || 0;
+  return { steps: (t && t.steps) || 0, fails: (t && t.fails) || 0 };
 }
 
 function titleCase(s) {
@@ -116,8 +116,9 @@ function banner(cwd) {
   const a = agents(r.relay);
   if (a.running) bits.push(a.running + ' ' + t('line.agents') + (a.roles.length ? ' ' + tally(a.roles) : ''));
 
-  const st = steps(r.relay);
-  if (st) bits.push(st + ' ' + t('line.steps'));
+  const ty = counters(r.relay);
+  if (ty.steps) bits.push(ty.steps + ' ' + t('line.steps'));
+  if (ty.fails >= 2) bits.push(ty.fails + ' ' + t('line.fails'));
 
   const p = problems(r.relay);
   if (p) bits.push(p + ' ' + t('line.problems'));

@@ -109,13 +109,17 @@ Contract: .claude/relay/contracts/T7.md
 The role file names its row; row x profile picks the cell in `<P>/tiers.json`. Resolve it,
 never restate it: `node <P>/scripts/contract.js tier --role builder --id T7`. Signals raise
 a cell, the profile caps it, nothing lowers it. Pass the result as the `Agent` call's
-`model`, and write `model`/`effort` into the agent's `live/` record. Council size and
-member cells come from `contract.js council --profile P`; members never see each other.
+`model`, and write `model`/`effort` into the agent's `live/` record.
 
-The advisor must run a different model than the asker - the resolver blocks it otherwise,
-with the reason. On premium it opens beside every `builder`/`ui-builder` contract, in the
-same message as that agent, and also when work you did yourself trips `risk.js`. It is
-given the goal, the acceptance and the evidence, never your draft answer.
+Open the advisor whenever a second mind would widen the view - there is no gate and no
+qualifying list. Pass `--asker <your own model>`; the resolver pairs you with a different
+one, because a model cannot give itself a second opinion. On premium it also opens beside
+every `builder`/`ui-builder` contract, in the same message as that agent, and when work you
+did yourself trips `risk.js`. It is given the goal, the acceptance and the evidence, never
+your draft answer.
+
+Repeated failures are counted for you: the `PostToolUseFailure` hook keeps the run in
+`live/_tally.json`, the resolver reads it unasked, the banner shows it from two upward.
 
 - Independent contracts start together, not in sequence.
 - Past three concurrent writers, give each a git worktree.

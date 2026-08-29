@@ -32,10 +32,10 @@ function roleOf(j) {
   return m ? m[1].toLowerCase() : '';
 }
 
-function bumpTally(live) {
+function bumpTally(live, step, fails) {
   const f = path.join(live, '_tally.json');
   const cur = read(f) || {};
-  write(f, { steps: (cur.steps || 0) + 1 });
+  write(f, { steps: (cur.steps || 0) + (step ? 1 : 0), fails: fails });
 }
 
 function record(j) {
@@ -65,9 +65,19 @@ function record(j) {
 
   if (ev === 'SubagentStop' && rec.role) setNotice(r.relay, rec.role + ' ' + t('notice.done'));
 
+  if (ev === 'PostToolUseFailure') {
+    rec.fails = (rec.fails || 0) + 1;
+    rec.failedTool = j.tool_name || '';
+    bumpTally(live, false, rec.fails);
+    write(file, rec);
+    sweep(live);
+    return;
+  }
+
   if (ev === 'PostToolUse') {
     rec.steps = (rec.steps || 0) + 1;
-    bumpTally(live);
+    rec.fails = 0;
+    bumpTally(live, true, 0);
     rec.tool = j.tool_name || '';
     if (WRITE_TOOLS.test(j.tool_name || '')) {
       const t = j.tool_input || {};
