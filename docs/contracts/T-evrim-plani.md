@@ -383,3 +383,18 @@ harcamayı keser — ve sıradan turda modele tek kelime yazmadığı için bunl
 **Not:** bugün **55** (özgün iki koz var ama kapı gevşek, iddialar kanıtsız, yayın kırık),
 bu listeyle **85**. Farkı kapatan yeni özellik bolluğu değil; kapının gerçekten kapanması ve
 her iddianın yanına kanıtının konması.
+
+### Kesilecekler — kullanıcı sorusu üzerine düzeltme
+
+**map.js kesilmiyor.** Fable'a "graphify aynı işi yapıyor" bilgisini ben verdim, oysa
+graphify bu makinede kurulu değil. Kaynak: `builder.md:18` ajana "kaynak dosya açmadan önce
+`.claude/relay/map.md` oku" diyor, `SKILL.md:131` haritayı üreten komutu tarif ediyor,
+`guard.js:123` yeni proje sayımında `map.scan` kullanıyor. Kesilirse harita üreten hiçbir şey
+kalmaz. Karar: kalsın; asıl sorunu F10 (akışta kimse otomatik çağırmıyor, elle çalıştırılıyor).
+
+**Banner kalıyor.** Kesilme önerisi banner'a değil, `notice.js`'in her ekran flush'ında bir
+node süreci başlatmasına. Ölçüldü: atılan ara flush **26 ms**, banner basan flush **31 ms**,
+ikisi de **0 token**. `statusline.js` zaten tembel yükleniyor (`notice.js:37`), yani atma yolu
+saf node açılışından ibaret. Geriye iki iş kalıyor: (1) D15'teki "mesaj başına tek çalışma"
+cümlesi yanlış, düzeltilecek; (2) mesaj başına kaç flush geldiği ölçülmeden karar verilmeyecek
+— sayaç `notice.js` içinden diske yazılır, 0 token. Sayı küçükse hiçbir şey değişmez.
