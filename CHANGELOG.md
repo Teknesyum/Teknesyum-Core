@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.3
+
+- The last section says what support does instead of repeating the license
+
 ## v0.4.2
 
 - The README says what the three modes are and how to set one
