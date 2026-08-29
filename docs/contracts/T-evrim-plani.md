@@ -324,3 +324,62 @@ Base özellik şişmesinden öldü; bu bölüm boş kalmayacak.
 | **Guard'ın Bash kara listesi** | `cd` ile aşılıyor. Koruma sanısı veren ama korumayan şey, olmayandan tehlikelidir. Seal ölçümü girince tamamen sil; girene kadar README'de "elden geldiğince" diye işaretle. |
 | **MessageDisplay'in flush başına süreci** | Belge "mesaj başına bir" diyor, gerçek her flush. "En hafif eklenti" iddiasıyla çelişen tek kalem. Banner'ı statusline'a indir ya da gerçekten mesaj başına bire sabitle. |
 | **map.js** | Import haritasını `graphify` skill'i zaten yapıyor; iki araç aynı soruya iki cevap verir. Kes, graphify'a işaret et. |
+
+---
+
+## O — Fable'ın kararı: sen olsan hangilerini eklerdin
+
+Ölçüt tek: bu eklentiyi gören biri "bunu kurmalıyım" desin. Danışman değil sahip gözüyle.
+
+### Eklerdim (12)
+
+| Özellik | Neden | Yapım | Bu olmadan eksik mi? |
+|---|---|---|---|
+| **Seal ölçümü** | "Sahiplik zorlanır" vaadini tahminden ölçüme çevirir; ana iddia ancak bununla dürüst | 35 | **Evet** |
+| **reopen** | Geri dönüşü olmayan kapı, kapı değil tuzaktır | 10 | **Evet** |
+| **Tur bütçesi** | Kaçak döngüyü kesen tek eklenti oluruz — aider'de bile yok, vitrin cümlesine girer | 20 | **Evet** |
+| **Token raporu** | "0 token" iddiasını sayıyla kanıtlar; kanıtsız iddia pazarlama, kanıtlısı ürün | 20 | **Evet** |
+| **doctor** | Sessizce bozulan kanca sistemi güveni öldürür; tek komutluk teşhis geri verir | 20 | **Evet** |
+| **Devir notu** | Herhangi bir YZ projeyi tek dosyadan devralır; oturum başı ~300 token tavan | 25 | **Evet** |
+| **Ön kontrol** | Bitmiş işe ajan açmamak = kullanıcının cebinde kalan para | 15 | Hayır |
+| **Proje profili** | Hobide premium yanmasın; iki saatlik iş | 10 | Hayır |
+| **Duman testi** | Kullanıcı görmez ama her sürümün belkemiği | 30 | Hayır |
+| **Sürüm niyet dosyası** | 404 bir kez yaşandı, ikincisi affedilmez | 20 | Hayır |
+| **Asgari CI** | "Windows'ta test edildi"den "üç sistemde koşuyor"a geçiş | 20 | Hayır |
+| **awesome-claude-code PR** | En iyi ürün bile bulunmazsa yüklenmez | 5 | Hayır |
+
+### Eklemezdim
+
+| Özellik | Neden hayır | İsteyen çıkarsa cevabım |
+|---|---|---|
+| Worktree | Piyasa kanıtı aleyhte: crystal ölüyor, claude-squad Windows'ta çöküyor; seal ölçümü aynı güvenceyi bedavaya verir | "Seal kaydında tek ihlal göster, konuşalım" |
+| İş kirası | Tek geliştirici, tek pencere — çözdüğü sorun yaşanmıyor | "İki pencerede aynı işi ezdiğin bir vaka getir" |
+| Takılan-ajan bekçisi | Tur bütçesi aynı deliği kapatıyor | "Tur bütçesinin yakalayamadığı takılma göster" |
+| audit verify | Kendine karşı kripto denetim, tiyatro | "Zinciri zaten kesiyorum" |
+| Grafik panosu · monorepo · verify önbelleği | Uç durum, şişkinlik, ya da kapının itibarını yiyen kısayol | "Hayır; Base'i bu iştah öldürdü" |
+| stale · arşivleme · bildirim · verify sıralama | Dördü de hoş, hiçbiri "yüklenmeli" dedirtmez; her biri bir satır bakım | "Çekirdek oturunca konfor paketi olarak topluca bakarız" |
+| Yönlendirme notu | Kırmızı çizgi; rakiplerden tek farkımız tam burası | "Hayır. Bu değişirse ürünün adı değişir" |
+| **KES — mühür zinciri** | Sahte run-id geçerken hash zinciri güvence değil süs | "Düz günlük + komut kanıtı daha dürüst" |
+| **KES — guard Bash kara listesi** | `cd` ile aşılıyor; korumayan koruma olmayandan tehlikeli | "Seal ölçümü yerine geçiyor" |
+| **KES — map.js** | Graphify aynı işi yapıyor; bir soruya iki cevap olmaz | "Graphify'a işaret ediyorum" |
+| **KES — MessageDisplay'in flush başı süreci** | "En hafif eklenti" iddiasıyla çelişen tek kalem | "Banner kalır, süreç mesaj başına bire iner" |
+
+### Şüpheli — kanıt gelirse döner
+
+| Özellik | Neden kararsız | "Ekle"ye döndüren kanıt |
+|---|---|---|
+| needs: | Paralel işin özü ama şema karmaşası getiriyor | Token raporu 30 günde **≥3 kez** "temel bitmeden başlayıp boşa dönen ajan" gösterirse |
+| Görev paketi | Keşif tekrarı gerçek ama özet yazmak da token | Rapor, paralel ajan başına **≥2K token** tekrar okuma gösterirse |
+| Proje DoD listesi | Kopyala-yapıştır verify gerçek mi, varsayım mı belirsiz | Son 10 iş dosyasının **≥7'sinde** aynı verify satırları çıkarsa |
+| Kurulum sihirbazı | setup.js var; sihirbaz cila mı ihtiyaç mı | Kurulum kaynaklı **2 ayrı kullanıcı hatası** gelirse |
+
+### Sonuç
+
+**12 ekleme + 4 kesinti.** Altısı ürünü tamamlıyor, altısı güven ve dağıtım.
+
+**Vaat cümlesi:** "Ajanlarına işi sözleşmeyle verir, 'bitti'ye testler karar verir, kaçak
+harcamayı keser — ve sıradan turda modele tek kelime yazmadığı için bunların hepsi bedava."
+
+**Not:** bugün **55** (özgün iki koz var ama kapı gevşek, iddialar kanıtsız, yayın kırık),
+bu listeyle **85**. Farkı kapatan yeni özellik bolluğu değil; kapının gerçekten kapanması ve
+her iddianın yanına kanıtının konması.
