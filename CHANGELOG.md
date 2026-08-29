@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.0
+
+- Acceptance that cannot fail is refused, contracts carry a ceiling, and precheck pins the tree
+
 ## v0.3.0
 
 - map.js who, contract.js list, unresolved references in check, and a zero-cost update hint
