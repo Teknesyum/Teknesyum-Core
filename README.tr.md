@@ -436,8 +436,8 @@ Eklenti ücretsiz ve ücretsiz kalacak — AGPL, ücretli sürüm yok, satın al
 tutulan özellik yok. Kötü bir merge'ü ya da bir öğleden sonranızı kurtardıysa, destek bunu
 söylemenin bir yolu.
 
-Parasız yolları da var ve değeri aynı: bir şey kırıldığında issue açın, README'nin sizi
-kaybettiği yeri yazın, ajanla çalışan birine varlığından bahsedin.
+Yardım etmenin ücretsiz yolları da var: hataları bildirin, yapıcı eleştirilerinizi yazın,
+bir arkadaşınıza tavsiye edin.
 
 <!-- signature -->
 <div align="center">

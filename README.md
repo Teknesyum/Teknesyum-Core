@@ -439,8 +439,8 @@ If it saves you time, you can [sponsor the work](https://github.com/sponsors/Tek
 The plugin is free and stays free — AGPL, no paid tier, nothing kept back for a version you
 have to buy. If it saved you a bad merge or an afternoon, sponsoring is one way to say so.
 
-There are free ways to help and they are worth as much: open an issue when something breaks,
-say which part of the README lost you, tell someone who runs agents that this exists.
+There are free ways to help too: report the bugs you hit, write down the criticism you have,
+recommend it to a friend.
 
 <!-- signature -->
 <div align="center">
