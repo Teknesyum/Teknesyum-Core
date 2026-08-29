@@ -44,9 +44,34 @@ function block(name, text) {
     .filter(Boolean);
 }
 
+function section(name, text) {
+  const body = String(text).replace(/\r\n/g, "\n");
+  const head = new RegExp("(?:^|\\n)#{1,6}[ \\t]*" + name + "[ \\t]*\\n", "i");
+  const m = head.exec(body);
+  if (!m) return [];
+  const rest = body.slice(m.index + m[0].length);
+  const next = /\n#{1,6}[ \t]/.exec(rest);
+  const chunk = next ? rest.slice(0, next.index) : rest;
+  return chunk
+    .split("\n")
+    .map((l) => l.replace(/^[ \t]*[-*][ \t]*/, "").trim())
+    .filter((l) => l && !l.startsWith("```"));
+}
+
+function entries(name, text) {
+  const inline = list(name, text);
+  if (inline.length) return inline;
+  const bl = block(name, text);
+  if (bl.length) return bl;
+  return section(name, text);
+}
+
+function owned(text) {
+  return entries('owns', text);
+}
+
 function verifySteps(text) {
-  const inline = list('verify', text);
-  return inline.length ? inline : block('verify', text);
+  return entries('verify', text);
 }
 
 module.exports = {
@@ -60,5 +85,8 @@ module.exports = {
   field,
   list,
   block,
+  section,
+  entries,
+  owned,
   verifySteps,
 };

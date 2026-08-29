@@ -1240,6 +1240,70 @@ function testFigures() {
   }
 }
 
+function testLadder() {
+  const root = fixture();
+  const live = path.join(root, '.claude', 'relay', 'live');
+  const done = path.join(root, FINISHED);
+  const body = [
+    '# L1',
+    'status: active',
+    'round: 1',
+    '',
+    '## owns',
+    'src/ok.js',
+    '',
+    '## verify',
+    'node -e "process.exit(0)"',
+    '',
+  ].join('\n');
+  writeContract(root, 'L1', body);
+
+  const parsed = require(path.join(CORE, 'hooks', 'schema.js'));
+  ok('the heading form of owns is read, the one the README shows', parsed.owned(body).length === 1, JSON.stringify(parsed.owned(body)));
+  ok('the heading form of verify is read too', parsed.verifySteps(body).length === 1, JSON.stringify(parsed.verifySteps(body)));
+
+  const early = contract(['complete', '--id', 'L1'], root);
+  ok('an active contract cannot close', early.status === 2, early.stdout + early.stderr);
+  ok('and the refusal names the command that fixes it', /submit --id/.test(early.stdout + early.stderr), early.stdout);
+
+  const sub = contract(['submit', '--id', 'L1'], root);
+  ok('submit moves it up the ladder', sub.status === 0, sub.stdout + sub.stderr);
+  ok('and the file now says submitted', /status: submitted/.test(fs.readFileSync(path.join(root, CONTRACTS, 'L1.md'), 'utf8')));
+
+  const shut = contract(['complete', '--id', 'L1'], root);
+  ok('a submitted contract closes', shut.status === 0, shut.stdout + shut.stderr);
+  const archived = fs.readFileSync(path.join(done, 'L1.md'), 'utf8');
+  ok('the archived contract carries a terminal status', /status: done/.test(archived), archived.slice(0, 60));
+
+  const back = contract(['reopen', '--id', 'L1', '--reason', 'the verify step was wrong'], root);
+  ok('a closed contract can be reopened', back.status === 0, back.stdout + back.stderr);
+  const reopened = fs.readFileSync(path.join(root, CONTRACTS, 'L1.md'), 'utf8');
+  ok('reopening returns it to active', /status: active/.test(reopened), reopened.slice(0, 60));
+  ok('reopening raises the round', /round: 2/.test(reopened), reopened.slice(0, 80));
+  ok('the closed round stays in the ledger', /reopened/.test(fs.readFileSync(path.join(root, '.claude', 'relay', 'audits', 'ledger.jsonl'), 'utf8')));
+  ok('reopen refuses without a reason', contract(['reopen', '--id', 'L1'], root).status === 2);
+
+  writeContract(root, 'L2', '# L2\nstatus: submitted\nowns: [src/gone.js]\nverify:\n  - true\n');
+  const gone = contract(['complete', '--id', 'L2'], root);
+  ok('a contract that owns a file nobody wrote cannot close', gone.status === 2, gone.stdout + gone.stderr);
+
+  writeContract(root, 'L3', '# L3\nstatus: submitted\nowns: [../outside.js]\nverify:\n  - true\n');
+  const out3 = contract(['complete', '--id', 'L3'], root);
+  ok('owns cannot reach outside the project', out3.status === 2 && /outside the project/.test(out3.stdout + out3.stderr), out3.stdout);
+
+  const sealMod = require(path.join(CORE, 'hooks', 'seal.js'));
+  fs.mkdirSync(live, { recursive: true });
+  ok(
+    'a run-id with no live record is refused, not waved through',
+    typeof sealMod.checkAuditor(path.join(root, '.claude', 'relay'), 'made-up-agent') === 'string',
+    String(sealMod.checkAuditor(path.join(root, '.claude', 'relay'), 'made-up-agent'))
+  );
+
+  try {
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}
+
 function main() {
   const root = fixture();
   testGuard(root);
@@ -1256,6 +1320,7 @@ function main() {
   testTier(root);
   testQuota(root);
   testTierVisible(root);
+  testLadder();
   testFigures();
   testNoContextWrites();
 

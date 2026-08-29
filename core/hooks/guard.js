@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { read, write, safe, norm, relayRoot, projectRoot, liveDir, logProblem, settings } = require('./lib.js');
-const { RANK, isContractName, status, isKnownStatus, list } = require('./schema.js');
+const { RANK, isContractName, status, isKnownStatus, list, owned } = require('./schema.js');
 
 let raw = '';
 process.stdin.on('data', (d) => (raw += d));
@@ -234,7 +234,7 @@ function bind(target, agentId) {
 
 function ownedBy(relay, id) {
   try {
-    return list('owns', fs.readFileSync(path.join(relay, 'contracts', id + '.md'), 'utf8'));
+    return owned(fs.readFileSync(path.join(relay, 'contracts', id + '.md'), 'utf8'));
   } catch {
     return null;
   }

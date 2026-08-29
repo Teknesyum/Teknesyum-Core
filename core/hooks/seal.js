@@ -27,7 +27,13 @@ function digest(data) {
 
 function ownsFault(root, owns) {
   for (const p of owns) {
-    if (/[\\/]$/.test(String(p))) return 'owns contains a directory path: ' + p;
+    const raw = String(p);
+    if (/[\\/]$/.test(raw)) return 'owns contains a directory path: ' + p;
+    if (path.isAbsolute(raw) || /^[A-Za-z]:/.test(raw))
+      return 'owns contains an absolute path: ' + p;
+    const rel = path.relative(root, path.resolve(root, raw));
+    if (!rel || rel.startsWith('..') || path.isAbsolute(rel))
+      return 'owns reaches outside the project: ' + p;
     let st;
     try {
       st = fs.statSync(path.join(root, p));
@@ -37,6 +43,18 @@ function ownsFault(root, owns) {
     if (st.isDirectory()) return 'owns contains a directory path: ' + p;
   }
   return '';
+}
+
+function ownsMissing(root, owns) {
+  const gone = [];
+  for (const p of owns) {
+    try {
+      fs.statSync(path.join(root, String(p)));
+    } catch {
+      gone.push(String(p));
+    }
+  }
+  return gone;
 }
 
 function ownsDigest(root, owns) {
@@ -91,7 +109,12 @@ function checkRecord(rec, expected) {
 
 function checkAuditor(relay, runId) {
   const rec = read(path.join(relay, 'live', safe(String(runId)) + '.json'));
-  if (!rec) return null;
+  if (!rec)
+    return (
+      'no live record for run-id: ' +
+      runId +
+      ' - the auditor must be an agent that actually ran, not a name'
+    );
   const role = String(rec.role || rec.agent_type || '?').replace(/^teknesyum:/, '');
   if (role !== 'auditor') return 'auditorRunId points at a non-auditor agent record: ' + role;
   const written = Array.isArray(rec.files) ? rec.files : [];
@@ -193,6 +216,7 @@ module.exports = {
   auditDir,
   digest,
   ownsFault,
+  ownsMissing,
   ownsDigest,
   recordPath,
   checkRecord,

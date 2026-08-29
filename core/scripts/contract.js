@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 const { relayRoot, projectRoot, settings, liveDir, read, setNotice, t } = require('../hooks/lib.js');
-const { isContractName, field, list, verifySteps } = require('../hooks/schema.js');
+const { isContractName, field, list, owned, verifySteps } = require('../hooks/schema.js');
 const seal = require('../hooks/seal.js');
 const risk = require('./risk.js');
 
@@ -389,7 +389,7 @@ function tierCmd() {
     const c = load(id);
     if (c.error) return stop([c.error]);
     relay = c.relay;
-    const owns = list('owns', c.body);
+    const owns = owned(c.body);
     level = risk.resolve(c.root, owns, field('risk', c.body));
     irrev = risk.irreversible(owns, verifySteps(c.body));
     if (!round) round = field('round', c.body);
@@ -460,7 +460,7 @@ function complete() {
   const c = load(arg('id'));
   if (c.error) return stop([c.error, '', 'Usage: contract.js complete --id T7']);
 
-  const owns = list('owns', c.body);
+  const owns = owned(c.body);
   if (!owns.length) return stop([c.id + ' has an empty owns set - cannot complete.']);
 
   const ownsFault = seal.ownsFault(c.root, owns);
@@ -471,6 +471,19 @@ function complete() {
       'A directory digest does not change when its contents do; the seal would lie.',
       'List the files the contract touches, one by one.',
     ]);
+
+  const missing = seal.ownsMissing(c.root, owns);
+  if (missing.length)
+    return stop([
+      c.id + ' cannot complete - owns names files that do not exist:',
+      '',
+      ...missing.map((p) => '  ' + p),
+      '',
+      'A contract closes on work that landed. Write the files, or correct owns.',
+    ]);
+
+  const ladder = statusFault(c.body);
+  if (ladder) return stop([c.id + ' cannot complete - ' + ladder]);
 
   const steps = verifySteps(c.body);
   if (!steps.length && !/^verify:[ \t]*\[[ \t]*\]/im.test(c.body))
@@ -525,6 +538,7 @@ function complete() {
   }
 
   fs.mkdirSync(path.dirname(c.dst), { recursive: true });
+  fs.writeFileSync(c.src, stampStatus(c.body, 'done'), 'utf8');
   fs.renameSync(c.src, c.dst);
   setNotice(c.relay, c.id + ' ' + t('notice.closed'));
   if (recordFile) seal.consume(recordFile, headSha);
@@ -533,7 +547,7 @@ function complete() {
     id: c.id,
     round,
     risk: level.level,
-    verify: results.map((r) => r.step),
+    verify: results.map((r) => ({ step: r.step, code: r.code })),
     auditorRunId: record ? record.auditorRunId : null,
     headSha,
     at: new Date().toISOString(),
@@ -549,6 +563,83 @@ function complete() {
       ]
     )
   );
+}
+
+const LADDER = ['open', 'active', 'submitted', 'done'];
+
+function statusOf(body) {
+  return String(field('status', body) || '').toLowerCase().trim();
+}
+
+function statusFault(body) {
+  const now = statusOf(body);
+  if (!now) return 'the contract carries no status: line - the ladder is open, active, submitted, done';
+  if (now === 'submitted') return '';
+  if (now === 'done') return 'the contract already says status: done';
+  if (!LADDER.includes(now)) return 'unknown status: ' + now;
+  return (
+    'status is ' +
+    now +
+    ', and only a submitted contract closes - run: contract.js submit --id <ID>'
+  );
+}
+
+function stampStatus(body, want) {
+  if (/^status:.*$/im.test(body)) return body.replace(/^status:.*$/im, 'status: ' + want);
+  return body.replace(/^(#.*\n)/, '$1status: ' + want + '\n');
+}
+
+function submit() {
+  const c = load(arg('id'));
+  if (c.error) return stop([c.error, '', 'Usage: contract.js submit --id T7']);
+  const now = statusOf(c.body);
+  if (now === 'submitted') return out([c.id + ' is already submitted.']);
+  if (now && !['open', 'active'].includes(now))
+    return stop([c.id + ' cannot be submitted from status ' + now + '.']);
+  fs.writeFileSync(c.src, stampStatus(c.body, 'submitted'), 'utf8');
+  return out([
+    c.id + ' submitted.',
+    'Next: contract.js complete --id ' + c.id + ' runs the verify steps and decides.',
+  ]);
+}
+
+function reopen() {
+  const id = arg('id');
+  const reason = arg('reason');
+  if (!id || !isContractName(id + '.md'))
+    return stop(['Missing or malformed contract id.', '', 'Usage: contract.js reopen --id T7 --reason "..."']);
+  if (!reason || reason.trim().length < 10)
+    return stop(['--reason is required: one line saying why the close was wrong.']);
+  const where = locate();
+  if (!where) return stop(['No relay root - .claude/relay does not exist.']);
+  const done = path.join(where.relay, 'contracts', 'done', id + '.md');
+  const back = path.join(where.relay, 'contracts', id + '.md');
+  let body;
+  try {
+    body = fs.readFileSync(done, 'utf8');
+  } catch {
+    return stop([id + ' is not under done/ - nothing to reopen.']);
+  }
+  if (fs.existsSync(back)) return stop([id + ' is already open under contracts/.']);
+  const round = String(Number(field('round', body) || '1') + 1);
+  let next = stampStatus(body, 'active');
+  next = /^round:.*$/im.test(next)
+    ? next.replace(/^round:.*$/im, 'round: ' + round)
+    : next.replace(/^(status:.*\n)/im, '$1round: ' + round + '\n');
+  fs.writeFileSync(done, next, 'utf8');
+  fs.renameSync(done, back);
+  seal.ledgerInit(where.relay);
+  seal.ledgerAppend(where.relay, {
+    id,
+    result: 'reopened',
+    round,
+    reason: reason.trim(),
+    at: new Date().toISOString(),
+  });
+  return out([
+    id + ' reopened -> contracts/' + id + '.md',
+    'round ' + round + ', status active, the ledger keeps the closed round.',
+  ]);
 }
 
 function close() {
@@ -577,6 +668,7 @@ function close() {
     'utf8'
   );
   fs.mkdirSync(path.dirname(c.dst), { recursive: true });
+  fs.writeFileSync(c.src, stampStatus(c.body, 'done'), 'utf8');
   fs.renameSync(c.src, c.dst);
   setNotice(c.relay, c.id + ' ' + t('notice.closed'));
   seal.ledgerInit(c.relay);
@@ -588,7 +680,7 @@ function close() {
 function check() {
   const c = load(arg('id'));
   if (c.error) return stop([c.error, '', 'Usage: contract.js check --id T7']);
-  const owns = list('owns', c.body);
+  const owns = owned(c.body);
   const level = risk.resolve(c.root, owns, field('risk', c.body));
   const steps = verifySteps(c.body);
   let diffHash = '';
@@ -637,7 +729,7 @@ function audit() {
   if (!evidence.length)
     return stop(['At least one --verification line is required; each states what you ran and got.']);
 
-  const owns = list('owns', c.body);
+  const owns = owned(c.body);
   if (!owns.length) return stop([c.id + ' has an empty owns set.']);
 
   const who = seal.checkAuditor(c.relay, runId);
@@ -700,7 +792,10 @@ function help() {
     'contract.js - the only legitimate way to close a contract',
     '',
     '  check --id <ID> [--run]   report risk and verify steps; --run executes them',
-    '  complete --id <ID>        run verify, check risk, seal, move to done/',
+    '  submit --id <ID>          mark the work finished and ready for the gate',
+    '  complete --id <ID>        run verify, check risk, record, move to done/',
+    '  reopen --id <ID> --reason "..."',
+    '                            take a closed contract back, round + 1',
     '  close --id <ID> --reason "..."',
     '                            close an unmet contract without a seal',
     '  audit --id <ID> --run-id <agent> --verification "..."',
@@ -717,6 +812,8 @@ function main() {
   if (cmd === 'complete') return complete();
   if (cmd === 'close') return close();
   if (cmd === 'check') return check();
+  if (cmd === 'submit') return submit();
+  if (cmd === 'reopen') return reopen();
   if (cmd === 'audit') return audit();
   if (cmd === 'ledger') return ledger();
   if (cmd === 'tier') return tierCmd();
@@ -729,6 +826,8 @@ module.exports = {
   close,
   check,
   audit,
+  submit,
+  reopen,
   ledger,
   runVerify,
   unsafeStep,

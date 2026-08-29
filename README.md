@@ -43,8 +43,7 @@ Some of it, yes: it spawns subagents, runs them in parallel, keeps a plan. What 
   the bill. Role and profile pick the model and the effort together, and a run of failures
   raises both.
 - **Risk-aware** — Risk is computed from the diff. When it is high the close demands an
-  audit record, and the records sit in a sealed chain, so backdating one leaves a visible
-  break.
+  audit record, and that record has to name an agent that actually ran.
 - **Role files** — Builder, planner, auditor, advisor. The role text is paid for by the
   agent holding it, not by your session.
 - **Banner and statusline** — One line for what is happening right now. Not a dashboard.
@@ -148,8 +147,13 @@ say so rather than invent a checkbox.
 
 `contract.js complete` is the only thing that can close a contract. It runs the verify
 commands itself instead of believing the report, works risk out from the diff, and will not
-close a high-risk contract until an audit record names the agent and what it checked. Audit
-records are a sealed chain, so backdating one leaves a visible break.
+close a high-risk contract until an audit record names the agent and what it checked. The
+record is bound to the owned files and to HEAD, and it is spent when the contract closes, so
+it cannot be reused or written after the fact for work that has since changed.
+
+A contract climbs a ladder: `open`, `active`, `submitted`, `done`. Only a submitted
+contract closes, the archived file is stamped `done`, and `contract.js reopen` takes a
+wrongly closed one back with its round raised and the closed round left in the ledger.
 
 Two hooks stand in front of the filesystem. `guard.js` blocks writes to files the current
 contract does not own, and shuts the shell out of the gate's own bookkeeping entirely — a
@@ -258,7 +262,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,294 assertions over the guard, the completion gate, the audit chain, the ledger, the
+2,310 assertions over the guard, the completion gate, the audit chain, the ledger, the
 known bypasses, the tier and quota locks, the personal-convention gate, the scaffold, the
 cue, the banner, and one check that no hook writes into context.
 

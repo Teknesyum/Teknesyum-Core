@@ -42,7 +42,7 @@ Bir kısmını yapıyor: subagent çağırır, paralel çalıştırır, plan tut
 - **İşe göre model** — Basit iş güçlü modele gitmez; kimse faturayı sevmiyor. Rol ve profil
   modeli ve eforu birlikte seçer, üst üste başarısızlık ikisini de yükseltir.
 - **Riskten haberdar** — Risk diff'ten hesaplanır. Yüksekse kapanış denetim kaydı ister ve
-  kayıtlar mühürlü bir zincirde durur; geriye dönük kayıt görünür bir kırılma bırakır.
+  kayıt gerçekten koşmuş bir ajanı adıyla göstermek zorunda.
 - **Rol dosyaları** — Yapıcı, planlayıcı, denetçi, danışman. Rol metnini yalnızca o rolü
   taşıyan ajan ödüyor, sizin oturumunuz değil.
 - **Banner ve statusline** — O an ne olduğunu tek satırda söyler. Pano değil.
@@ -145,8 +145,13 @@ bunu açıkça söylemesi söylenir.
 
 Bir sözleşmeyi kapatabilen tek şey `contract.js complete`. Rapora inanmak yerine verify
 komutlarını kendisi çalıştırıyor, riski diff'ten çıkarıyor ve yüksek riskli bir sözleşmeyi,
-ajanı ve neyi doğruladığını yazan bir denetim kaydı olmadan kapatmıyor. Denetim kayıtları
-mühürlü bir zincir; birini sonradan tarihlemek görünür bir kırık bırakıyor.
+ajanı ve neyi doğruladığını yazan bir denetim kaydı olmadan kapatmıyor. Kayıt, sahiplenilen
+dosyalara ve HEAD'e bağlı ve kapanışta tükeniyor: ne yeniden kullanılabiliyor ne de değişmiş
+bir iş için sonradan yazılabiliyor.
+
+Sözleşme bir merdiven çıkıyor: `open`, `active`, `submitted`, `done`. Yalnız submitted olan
+kapanıyor, arşivlenen dosyaya `done` damgası vuruluyor, yanlış kapanan iş `contract.js reopen`
+ile turu artırılarak geri alınıyor ve kapanan tur defterde kalıyor.
 
 Dosya sisteminin önünde iki kanca duruyor. `guard.js` mevcut sözleşmenin sahip olmadığı
 dosyalara yazmayı engelliyor ve kapının kendi muhasebesini kabuğa tamamen kapatıyor — onları
@@ -255,7 +260,7 @@ kenarlar. Okuması dosya açmaktan ucuz ve dosya açmanın cevaplamadığı şey
 node test/all.js
 ```
 
-2.294 doğrulama: guard, kapanış kapısı, denetim zinciri, defter, bilinen aşma yolları,
+2.310 doğrulama: guard, kapanış kapısı, denetim zinciri, defter, bilinen aşma yolları,
 kademe ve kota kilitleri, kişisel sözleşme kapısı, scaffold, cue, banner ve hiçbir kancanın
 bağlama yazmadığına dair tek bir denetim.
 
