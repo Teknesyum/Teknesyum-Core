@@ -398,3 +398,57 @@ ikisi de **0 token**. `statusline.js` zaten tembel yükleniyor (`notice.js:37`),
 saf node açılışından ibaret. Geriye iki iş kalıyor: (1) D15'teki "mesaj başına tek çalışma"
 cümlesi yanlış, düzeltilecek; (2) mesaj başına kaç flush geldiği ölçülmeden karar verilmeyecek
 — sayaç `notice.js` içinden diske yazılır, 0 token. Sayı küçükse hiçbir şey değişmez.
+
+---
+
+## P — Uygulandı (v0.2.0)
+
+Tümü testli: **2352 assertion, 0 hata**. Sürüm `v0.2.0` olarak kesildi ve yayınlandı.
+
+### Kapı ve merdiven
+| Ne | Neden | Nerede |
+| --- | --- | --- |
+| `submit` / `reopen` komutları, `open → active → submitted → done` merdiveni | Kapanış tek adımdı; yanlış kapanan işi geri almanın yolu yoktu | contract.js |
+| Arşivlenen dosyaya `done` damgası | done/ altındaki dosya hâlâ "active" diyordu | contract.js |
+| `owns` başlık biçiminin ayrıştırılması | README'nin gösterdiği `## owns` biçimini ayrıştırıcı hiç okumuyordu: ön sayfayı izleyen herkeste sahiplik kümesi boş, sınır sessizce kapalıydı | schema.js |
+| Yazılmamış dosyayı sahiplenen sözleşme kapanamıyor | Okunamayan dosya boş sayılıyor, yapılmamış iş kapanıyordu | seal.js |
+| `owns` kök dışına / mutlak yola çıkamıyor | Sınır denetiminden kaçış | seal.js |
+| Uydurma `--run-id` reddi | Koşmamış bir ajan adıyla yüksek riskli kapanış mühürlenebiliyordu | seal.js |
+| Tur tavanı 6 (`--force` ile aşılır) | Altıncı turdan sonra sorun ajanda değil sözleşmede | contract.js · tiers.json |
+
+### Yarış ve maliyet
+| Ne | Neden |
+| --- | --- |
+| Hata sayacı ajan başına (`byAgent`) | Tek sayaç vardı: bir ajanın Bash hatası herkesin modelini yükseltiyordu |
+| Eşik 3 → 2 | Bile bile üçüncü turu beklemiyoruz |
+| `merge()` ile yazım | `guard.bind` ile `watch` aynı dosyayı okuyup yazıyor, birbirinin alanını siliyordu |
+| `PostToolUse`/`PostToolUseFailure` matcher'ı | Her `Read`/`Grep` çağrısında node açılıyordu; artık yalnız yazan araçlarda |
+| `sweep()` yalnız oturum/ajan bitişinde | Her araç çağrısında dizin taranıyordu |
+
+### Kullanıcı güvenliği
+| Ne | Neden |
+| --- | --- |
+| `setup.js` okunamayan `settings.json`'ı ezmiyor, `.bak` bırakıyor | Yorum satırı olan bir ayar dosyası tamamen siliniyordu |
+| `guard.js` relay'i olmayan projede açık düşüyor | Kancayı kuran ama relay kullanmayan kullanıcının işi bloke oluyordu |
+
+### Yeni araçlar (çağrılmadıkça çalışmaz, 0 token)
+| Ne | Ne işe yarar |
+| --- | --- |
+| `handoff.js` → `.claude/relay/HANDOFF.md` | Projenin nerede olduğu: açık sözleşmeler, son kapanışlar, dal, baş. Mekanik kısmı SessionEnd kancası yazar (bedelsiz), niyet paragrafı elle bir kez. Herhangi bir model okur |
+| `contract.js precheck --id` | Ajan açmadan önce verify koşar; zaten geçiyorsa iş bitmiştir |
+| `doctor.js` | Kurulum sağlam mı: sürümler, tablo, roller, kancalar, statusline, defter |
+| `release.js` | Sürüm hafızadan değil `.changes/` notlarından: iki manifest + dört dosyadaki kurulum satırı + changelog birlikte hareket eder |
+| `.claude/relay/config.json` | Proje kendi profilini tutar; premium makinede eco depo eco kalır |
+| `.github/workflows/test.yml` | Üç işletim sisteminde test |
+
+### Kesilenler
+| Ne | Ne yapıyordu | Niye kaldırdık |
+| --- | --- | --- |
+| Guard'ın Bash kara listesi (`READ_CMDS`, `GIT_SAFE`, `readsOnly`, `allowed`) | Bash komut metninde `contracts/done` ve `relay/audits` arıyor, yazan komutları reddediyordu | Düz metin eşleşmesiydi: `cd .claude/relay/contracts; mv T7.md done/` hiçbir parçada bu diziyi taşımadığı için geçiyordu, buna karşılık defteri okuyan bir `python` tek satırı reddediliyordu. Korumayan koruma, olmayandan tehlikelidir; üstelik her Bash çağrısında bir node açtırıyordu. Bash kanca matcher'ından da düştü |
+
+### Kesilmedi — gerekçesiyle
+**Mühür (kayıt–ağaç bağı).** Kesme gerekçesi "sahte run-id zaten geçiyor, yani mühür güvence
+vermiyor" idi. B1'de o açık kapandı: artık kayıt gerçekten koşmuş bir denetçiyi göstermek
+zorunda. Gerekçe ortadan kalkınca kesim net bir kayıp oluyor: `headSha` + `diffHash`,
+denetimden sonra değişen ağaçla kapanışı engelliyor, çalışma anı maliyeti kapanışta tek
+hash, ve testi var. Yine de kesilsin denirse tek commit: kararı sen ver.
