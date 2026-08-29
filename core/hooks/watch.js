@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { read, write, merge, safe, relayRoot, liveDir, sessionId, setNotice, t } = require('./lib.js');
+const { status, isContractName } = require('./schema.js');
 
 let raw = '';
 process.stdin.on('data', (d) => (raw += d));
@@ -96,6 +97,7 @@ function record(j) {
 
   if (ev === 'PostToolUse') {
     rec.steps = (rec.steps || 0) + 1;
+    if (rec.contract) rec.contractSteps = (rec.contractSteps || 0) + 1;
     rec.fails = 0;
     bumpTally(live, true, 0, key, rec.contract || '');
     rec.tool = j.tool_name || '';
@@ -127,6 +129,7 @@ function record(j) {
       require('../scripts/update.js').maybeRefresh();
     } catch {}
   }
+  if (ev === 'SessionEnd' || ev === 'Stop') abandoned(r.relay, live, now);
   if (ev === 'SessionEnd' || ev === 'Stop' || ev === 'SubagentStop') sweep(live);
 }
 
@@ -158,6 +161,54 @@ function closeAll(live, now) {
     a.stop_reason = 'session_end';
     write(p, a);
   }
+}
+
+function heldContracts(live) {
+  const held = new Set();
+  let rows = [];
+  try {
+    rows = fs.readdirSync(live).filter((f) => f.endsWith('.json') && !f.startsWith('_'));
+  } catch {
+    return held;
+  }
+  for (const f of rows) {
+    const r = read(path.join(live, f));
+    if (r && !r.ended && r.contract) held.add(String(r.contract));
+  }
+  return held;
+}
+
+function abandoned(relay, live, now) {
+  const dir = path.join(relay, 'contracts');
+  let files = [];
+  try {
+    files = fs.readdirSync(dir).filter(isContractName);
+  } catch {
+    return;
+  }
+  const held = heldContracts(live);
+  const open = [];
+  for (const f of files) {
+    const id = f.replace(/\.md$/i, '');
+    if (held.has(id)) continue;
+    let body = '';
+    try {
+      body = fs.readFileSync(path.join(dir, f), 'utf8');
+    } catch {
+      continue;
+    }
+    if (status(body) === 'active') open.push(id);
+  }
+  const marks = path.join(live, '_stale.json');
+  const cur = read(marks);
+  const seen = cur && Array.isArray(cur.ids) ? cur.ids : [];
+  const fresh = open.filter((id) => !seen.includes(id));
+  write(marks, { ids: open, at: now });
+  if (!fresh.length) return;
+  try {
+    const seal = require('./seal.js');
+    for (const id of fresh) seal.ledgerAppend(relay, { id: id, result: 'stale', at: now });
+  } catch {}
 }
 
 function sweep(live) {

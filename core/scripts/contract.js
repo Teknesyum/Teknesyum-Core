@@ -68,6 +68,27 @@ const FORBIDDEN_IN_VERIFY = [
   { re: /relay[\\/](audits|live)/i, why: 'touches audits/ or live/' },
 ];
 
+const HOLLOW = [
+  { re: /^\s*:\s*$/, why: 'does nothing' },
+  { re: /^\s*true\s*$/i, why: 'always passes' },
+  { re: /^\s*(exit\s+0|cd\s+\S+|pwd|ls|dir)\s*$/i, why: 'always passes' },
+  { re: /^\s*echo\b/i, why: 'prints instead of testing' },
+  { re: /^\s*#/, why: 'is a comment' },
+];
+
+function hollowStep(step) {
+  const s = String(step).trim();
+  if (!s) return 'is empty';
+  for (const h of HOLLOW) if (h.re.test(s)) return h.why;
+  return '';
+}
+
+function hollowVerify(steps) {
+  if (!steps.length) return [];
+  const graded = steps.map((s) => [s, hollowStep(s)]);
+  return graded.every(([, why]) => why) ? graded : [];
+}
+
 function unsafeStep(step) {
   for (const f of FORBIDDEN_IN_VERIFY) if (f.re.test(step)) return f.why;
   return '';
@@ -506,6 +527,21 @@ function complete() {
       'Add a `verify:` block, or `verify: []` with a written reason under ## Acceptance.',
     ]);
 
+  const hollow = hollowVerify(steps);
+  if (hollow.length)
+    return stop(
+      [
+        c.id + ' cannot complete - nothing here is acceptance.',
+        '',
+      ]
+        .concat(hollow.map(([s, why]) => '  ' + s + '  (' + why + ')'))
+        .concat([
+          '',
+          'A verify step has to be able to fail. Give one command that would exit non-zero',
+          'if the work were undone - a test, a build, a lint, a grep for what you promised.',
+        ])
+    );
+
   const unsafe = steps.map((s) => [s, unsafeStep(s)]).filter(([, why]) => why);
   if (unsafe.length)
     return stop(
@@ -555,6 +591,7 @@ function complete() {
   fs.writeFileSync(c.src, stampStatus(c.body, 'done'), 'utf8');
   fs.renameSync(c.src, c.dst);
   setNotice(c.relay, c.id + ' ' + t('notice.closed'));
+  dropSnapshot(c.root, c.id);
   if (recordFile) seal.consume(recordFile, headSha);
   seal.ledgerInit(c.relay);
   seal.ledgerAppend(c.relay, {
@@ -581,6 +618,77 @@ function complete() {
 
 const LADDER = ['open', 'active', 'submitted', 'done'];
 
+const SNAP_NS = 'refs/teknesyum/';
+
+function snapRef(id) {
+  return SNAP_NS + id;
+}
+
+function snapshotOf(root, id) {
+  return git(root, ['rev-parse', '--verify', '--quiet', snapRef(id)]) || null;
+}
+
+function takeSnapshot(root, id) {
+  const held = snapshotOf(root, id);
+  if (held) return held;
+  const dirty = git(root, ['stash', 'create']);
+  const sha = dirty || git(root, ['rev-parse', 'HEAD']);
+  if (!sha) return null;
+  return git(root, ['update-ref', snapRef(id), sha]) === null ? null : sha;
+}
+
+function dropSnapshot(root, id) {
+  if (snapshotOf(root, id)) git(root, ['update-ref', '-d', snapRef(id)]);
+}
+
+function snapshotCmd() {
+  const c = load(arg('id'));
+  if (c.error) return stop([c.error]);
+  const sha = takeSnapshot(c.root, c.id);
+  if (!sha) return stop(['Cannot snapshot - not a git repository, or no commit yet.']);
+  return out([
+    c.id + ' pinned at ' + sha.slice(0, 8) + ' as ' + snapRef(c.id),
+    '',
+    'A real ref, not a dangling object, so gc cannot take it. It holds the tracked',
+    'files as they were; anything untracked is not in it.',
+  ]);
+}
+
+function revert() {
+  const c = load(arg('id'));
+  if (c.error) return stop([c.error]);
+  const sha = snapshotOf(c.root, c.id);
+  if (!sha)
+    return stop([
+      'No snapshot for ' + c.id + '.',
+      'One is taken by: contract.js precheck --id ' + c.id + ' (or snapshot --id ' + c.id + ')',
+    ]);
+  const owns = owned(c.body);
+  if (!owns.length) return stop([c.id + ' owns nothing, so there is nothing to put back.']);
+  if (!has('yes'))
+    return out(
+      [
+        'revert would overwrite these with ' + sha.slice(0, 8) + ':',
+        '',
+      ]
+        .concat(owns.map((o) => '  ' + o))
+        .concat(['', 'Run it again with --yes.']),
+      1
+    );
+  const done = [];
+  const missed = [];
+  for (const o of owns) {
+    if (git(c.root, ['checkout', sha, '--', o]) === null) missed.push(o);
+    else done.push(o);
+  }
+  return out(
+    [c.id + ' reverted to ' + sha.slice(0, 8)]
+      .concat(done.map((o) => '  put back ' + o))
+      .concat(missed.length ? [''].concat(missed.map((o) => '  not in the snapshot: ' + o)) : []),
+    missed.length ? 1 : 0
+  );
+}
+
 function precheck() {
   const c = load(arg('id'));
   if (c.error) return stop([c.error]);
@@ -590,6 +698,7 @@ function precheck() {
       c.id + ' carries no verify steps, so there is nothing to check before the work starts.',
       'Add a ## verify section, or run the contract as it is.',
     ], 1);
+  const pin = takeSnapshot(c.root, c.id);
   const results = runVerify(c.root, steps);
   const met = results.every((r) => r.code === 0);
   return out(
@@ -601,6 +710,7 @@ function precheck() {
           ? 'Every step already passes. The work is done - close it instead of spawning an agent:'
           : 'The work is genuinely open. Spawning an agent is worth it.',
         met ? '  node <plugin>/scripts/contract.js submit --id ' + c.id : '',
+        pin ? 'The tree is pinned at ' + pin.slice(0, 8) + '; revert --id ' + c.id + ' puts it back.' : '',
       ])
       .filter((x) => x !== ''),
     met ? 0 : 1
@@ -716,6 +826,7 @@ function close() {
   fs.writeFileSync(c.src, archived, 'utf8');
   fs.renameSync(c.src, c.dst);
   setNotice(c.relay, c.id + ' ' + t('notice.closed'));
+  dropSnapshot(c.root, c.id);
   seal.ledgerInit(c.relay);
   seal.ledgerAppend(c.relay, { id: c.id, result: 'unmet', reason: reason.trim(), headSha, at });
 
@@ -822,6 +933,12 @@ function check() {
       ? 'An auditor record is required before complete.'
       : 'Verification alone completes this contract.',
   ];
+  const hollowSeen = hollowVerify(steps);
+  if (hollowSeen.length) {
+    lines.push('');
+    lines.push('nothing here can fail, so nothing here is acceptance:');
+    for (const [s, why] of hollowSeen) lines.push('  ' + s + '  (' + why + ')');
+  }
   const gone = unresolved(c.root, owns, steps);
   if (gone.steps.length) {
     lines.push('');
@@ -925,6 +1042,8 @@ function help() {
     '  list [--open] [--owns <path>]',
     '                            what is open, and which contract owns a file',
     '  precheck --id <ID>        run verify before the work starts; 0 means it is already done',
+    '  snapshot --id <ID>        pin the tracked tree as refs/teknesyum/<ID>',
+    '  revert --id <ID> --yes    put the owned files back to that pin',
     '  check --id <ID> [--run]   report risk and verify steps; --run executes them',
     '  submit --id <ID>          mark the work finished and ready for the gate',
     '  complete --id <ID>        run verify, check risk, record, move to done/',
@@ -948,6 +1067,8 @@ function main() {
   if (cmd === 'check') return check();
   if (cmd === 'submit') return submit();
   if (cmd === 'precheck') return precheck();
+  if (cmd === 'snapshot') return snapshotCmd();
+  if (cmd === 'revert') return revert();
   if (cmd === 'list') return listCmd();
   if (cmd === 'reopen') return reopen();
   if (cmd === 'audit') return audit();
@@ -958,6 +1079,13 @@ function main() {
 
 if (require.main === module) main();
 module.exports = {
+  snapRef,
+  snapshotOf,
+  takeSnapshot,
+  dropSnapshot,
+  revert,
+  hollowStep,
+  hollowVerify,
   listCmd,
   unresolved,
   precheck,

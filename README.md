@@ -52,6 +52,14 @@ Some of it, yes: it spawns subagents, runs them in parallel, keeps a plan. What 
   costs nothing, and any model can read it — not only Claude.
 - **Ask before you spawn** — `contract.js precheck` runs the verify steps first. If they
   already pass, the work is done and no agent is worth starting.
+- **Acceptance that can fail** — A `verify` block where every step is `true`, `echo`, or a
+  comment is not acceptance. The gate refuses to close on it and says why.
+- **A ceiling** — A contract can name how many steps it is worth. Past it the contract stops
+  being writable, so a run that is not converging stops on its own.
+- **A pin you can go back to** — `precheck` records the tracked tree as `refs/teknesyum/<ID>`
+  before the work starts; `revert` puts the owned files back to it.
+- **Abandoned work is on the record** — A contract still `active` when the session ends is
+  written to the ledger and shown on the statusline. Nothing is written into your context.
 - **`doctor`** — One command answers whether the install is sound: versions, tier table,
   roles, hooks, statusline, and every close accounted for in the ledger.
 
@@ -95,7 +103,7 @@ falls open, not closed.
 
 Weigh the maturity honestly. One developer, v0.2.0, first public tags this month. Audit
 records are individually bound but not chained to each other. Development is Windows-first;
-Linux and macOS are covered by CI, not daily use. The test suite (2,383 assertions, three
+Linux and macOS are covered by CI, not daily use. The test suite (2,420 assertions, three
 platforms) is real, but the field history is weeks, not years.
 
 *Reviewed from the source by Claude (Fable 5), asked for an outside opinion and published
@@ -205,7 +213,21 @@ that the agent is unlucky — split it, or narrow what it owns. `--force` is the
 you disagree.
 
 Before any of that, `contract.js precheck --id X` runs the verify steps while the work is
-still unstarted. If they already pass, the work is done and spawning an agent is a waste.
+still unstarted. If they already pass, the work is done and spawning an agent is a waste. It
+also pins the tracked tree as `refs/teknesyum/<ID>` — a real ref, so gc cannot take it — and
+`contract.js revert --id X --yes` puts the owned files back to that pin. The pin comes down
+when the contract closes; an abandoned contract keeps its pin, which is the point of it.
+
+A `verify` block whose every step is `true`, `:`, `exit 0`, `ls`, `echo` or a comment cannot
+fail, and something that cannot fail is not acceptance. The gate refuses to close on it and
+names the step. One command that can fail is enough; the rest may be noise.
+
+A contract may carry `ceiling: <n>` — the number of tool steps it is worth. Past it the guard
+stops accepting writes under that contract, so a run that is not converging ends without
+anyone watching it. Contracts without the line get a generous default. When a session ends
+with a contract still `active` and no agent holding it, the ledger gets a `stale` entry and
+the statusline says so. It is a record, not a refusal to exit — the session closes as usual
+and nothing is written into the model's context.
 
 ### The audit record
 
@@ -314,6 +336,8 @@ The hooks that watch tool calls carry a matcher, so reading a file does not star
 | `contract.js precheck` | runs the verify steps before an agent is spawned |
 | `contract.js check` | risk, verify steps, and anything they name that is not there |
 | `contract.js list` | what is open, and which contract owns a given file |
+| `contract.js snapshot` | pins the tracked tree as `refs/teknesyum/<ID>` |
+| `contract.js revert` | puts the owned files back to that pin |
 | `handoff.js` | writes `.claude/relay/HANDOFF.md`, the state of the project |
 | `doctor.js` | says whether the install is sound |
 | `release.js` | decides the next version from notes left in `.changes/` |
@@ -400,7 +424,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,383 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,420 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
 scaffold, the cue, the banner, the handoff note, and one check that no hook writes into
 context. CI runs the same suite on Linux, Windows and macOS; development is Windows-first.

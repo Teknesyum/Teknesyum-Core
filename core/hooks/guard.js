@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { read, write, merge, safe, norm, relayRoot, projectRoot, liveDir, logProblem, settings } = require('./lib.js');
-const { RANK, isContractName, status, isKnownStatus, list, owned } = require('./schema.js');
+const { RANK, isContractName, status, isKnownStatus, field, list, owned } = require('./schema.js');
 
 let raw = '';
 process.stdin.on('data', (d) => (raw += d));
@@ -236,6 +236,7 @@ function bind(target, agentId) {
   merge(f, (cur) =>
     Object.assign({ id: safe(String(agentId)), files: [] }, cur, {
       contract: path.basename(abs, '.md'),
+      contractSteps: 0,
     })
   );
 }
@@ -246,6 +247,39 @@ function ownedBy(relay, id) {
   } catch {
     return null;
   }
+}
+
+const CEILING = 150;
+
+function ceilingOf(body) {
+  const n = Number(String(field('ceiling', body)).trim());
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : CEILING;
+}
+
+function exhausted(target, agentId) {
+  if (!agentId) return;
+  const abs = path.resolve(target);
+  if (/\/\.claude\/relay\//i.test(norm(abs))) return;
+  const r = relayRoot(path.dirname(abs), { git: false });
+  if (!r) return;
+  const rec = read(bindingFile(r.relay, agentId));
+  if (!rec || !rec.contract) return;
+  let body = '';
+  try {
+    body = fs.readFileSync(path.join(r.relay, 'contracts', rec.contract + '.md'), 'utf8');
+  } catch {
+    return;
+  }
+  const cap = ceilingOf(body);
+  const spent = Number(rec.contractSteps || 0);
+  if (spent < cap) return;
+  return block(
+    rec.contract + ' has spent its ceiling: ' + spent + ' steps of ' + cap + '.',
+    'Nothing more can be written under it.',
+    '',
+    'Record where you got to under ## Checkpoint and submit, or ask T0 for a',
+    'smaller contract. To raise the bar on purpose, add a "ceiling: <n>" line.'
+  );
 }
 
 function boundary(target, agentId) {
@@ -281,6 +315,7 @@ function decide(j) {
     sealedArea(target);
     bind(target, agentId);
     boundary(target, agentId);
+    exhausted(target, agentId);
     if (tool === 'Write') {
       priorArt(target);
       router(target, t.content || '');

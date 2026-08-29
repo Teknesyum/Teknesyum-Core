@@ -75,7 +75,7 @@ function testGuard(root) {
 
   ok(
     'owns with a directory is blocked',
-    hook({ tool_name: 'Write', tool_input: { file_path: c('T9'), content: 'owns: [src/]\nverify:\n  - true\n' } }, root)
+    hook({ tool_name: 'Write', tool_input: { file_path: c('T9'), content: 'owns: [src/]\nverify:\n  - node -e \"process.exit(0)\"\n' } }, root)
       .status === 2
   );
 
@@ -86,7 +86,7 @@ function testGuard(root) {
 
   const valid = {
     tool_name: 'Write',
-    tool_input: { file_path: c('T9'), content: 'owns: [src/ok.js]\nverify:\n  - true\nstatus: open\n' },
+    tool_input: { file_path: c('T9'), content: 'owns: [src/ok.js]\nverify:\n  - node -e \"process.exit(0)\"\nstatus: open\n' },
   };
   ok('first contract of a new project needs prior art', hook(valid, root).status === 2);
 
@@ -112,7 +112,7 @@ function testGuard(root) {
     hook({ tool_name: 'Bash', tool_input: { command: 'rm ' + finishedFile } }, root).status === 0
   );
 
-  writeContract(root, 'R1', '---\nid: R1\nstatus: submitted\nowns: [src/ok.js]\nverify:\n  - true\n---\n');
+  writeContract(root, 'R1', '---\nid: R1\nstatus: submitted\nowns: [src/ok.js]\nverify:\n  - node -e \"process.exit(0)\"\n---\n');
   ok(
     'status regression is blocked',
     hook(
@@ -135,7 +135,7 @@ function testGuard(root) {
     ).status === 0
   );
 
-  writeContract(root, 'R2', '---\nid: R2\nstatus: open\nowns: [src/ok.js]\nverify:\n  - true\n---\n');
+  writeContract(root, 'R2', '---\nid: R2\nstatus: open\nowns: [src/ok.js]\nverify:\n  - node -e \"process.exit(0)\"\n---\n');
   ok(
     'open cannot skip active',
     hook(
@@ -274,7 +274,7 @@ function testBypass(root) {
   writeContract(
     root,
     'B1',
-    '---\nid: B1\nstatus: open\nround: 1\nowns: [src/ok.js]\nverify:\n  - true\n---\n'
+    '---\nid: B1\nstatus: open\nround: 1\nowns: [src/ok.js]\nverify:\n  - node -e \"process.exit(0)\"\n---\n'
   );
   const contractPath = path.join(root, CONTRACTS, 'B1.md');
   const agent = 'agent-b1';
@@ -1279,7 +1279,7 @@ function testLadder() {
   ok('the closed round stays in the ledger', /reopened/.test(fs.readFileSync(path.join(root, '.claude', 'relay', 'audits', 'ledger.jsonl'), 'utf8')));
   ok('reopen refuses without a reason', contract(['reopen', '--id', 'L1'], root).status === 2);
 
-  writeContract(root, 'L9', '# L9\nstatus: submitted\nround: 6\nowns: [src/ok.js]\nverify:\n  - true\n');
+  writeContract(root, 'L9', '# L9\nstatus: submitted\nround: 6\nowns: [src/ok.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
   contract(['complete', '--id', 'L9'], root);
   const capped = contract(['reopen', '--id', 'L9', '--reason', 'this one will not converge'], root);
   ok('a seventh round is refused - the contract is wrong, not the agent', capped.status === 2, capped.stdout + capped.stderr);
@@ -1287,11 +1287,11 @@ function testLadder() {
   const forced = contract(['reopen', '--id', 'L9', '--reason', 'this one will not converge', '--force'], root);
   ok('the cap can still be overridden on purpose', forced.status === 0, forced.stdout + forced.stderr);
 
-  writeContract(root, 'L2', '# L2\nstatus: submitted\nowns: [src/gone.js]\nverify:\n  - true\n');
+  writeContract(root, 'L2', '# L2\nstatus: submitted\nowns: [src/gone.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
   const gone = contract(['complete', '--id', 'L2'], root);
   ok('a contract that owns a file nobody wrote cannot close', gone.status === 2, gone.stdout + gone.stderr);
 
-  writeContract(root, 'L3', '# L3\nstatus: submitted\nowns: [../outside.js]\nverify:\n  - true\n');
+  writeContract(root, 'L3', '# L3\nstatus: submitted\nowns: [../outside.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
   const out3 = contract(['complete', '--id', 'L3'], root);
   ok('owns cannot reach outside the project', out3.status === 2 && /outside the project/.test(out3.stdout + out3.stderr), out3.stdout);
 
@@ -1376,7 +1376,7 @@ function testRaces() {
   ok('a clean step wipes that agent off the failure list', !(t2.byAgent && t2.byAgent.a1), JSON.stringify(t2));
   ok('and the relay figure falls with it', (t2.fails || 0) === 0, JSON.stringify(t2));
 
-  writeContract(root, 'R1', '# R1\nstatus: active\nowns: [src/ok.js]\nverify:\n  - true\n');
+  writeContract(root, 'R1', '# R1\nstatus: active\nowns: [src/ok.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
   const mine = path.join(live, 'a3.json');
   fs.writeFileSync(mine, JSON.stringify({ id: 'a3', files: [], contract: 'R1' }));
   fire('PostToolUse', 'Bash', 'a3');
@@ -1404,7 +1404,7 @@ function testTools() {
   const HANDOFF = path.join(CORE, 'scripts', 'handoff.js');
   const DOCTOR = path.join(CORE, 'scripts', 'doctor.js');
 
-  writeContract(root, 'H1', '# H1 the banner cost\nstatus: active\nround: 2\nowns: [src/ok.js]\nverify:\n  - true\n');
+  writeContract(root, 'H1', '# H1 the banner cost\nstatus: active\nround: 2\nowns: [src/ok.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
   const made = run(process.execPath, [HANDOFF, 'show', '--root', root], { cwd: root });
   const note = made.stdout;
   ok('the handoff note names the open contract', /H1/.test(note), note);
@@ -1512,7 +1512,7 @@ function testIndex() {
   ok('and says a step that cannot run is not acceptance', /not acceptance/.test(seen.stdout), seen.stdout);
   ok('an owns entry for work not done yet is information, not a fault', /do not exist yet/.test(seen.stdout), seen.stdout);
 
-  writeContract(root, 'U2', '# U2 the banner\nstatus: active\nowns: [src/a.js]\nverify:\n  - true\n');
+  writeContract(root, 'U2', '# U2 the banner\nstatus: active\nowns: [src/a.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
   const all = contract(['list'], root);
   ok('list reports what is open', /U1/.test(all.stdout) && /U2/.test(all.stdout), all.stdout);
   ok('and what each one owns', /src\/a\.js/.test(all.stdout), all.stdout);
@@ -1569,6 +1569,138 @@ function testUpdate() {
   ok('and never on the chat banner, which the user has to read', !/update\.js/.test(notice));
 }
 
+function testAcceptance() {
+  const mod = require(path.join(CORE, 'scripts', 'contract.js'));
+  ok('an empty step measures nothing', mod.hollowStep('  ') === 'is empty');
+  ok('true always passes', mod.hollowStep('true') === 'always passes');
+  ok('a bare colon does nothing', mod.hollowStep(':') === 'does nothing');
+  ok('exit 0 always passes', mod.hollowStep('exit 0') === 'always passes');
+  ok('ls always passes', mod.hollowStep('ls') === 'always passes');
+  ok('echo prints instead of testing', mod.hollowStep('echo done') === 'prints instead of testing');
+  ok('a comment is not a test', mod.hollowStep('# ran the tests') === 'is a comment');
+  ok('a real command is not hollow', mod.hollowStep('npm test') === '');
+  ok('a command that merely starts with true is not hollow', mod.hollowStep('truffle test') === '');
+  ok('no verify at all is a different complaint, not this one', mod.hollowVerify([]).length === 0);
+  ok('one real step among hollow ones is enough', mod.hollowVerify(['echo hi', 'npm test']).length === 0);
+  ok('all hollow is caught', mod.hollowVerify(['echo hi', 'true']).length === 2);
+
+  const root = fixture();
+  writeContract(root, 'V1', '# V1\nstatus: submitted\nowns: [src/ok.js]\nverify:\n  - true\n');
+  const dud = contract(['complete', '--id', 'V1'], root);
+  ok('a contract whose acceptance cannot fail does not close', dud.status === 2, dud.stdout + dud.stderr);
+  ok('and the refusal says so plainly', /nothing here is acceptance/.test(dud.stdout + dud.stderr), dud.stdout);
+  ok('it names the step and why', /always passes/.test(dud.stdout + dud.stderr), dud.stdout);
+  const seen = contract(['check', '--id', 'V1'], root);
+  ok('check reports it before anyone submits', /nothing here can fail/.test(seen.stdout + seen.stderr), seen.stdout);
+
+  writeContract(root, 'V2', '# V2\nstatus: submitted\nowns: [src/ok.js]\nverify:\n  - echo built\n  - node -e \"process.exit(0)\"\n');
+  const mixed = contract(['complete', '--id', 'V2'], root);
+  ok('one command that can fail is enough to close', mixed.status === 0, mixed.stdout + mixed.stderr);
+
+  try {
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}
+
+function testLifetime() {
+  const lib = require(path.join(CORE, 'hooks', 'lib.js'));
+  const WATCH = path.join(CORE, 'hooks', 'watch.js');
+  const root = fixture();
+  const relay = path.join(root, '.claude', 'relay');
+  const live = lib.liveDir(relay);
+  const fire = (ev, tool, agent) =>
+    run(process.execPath, [WATCH], {
+      cwd: root,
+      input: JSON.stringify({ hook_event_name: ev, tool_name: tool, agent_id: agent, cwd: root }),
+    });
+
+  writeContract(root, 'W1', '# W1\nstatus: active\nowns: [src/ok.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
+  fire('Stop', '', 'w-a');
+  const marks = path.join(live, '_stale.json');
+  ok('an active contract nobody is holding is recorded as abandoned', JSON.parse(fs.readFileSync(marks, 'utf8')).ids.indexOf('W1') !== -1, fs.readFileSync(marks, 'utf8'));
+  const led = fs.readFileSync(path.join(relay, 'audits', 'ledger.jsonl'), 'utf8');
+  ok('and it lands in the ledger, not in anybody context', /"result":"stale"/.test(led.split(' ').join('')) || /stale/.test(led), led.slice(-200));
+  const before = fs.readFileSync(path.join(relay, 'audits', 'ledger.jsonl'), 'utf8').split(String.fromCharCode(10)).length;
+  fire('Stop', '', 'w-a');
+  const after = fs.readFileSync(path.join(relay, 'audits', 'ledger.jsonl'), 'utf8').split(String.fromCharCode(10)).length;
+  ok('the same abandonment is not logged twice', before === after, before + ' -> ' + after);
+  ok('the statusline says it, since the statusline costs nothing', /abandoned|sahipsiz/.test(require(path.join(CORE, 'scripts', 'statusline.js')).summary(root)));
+
+  const held = path.join(live, 'w-b.json');
+  fs.writeFileSync(held, JSON.stringify({ id: 'w-b', contract: 'W1', files: [] }));
+  fire('Stop', '', 'w-c');
+  ok('a contract an agent is still holding is not abandoned', JSON.parse(fs.readFileSync(marks, 'utf8')).ids.indexOf('W1') === -1, fs.readFileSync(marks, 'utf8'));
+
+  writeContract(root, 'W2', '# W2\nstatus: active\nceiling: 2\nowns: [src/ok.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
+  const edit = (n) => ({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Write',
+    agent_id: 'w-d',
+    cwd: root,
+    tool_input: { file_path: path.join(root, n), content: 'x' },
+  });
+  hook({ ...edit('.claude/relay/contracts/W2.md'), tool_input: { file_path: path.join(root, CONTRACTS, 'W2.md'), content: fs.readFileSync(path.join(root, CONTRACTS, 'W2.md'), 'utf8') } }, root);
+  const bound = path.join(live, 'w-d.json');
+  ok('touching a contract binds the agent to it', JSON.parse(fs.readFileSync(bound, 'utf8')).contract === 'W2', fs.readFileSync(bound, 'utf8'));
+  const first = hook(edit('src/ok.js'), root);
+  ok('inside the ceiling the write goes through', first.status === 0, first.stderr);
+  fire('PostToolUse', 'Write', 'w-d');
+  fire('PostToolUse', 'Write', 'w-d');
+  const spent = hook(edit('src/ok.js'), root);
+  ok('once the ceiling is spent the contract stops being writable', spent.status === 2, spent.stdout + spent.stderr);
+  ok('and the refusal names the ceiling', /ceiling/.test(spent.stderr), spent.stderr);
+  ok('it points at the checkpoint rather than at a wider contract', /Checkpoint/.test(spent.stderr), spent.stderr);
+
+  writeContract(root, 'W3', '# W3\nstatus: active\nowns: [src/ok.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
+  fs.writeFileSync(path.join(live, 'w-e.json'), JSON.stringify({ id: 'w-e', contract: 'W3', contractSteps: 40, files: [] }));
+  const roomy = hook({ ...edit('src/ok.js'), agent_id: 'w-e' }, root);
+  ok('a contract with no ceiling line still has a generous one', roomy.status === 0, roomy.stderr);
+
+  try {
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}
+
+function testSnapshot() {
+  const root = fixture();
+  writeContract(root, 'S1', '# S1\nstatus: active\nowns: [src/ok.js]\nverify:\n  - node -e \"process.exit(1)\"\n');
+  const target = path.join(root, 'src', 'ok.js');
+  const original = fs.readFileSync(target, 'utf8');
+
+  const pre = contract(['precheck', '--id', 'S1'], root);
+  ok('precheck pins the tree before the work starts', /pinned at|is pinned at/.test(pre.stdout + pre.stderr), pre.stdout);
+  const ref = run('git', ['-C', root, 'rev-parse', '--verify', '--quiet', 'refs/teknesyum/S1']);
+  ok('the pin is a real ref, not a dangling object gc can take', ref.status === 0 && ref.stdout.trim().length === 40, ref.stdout + ref.stderr);
+
+  fs.writeFileSync(target, 'module.exports = 999;\n');
+  const dry = contract(['revert', '--id', 'S1'], root);
+  ok('revert does not overwrite anything until it is told to', dry.status === 1 && fs.readFileSync(target, 'utf8') !== original, dry.stdout);
+  ok('and it says exactly which files it would overwrite', /src\/ok\.js/.test(dry.stdout), dry.stdout);
+  const undo = contract(['revert', '--id', 'S1', '--yes'], root);
+  const back = fs.readFileSync(target, 'utf8').split(String.fromCharCode(13)).join('');
+  ok('with --yes the owned file goes back to the pin', undo.status === 0 && back === original, undo.stdout + undo.stderr + ' :: ' + back);
+
+  const other = path.join(root, 'src', 'auth', 'token.js');
+  fs.writeFileSync(other, 'module.exports = 999;\n');
+  contract(['revert', '--id', 'S1', '--yes'], root);
+  ok('revert stays inside the owns set', fs.readFileSync(other, 'utf8') === 'module.exports = 999;\n');
+
+  writeContract(root, 'S2', '# S2\nstatus: submitted\nowns: [src/ok.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
+  contract(['snapshot', '--id', 'S2'], root);
+  const held = run('git', ['-C', root, 'rev-parse', '--verify', '--quiet', 'refs/teknesyum/S2']);
+  ok('a snapshot can also be taken by hand', held.status === 0, held.stdout + held.stderr);
+  contract(['complete', '--id', 'S2'], root);
+  const gone = run('git', ['-C', root, 'rev-parse', '--verify', '--quiet', 'refs/teknesyum/S2']);
+  ok('closing a contract takes its pin down again', gone.status !== 0, gone.stdout);
+
+  const none = contract(['revert', '--id', 'S2', '--yes'], root);
+  ok('reverting to a pin that was never taken refuses instead of guessing', none.status === 2, none.stdout + none.stderr);
+
+  try {
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}
+
 function main() {
   const root = fixture();
   testGuard(root);
@@ -1591,6 +1723,9 @@ function main() {
   testTools();
   testIndex();
   testUpdate();
+  testAcceptance();
+  testLifetime();
+  testSnapshot();
   testFigures();
   testNoContextWrites();
 

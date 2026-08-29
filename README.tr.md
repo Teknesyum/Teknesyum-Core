@@ -51,6 +51,14 @@ Bir kısmını yapıyor: alt ajan açar, paralel çalıştırır, plan tutar. Co
   değil, herhangi bir model okuyabilir.
 - **Ajanı çağırmadan sor** — `contract.js precheck` verify adımlarını önce çalıştırır.
   Zaten geçiyorsa iş bitmiştir, ajan açmaya değmez.
+- **Başarısız olabilen kabul** — Her adımı `true`, `echo` ya da yorum olan bir `verify`
+  bloğu kabul ölçütü değildir. Kapı bunun üstüne kapatmaz ve nedenini söyler.
+- **Tavan** — Sözleşme kaç adım ettiğini yazabilir. Tavanı geçince sözleşme yazılabilir
+  olmaktan çıkar; yakınsamayan koşu kendiliğinden durur.
+- **Geri dönülebilecek bir sabit** — `precheck`, iş başlamadan izlenen ağacı
+  `refs/teknesyum/<ID>` olarak kaydeder; `revert` sahiplenilen dosyaları oraya geri koyar.
+- **Sahipsiz kalan iş kayda geçer** — Oturum biterken hâlâ `active` olan sözleşme deftere
+  yazılır ve statusline'da görünür. Bağlamınıza tek kelime yazılmaz.
 - **`doctor`** — Kurulumun sağlam olup olmadığını tek komut söyler: sürümler, tablo, roller,
   kancalar, statusline ve defterde karşılığı olmayan kapanış var mı.
 
@@ -94,7 +102,7 @@ kapalı değil açık düşer.
 
 Olgunluğu da dürüstçe tartın. Tek geliştirici, v0.2.0, ilk açık etiketler bu ay. Denetim
 kayıtları tek tek bağlı ama birbirine zincirli değil. Geliştirme Windows öncelikli; Linux ve
-macOS'u günlük kullanım değil CI kapsıyor. Test takımı (2.383 assertion, üç platform)
+macOS'u günlük kullanım değil CI kapsıyor. Test takımı (2.420 assertion, üç platform)
 gerçek, ama sahadaki geçmiş yıllarla değil haftalarla ölçülüyor.
 
 *Kaynak üzerinden Claude (Fable 5) değerlendirdi; dışarıdan görüş istendi ve olduğu gibi
@@ -202,7 +210,22 @@ turda duruyor. Yedinci tur, ajanın şanssız değil sözleşmenin yanlış oldu
 ya da sahiplendiğini daralt. Katılmadığınız gün için `--force` duruyor.
 
 Bunların hepsinden önce, `contract.js precheck --id X` iş hiç başlamamışken verify adımlarını
-çalıştırıyor. Zaten geçiyorlarsa iş bitmiştir ve ajan açmak israftır.
+çalıştırıyor. Zaten geçiyorlarsa iş bitmiştir ve ajan açmak israftır. Aynı anda izlenen ağacı
+`refs/teknesyum/<ID>` olarak sabitliyor — gerçek bir ref, yani gc alamıyor — ve
+`contract.js revert --id X --yes` sahiplenilen dosyaları o noktaya geri koyuyor. Sözleşme
+kapanınca sabit iniyor; sahipsiz kalan sözleşme sabitini koruyor, zaten meselesi o.
+
+Her adımı `true`, `:`, `exit 0`, `ls`, `echo` ya da yorum olan bir `verify` bloğu başarısız
+olamaz; başarısız olamayan şey de kabul ölçütü değildir. Kapı bunun üstüne kapatmayı
+reddediyor ve adımı adıyla söylüyor. Başarısız olabilen tek komut yeter, gerisi gürültü
+olabilir.
+
+Sözleşme `ceiling: <n>` taşıyabilir — kaç araç adımı ettiği. Tavanı geçince kapı kancası o
+sözleşme altındaki yazmaları kabul etmiyor; yakınsamayan bir koşu kimse başında beklemeden
+bitiyor. Satırı olmayan sözleşmeye cömert bir varsayılan veriliyor. Oturum, hâlâ `active`
+olan ve hiçbir ajanın tutmadığı bir sözleşmeyle biterse deftere `stale` kaydı düşüyor ve
+statusline bunu söylüyor. Bu bir kayıt, çıkışın reddi değil — oturum her zamanki gibi
+kapanıyor ve modelin bağlamına tek kelime yazılmıyor.
 
 ### Denetim kaydı
 
@@ -312,6 +335,8 @@ Araç çağrılarını izleyen kancalar artık matcher taşıyor, yani dosya oku
 | `contract.js precheck` | ajan açılmadan önce verify adımlarını çalıştırıyor |
 | `contract.js check` | risk, verify adımları ve onların adını verip de var olmayan şeyler |
 | `contract.js list` | ne açık, ve bir dosya hangi sözleşmenin |
+| `contract.js snapshot` | izlenen ağacı `refs/teknesyum/<ID>` olarak sabitler |
+| `contract.js revert` | sahiplenilen dosyaları o sabite geri koyar |
 | `handoff.js` | `.claude/relay/HANDOFF.md` dosyasını, projenin durumunu yazıyor |
 | `doctor.js` | kurulum sağlam mı söylüyor |
 | `release.js` | sonraki sürümü `.changes/` içindeki notlardan belirliyor |
@@ -397,7 +422,7 @@ node test/all.js
 
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
 kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu ve hiçbir kancanın
-bağlama yazmadığı denetimi üzerine 2.383 assertion. Aynı takımı CI Linux, Windows ve
+bağlama yazmadığı denetimi üzerine 2.420 assertion. Aynı takımı CI Linux, Windows ve
 macOS'ta koşuyor; geliştirme Windows öncelikli.
 
 ---

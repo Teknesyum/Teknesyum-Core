@@ -42,6 +42,11 @@ function contracts(relay) {
   return { total: files.length, count };
 }
 
+function stale(relay) {
+  const r = read(path.join(liveDir(relay), '_stale.json'));
+  return r && Array.isArray(r.ids) ? r.ids.length : 0;
+}
+
 function agents(relay) {
   const live = liveDir(relay);
   let files = [];
@@ -249,6 +254,9 @@ function build(input) {
     if (c.count.blocked) bits.push(paint(C.red, c.count.blocked + ' ' + t('line.blocked')));
     parts.push(bits.length ? bits.join(' ') : c.total + ' ' + t('line.contracts'));
   }
+
+  const st = stale(r.relay);
+  if (st) parts.push(paint(C.yellow, st + ' ' + t('line.stale')));
 
   const a = agents(r.relay);
   if (a.running) parts.push(paint(C.magenta, a.running + ' ' + t('line.agents')) + (a.roles.length ? ' ' + paint(C.dim, tally(a.roles)) : ''));

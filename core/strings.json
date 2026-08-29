@@ -99,6 +99,7 @@
     "en": "logs",
     "tr": "günlük"
   },
+  "line.stale": { "en": "abandoned", "tr": "sahipsiz" },
   "line.update": {
     "en": "is out",
     "tr": "çıktı"
