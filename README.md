@@ -95,7 +95,7 @@ falls open, not closed.
 
 Weigh the maturity honestly. One developer, v0.2.0, first public tags this month. Audit
 records are individually bound but not chained to each other. Development is Windows-first;
-Linux and macOS are covered by CI, not daily use. The test suite (2,352 assertions, three
+Linux and macOS are covered by CI, not daily use. The test suite (2,383 assertions, three
 platforms) is real, but the field history is weeks, not years.
 
 *Reviewed from the source by Claude (Fable 5), asked for an outside opinion and published
@@ -312,10 +312,14 @@ The hooks that watch tool calls carry a matcher, so reading a file does not star
 | Script | What it does |
 |---|---|
 | `contract.js precheck` | runs the verify steps before an agent is spawned |
+| `contract.js check` | risk, verify steps, and anything they name that is not there |
+| `contract.js list` | what is open, and which contract owns a given file |
 | `handoff.js` | writes `.claude/relay/HANDOFF.md`, the state of the project |
 | `doctor.js` | says whether the install is sound |
 | `release.js` | decides the next version from notes left in `.changes/` |
+| `update.js` | says whether a newer release exists |
 | `map.js` | the import graph — hubs, cycles, orphans |
+| `map.js who <file>` | who imports the file you are about to change |
 | `log.js` | the error log; not written by hand |
 | `setup.js` | machine setup and statusline wiring |
 
@@ -325,6 +329,21 @@ round, the last closes, the branch, the head, how much is uncommitted, which age
 other half is the one paragraph a machine cannot write, the intent, and a refresh preserves
 it. The file is plain markdown, so the next model to open the project can read it whether or
 not it is Claude.
+
+`contract.js check` also reads the contract for references to things that do not exist: a
+verify step calling a script nobody wrote is not acceptance, it is a step that cannot run,
+and it is worth knowing before the work starts rather than at the gate. An `owns` entry with
+no file behind it is reported as information — usually that is the work.
+
+A newer release shows up as one dim word at the end of the statusline, and nowhere else —
+not in the chat, not in the model's context. The lookup is a `git ls-remote` that runs at
+most once a week, detached, while the session is already ending, so nobody waits for it.
+It is a hint, not a guarantee: what it shows is true, but its silence does not prove you are
+current. `node <plugin>/scripts/update.js` asks now and answers plainly.
+
+The map stamps the commit it was built from. Three weeks later it would otherwise state
+hubs, cycles and orphans that no longer exist, with full confidence; instead `doctor` says
+how many commits behind it is, and `map.js who` says so too.
 
 `doctor.js` answers in `{name, ok, message}` rows and takes `--json`. What it checks is what
 it prints; run it rather than read about it.
@@ -381,7 +400,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,352 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,383 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
 scaffold, the cue, the banner, the handoff note, and one check that no hook writes into
 context. CI runs the same suite on Linux, Windows and macOS; development is Windows-first.

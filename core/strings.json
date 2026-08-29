@@ -99,6 +99,10 @@
     "en": "logs",
     "tr": "günlük"
   },
+  "line.update": {
+    "en": "is out",
+    "tr": "çıktı"
+  },
   "line.worktree": {
     "en": "worktree",
     "tr": "worktree"

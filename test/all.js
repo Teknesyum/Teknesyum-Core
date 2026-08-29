@@ -1469,6 +1469,106 @@ function testTools() {
   } catch {}
 }
 
+function testIndex() {
+  const root = fixture();
+  const MAP = path.join(CORE, 'scripts', 'map.js');
+  const DOCTOR = path.join(CORE, 'scripts', 'doctor.js');
+  const src = path.join(root, 'src');
+  fs.mkdirSync(src, { recursive: true });
+  fs.writeFileSync(path.join(src, 'a.js'), "const b = require('./b.js');\nmodule.exports = b;\n");
+  fs.writeFileSync(path.join(src, 'b.js'), 'module.exports = 1;\n');
+  fs.writeFileSync(path.join(src, 'lonely.js'), 'module.exports = 2;\n');
+  run('git', ['add', '-A'], { cwd: root });
+  run('git', ['commit', '-m', 'files'], { cwd: root });
+  run(process.execPath, [MAP, root], { cwd: root });
+
+  const mapDir = path.join(root, '.claude', 'relay');
+  const md = fs.readFileSync(path.join(mapDir, 'map.md'), 'utf8');
+  ok('the map says which commit it was built from', /HEAD [0-9a-f]{8}/.test(md), md.split('\n').slice(0, 4).join(' | '));
+  const json = JSON.parse(fs.readFileSync(path.join(mapDir, 'map.json'), 'utf8'));
+  ok('and the machine copy carries the same seal', /^[0-9a-f]{40}$/.test((json._map || {}).head || ''), JSON.stringify(json._map));
+
+  const mapMod = require(path.join(CORE, 'scripts', 'map.js'));
+  ok('a map built at HEAD reads as fresh', mapMod.staleness(root, mapDir).state === 'fresh', JSON.stringify(mapMod.staleness(root, mapDir)));
+
+  const asked = run(process.execPath, [MAP, 'who', 'src/b.js'], { cwd: root });
+  ok('the map answers who imports a file', /src\/a\.js/.test(asked.stdout), asked.stdout);
+  ok('and says so plainly when nobody does', /nothing imports it/.test(run(process.execPath, [MAP, 'who', 'src/lonely.js'], { cwd: root }).stdout));
+  ok('asking about a file it never saw is not a crash', run(process.execPath, [MAP, 'who', 'src/ghost.js'], { cwd: root }).status === 1);
+
+  fs.writeFileSync(path.join(src, 'c.js'), 'module.exports = 3;\n');
+  run('git', ['add', '-A'], { cwd: root });
+  run('git', ['commit', '-m', 'one more'], { cwd: root });
+  const st = mapMod.staleness(root, mapDir);
+  ok('a commit later the map knows it is behind', st.state === 'stale', JSON.stringify(st));
+  ok('and it counts how far behind', st.behind === 1, JSON.stringify(st));
+  const doc = JSON.parse(run(process.execPath, [DOCTOR, '--json'], { cwd: root }).stdout || '[]');
+  const mapRow = doc.find((r) => r.name === 'map') || {};
+  ok('doctor turns the silent lie into a visible one', mapRow.ok === false && /behind/.test(mapRow.message || ''), JSON.stringify(mapRow));
+
+  writeContract(root, 'U1', '# U1\nstatus: open\nowns: [src/new.js]\nverify:\n  - node tools/ghost.js\n');
+  const seen = contract(['check', '--id', 'U1'], root);
+  ok('check names the verify target that is not there', /tools\/ghost\.js/.test(seen.stdout), seen.stdout);
+  ok('and says a step that cannot run is not acceptance', /not acceptance/.test(seen.stdout), seen.stdout);
+  ok('an owns entry for work not done yet is information, not a fault', /do not exist yet/.test(seen.stdout), seen.stdout);
+
+  writeContract(root, 'U2', '# U2 the banner\nstatus: active\nowns: [src/a.js]\nverify:\n  - true\n');
+  const all = contract(['list'], root);
+  ok('list reports what is open', /U1/.test(all.stdout) && /U2/.test(all.stdout), all.stdout);
+  ok('and what each one owns', /src\/a\.js/.test(all.stdout), all.stdout);
+  const owner = contract(['list', '--owns', 'src/a.js'], root);
+  ok('one question answers who owns a file', /U2/.test(owner.stdout) && !/U1/.test(owner.stdout), owner.stdout);
+  const nobody = contract(['list', '--owns', 'src/b.js'], root);
+  ok('and it says so when nobody owns it', nobody.status === 1, nobody.stdout);
+
+  try {
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}
+
+function testUpdate() {
+  const up = require(path.join(CORE, 'scripts', 'update.js'));
+  ok('0.2.0 is newer than 0.1.12, not older', up.newer('0.2.0', '0.1.12') === true);
+  ok('0.1.12 is newer than 0.1.9 - these are numbers, not text', up.newer('0.1.12', '0.1.9') === true);
+  ok('the same version is not newer than itself', up.newer('1.0.0', '1.0.0') === false);
+  ok('1.0.0 beats 0.99.99', up.newer('1.0.0', '0.99.99') === true);
+  ok('a v prefix is read', up.newer('v0.3.0', '0.2.9') === true);
+  ok('nonsense is not newer than anything', up.newer('', '1.0.0') === false && up.newer('latest', '1.0.0') === false);
+
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-up-'));
+  const state = path.join(home, 'teknesyum');
+  fs.mkdirSync(state, { recursive: true });
+  const held = process.env.CLAUDE_CONFIG_DIR;
+  process.env.CLAUDE_CONFIG_DIR = home;
+  delete require.cache[require.resolve(path.join(CORE, 'scripts', 'update.js'))];
+  delete require.cache[require.resolve(path.join(CORE, 'hooks', 'lib.js'))];
+  const fresh = require(path.join(CORE, 'scripts', 'update.js'));
+
+  ok('with no cache at all, nothing is claimed', fresh.known() === '');
+  ok('and the check is due', fresh.due() === true);
+  fs.writeFileSync(path.join(state, 'version.json'), JSON.stringify({ latest: '99.0.0', checkedAt: Date.now() }));
+  ok('a fresh answer is used', fresh.known() === '99.0.0', fresh.known());
+  ok('and it is not asked for again within the week', fresh.due() === false);
+  ok('a newer release becomes a hint', /^99\.0\.0$/.test(fresh.hint()), fresh.hint());
+  fs.writeFileSync(path.join(state, 'version.json'), JSON.stringify({ latest: '0.0.1', checkedAt: Date.now() }));
+  ok('and an older one says nothing at all', fresh.hint() === '', fresh.hint());
+
+  process.env.CLAUDE_CONFIG_DIR = held === undefined ? '' : held;
+  if (held === undefined) delete process.env.CLAUDE_CONFIG_DIR;
+  delete require.cache[require.resolve(path.join(CORE, 'scripts', 'update.js'))];
+  delete require.cache[require.resolve(path.join(CORE, 'hooks', 'lib.js'))];
+  try {
+    fs.rmSync(home, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+
+  const hooks = fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8');
+  ok('nothing about updates runs on an ordinary turn', !/update\.js/.test(hooks), 'update.js is wired into hooks.json');
+  const line = fs.readFileSync(path.join(CORE, 'scripts', 'statusline.js'), 'utf8');
+  ok('the hint lives on the statusline, which is outside the context', /update\(\)/.test(line));
+  const notice = fs.readFileSync(path.join(CORE, 'hooks', 'notice.js'), 'utf8');
+  ok('and never on the chat banner, which the user has to read', !/update\.js/.test(notice));
+}
+
 function main() {
   const root = fixture();
   testGuard(root);
@@ -1489,6 +1589,8 @@ function main() {
   testSafety();
   testRaces();
   testTools();
+  testIndex();
+  testUpdate();
   testFigures();
   testNoContextWrites();
 

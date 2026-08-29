@@ -123,6 +123,9 @@ function record(j) {
     try {
       require('../scripts/handoff.js').writeAt(r.relay, path.dirname(path.dirname(r.relay)));
     } catch {}
+    try {
+      require('../scripts/update.js').maybeRefresh();
+    } catch {}
   }
   if (ev === 'SessionEnd' || ev === 'Stop' || ev === 'SubagentStop') sweep(live);
 }

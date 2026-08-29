@@ -101,6 +101,33 @@ function ledgerOk(root) {
   return 'every close is in the ledger';
 }
 
+function updateOk() {
+  const up = require('./update.js');
+  const here = up.installed();
+  const there = up.hint();
+  if (there) return { ok: false, message: 'v' + there + ' is out, and v' + here + ' is installed - /plugin update teknesyum-core@teknesyum' };
+  const seen = up.cached();
+  if (!seen.checkedAt) return { ok: true, message: 'the latest release has not been looked up yet - node <plugin>/scripts/update.js' };
+  return 'v' + here + ', and nothing newer has been seen';
+}
+
+function mapOk(root) {
+  const r = lib.relayRoot(root, { git: false });
+  const dir = r ? r.relay : path.join(root, '.claude');
+  const st = require('./map.js').staleness(root, dir);
+  if (st.state === 'missing') return { ok: true, message: 'no map yet - node <plugin>/scripts/map.js .' };
+  if (st.state === 'unsealed') return { ok: false, message: 'the map does not say which commit it was built from - rebuild it' };
+  if (st.state === 'unknown') return { ok: true, message: 'built at ' + String(st.at).slice(0, 8) + ', and HEAD cannot be read' };
+  if (st.state === 'stale')
+    return {
+      ok: false,
+      message:
+        'the map is ' + (st.behind === null ? 'behind HEAD' : st.behind + ' commits behind') +
+        ' and still reads as fact - node <plugin>/scripts/map.js .',
+    };
+  return 'current with HEAD';
+}
+
 function hooksOk() {
   const h = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8')).hooks;
   const missing = [];
@@ -139,6 +166,8 @@ function run(root) {
     check('roles', rolesOk),
     check('hooks', hooksOk),
     check('statusline', statuslineOk),
+    check('update', updateOk),
+    check('map', () => mapOk(root)),
     check('relay', () => relayOk(root)),
     check('ledger', () => ledgerOk(root)),
   ];

@@ -705,24 +705,95 @@ function close() {
   if (!headSha) return stop(['Cannot read HEAD - not a git repository, or no commit yet.']);
 
   const at = new Date().toISOString();
-  fs.writeFileSync(
-    c.src,
-    c.body.replace(/\s*$/, '') +
-      '\n\n## Closed - unmet (' +
-      at.slice(0, 10) +
-      ')\n\n' +
-      reason.trim() +
-      '\n\nNot sealed. Acceptance was not met; the work stays in the tree.\n',
-    'utf8'
-  );
+  const archived =
+    stampStatus(c.body, 'done').replace(/\s*$/, '') +
+    '\n\n## Closed - unmet (' +
+    at.slice(0, 10) +
+    ')\n\n' +
+    reason.trim() +
+    '\n\nNot sealed. Acceptance was not met; the work stays in the tree.\n';
   fs.mkdirSync(path.dirname(c.dst), { recursive: true });
-  fs.writeFileSync(c.src, stampStatus(c.body, 'done'), 'utf8');
+  fs.writeFileSync(c.src, archived, 'utf8');
   fs.renameSync(c.src, c.dst);
   setNotice(c.relay, c.id + ' ' + t('notice.closed'));
   seal.ledgerInit(c.relay);
   seal.ledgerAppend(c.relay, { id: c.id, result: 'unmet', reason: reason.trim(), headSha, at });
 
   return out([c.id + ' closed as unmet -> contracts/done/' + c.id + '.md']);
+}
+
+function pathish(step) {
+  const out = [];
+  const re = /(?:^|[\s"'(=])((?:\.{1,2}[\\/])?[\w.-]+(?:[\\/][\w.-]+)+)/g;
+  let m;
+  while ((m = re.exec(String(step)))) {
+    const p = m[1].replace(/["')]+$/, '');
+    if (/\.[A-Za-z0-9]{1,5}$/.test(p) && !/^https?:/.test(p)) out.push(p);
+  }
+  return out;
+}
+
+function unresolved(root, owns, steps) {
+  const missingOwns = owns.filter((p) => {
+    try {
+      fs.statSync(path.join(root, String(p)));
+      return false;
+    } catch {
+      return true;
+    }
+  });
+  const seen = new Set();
+  const missingSteps = [];
+  for (const step of steps)
+    for (const p of pathish(step)) {
+      if (seen.has(p)) continue;
+      seen.add(p);
+      if (owns.some((o) => String(o).replace(/\\/g, '/') === p.replace(/\\/g, '/'))) continue;
+      try {
+        fs.statSync(path.join(root, p));
+      } catch {
+        missingSteps.push({ step: step, target: p });
+      }
+    }
+  return { owns: missingOwns, steps: missingSteps };
+}
+
+function listCmd() {
+  const where = locate();
+  if (!where) return stop(['No relay root - .claude/relay does not exist.']);
+  const dir = path.join(where.relay, 'contracts');
+  let files = [];
+  try {
+    files = fs.readdirSync(dir).filter((f) => /\.md$/i.test(f));
+  } catch {
+    return out(['No contracts are open.']);
+  }
+  const want = arg('owns');
+  const target = want ? String(want).replace(/\\/g, '/').replace(/^\.\//, '').toLowerCase() : '';
+  const rows = [];
+  for (const f of files.sort()) {
+    let body = '';
+    try {
+      body = fs.readFileSync(path.join(dir, f), 'utf8');
+    } catch {
+      continue;
+    }
+    const id = f.replace(/\.md$/i, '');
+    const owns = owned(body).map((o) => String(o).replace(/\\/g, '/'));
+    if (target && !owns.some((o) => o.toLowerCase() === target || o.toLowerCase().endsWith('/' + target)))
+      continue;
+    const st = statusOf(body) || 'open';
+    if (has('open') && st === 'done') continue;
+    const title = (body.match(/^#[ \t]+(.+)$/m) || [])[1] || '';
+    rows.push(
+      id + '  ' + st + '  round ' + (field('round', body) || '1') +
+        (title ? '  ' + title.trim() : '') +
+        (target ? '' : '\n    owns: ' + (owns.join(', ') || 'nothing'))
+    );
+  }
+  if (!rows.length)
+    return out([target ? 'No open contract owns ' + want + '.' : 'No contracts are open.'], target ? 1 : 0);
+  return out(rows);
 }
 
 function check() {
@@ -751,6 +822,18 @@ function check() {
       ? 'An auditor record is required before complete.'
       : 'Verification alone completes this contract.',
   ];
+  const gone = unresolved(c.root, owns, steps);
+  if (gone.steps.length) {
+    lines.push('');
+    lines.push('verify names something that is not there:');
+    for (const g of gone.steps) lines.push('  ' + g.target + '  (' + g.step + ')');
+    lines.push('  a step that cannot run is not acceptance - fix it before the work starts.');
+  }
+  if (gone.owns.length) {
+    lines.push('');
+    lines.push('owns names files that do not exist yet: ' + gone.owns.join(', '));
+    lines.push('  that is the work, unless it is a typo.');
+  }
   if (!has('run')) return out(lines);
   const results = runVerify(c.root, steps);
   return out(
@@ -839,6 +922,8 @@ function help() {
   return out([
     'contract.js - the only legitimate way to close a contract',
     '',
+    '  list [--open] [--owns <path>]',
+    '                            what is open, and which contract owns a file',
     '  precheck --id <ID>        run verify before the work starts; 0 means it is already done',
     '  check --id <ID> [--run]   report risk and verify steps; --run executes them',
     '  submit --id <ID>          mark the work finished and ready for the gate',
@@ -863,6 +948,7 @@ function main() {
   if (cmd === 'check') return check();
   if (cmd === 'submit') return submit();
   if (cmd === 'precheck') return precheck();
+  if (cmd === 'list') return listCmd();
   if (cmd === 'reopen') return reopen();
   if (cmd === 'audit') return audit();
   if (cmd === 'ledger') return ledger();
@@ -872,6 +958,8 @@ function main() {
 
 if (require.main === module) main();
 module.exports = {
+  listCmd,
+  unresolved,
   precheck,
   complete,
   close,

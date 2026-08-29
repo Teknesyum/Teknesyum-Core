@@ -94,7 +94,7 @@ kapalı değil açık düşer.
 
 Olgunluğu da dürüstçe tartın. Tek geliştirici, v0.2.0, ilk açık etiketler bu ay. Denetim
 kayıtları tek tek bağlı ama birbirine zincirli değil. Geliştirme Windows öncelikli; Linux ve
-macOS'u günlük kullanım değil CI kapsıyor. Test takımı (2.352 assertion, üç platform)
+macOS'u günlük kullanım değil CI kapsıyor. Test takımı (2.383 assertion, üç platform)
 gerçek, ama sahadaki geçmiş yıllarla değil haftalarla ölçülüyor.
 
 *Kaynak üzerinden Claude (Fable 5) değerlendirdi; dışarıdan görüş istendi ve olduğu gibi
@@ -310,10 +310,14 @@ Araç çağrılarını izleyen kancalar artık matcher taşıyor, yani dosya oku
 | Betik | Ne yapıyor |
 |---|---|
 | `contract.js precheck` | ajan açılmadan önce verify adımlarını çalıştırıyor |
+| `contract.js check` | risk, verify adımları ve onların adını verip de var olmayan şeyler |
+| `contract.js list` | ne açık, ve bir dosya hangi sözleşmenin |
 | `handoff.js` | `.claude/relay/HANDOFF.md` dosyasını, projenin durumunu yazıyor |
 | `doctor.js` | kurulum sağlam mı söylüyor |
 | `release.js` | sonraki sürümü `.changes/` içindeki notlardan belirliyor |
+| `update.js` | yeni bir sürüm çıkmış mı söylüyor |
 | `map.js` | import haritası — merkezler, döngüler, öksüzler |
+| `map.js who <dosya>` | değiştireceğin dosyayı kim import ediyor |
 | `log.js` | hata günlüğü; elle yazılmıyor |
 | `setup.js` | makine ayarı ve statusline bağlama |
 
@@ -322,6 +326,21 @@ kapanışlar, dal, baş, ne kadarı commit edilmemiş, hangi ajan takılmış �
 kancasıyla tazeleniyor; bedeli yok ve hiç bayatlamıyor. Öteki yarısı makinenin yazamayacağı
 tek paragraf, yani niyet; tazeleme onu koruyor. Dosya düz markdown, yani projeyi sonra açan
 model Claude olmasa da okuyabiliyor.
+
+`contract.js check` ayrıca sözleşmede adı geçip de var olmayan şeyleri okuyor: kimsenin
+yazmadığı bir betiği çağıran verify adımı kabul ölçütü değil, çalışamayacak bir adımdır ve
+bunu kapıda değil iş başlamadan bilmek gerekir. Arkasında dosya olmayan bir `owns` girdisi
+ise bilgi olarak bildiriliyor — genelde iş odur.
+
+Yeni sürüm, statusline'ın sonunda tek sönük kelime olarak görünüyor; başka hiçbir yerde —
+sohbette değil, modelin bağlamında hiç değil. Sorgu, haftada en fazla bir kez, oturum zaten
+kapanırken, kimsenin beklemediği ayrık bir süreçte koşan bir `git ls-remote`. Bu bir garanti
+değil bir ipucu: gösterdiği şey doğru, ama susması güncel olduğunuzu kanıtlamıyor.
+`node <plugin>/scripts/update.js` şimdi sorar ve açıkça söyler.
+
+Harita üretildiği commit'i damgalıyor. Yoksa üç hafta sonra artık var olmayan merkezleri,
+döngüleri ve öksüzleri tam bir güvenle sayardı; onun yerine `doctor` kaç commit geride
+olduğunu söylüyor, `map.js who` da aynısını hatırlatıyor.
 
 `doctor.js` `{name, ok, message}` satırlarıyla cevap veriyor ve `--json` alıyor. Neyi
 denetlediği, bastığı şeydir; okumak yerine çalıştırın.
@@ -378,7 +397,7 @@ node test/all.js
 
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
 kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu ve hiçbir kancanın
-bağlama yazmadığı denetimi üzerine 2.352 assertion. Aynı takımı CI Linux, Windows ve
+bağlama yazmadığı denetimi üzerine 2.383 assertion. Aynı takımı CI Linux, Windows ve
 macOS'ta koşuyor; geliştirme Windows öncelikli.
 
 ---
