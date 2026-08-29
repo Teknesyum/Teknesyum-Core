@@ -241,49 +241,69 @@ acildir; F1 kapı düzeltmelerinin önüne alındı.
 
 ---
 
-## N — Yetenek tablosu, maliyetiyle (fable)
+## N — Yetenek tablosu: ne, ne kadar, neden (fable)
 
-Maliyet üç ayrı sütun: **yapım** (bir kerelik iş), **bakım** (her sürümde bıraktığı yük),
-**çalışma** (kullanıcının her tur ya da her kapanışta ödediği). Kırmızı çizgi: sıradan turda
-modele tek kelime yazılmaz.
+### Sözlük
 
-| Özellik | Ne işe yarar | Yapım | Bakım | Çalışma | Değer | Karar |
-|---|---|---|---|---|---|---|
-| reopen | Kapanmış sözleşmeyi gerekçeyle geri açar | S | S | Sıfır, elle | Yüksek | **Şimdi** |
-| stale | Uzun süre dokunulmayanı işaretler | S | S | Bir mtime bakışı | Orta | **Şimdi** |
-| needs: | Bağımlısı kapanmadan iş başlamaz | M | M — döngü tespiti hep sizinle | Kapanışta grafik taraması | Yüksek | **Şimdi** |
-| stats | Rol/model/tur/süre defteri + özet | S | S | Kapanış başına bir append | Yüksek | **Şimdi** |
-| doctor | Ortam denetimi: node, git, kanca kaydı, bozuk sözleşme | M | M — her yeni özellik satır ister | Sıfır, elle | Yüksek | **Şimdi** |
-| Proje profili | Proje ayarı makine ayarını ezer | S | S | Bir dosya okuma | Yüksek | **Şimdi** |
-| release betiği | Sürüm/etiket/CHANGELOG tek kaynaktan | S-M | S — şema değişmedikçe uyur | Sıfır, yayında | Yüksek | **Şimdi** |
-| Asgari CI | Üç OS'te mevcut testi koşturur | S | M — kırmızıya dönene siz bakarsınız | Sıfır | Yüksek | **Şimdi** |
-| Duman testi | `open → done` tam turu koşar | M | M — boru hattı değişince kırılır, iyi ki | Sıfır | Yüksek | **Şimdi** |
-| Seal anlık görüntü | Adım öncesi/sonrası ağaç hash'i, fark kanıt olur | M | M — guard'la görev ayrımı ister | Adım başına bir hash | Yüksek | **Şimdi** |
-| audit verify | Mühür zincirini baştan doğrular | S | S | Sıfır, elle | Orta | Sonra |
-| Sözleşme şablonları | bugfix/refactor/feature kalıpları | S | M — şema değişince hepsi | Sıfır | Orta | Sonra |
-| Sözleşme kirası | İki oturum aynı sözleşmeyi alamaz | M | M — ölü kilit temizliği köşeli | Alışta bir kontrol | Orta | Sonra |
-| Takılan ajan bekçisi | Süre aşan ajanı işaretler, sözleşmeyi bırakır | M | M — eşik hep tartışmalı | Bir zaman bakışı | Orta | Sonra |
-| Kapanış bildirimi | Kapanışta toast | S | S | Kapanış başına süreç | Düşük | Sonra |
-| Arşivleme | Kapanan sözleşme `trash/`'e | S | S | Bir taşıma | Orta | Sonra |
-| Worktree (yüksek risk) | Riskli sözleşme izole kopyada | L | L — Windows, IDE, node_modules | Disk + kurulum saniyeleri | Orta | Sonra |
-| Sözleşme grafiği panosu | `needs:` grafiğini HTML'e çizer | M | M | Sıfır | Düşük | **Yapma** — statusline aynısını tek satırda söylüyor |
-| Verify önbelleği | Değişmeyen owns'ta verify atlanır | M | L — yanlış atlama kapının itibarını yer | Hash karşılaştırma | Düşük | **Yapma** — kapının tek işi koşmak |
-| Monorepo / çoklu repo | Sözleşme birden çok repoya yayılır | L | L — her mekanizma iki kez | Her hook'ta repo çözümleme | Düşük | **Yapma** — tek geliştirici, tek repo |
-| Modele yönlendirme notu | Tur başında bağlama öneri satırı | S | S | **0-token çizgisini ihlal eder** | — | **Yapma** — çizgi tartışmaya kapalı |
+- **Sözleşme** = bir iş emri dosyası. "Şu iş yapılacak, şu dosyalara dokunulacak, bittiği şu
+  komutlarla kanıtlanacak" yazan markdown; diskte durur.
+- **Kapanış** = işin resmen bitmesi. Betik kanıt komutlarını çalıştırır, geçerse iş "bitti" olur.
+- **Tur** = bir mesaj + bir cevap. **Sıradan tur** = Core'un hiç karışmadığı normal sohbet turu.
+- **Oturum** = bir sohbet penceresi. **Compact** = uzayan sohbetin özetlenip belleğin daraltılması.
+- **Maliyet ne zaman ödenir** — Çalışma sütunundaki harf:
+  **(a)** bir defa, kurulumda · **(b)** her yeni sohbette bir kez · **(c)** compact'tan sonra
+  tekrar · **(d)** her mesajda · **(e)** her araç çağrısında / ajan adımında · **(f)** yalnız
+  elle çağırınca · **(g)** iş kapanırken.
+- **0 token** = model o özellik yüzünden tek kelime okumaz ya da yazmaz; maliyet yalnız disk
+  ve milisaniyedir.
 
-Kırmızı çizgiyi ihlal eden tek satır: modele yönlendirme notu. Gerisi kanca/betik tarafında kalıyor.
+### Karar tanımları
 
-### Worktree kararı
+- **Şimdi** — ilk çalışma dilimlerinde yapılmalı; değeri maliyetini açık ara aşıyor.
+- **Sonra** — yapılabilir ama bugün değil. Koşulu: `stats` verisi ihtiyacı kanıtlayınca
+  (görev paketi, verify sıralama, worktree) ya da Şimdi kalemleri bitince.
+- **Yapma** — değeri maliyetini karşılamıyor ya da ilkeyi bozuyor. Listede duruyor ki aynı
+  fikir tekrar geldiğinde cevap hazır olsun.
 
-Gerçek maliyet yapımda değil sonrasında: sözleşme başına tam çalışma kopyası, kurulumda
-saniyeler, kapanışta **birleştirme** — çakışma çıkınca çözen kişi geliştiricinin kendisi ve
-paralel ajanların bütün kazancı o kuyrukta eriyor. Windows'ta uzun yol adları, kilitli
-dosyalar, IDE'nin hangi kopyaya baktığı karmaşası cabası.
+### Tablo
 
-Amorti eşiği: aynı dosyalara dokunmayan ama **aynı anda koşan 3+ sözleşme** düzenli hâle
-geldiğinde ve guard/seal ihlalleri gerçekten yaşandığında. Bugün o eşikte değiliz.
+| Özellik | Şu an ne oluyor | Bununla ne olur | Yapım | Bakım | Çalışma | Değer | Tasarruf | Skor | Karar |
+|---|---|---|---|---|---|---|---|---|---|
+| **reopen** | Bir iş yanlışlıkla "bitti" kapanınca geri dönüş yok; aynı işi yeni adla baştan açıyorsun, geçmişi kopuyor | Tek komutla aynı iş, geçmişiyle geri açılır | 10 (~2 sa, 1 dosya) | 5 — hiç geri gelmez | 0 — (f), 0 token | 80 | Var: baştan-açma turları gider | 90 | **Şimdi** |
+| **Model düşürme** | Zorlanan iş pahalı modele yükseliyor ama geri inmiyor; basit işler pahalıda kalıyor | Üst üste temiz biten rol otomatik ucuz modele iner | 15 (~3 sa, 1 dosya) | 10 — eşik ayarı nadiren | 1 — (g), ~2 ms, 0 token | 70 | **Var: doğrudan para, rol başına kabaca %20-40** | 85 | **Şimdi** |
+| **Proje profili** | Kalite ayarı makine geneli: hobi projesinde premium para yakıyor, iş projesinde eco kalite düşürüyor | Her proje kendi ayarını taşır, makineyi ezer | 10 (~2 sa, 1 dosya) | 5 — hiç | 1 — (b), ~2 ms, 0 token | 70 | Var: hobide yanlışlıkla premium yanmaz | 85 | **Şimdi** |
+| **Seal anlık görüntü** | Ajanın izinsiz dosyaya yazması tahminle yakalanıyor; kaçan oluyor, ezilen dosyayı sonra fark ediyorsun | Her ajan adımında ağacın parmak izi alınır, fark kanıt olur | 35 (~8 sa, 2-3 dosya) | 20 — guard değişince | 10 — (e), ~50 ms, 0 token | 80 | Dolaylı: ezilen dosyayı geri yazma turları gider | 85 | **Şimdi** |
+| **Ön kontrol** | İş aslında bitmişken bile ajan çağrılıp boşa harcanabiliyor | Ajan açılmadan betik kanıt komutlarını koşar; geçiyorsa ajan hiç çağrılmaz | 15 (~3 sa, 1 dosya) | 10 — yok denecek kadar az | 5 — ajan başlarken, 0 token | 60 | **Var: vaka başına bir tam ajan çağrısı** | 80 | **Şimdi** |
+| **Tur bütçesi** | Aynı hatada dönen ajan, sen fark edene kadar harcamaya devam ediyor | İşe azami tur yazılır; aşan ajan durdurulur, iş "takıldı" işaretlenir | 20 (~4 sa, 2 dosya) | 15 — eşik tartışması ara sıra | 1 — (e), sayaç, 0 token | 70 | **Var: kaçak döngü kesilir; en kötü vaka en pahalısıdır** | 80 | **Şimdi** |
+| **stats** | Hangi rol/model ne harcıyor bilinmiyor; ayarlar hissiyatla yapılıyor | Her bitişte deftere satır düşer, komutla döküm alınır | 20 (~4 sa, 2 dosya) | 15 — alan ekledikçe | 2 — (g), ~5 ms, 0 token | 70 | Dolaylı: pahalı rol görünür olur | 80 | **Şimdi** |
+| **doctor** | Kurulum bozulunca sistem sessizce devre dışı kalıyor, günlerce fark etmeyebiliyorsun | Tek komut neyin kırık olduğunu listeler | 25 (~5 sa, 1 dosya) | 30 — her yeni özellik bir satır ister | 0 — (f), 0 token | 75 | Var: "neden çalışmıyor" kovalamacası gider | 80 | **Şimdi** |
+| **needs:** | B işi, temeli olan A bitmeden başlayabiliyor; ajan yarım temelde çalışıp boşa dönüyor | A kapanmadan B başlatılamaz | 30 (~6 sa, 2-3 dosya) | 25 — şema değişince | 3 — (g), ms'ler, 0 token | 75 | Var: boşa ajan çağrısı kesilir | 80 | **Şimdi** |
+| **Duman testi** | Parçalar test ediliyor ama zincirin bütünü hiç; uçtan uca kırığı kullanıcı buluyor | Sahte bir iş açılıştan kapanışa gerçekten koşturulur | 30 (~6 sa, 1-2 dosya) | 25 — boru hattı değiştikçe kırılır (iyi ki) | 0 — yalnız test anında | 75 | Yok | 80 | **Şimdi** |
+| **release betiği** | Sürüm elle basılıyor; kurulum linki olmayan etikete gitti, 404 yaşandı | Tek komut: sürüm + etiket + notlar tek kaynaktan, tutarsızsa durur | 20 (~4 sa, 1 dosya) | 10 — düzen değişmedikçe uyur | 0 — (f), 0 token | 65 | Yayın başına ~15 dk | 80 | **Şimdi** |
+| **Devir notu** | Yeni sohbette "neredeydik" diye anlatıyorsun; model dosyaları yeniden okuyup keşfe token yakıyor | Oturum kapanırken açık işlerin durumu tek dosyaya yazılır; yeni sohbette tek okumayla devam | 25 (~5 sa, 2 dosya) | 15 — şema değişince | 5 — yazma (g) 0 token, okuma (f) ~1-2K token ve keşiften ucuz | 70 | **Var: her yeni sohbetin keşif turları kısalır** | 75 | **Şimdi** |
+| **Asgari CI** | Mac/Linux'ta çalışıp çalışmadığı bilinmiyor, kullanıcı hatasıyla öğreniliyor | Her push'ta üç sistemde test koşar | 20 (~4 sa, 1 dosya) | 30 — kırmızıya sen bakarsın | 0 — yerelde hiçbir şey | 70 | Yok | 75 | **Şimdi** |
+| **Görev paketi** | Paralel ajanların her biri aynı dosyaları kendisi arayıp okuyor; aynı okuma iki kez ödeniyor | İş dosyasına "önce şunu oku" listesi + kısa özet konur | 30 (~6 sa, 2 dosya) | 20 — şema değişince | 20 — ajan başına ~500-1500 token, keşif turlarını keser | 65 | Muhtemel net artı; stats ile ölçülmeli | 70 | Sonra |
+| **audit verify** | Mühür zinciri var ama kimse doğrulamıyor | Tek komut zinciri baştan kontrol eder | 15 (~3 sa, 1 dosya) | 10 — biçim değişince | 0 — (f), 0 token | 55 | Yok | 60 | Sonra |
+| **stale** | Unutulan işler sessizce açık kalıyor | X gün dokunulmayan iş "bayat" etiketi alır | 10 (~2 sa, 1 dosya) | 5 — hiç | 2 — (b), ~5 ms, 0 token | 55 | Yok | 60 | Sonra |
+| **Şablonlar** | Her iş dosyası sıfırdan yazılıyor, alanlar unutuluyor | Hata / yenileme / yeni özellik kalıpları | 15 (~3 sa, 3-4 dosya) | 25 — şema değişince hepsi | 0 — (f) | 55 | Küçük | 55 | Sonra |
+| **Verify sıralama** | Kanıt komutları yazılış sırasında koşuyor; yavaş test baştaysa kırığı geç görüyorsun | En hızlı komut önce, ilk kırıkta dur | 10 (~2 sa, 1 dosya) | 10 — stats'a bağlı | Eksi: kapanışı hızlandırır | 45 | Küçük | 55 | Sonra |
+| **İş kirası** | İki sohbet penceresi aynı işi alıp birbirini ezebiliyor | İş alınınca kilitlenir, süre dolunca kilit düşer | 20 (~4 sa, 2 dosya) | 25 — ölü kilit temizliği köşeli | 2 — bir dosya bakışı, 0 token | 55 | Var: ezişme tekrarı gider | 55 | Sonra |
+| **Arşivleme** | Biten işler klasörde birikiyor | Biten iş `trash/` altına taşınır | 10 (~2 sa, 1 dosya) | 5 — hiç | 1 — (g) | 50 | Yok | 50 | Sonra |
+| **Takılan-ajan bekçisi** | Hiç dönmeyen ajan işi kilitli tutuyor | Süre aşan ajan işaretlenir, iş serbest kalır | 20 (~4 sa, 2 dosya) | 20 — eşik tartışmalı | 1 — (e), 0 token | 50 | Küçük — tur bütçesi çoğunu karşılar | 50 | Sonra |
+| **Bildirim** | Uzun işin bitmesini ekran başında bekliyorsun | İş bitince Windows bildirimi | 10 (~2 sa, 1 dosya) | 10 — API değişirse | 2 — (g), bir süreç | 45 | Bekleme dakikaları | 45 | Sonra |
+| **Worktree** | Aynı anda koşan işler aynı klasörde; teoride üst üste yazabilirler | Riskli iş deponun ayrı kopyasında koşar, kapanışta birleştirilir | 60 (~2-3 gün, 4+ dosya) | 50 — Windows köşeleri, IDE, birleştirme her sürümde | 25 — iş başına 10-100+ MB disk + saniyeler, 0 token | 55 | Yok; birleştirme çakışması **zaman kaybettirir** | 40 | Sonra |
+| **Grafik panosu** | Bağımlılıkları çizen HTML yok | `needs:` ilişkileri şema olur | 30 | 30 — şema değişince kırar | 0 — (f) | 30 | Yok | 20 | **Yapma** — durum satırı aynısını tek satırda veriyor |
+| **Verify önbelleği** | Değişmeyen işte kanıt komutları yine koşuyor | Dosya değişmediyse kanıt atlanır | 25 | 40 — yanlış atlama kapının güvenini yer | 1 — hash bakışı | 25 | Saniyeler | 15 | **Yapma** — kapının tek işi koşmak |
+| **Monorepo** | İş tek depoyla sınırlı | Bir iş birden çok depoya yayılır | 70 | 60 — her mekanizma iki kez | 5 — her hook'ta çözümleme | 25 | Yok | 10 | **Yapma** — ihtiyaç doğmadan bedel ödeme |
+| **Yönlendirme notu** | Model Core'un durumunu görmüyor (bilerek) | Her tur başında bağlama öneri satırı | 10 | 10 | **(d) her mesajda token — kırmızı çizgi ihlali** | 30 | Negatif | 0 | **Yapma** |
 
-Ucuz yarı yol zaten listede: **seal anlık görüntüsü** + kapanışta "owns dışında dosya
-değişmiş mi" kontrolü. Bu ikili, worktree'nin verdiği garantinin büyük kısmını sıfır
-birleştirme angaryasıyla veriyor. Worktree yüksek riskli sözleşmede opsiyonel bayrak olarak
-arka cepte kalsın; seal verisi ihlal göstermedikçe cepten çıkmasın.
+### Worktree, ayrıca
+
+Gerçek maliyet yapımda değil sonrasında: iş başına tam çalışma kopyası, kurulumda saniyeler,
+kapanışta **birleştirme** — çakışma çıkınca çözen kişi sensin ve paralel ajanların bütün
+kazancı o kuyrukta erir. Windows'ta uzun yol adları, kilitli dosyalar, IDE'nin hangi kopyaya
+baktığı cabası.
+
+Amorti eşiği: aynı anda koşan **3+ iş** düzenli hâle geldiğinde ve seal kaydı gerçekten ihlal
+gösterdiğinde. Bugün orada değiliz. Ucuz yarı yol zaten listede: seal anlık görüntüsü +
+kapanışta "sahiplenilmeyen dosya değişmiş mi" kontrolü.
