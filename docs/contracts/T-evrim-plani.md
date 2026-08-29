@@ -115,3 +115,20 @@ Doğrulananlar: v0.1.12 etiketi yok (son etiket v0.1.9), `sessionFile` lib.js'te
 | I3 | Sözleşme şablonu ve şema doğrulaması: `new` komutuyla üretilen iskelet + yazma anında şema hatasını söyleyen kanca (B5 sessiz kalmasın). |
 | I4 | Ajan dönüş defteri: her ajanın döndürdüğü metin `live/<id>.return.md`, t0 bunu okuyup birleştirsin (E4'ün karşılığı). |
 | I5 | `doctor` komutu: sürüm eşitliği, statusline yolu, node/git varlığı, bozuk config, artık `live/` kaydı — hepsini tek çıktıda söylesin. |
+
+---
+
+## J — Sole'un devir belgesinden gelen, yukarıda olmayanlar
+
+`docs/CLAUDE-HANDOFF.md` ayrı bir tarama. Örtüşenler yukarıda; bunlar yalnız orada:
+
+| # | Ne | Nerede |
+|---|---|---|
+| J1 | **Merdiven kapıda yok.** `complete` hiçbir yerde `status:` okumuyor (grep: tek eşleşme yok, ikisi de spawn sonucu). `open` bir sözleşme doğrudan kapanıyor, arşivlenen dosya `status: active` yazılı kalıyor. Belgelediğimiz `open → active → submitted → done` merdiveni yalnız metinde var. | contract.js:459-551 |
+| J2 | Edit denetimi yalnız `new_string`'e bakıyor; sonuçta oluşan belgeye bakmadığı için zorunlu alanı **silen** düzenleme geçiyor. | guard.js:50-93 |
+| J3 | Bash hiçbir zaman `owns`'a karşı denetlenmiyor — yalnız kapının kendi dizinleri korunuyor. Bağlı bir ajan kabuktan istediği kaynağı değiştirebilir; `watch.js` yalnız Write/Edit ile değişen dosyayı kaydettiği için iz de kalmaz. Denetçinin "yazdı mı" kontrolü de kabuğu görmüyor. | guard.js:222-262 · watch.js:90-102 |
+| J4 | Hedef proje dışına düşünce `relayRoot(..., {git:false})` null dönüyor ve sınır sessizce yok oluyor. | guard.js |
+| J5 | `owns` yinelenen girdiyi, dizini ve büyük/küçük harf çakışmasını da kabul ediyor (B3'ün geniş hâli). | schema.js · seal.js |
+| J6 | `map.js` dil kapsamı iddiadan dar: JS/TS iyi, Python/C# kısmi, Go/Rust yok — oysa risk kuralları o dilleri sayıyor. Önce dil örneği, sonra iddia. | map.js · risk.js:8 |
+| J7 | `contract.js validate [--all]`: ajan token harcamadan önce şema, sahiplik çakışması, bağımlılık, verify taşınabilirliği ve defter tutarlılığı denetlensin. (D5'in geniş hâli.) | — |
+| J8 | Kurtarma akışı: devam edilebilir sözleşmeleri listele, öksüz live kaydını ve yarım işlemi bağdaştır. Tamamlanmayı asla tahmin etme. | — |
