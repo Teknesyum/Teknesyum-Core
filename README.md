@@ -3,33 +3,48 @@
 **English** · [Türkçe](README.tr.md)
 
 <div align="center">
-<img src="assets/banner.svg" alt="Teknesyum Core, a contract gate for multi-agent work in Claude Code. Below the name, the line the plugin prints into the chat: Teknesyum, three Opus-Medium workers at work. Under it, three linked stages: hooks enforce, the gate closes, roles do the work." width="900">
+<img src="assets/banner.svg" alt="Teknesyum Core, multi-agent work in Claude Code with the plumbing done. Below the name, the line the plugin prints into the chat: Teknesyum, three Opus-Medium workers at work. Under it, three linked stages: hooks enforce, the gate closes, roles do the work." width="900">
 </div>
 
 # Teknesyum Core
 
-A contract gate for multi-agent work in Claude Code.
+Multi-agent work in Claude Code, with the plumbing already done.
+
+---
+
+## What it is
+
+A job splits into contracts. A contract names the files it owns and the commands that prove
+it finished. Agents run in parallel, each at whatever model the work is actually worth, and
+the gate runs those commands itself before anything is called done.
+
+None of it costs you a token per turn. Getting that part right took fifteen abandoned
+attempts, all of which are written down.
 
 ---
 
 ## What it solves
 
-An agent that says it is done is making a claim. Nothing checks it.
+Four things go wrong the moment more than one agent works on one repository.
 
-On a one-file change, fine. Across a dozen parallel agents that is how a branch quietly
-stops building: everyone reports success, nobody ran anyone else's tests, and the wreckage
-turns up an hour later in someone else's work.
+**They write over each other.** Two agents, one file, and the second one wins. A contract
+says which files are its own; `guard.js` refuses everything else before the write lands, so
+the collision never happens instead of being found later.
 
-Core makes "done" something you measure. Work splits into contracts; a contract names the
-files it owns and the commands that prove it finished. Nothing closes until those commands
-exit 0, risk comes from the actual diff instead of a vibe, and a high-risk close is refused
-outright until an audit record exists.
+**"Done" is a claim.** Everyone reports success, nobody ran anyone else's tests, and the
+branch stops building an hour later inside somebody else's work. `contract.js complete` runs
+the verify commands itself rather than believing the report, works risk out from the actual
+diff, and refuses a high-risk close outright until an audit record names who checked what.
 
-Then there is what all that scaffolding costs. Plugins usually buy structure with context —
-a command list, agent descriptions, a rule block stapled to every message. That is a bill
-you pay every turn, forever, resent with the whole transcript. Core's enforcement lives in
-hooks: they read files, write files, and never say a word to the model. **Zero tokens per
-turn**, measured rather than hoped for, table in [docs/COST-MODEL.md](docs/COST-MODEL.md).
+**One model does everything.** That is either too expensive for renaming a variable or too
+cheap for the design call. Role and profile pick a cell out of a table; repeated failure
+raises it, the profile caps it, nothing lowers it. Nobody has to remember any of this.
+
+**Structure gets bought with context.** This is the one plugins do to you. A command list,
+seven agent descriptions, a rule block stapled to every message — a bill you pay every turn,
+forever, resent with the whole transcript. Core's enforcement lives in hooks. They read
+files, write files, and never say a word to the model. **Zero tokens per turn**, measured
+rather than hoped for, table in [docs/COST-MODEL.md](docs/COST-MODEL.md).
 
 ---
 
@@ -244,7 +259,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,261 assertions over the guard, the completion gate, the audit chain, the ledger, the
+2,294 assertions over the guard, the completion gate, the audit chain, the ledger, the
 known bypasses, the tier and quota locks, the personal-convention gate, the scaffold, the
 cue, the banner, and one check that no hook writes into context.
 

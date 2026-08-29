@@ -15,7 +15,7 @@
   </g>
   <g font-family="Segoe UI, system-ui, sans-serif">
     <text x="86" y="72" fill="#ffffff" font-size="42" font-weight="700">Teknesyum Core</text>
-    <text x="86" y="104" fill="#9aa3ad" font-size="18">A Contract Gate For Multi-Agent Work In Claude Code.</text>
+    <text x="86" y="104" fill="#9aa3ad" font-size="18">Multi-Agent Work In Claude Code, Plumbing Included.</text>
   </g>
   <rect x="56" y="128" width="788" height="44" rx="10" fill="#111116" stroke="#2a2a33"/>
   <text x="76" y="157" font-family="Consolas, 'Cascadia Mono', monospace" font-size="17" fill="#00f3ff">Teknesyum</text>

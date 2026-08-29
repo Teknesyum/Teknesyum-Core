@@ -36,5 +36,5 @@
   <text x="760" y="300" font-family="Consolas, 'Cascadia Mono', monospace" font-size="15" fill="#3f4a55" text-anchor="middle">&#8212;</text>
   <path d="M40 322 H860" stroke="#2a2a33"/>
   <text x="40" y="352" font-family="Segoe UI, system-ui, sans-serif" font-size="15" fill="#e6e6ea">Per-Turn Cost</text>
-  <text x="760" y="352" font-family="Consolas, 'Cascadia Mono', monospace" font-size="16" fill="#00f3ff" text-anchor="middle">0 tok</text>
+  <text x="760" y="352" font-family="Consolas, 'Cascadia Mono', monospace" font-size="16" fill="#00f3ff" text-anchor="middle">0 Tokens</text>
 </svg>

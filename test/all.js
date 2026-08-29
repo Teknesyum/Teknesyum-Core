@@ -1181,6 +1181,65 @@ function testTierVisible(root) {
   ok('D8 records the two open points', /Settled by the user: opus/.test(d8) && /cost ratios/.test(d8));
 }
 
+const REPO = path.resolve(__dirname, '..');
+function testFigures() {
+  const dir = path.join(REPO, 'assets');
+  let files = [];
+  try {
+    files = fs.readdirSync(dir).filter((x) => x.endsWith('.svg') && !x.startsWith('badge-'));
+  } catch {}
+  ok('the figures are where the READMEs point', files.length > 0, dir);
+
+  const TR = /[\u00e7\u011f\u0131\u015f\u00f6\u00fc\u00c7\u011e\u0130\u015e\u00d6\u00dc]/;
+  const CODE = /[./_<>&]|^t0$|^\d/;
+  const text = (body) =>
+    (body.match(/>[^<>]+</g) || [])
+      .map((x) => x.slice(1, -1).trim())
+      .filter(Boolean)
+      .filter((x) => !/^&#\d+;$/.test(x));
+
+  const pairs = new Set();
+  for (const file of files) {
+    const body = fs.readFileSync(path.join(dir, file), 'utf8');
+    const tr = file.endsWith('.tr.svg');
+    const lines = text(body);
+    const alt = (/aria-label="([^"]*)"/.exec(body) || [])[1] || '';
+
+    ok(file + ' carries alt text that is a sentence, not a label', alt.length > 80, alt.slice(0, 40));
+
+    if (!tr) {
+      pairs.add(file.replace(/\.svg$/, '.tr.svg'));
+      const leaked = lines.filter((x) => TR.test(x));
+      ok(file + ' has no Turkish text in an English figure', leaked.length === 0, leaked.join(' | '));
+      const leakedAlt = TR.test(alt);
+      ok(file + ' has no Turkish in its alt text', !leakedAlt, alt.slice(0, 60));
+    }
+
+    const lower = [];
+    for (const line of lines) {
+      if (/[.][a-z]+/.test(line)) continue;
+      for (const word of line.split(/[\s\u00b7\u2014\u2192\u2022]+/)) {
+        if (!word || CODE.test(word)) continue;
+        const first = word[0];
+        if (first !== first.toLocaleUpperCase('tr') && /\p{L}/u.test(first)) lower.push(word);
+      }
+    }
+    ok(file + ' capitalises every word of its signage', lower.length === 0, lower.join(', '));
+  }
+
+  for (const want of pairs) {
+    ok('the Turkish twin of ' + want.replace('.tr.svg', '.svg') + ' exists', files.includes(want), files.join(', '));
+  }
+
+  for (const readme of ['README.md', 'README.tr.md']) {
+    const body = fs.readFileSync(path.join(REPO, readme), 'utf8');
+    const used = (body.match(/assets\/[a-z-]+(?:\.tr)?\.svg/g) || []).filter((x) => !/badge-/.test(x));
+    ok(readme + ' shows at least one figure', used.length > 0);
+    const wrong = used.filter((x) => (readme === 'README.tr.md') !== /\.tr\.svg$/.test(x));
+    ok(readme + ' shows only figures in its own language', wrong.length === 0, wrong.join(', '));
+  }
+}
+
 function main() {
   const root = fixture();
   testGuard(root);
@@ -1197,6 +1256,7 @@ function main() {
   testTier(root);
   testQuota(root);
   testTierVisible(root);
+  testFigures();
   testNoContextWrites();
 
   process.stdout.write('\n' + pass + ' passed, ' + fail + ' failed\n');

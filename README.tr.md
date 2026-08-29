@@ -3,34 +3,49 @@
 **Türkçe** · [English](README.md)
 
 <div align="center">
-<img src="assets/banner.tr.svg" alt="Teknesyum Core, Claude Code'da çok ajanlı iş için sözleşme kapısı. Adın altında eklentinin sohbete bastığı satır: Teknesyum, 3 Opus-Medium İşçi Çalışıyor. Onun altında birbirine bağlı üç aşama: kancalar zorluyor, kapı kapatıyor, roller işi yapıyor." width="900">
+<img src="assets/banner.tr.svg" alt="Teknesyum Core, Claude Code'da çok ajanlı iş, tesisatı döşenmiş hâli. Adın altında eklentinin sohbete bastığı satır: Teknesyum, 3 Opus-Medium İşçi Çalışıyor. Onun altında birbirine bağlı üç aşama: kancalar zorluyor, kapı kapatıyor, roller işi yapıyor." width="900">
 </div>
 
 # Teknesyum Core
 
-Claude Code'da çok ajanlı iş için sözleşme kapısı.
+Claude Code'da çok ajanlı iş — tesisatı döşenmiş hâli.
+
+---
+
+## Nedir
+
+İş sözleşmelere bölünüyor. Sözleşme, sahip olduğu dosyaları ve bittiğini kanıtlayan
+komutları yazıyor. Ajanlar paralel çalışıyor, her biri işin gerçekten hak ettiği modelde;
+kapı da bir şeye "bitti" demeden önce o komutları kendi çalıştırıyor.
+
+Hiçbiri tur başına token yakmıyor. O kısmı doğru yapmak on beş denemeyi çöpe attırdı,
+hepsi yazılı duruyor.
 
 ---
 
 ## Neyi çözüyor
 
-"Bitti" diyen ajan bir iddiada bulunuyor. Kimse ölçmüyor.
+Bir depoda birden fazla ajan çalışmaya başladığı anda dört şey bozuluyor.
 
-Tek dosyalık işte sorun yok. On iki paralel ajanda bir dal işte tam da böyle sessizce
-bozuluyor: herkes başarı bildiriyor, kimse ötekinin testini çalıştırmıyor, enkaz bir saat
-sonra başkasının işinde ortaya çıkıyor.
+**Birbirinin üstüne yazıyorlar.** İki ajan, tek dosya, ikincisi kazanıyor. Sözleşme hangi
+dosyaların kendisine ait olduğunu söylüyor; `guard.js` gerisini yazma diske inmeden
+reddediyor. Çakışma sonradan bulunmuyor, hiç olmuyor.
 
-Core "bitti"yi ölçülen bir şeye çeviriyor. İş sözleşmelere bölünüyor; sözleşme sahip olduğu
-dosyaları ve bittiğini kanıtlayan komutları yazıyor. O komutlar 0 ile çıkmadan hiçbir şey
-kapanmıyor, risk sezgiden değil gerçek diff'ten geliyor ve yüksek riskli kapanış denetim
-kaydı olmadan doğrudan reddediliyor.
+**"Bitti" bir iddia.** Herkes başarı bildiriyor, kimse ötekinin testini çalıştırmıyor, dal
+bir saat sonra başkasının işinde bozuluyor. `contract.js complete` rapora inanmak yerine
+doğrulama komutlarını kendi çalıştırıyor, riski sezgiden değil gerçek diff'ten çıkarıyor ve
+yüksek riskli kapanışı, neyi kimin denetlediğini yazan bir kayıt olmadan reddediyor.
 
-Bir de bütün bu iskelenin faturası var. Eklentiler yapıyı genelde bağlamla satın alıyor —
-komut listesi, ajan açıklamaları, her mesaja zımbalanmış bir kural bloğu. Bunu her turda
-ödüyorsunuz, sonsuza kadar, üstelik transkriptin tamamıyla tekrar gönderiliyor. Core'un
-zorlaması kancalarda: dosya okuyorlar, dosya yazıyorlar, modele tek kelime etmiyorlar.
-**Tur başına sıfır token** — umut değil ölçüm, tablo
-[docs/COST-MODEL.md](docs/COST-MODEL.md) içinde.
+**Her işi tek model yapıyor.** Bu ya değişken adı değiştirmek için fazla pahalı, ya tasarım
+kararı için fazla ucuz. Rol ve profil tablodan bir hücre seçiyor; üst üste başarısızlık
+hücreyi yükseltiyor, profil tavanı koyuyor, hiçbir şey aşağı çekmiyor. Kimsenin bunu
+aklında tutması gerekmiyor.
+
+**Yapı bağlamla satın alınıyor.** Eklentilerin size yaptığı asıl şey bu. Komut listesi, yedi
+ajan açıklaması, her mesaja zımbalanmış kural bloğu — her turda ödediğiniz, sonsuza kadar
+süren, üstelik transkriptin tamamıyla yeniden gönderilen bir fatura. Core'un zorlaması
+kancalarda: dosya okuyorlar, dosya yazıyorlar, modele tek kelime etmiyorlar. **Tur başına
+sıfır token** — umut değil ölçüm, tablo [docs/COST-MODEL.md](docs/COST-MODEL.md) içinde.
 
 ---
 
@@ -245,7 +260,7 @@ kenarlar. Okuması dosya açmaktan ucuz ve dosya açmanın cevaplamadığı şey
 node test/all.js
 ```
 
-2.261 doğrulama: guard, kapanış kapısı, denetim zinciri, defter, bilinen aşma yolları,
+2.294 doğrulama: guard, kapanış kapısı, denetim zinciri, defter, bilinen aşma yolları,
 kademe ve kota kilitleri, kişisel sözleşme kapısı, scaffold, cue, banner ve hiçbir kancanın
 bağlama yazmadığına dair tek bir denetim.
 
