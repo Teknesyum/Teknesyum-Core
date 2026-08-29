@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" width="900" height="380" role="img" aria-label="One turn through the plugin's hooks and what each writes into the model's context. A prompt arrives; the cue hook stays silent; before a tool runs, the guard may block a write and the prefs hook may block a README missing its markers; after every tool the watcher records the step to disk; while the answer streams, the notice hook draws the banner as display only; and at the end the notifier plays a sound. Every arrow into the model's context is empty, so the per-turn cost is zero tokens.">
+  <defs>
+    <linearGradient id="edge3" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#00f3ff"/>
+      <stop offset="100%" stop-color="#b026ff"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="898" height="378" rx="18" fill="#0a0a0c" stroke="url(#edge3)" stroke-width="2"/>
+
+  <g font-family="Segoe UI, system-ui, sans-serif" font-size="13" fill="#5f6b78">
+    <text x="40" y="44">hook</text>
+    <text x="330" y="44">what it does</text>
+    <text x="700" y="44">into context</text>
+  </g>
+  <path d="M40 56 H860" stroke="#2a2a33"/>
+
+  <g font-family="Consolas, 'Cascadia Mono', monospace" font-size="15" fill="#00f3ff">
+    <text x="40" y="90">cue.js</text>
+    <text x="40" y="132">guard.js</text>
+    <text x="40" y="174">prefs.js</text>
+    <text x="40" y="216">watch.js</text>
+    <text x="40" y="258">notice.js</text>
+    <text x="40" y="300">notify.js</text>
+  </g>
+
+  <g font-family="Segoe UI, system-ui, sans-serif" font-size="15" fill="#9aa3ad">
+    <text x="330" y="90">silent on an ordinary prompt</text>
+    <text x="330" y="132">blocks a write outside the contract</text>
+    <text x="330" y="174">blocks a README missing its markers</text>
+    <text x="330" y="216">records the step to disk</text>
+    <text x="330" y="258">draws the banner, display only</text>
+    <text x="330" y="300">plays a sound when the turn ends</text>
+  </g>
+
+  <g font-family="Consolas, 'Cascadia Mono', monospace" font-size="15" fill="#3f4a55" text-anchor="middle">
+    <text x="760" y="90">&#8212;</text>
+    <text x="760" y="132">&#8212;</text>
+    <text x="760" y="174">&#8212;</text>
+    <text x="760" y="216">&#8212;</text>
+    <text x="760" y="258">&#8212;</text>
+    <text x="760" y="300">&#8212;</text>
+  </g>
+
+  <path d="M40 322 H860" stroke="#2a2a33"/>
+  <text x="40" y="352" font-family="Segoe UI, system-ui, sans-serif" font-size="15" fill="#e6e6ea">Per-turn cost</text>
+  <text x="760" y="352" font-family="Consolas, 'Cascadia Mono', monospace" font-size="16" fill="#00f3ff" text-anchor="middle">0 tok</text>
+</svg>

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" width="900" height="340" role="img" aria-label="A contract's life: it is opened, an agent takes it to active, the agent submits it, and the gate then runs the contract's own verify commands. A failing command sends the contract back to active. When every command exits zero, the gate computes risk from the diff; at high risk it also demands an audit record naming the agent and the verification, and only then does the contract move to done and its file into contracts slash done.">
+  <defs>
+    <linearGradient id="edge2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#00f3ff"/>
+      <stop offset="100%" stop-color="#b026ff"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="898" height="338" rx="18" fill="#0a0a0c" stroke="url(#edge2)" stroke-width="2"/>
+
+  <g font-family="Segoe UI, system-ui, sans-serif" font-size="16">
+    <rect x="40" y="48" width="150" height="46" rx="10" fill="#111116" stroke="#2f3a44"/>
+    <text x="115" y="77" fill="#e6e6ea" text-anchor="middle">open</text>
+
+    <path d="M198 71 h38" stroke="#3a4550" stroke-width="2"/>
+    <path d="M230 65 l8 6 -8 6 z" fill="#3a4550"/>
+
+    <rect x="244" y="48" width="150" height="46" rx="10" fill="#111116" stroke="#2f3a44"/>
+    <text x="319" y="77" fill="#e6e6ea" text-anchor="middle">active</text>
+
+    <path d="M402 71 h38" stroke="#3a4550" stroke-width="2"/>
+    <path d="M434 65 l8 6 -8 6 z" fill="#3a4550"/>
+
+    <rect x="448" y="48" width="150" height="46" rx="10" fill="#111116" stroke="#2f3a44"/>
+    <text x="523" y="77" fill="#e6e6ea" text-anchor="middle">submitted</text>
+
+    <path d="M606 71 h38" stroke="#3a4550" stroke-width="2"/>
+    <path d="M638 65 l8 6 -8 6 z" fill="#3a4550"/>
+
+    <rect x="652" y="48" width="208" height="46" rx="10" fill="#111116" stroke="#00f3ff"/>
+    <text x="756" y="77" fill="#00f3ff" text-anchor="middle">done</text>
+  </g>
+
+  <g font-family="Segoe UI, system-ui, sans-serif" font-size="15">
+    <rect x="380" y="150" width="440" height="140" rx="12" fill="none" stroke="#2f3a44" stroke-dasharray="5 5"/>
+    <text x="400" y="176" fill="#b026ff" font-size="14" font-weight="700">contract.js complete</text>
+
+    <text x="400" y="206" fill="#9aa3ad">1. run every verify command &#8212; all must exit 0</text>
+    <text x="400" y="232" fill="#9aa3ad">2. compute risk from the diff, not from a claim</text>
+    <text x="400" y="258" fill="#9aa3ad">3. at high risk, demand an audit record first</text>
+    <text x="400" y="282" fill="#5f6b78" font-size="13">nothing else can move a contract to done</text>
+  </g>
+
+  <path d="M523 100 v46 " stroke="#3a4550" stroke-width="2"/>
+  <path d="M517 140 l6 8 6 -8 z" fill="#3a4550"/>
+
+  <path d="M380 220 H319 V100" stroke="#b026ff" stroke-width="2" fill="none"/>
+  <path d="M313 112 l6 -12 6 12 z" fill="#b026ff"/>
+  <text x="196" y="216" font-family="Segoe UI, system-ui, sans-serif" font-size="14" fill="#b026ff">a command failed</text>
+</svg>
