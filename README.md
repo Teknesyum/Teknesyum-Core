@@ -21,19 +21,33 @@ verification commands actually pass.
 
 ---
 
+## Doesn't native Claude Code already do this?
+
+Some of it, yes: it spawns subagents, runs them in parallel, keeps a plan. What Core adds:
+
+- **A script decides "done", not the model.** In native, an agent says it is finished and
+  that is that. In Core a contract cannot close until its verify commands actually pass —
+  `contract.js` runs them itself.
+- **File ownership is enforced.** In native, two parallel agents can clobber the same file.
+  Core's guard blocks writes to any file a contract does not own.
+- **Work lives on disk.** A contract is a file; the session ends, the contract stays. Pick
+  it up tomorrow where you left off.
+- **It takes no context space.** No command list, no rules block, no agent descriptions
+  injected into every message. Everything runs in hooks: 0 tokens per turn.
+
+---
+
 ## Features
 
-- **Contracts** — Each piece of work owns its files. Two agents cannot write to the same
-  file; who touches what is settled up front.
-- **Verification gate** — Saying "done" is not enough. Tests actually run before a contract
-  closes; if they fail, the job stays open.
-- **Parallel agents** — The job is split, agents run at the same time, each keeps its own
-  record.
 - **Right model for the job** — Simple tasks do not get the expensive model; nobody likes
-  the bill. Role and profile pick the model and the effort together.
+  the bill. Role and profile pick the model and the effort together, and a run of failures
+  raises both.
 - **Risk-aware** — Risk is computed from the diff. When it is high the close demands an
-  audit record, and refuses without one.
-- **No room in context** — The rules live in hooks, not in the chat. Numbers below.
+  audit record, and the records sit in a sealed chain, so backdating one leaves a visible
+  break.
+- **Role files** — Builder, planner, auditor, advisor. The role text is paid for by the
+  agent holding it, not by your session.
+- **Banner and statusline** — One line for what is happening right now. Not a dashboard.
 
 ---
 

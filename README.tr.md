@@ -21,18 +21,31 @@ doğrulama komutları geçmeden hiçbir sözleşme kapanmaz.
 
 ---
 
+## Bunu native Claude Code zaten yapmıyor mu?
+
+Bir kısmını yapıyor: subagent çağırır, paralel çalıştırır, plan tutar. Core'un eklediği şu:
+
+- **"Bitti"yi model değil betik söyler.** Native'de ajan "bitti" der, iş biter. Core'da
+  sözleşme, doğrulama komutları gerçekten geçmeden kapanmaz; komutları `contract.js` kendisi
+  çalıştırır.
+- **Dosya sahipliği zorlanır.** Native'de iki paralel ajan aynı dosyayı ezebilir. Core'da
+  guard, sözleşmesinde yazmayan dosyaya yazdırmaz.
+- **İş diskte yaşar.** Sözleşme bir dosyadır; oturum kapanır, sözleşme kalır. Yarın kaldığı
+  yerden devam edersiniz.
+- **Bağlamda yer kaplamaz.** Komut listesi, kural bloğu, ajan tanımı — hiçbiri her mesaja
+  eklenmiyor. Her şey kancalarda dönüyor: tur başına 0 token.
+
+---
+
 ## Özellikler
 
-- **Sözleşmeler** — Her iş parçası kendi dosyalarını sahiplenir. İki ajan aynı dosyaya
-  yazamaz; kim neye dokunuyor baştan belli.
-- **Doğrulama kapısı** — "Bitti" demek yetmiyor. Sözleşme kapanmadan önce testler gerçekten
-  çalışır; geçmezse iş açık kalır.
-- **Paralel ajanlar** — İş bölünür, ajanlar aynı anda koşar, her biri kendi kaydını tutar.
 - **İşe göre model** — Basit iş güçlü modele gitmez; kimse faturayı sevmiyor. Rol ve profil
-  modeli ve eforu birlikte seçer.
-- **Riskten haberdar** — Risk diff'ten hesaplanır. Yükseldiğinde kapanış denetim kaydı
-  ister, yoksa reddeder.
-- **Bağlamda yer kaplamaz** — Kurallar kancalarda durur, sohbete girmez. Ölçüsü aşağıda.
+  modeli ve eforu birlikte seçer, üst üste başarısızlık ikisini de yükseltir.
+- **Riskten haberdar** — Risk diff'ten hesaplanır. Yüksekse kapanış denetim kaydı ister ve
+  kayıtlar mühürlü bir zincirde durur; geriye dönük kayıt görünür bir kırılma bırakır.
+- **Rol dosyaları** — Yapıcı, planlayıcı, denetçi, danışman. Rol metnini yalnızca o rolü
+  taşıyan ajan ödüyor, sizin oturumunuz değil.
+- **Banner ve statusline** — O an ne olduğunu tek satırda söyler. Pano değil.
 
 ---
 
