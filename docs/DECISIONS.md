@@ -185,11 +185,17 @@ Cell is `model/effort`. Bold cells pierce the profile ceiling.
 | scribe | haiku/low | haiku/low | sonnet/low |
 | scout | haiku/low | sonnet/low | sonnet/medium |
 | auditor | **opus/medium** | opus/medium | opus/high |
-| advisor | **opus/high** | **fable/high** | **fable/high** |
+| advisor | **opus/medium** | off | **fable/medium** |
 
-The advisor cell is a fallback. When the asker names its own model the pairing in
-`advisorPair` decides instead, and the pairing is the real rule: opus asks, fable answers;
-anything else asks, opus answers. The row above is what a caller gets who did not say.
+The advisor cell is a fallback. When the asker names its own model, `advisorLadder`
+decides instead, and the ladder is the real rule: **the advisor is one rung above the
+asker.** Sonnet asks, opus answers; opus asks, fable answers. Effort is `medium` by
+default and T0 lifts it to `high` when the question earns it.
+
+**Normal runs no advisor.** Its T0 is opus, so the rung above is fable, and the standard
+plan carries no fable credit. Rather than sell a cheaper opinion that is no opinion, the
+cell says `off`: `contract.js tier` exits 2 and names the profile. The question goes to
+the user or the profile goes up.
 
 Search subagents are not roles: `haiku/low` in every profile, fixed.
 
@@ -222,12 +228,12 @@ and work that tripped the gate is not ordinary work.
 **Advisor is exempt outright.** A second opinion that is cheaper than the first opinion is
 not a second opinion. Eco opens opus like everyone else.
 
-**The advisor must run a different model than the asker.** A model cannot give itself a
-second opinion. This began as `advisorModelGap`, a *block*: same model, advisor refused to
-open, exit code 2. That was the wrong shape — it punished the asker for a table entry it
-did not choose. `advisorPair` replaces it: the resolver reads the asker's model and hands
-back the other one. Opus asks, fable answers; sonnet, haiku or fable asks, opus answers.
-The block survives only as a backstop, for a model with no pair.
+**The advisor must run above the asker, never beside it.** A model cannot give itself a
+second opinion, and one of equal rank is a coin toss. This began as `advisorModelGap`, a
+*block*: same model, advisor refused to open, exit code 2. That was the wrong shape — it
+punished the asker for a table entry it did not choose. `advisorLadder` replaces it: the
+resolver reads the asker's model and returns the rung above. The block survives for the
+one case the ladder cannot answer — a profile that does not carry the rung at all.
 
 **No gate on the advisor.** The four signals below open it on their own, but they are not
 conditions of entry. Wanting a second opinion is reason enough, and the role file says so:
@@ -494,10 +500,39 @@ zero model tokens, one hook run per message, ~43 ms of node startup. For scale, 
 spends about 1.3 s per turn across twenty tool calls; the notice is 3% of what the plugin
 already costs in latency and 0% of what it costs in tokens.
 
-Because the channel is free, the line says more than the statusline does. `banner()` reports
-the profile, contracts by status, running agents with their roles, how many tool calls the
-plugin has watched, problems and open logs — in the user's language, Title Cased with
-`toLocaleUpperCase('tr')` so a Turkish dotted İ survives.
+**The line is an event, not a scoreboard.** The first version listed everything it could
+count: profile, contracts, agents, steps watched, problems, open logs. The user read
+`2 Ajan Explore · 72 Adım İzlendi · 6 Günlük` and asked what any of it meant. Fair: a
+number with nothing to compare it against is not information, and "2 agents" without
+saying *what they were asked* answers a question nobody had.
+
+So the banner now shows one thing — the most important thing happening — in this order:
+
+1. A run of failed tool calls, from two upward. It outranks everything; nothing else
+   matters while the same call keeps failing.
+2. On the closing band only, what just finished — the agent that returned, the contract
+   that closed.
+3. What is running, as `Role Model/Effort — Task`. The task is the `description` of the
+   `Agent` call, captured by `watch.js` into `live/_calls.json` at `PreToolUse` and
+   matched back by role. With several agents the models drop out and the tasks stay.
+4. Only when nothing is happening: the profile, contracts by status, problems, and the
+   gate if it is off.
+
+The step counter and the open-log counter are gone for good. They grew without bound and
+meant nothing at any value.
+
+**The two bands differ.** The opening band says what is running, the closing band says what
+finished — it is computed after the message and simply knows more. Suppressing that would
+be throwing away free information.
+
+Counting agents had a bug worth recording: `agents()` globbed `*.json` under `live/`,
+which swept up `_tally.json` as an agent with no role. That is where "2 Ajan Explore" came
+from — one real agent and one bookkeeping file. Records are now the files that do not
+start with `_`.
+
+All of it in the user's language, Title Cased with `toLocaleUpperCase('tr')` so a Turkish
+dotted İ survives, and the case break now includes `/` and the em dash so `Fable/Medium`
+does not come out `Fable/medium`.
 
 Free of tokens is not free of everything, and the first version paid twice. It trimmed the
 delta on the opening flush as well as the closing one, so a batch ending mid-word lost the

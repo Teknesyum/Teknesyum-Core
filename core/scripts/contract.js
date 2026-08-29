@@ -183,11 +183,13 @@ function tier(role, opt) {
   const askerModel = String(o.asker || '').toLowerCase();
   let cellText = T.cells[row][profile];
   let pairedFrom = '';
-  if (row === 'advisor' && askerModel && T.advisorPair && T.advisorPair[askerModel]) {
-    cellText = T.advisorPair[askerModel];
+  const closed = row === 'advisor' && String(cellText).toLowerCase() === 'off';
+
+  if (!closed && row === 'advisor' && askerModel && T.advisorLadder && T.advisorLadder[askerModel]) {
+    cellText = T.advisorLadder[askerModel];
     pairedFrom = askerModel;
   }
-  const base = parseCell(cellText);
+  const base = closed ? { model: '', effort: '' } : parseCell(cellText);
   let model = base.model;
   let effort = base.effort;
 
@@ -197,7 +199,7 @@ function tier(role, opt) {
   let raisedBySignal = false;
 
   if (pairedFrom)
-    reasons.push('the asker runs ' + pairedFrom + ', so the advisor is paired to ' + cellText);
+    reasons.push('the asker runs ' + pairedFrom + ', so the advisor steps up to ' + cellText);
 
   if (String(o.risk || '').toLowerCase() === 'high') {
     signals.push('risk high');
@@ -298,7 +300,11 @@ function tier(role, opt) {
 
   const asker = askerModel;
   let blocked = '';
-  if (row === 'advisor' && T.advisorModelGap && asker && asker === model)
+  if (closed)
+    blocked =
+      'the ' + profile + ' profile runs no advisor - the step above its own model is not in its budget' +
+      ' - raise the profile or ask the user';
+  else if (row === 'advisor' && T.advisorModelGap && asker && asker === model)
     blocked =
       'the asker already runs ' + asker + ' and no other model is paired to it' +
       ' - the same model cannot give itself a second opinion';

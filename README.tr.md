@@ -21,13 +21,13 @@ model hiç görmez. Bedel bir kez, kurulumda ödenir.
 ### Windows — tek satır
 
 ```powershell
-irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.10/install.ps1 | iex
+irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.11/install.ps1 | iex
 ```
 
 ### macOS / Linux — tek satır
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.10/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.11/install.sh | bash
 ```
 
 ### Claude Code içinden

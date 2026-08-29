@@ -58,9 +58,9 @@
       "premium": "opus/high"
     },
     "advisor": {
-      "eco": "opus/high",
-      "normal": "fable/high",
-      "premium": "fable/high"
+      "eco": "opus/medium",
+      "normal": "off",
+      "premium": "fable/medium"
     }
   },
   "advisory": [
@@ -75,12 +75,6 @@
     "ui-builder"
   ],
   "advisorModelGap": true,
-  "advisorPair": {
-    "opus": "fable/high",
-    "fable": "opus/high",
-    "sonnet": "opus/high",
-    "haiku": "opus/high"
-  },
   "advisorDefault": {
     "premium": {
       "onContractOpen": [
@@ -112,5 +106,11 @@
       }
     }
   },
-  "autoEffortCap": "high"
+  "autoEffortCap": "high",
+  "advisorLadder": {
+    "haiku": "sonnet/medium",
+    "sonnet": "opus/medium",
+    "opus": "fable/medium",
+    "fable": "fable/high"
+  }
 }

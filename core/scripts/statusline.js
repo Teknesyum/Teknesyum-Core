@@ -46,12 +46,13 @@ function agents(relay) {
   const live = liveDir(relay);
   let files = [];
   try {
-    files = fs.readdirSync(live).filter((f) => f.endsWith('.json'));
+    files = fs.readdirSync(live).filter((f) => f.endsWith('.json') && !f.startsWith('_'));
   } catch {
     return { running: 0, roles: [] };
   }
   const cutoff = Date.now() - ACTIVE_MS;
   const roles = [];
+  const rows = [];
   let running = 0;
   for (const f of files) {
     const r = read(path.join(live, f));
@@ -63,8 +64,45 @@ function agents(relay) {
     if (m < cutoff) continue;
     running += 1;
     if (r.role) roles.push(label(r));
+    rows.push(r);
   }
-  return { running, roles };
+  return { running, roles, rows };
+}
+
+function calls(relay) {
+  const c = read(path.join(liveDir(relay), '_calls.json'));
+  return Array.isArray(c) ? c : [];
+}
+
+function taskFor(row, pool) {
+  for (let i = pool.length - 1; i >= 0; i -= 1) {
+    const c = pool[i];
+    if (c.used || c.role !== row.role) continue;
+    c.used = true;
+    return c;
+  }
+  return null;
+}
+
+function crew(relay) {
+  const a = agents(relay);
+  if (!a.running) return '';
+  const pool = calls(relay);
+  const tasks = [];
+  const parts = a.rows.map((row) => {
+    const c = taskFor(row, pool);
+    tasks.push((c && c.task) || '');
+    const model = row.model || (c && c.model) || '';
+    const cell = model ? ' ' + model + (row.effort ? '/' + row.effort : '') : '';
+    const task = c && c.task ? ' — ' + c.task : '';
+    return (row.role || t('line.agent')) + cell + task;
+  });
+  if (parts.length === 1) return parts[0];
+  const brief = a.rows.map((row, i) => {
+    const task = tasks[i];
+    return (row.role || t('line.agent')) + (task ? ' ' + task : '');
+  });
+  return a.running + ' ' + t('line.agents') + ': ' + brief.join(' · ');
 }
 
 function label(r) {
@@ -95,40 +133,41 @@ function counters(relay) {
 }
 
 function titleCase(s) {
-  return String(s).replace(/(^|[\s·×])(\p{L})/gu, (m, a, b) => a + b.toLocaleUpperCase('tr'));
+  return String(s).replace(/(^|[\s·×—/])(\p{L})/gu, (m, a, b) => a + b.toLocaleUpperCase('tr'));
 }
 
-function banner(cwd) {
+function banner(cwd, phase) {
   const r = relayRoot(cwd, { git: false });
   if (!r) return '';
-  const bits = [String(settings().profile || 'normal')];
-
-  const c = contracts(r.relay);
-  if (c && c.total) {
-    const sub = [];
-    if (c.count.active) sub.push(c.count.active + ' ' + t('line.active'));
-    if (c.count.submitted) sub.push(c.count.submitted + ' ' + t('line.submitted'));
-    if (c.count.open) sub.push(c.count.open + ' ' + t('line.open'));
-    if (c.count.blocked) sub.push(c.count.blocked + ' ' + t('line.blocked'));
-    bits.push(sub.length ? sub.join(' ') : c.total + ' ' + t('line.contracts'));
-  }
-
-  const a = agents(r.relay);
-  if (a.running) bits.push(a.running + ' ' + t('line.agents') + (a.roles.length ? ' ' + tally(a.roles) : ''));
+  const mark = 'Teknesyum ▸ ';
+  const say = (body) => mark + trim(titleCase(body));
 
   const ty = counters(r.relay);
-  if (ty.steps) bits.push(ty.steps + ' ' + t('line.steps'));
-  if (ty.fails >= 2) bits.push(ty.fails + ' ' + t('line.fails'));
+  if (ty.fails >= 2) return say(t('line.caution') + ' — ' + ty.fails + ' ' + t('line.failRun'));
 
+  if (phase === 'foot') {
+    const n = getNotice(r.relay);
+    if (n) return say(n);
+  }
+
+  const c = crew(r.relay);
+  if (c) return say(c);
+
+  const bits = [String(settings().profile || 'normal')];
+  const k = contracts(r.relay);
+  if (k && k.total) {
+    const sub = [];
+    if (k.count.active) sub.push(k.count.active + ' ' + t('line.active'));
+    if (k.count.submitted) sub.push(k.count.submitted + ' ' + t('line.submitted'));
+    if (k.count.open) sub.push(k.count.open + ' ' + t('line.open'));
+    if (k.count.blocked) sub.push(k.count.blocked + ' ' + t('line.blocked'));
+    bits.push(sub.length ? sub.join(' ') : k.total + ' ' + t('line.contracts'));
+  }
   const p = problems(r.relay);
   if (p) bits.push(p + ' ' + t('line.problems'));
-
-  const logs = openLogCount();
-  if (logs) bits.push(logs + ' ' + t('line.logs'));
-
   if (!gateOn()) bits.push(t('line.gateOff'));
 
-  return 'Teknesyum ▸ ' + trim(titleCase(bits.join(' · ')));
+  return say(bits.join(' · '));
 }
 
 function gateOn() {

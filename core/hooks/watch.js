@@ -38,6 +38,19 @@ function bumpTally(live, step, fails) {
   write(f, { steps: (cur.steps || 0) + (step ? 1 : 0), fails: fails });
 }
 
+function logCall(live, role, input) {
+  const f = path.join(live, '_calls.json');
+  const cur = read(f);
+  const list = Array.isArray(cur) ? cur : [];
+  list.push({
+    role: role,
+    model: String(input.model || ''),
+    task: String(input.description || '').slice(0, 60),
+    at: Date.now(),
+  });
+  write(f, list.slice(-12));
+}
+
 function record(j) {
   const cwd = j.cwd || process.cwd();
   const r = relayRoot(cwd, { git: false });
@@ -93,6 +106,7 @@ function record(j) {
     const child = roleOf(j);
     if (child) {
       rec.spawned = (rec.spawned || []).concat(child).slice(-40);
+      logCall(live, child, j.tool_input || {});
     }
   }
 

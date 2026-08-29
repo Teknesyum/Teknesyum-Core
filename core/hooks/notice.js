@@ -16,23 +16,26 @@ function build(j) {
   const head = j.index === 0;
   const foot = !!j.final;
   if (!head && !foot) return '';
-  const line = notice(j.cwd || process.cwd());
-  if (!line) return '';
+
+  const cwd = j.cwd || process.cwd();
+  const top = head ? notice(cwd, 'head') : '';
+  const end = foot ? notice(cwd, 'foot') : '';
+  if (!top && !end) return '';
 
   const delta = String(j.delta || '');
   let body = foot ? delta.replace(/\s+$/, '') : delta;
-  if (head) body = body ? line + '\n\n' + body : line;
-  if (foot && body !== line) body = body ? body + '\n\n' + line : line;
+  if (head && top) body = body ? top + '\n\n' + body : top;
+  if (foot && end && body !== end) body = body ? body + '\n\n' + end : end;
 
   return JSON.stringify({
     hookSpecificOutput: { hookEventName: 'MessageDisplay', displayContent: body },
   });
 }
 
-function notice(cwd) {
+function notice(cwd, phase) {
   try {
     const { banner } = require(path.join(__dirname, '..', 'scripts', 'statusline.js'));
-    return banner(cwd);
+    return banner(cwd, phase);
   } catch {
     return '';
   }

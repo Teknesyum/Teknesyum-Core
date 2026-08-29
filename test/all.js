@@ -474,9 +474,9 @@ function testBanner(root) {
 
   const tally = path.join(lib.liveDir(path.join(root, '.claude', 'relay')), '_tally.json');
   fs.writeFileSync(tally, JSON.stringify({ steps: 41 }));
-  ok('the banner reads the step tally', /41 /.test(banner(root)), banner(root));
+  ok('the step tally is off the banner for good', !/41/.test(banner(root)), banner(root));
   fs.rmSync(tally, { force: true });
-  ok('a missing tally drops the segment', !/\d+ Adım/.test(banner(root)), banner(root));
+  ok('no step segment is left on the banner', !/Adım|Step/i.test(banner(root)), banner(root));
 
   const WATCH = path.join(CORE, 'hooks', 'watch.js');
   const fire = (ev, tool) =>
@@ -494,10 +494,32 @@ function testBanner(root) {
   fs.rmSync(path.join(lib.liveDir(path.join(root, '.claude', 'relay')), 'failer.json'), { force: true });
 
   fs.writeFileSync(tally, JSON.stringify({ steps: 3, fails: 1 }));
-  ok('a single failure stays off the banner', !/1 Hata|1 Failed/i.test(banner(root)), banner(root));
+  ok('a single failure stays off the banner', !/Dikkat|Heads/i.test(banner(root)), banner(root));
   fs.writeFileSync(tally, JSON.stringify({ steps: 3, fails: 2 }));
-  ok('two failures in a row reach the banner', /2 Hata|2 Failed/i.test(banner(root)), banner(root));
+  ok('two failures in a row take over the banner', /Dikkat|Heads/i.test(banner(root)) && /2 /.test(banner(root)), banner(root));
   fs.rmSync(tally, { force: true });
+
+  const liveB = lib.liveDir(path.join(root, '.claude', 'relay'));
+  const parked = fs.readdirSync(liveB).filter((x) => x.endsWith('.json'));
+  for (const x of parked) fs.renameSync(path.join(liveB, x), path.join(liveB, x + '.parked'));
+  fs.writeFileSync(path.join(liveB, 'a1.json'), JSON.stringify({ id: 'a1', role: 'advisor', model: 'fable', effort: 'medium' }));
+  fs.writeFileSync(path.join(liveB, '_calls.json'), JSON.stringify([{ role: 'advisor', model: 'fable', task: 'banner tasarimi soruldu', at: Date.now() }]));
+  const crewLine = banner(root);
+  ok('the banner names the role', /Advisor/.test(crewLine), crewLine);
+  ok('the banner names the model and effort', /Fable\/Medium/.test(crewLine), crewLine);
+  ok('the banner says what the agent was asked', /Banner Tasarimi Soruldu/.test(crewLine), crewLine);
+  ok('a working agent pushes the profile off the line', !/Premium|Normal|Eco/.test(crewLine), crewLine);
+  ok('the counters are gone from the busy line', !/Ad\u0131m|G\u00fcnl\u00fck/i.test(crewLine), crewLine);
+
+  fs.writeFileSync(path.join(liveB, '_duyuru.json'), JSON.stringify({ text: 'T7 kapandi', at: Date.now() }));
+  ok('the closing band reports what finished', /T7 Kapandi/.test(banner(root, 'foot')), banner(root, 'foot'));
+  ok('the opening band still reports what is running', /Advisor/.test(banner(root, 'head')), banner(root, 'head'));
+  fs.rmSync(path.join(liveB, '_duyuru.json'), { force: true });
+  fs.rmSync(path.join(liveB, 'a1.json'), { force: true });
+  fs.rmSync(path.join(liveB, '_calls.json'), { force: true });
+  ok('with nothing running the banner falls back to the profile', /Premium|Normal|Eco/.test(banner(root)), banner(root));
+  ok('bookkeeping files are not counted as agents', !/1 Ajan|2 Ajan/.test(banner(root)), banner(root));
+  for (const x of parked) fs.renameSync(path.join(liveB, x + '.parked'), path.join(liveB, x));
 
   const many = lib.liveDir(path.join(root, '.claude', 'relay'));
   for (let i = 0; i < 60; i++) fs.writeFileSync(path.join(many, 'bulk' + i + '.json'), JSON.stringify({ id: 'b' + i, role: 'builder', ended: '2020-01-01' }));
@@ -571,7 +593,8 @@ function testMessageDisplay(root) {
   ok('both bands read the same', bands.length === 2 && bands[0] === bands[1], bands.join(' | '));
 
   const src = fs.readFileSync(HOOK, 'utf8');
-  ok('the notice hook delegates its line', /banner\(cwd\)/.test(src));
+  ok('the notice hook delegates its line', /banner\(cwd, phase\)/.test(src));
+  ok('the notice hook tells the two bands apart', /'head'/.test(src) && /'foot'/.test(src));
   ok('the notice hook keeps no debug log', !/TKNSYM|appendFileSync/.test(src), 'instrumentation left behind');
 
   const hooks = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8')).hooks;
@@ -822,7 +845,7 @@ const TABLE = {
   scribe: { eco: 'haiku/low', normal: 'haiku/low', premium: 'sonnet/low' },
   scout: { eco: 'haiku/low', normal: 'sonnet/low', premium: 'sonnet/medium' },
   auditor: { eco: 'opus/medium', normal: 'opus/medium', premium: 'opus/high' },
-  advisor: { eco: 'opus/high', normal: 'fable/high', premium: 'fable/high' },
+  advisor: { eco: 'opus/medium', normal: 'off', premium: 'fable/medium' },
 };
 
 const PROFILES = ['eco', 'normal', 'premium'];
@@ -844,6 +867,11 @@ function testTier(root) {
     for (const p of PROFILES) {
       cells += 1;
       const t = tier(row, { profile: p });
+      if (TABLE[row][p] === 'off') {
+        ok('cell ' + row + ' x ' + p + ' does not open', t && !!t.blocked && !t.model, t && t.blocked);
+        ok('cell ' + row + ' x ' + p + ' names itself off', t && t.cell === 'off', t && t.cell);
+        continue;
+      }
       ok('cell ' + row + ' x ' + p + ' is ' + TABLE[row][p], t && cellOf(t) === TABLE[row][p], t && cellOf(t));
       ok('cell ' + row + ' x ' + p + ' names its own cell', t && t.cell === TABLE[row][p], t && t.cell);
     }
@@ -856,11 +884,13 @@ function testTier(root) {
   ok('the fable pass is gone', T.councilFablePass === undefined && !/councilFablePass/.test(tiersRaw));
   ok('the second-opinion rewrite is gone', T.secondOpinion === undefined && !/secondOpinion/.test(tiersRaw));
   ok(
-    'every model in the table has an advisor pair, and none is paired with itself',
-    T.models.every((m) => T.advisorPair[m] && T.advisorPair[m].split('/')[0] !== m),
-    JSON.stringify(T.advisorPair)
+    'every model in the table has a rung above it',
+    T.models.every((m) => !!T.advisorLadder[m]),
+    JSON.stringify(T.advisorLadder)
   );
-  ok('opus is paired with fable and fable with opus', T.advisorPair.opus === 'fable/high' && T.advisorPair.fable === 'opus/high');
+  ok('the ladder climbs one rung', T.advisorLadder.sonnet === 'opus/medium' && T.advisorLadder.opus === 'fable/medium');
+  ok('the ladder defaults to medium effort', Object.values(T.advisorLadder).filter((c) => /\/medium$/.test(c)).length >= 3, JSON.stringify(T.advisorLadder));
+  ok('the normal profile runs no advisor', T.cells.advisor.normal === 'off');
   ok('the model gap is on', T.advisorModelGap === true);
   ok(
     'the premium advisor default names the two builder rows',
@@ -874,16 +904,22 @@ function testTier(root) {
   for (const prof of T.profiles) {
     for (const askerModel of T.models) {
       const r = tierOf('advisor', { profile: prof, asker: askerModel });
+      if (T.cells.advisor[prof] === 'off') {
+        ok('on ' + prof + ' the advisor does not open at all', !!r.blocked && !r.model, JSON.stringify(r.blocked));
+        continue;
+      }
       ok(
-        'on ' + prof + ' a ' + askerModel + ' asker never gets ' + askerModel + ' back',
-        r.model !== askerModel && !r.blocked,
+        'on ' + prof + ' a ' + askerModel + ' asker climbs above ' + askerModel,
+        askerModel === 'fable' ? r.model === 'fable' : r.model !== askerModel,
         JSON.stringify({ model: r.model, blocked: r.blocked })
       );
     }
   }
-  ok('an opus asker is paired with fable on every profile', T.profiles.every((p) => tierOf('advisor', { profile: p, asker: 'opus' }).model === 'fable'));
-  ok('the pairing states its reason', /the asker runs opus/.test(tierOf('advisor', { profile: 'eco', asker: 'opus' }).reasons.join(' ')));
+  ok('an opus asker climbs to fable where the advisor runs', tierOf('advisor', { profile: 'premium', asker: 'opus' }).model === 'fable' && tierOf('advisor', { profile: 'eco', asker: 'opus' }).model === 'fable');
+  ok('the step states its reason', /the asker runs opus/.test(tierOf('advisor', { profile: 'eco', asker: 'opus' }).reasons.join(' ')));
   ok('with no asker the advisor falls back to the cell', tierOf('advisor', { profile: 'eco' }).model === 'opus');
+  ok('the advisor defaults to medium effort', tierOf('advisor', { profile: 'premium', asker: 'opus' }).effort === 'medium');
+  ok('t0 may lift the effort to high', tierOf('advisor', { profile: 'premium', asker: 'opus', effort: 'high' }).effort === 'high');
 
   const files = fs.readdirSync(ROLES).filter((f) => f.endsWith('.md'));
   ok('the scribe role file exists', files.includes('scribe.md'), files.join(', '));
@@ -924,13 +960,13 @@ function testTier(root) {
   ok('the capped role says why', /caps the model/.test(tier('planner', { profile: 'eco', model: 'opus' }).reasons.join(' ')));
   ok('normal and premium leave the grid alone', tier('planner', { profile: 'normal' }).pierced === false);
 
-  ok('an opus asker on premium gets fable', cellOf(tier('advisor', { profile: 'premium', asker: 'opus' })) === 'fable/high');
+  ok('an opus asker on premium gets fable', cellOf(tier('advisor', { profile: 'premium', asker: 'opus' })) === 'fable/medium');
   ok('an opus asker on premium is not blocked', !tier('advisor', { profile: 'premium', asker: 'opus' }).blocked);
-  ok('a sonnet asker still gets opus', tier('advisor', { profile: 'normal', asker: 'sonnet' }).model === 'opus');
-  ok('a sonnet asker is not blocked', !tier('advisor', { profile: 'normal', asker: 'sonnet' }).blocked);
-  ok('an opus asker on normal gets fable, not a block', cellOf(tier('advisor', { profile: 'normal', asker: 'opus' })) === 'fable/high' && !tier('advisor', { profile: 'normal', asker: 'opus' }).blocked);
-  ok('an opus asker on eco is paired up to fable as well', cellOf(tier('advisor', { profile: 'eco', asker: 'opus' })) === 'fable/high');
-  ok('the block survives only as a backstop', /same model cannot give itself/.test(String(tier('advisor', { profile: 'eco', asker: 'sonnet' }).blocked || 'same model cannot give itself')));
+  ok('a sonnet asker still gets opus', tier('advisor', { profile: 'eco', asker: 'sonnet' }).model === 'opus');
+  ok('a sonnet asker is not blocked', !tier('advisor', { profile: 'eco', asker: 'sonnet' }).blocked);
+  ok('a normal opus asker is told the profile runs no advisor', /runs no advisor/.test(String(tier('advisor', { profile: 'normal', asker: 'opus' }).blocked)));
+  ok('an eco opus asker climbs to fable/medium', cellOf(tier('advisor', { profile: 'eco', asker: 'opus' })) === 'fable/medium');
+  ok('a premium opus asker climbs to fable/medium', cellOf(tier('advisor', { profile: 'premium', asker: 'opus' })) === 'fable/medium');
   ok('a premium builder is told the advisor opens with it', tier('builder', { profile: 'premium' }).notes.join(' ').includes('opens the advisor alongside'));
   ok('a premium scribe is not', !tier('scribe', { profile: 'premium' }).notes.join(' ').includes('advisor'));
 
@@ -939,6 +975,7 @@ function testTier(root) {
 
   for (const row of Object.keys(TABLE)) {
     for (const p of PROFILES) {
+      if (TABLE[row][p] === 'off') continue;
       const [bm, be] = TABLE[row][p].split('/');
       for (const m of MODELS) {
         for (const e of EFFORTS) {
@@ -971,36 +1008,36 @@ function testTier(root) {
 
   const cliAdv = contract(['tier', '--role', 'advisor', '--profile', 'eco'], root);
   ok(
-    'acceptance 3: eco advisor is opus/high and exempt',
-    cliAdv.status === 0 && /^advisor opus\/high$/m.test(cliAdv.stdout) && /exempt from the profile ceiling/.test(cliAdv.stdout),
+    'acceptance 3: eco advisor is opus/medium and exempt',
+    cliAdv.status === 0 && /^advisor opus\/medium$/m.test(cliAdv.stdout) && /exempt from the profile ceiling/.test(cliAdv.stdout),
     cliAdv.stdout
   );
 
   const gapNormal = contract(['tier', '--role', 'advisor', '--profile', 'normal', '--asker', 'opus'], root);
   ok(
-    'acceptance: a normal opus asker is paired with fable, with the reason',
-    gapNormal.status === 0 && /^advisor fable\/high$/m.test(gapNormal.stdout) && /the asker runs opus/.test(gapNormal.stdout),
+    'acceptance: a normal opus asker is told the profile runs no advisor',
+    gapNormal.status === 2 && /runs no advisor/.test(gapNormal.stdout),
     gapNormal.stdout
   );
 
-  const gapSonnet = contract(['tier', '--role', 'advisor', '--profile', 'normal', '--asker', 'sonnet'], root);
+  const gapSonnet = contract(['tier', '--role', 'advisor', '--profile', 'eco', '--asker', 'sonnet'], root);
   ok(
-    'acceptance: a normal sonnet asker gets opus/high',
-    gapSonnet.status === 0 && /^advisor opus\/high$/m.test(gapSonnet.stdout),
+    'acceptance: an eco sonnet asker climbs to opus/medium',
+    gapSonnet.status === 0 && /^advisor opus\/medium$/m.test(gapSonnet.stdout),
     gapSonnet.stdout
   );
 
   const gapPrem = contract(['tier', '--role', 'advisor', '--profile', 'premium', '--asker', 'opus'], root);
   ok(
-    'acceptance: a premium opus asker gets fable/high',
-    gapPrem.status === 0 && /^advisor fable\/high$/m.test(gapPrem.stdout),
+    'acceptance: a premium opus asker climbs to fable/medium',
+    gapPrem.status === 0 && /^advisor fable\/medium$/m.test(gapPrem.stdout),
     gapPrem.stdout
   );
 
   const gapEco = contract(['tier', '--role', 'advisor', '--profile', 'eco', '--asker', 'sonnet'], root);
   ok(
-    'acceptance: an eco sonnet asker gets opus/high with the exemption note',
-    gapEco.status === 0 && /^advisor opus\/high$/m.test(gapEco.stdout) && /exempt from the profile ceiling/.test(gapEco.stdout),
+    'acceptance: an eco sonnet asker climbs with the exemption note',
+    gapEco.status === 0 && /^advisor opus\/medium$/m.test(gapEco.stdout) && /exempt from the profile ceiling/.test(gapEco.stdout),
     gapEco.stdout
   );
 
@@ -1013,8 +1050,8 @@ function testTier(root) {
   const cliCell = contract(['tier', '--role', 'ui-builder', '--profile', 'premium'], root);
   ok('the command names the cell it came from', /cell +ui-builder x premium = opus\/medium/.test(cliCell.stdout), cliCell.stdout);
 
-  const cliLow = contract(['tier', '--role', 'advisor', '--profile', 'normal', '--model', 'haiku'], root);
-  ok('the command refuses to lower a cell', /^advisor fable\/high$/m.test(cliLow.stdout) && /below the cell/.test(cliLow.stdout), cliLow.stdout);
+  const cliLow = contract(['tier', '--role', 'advisor', '--profile', 'eco', '--model', 'haiku'], root);
+  ok('the command refuses to lower a cell', /^advisor opus\/medium$/m.test(cliLow.stdout) && /below the cell/.test(cliLow.stdout), cliLow.stdout);
 
   writeContract(
     root,
@@ -1058,7 +1095,7 @@ function testQuota(root) {
   ok('the fourth eco advisor opening is blocked', fourth.status === 2 && /quota is spent/.test(fourth.stdout), fourth.stdout);
 
   const normal = contract(['tier', '--role', 'advisor', '--profile', 'normal'], root);
-  ok('normal has no advisor quota', normal.status === 0 && !/quota/.test(normal.stdout), normal.stdout);
+  ok('normal has no advisor at all, so no quota', normal.status === 2 && !/quota/.test(normal.stdout), normal.stdout);
 
   for (const f of ['adv1', 'adv2', 'adv3']) fs.unlinkSync(path.join(live, f + '.json'));
 }
@@ -1127,11 +1164,11 @@ function testTierVisible(root) {
   ok('D8 records the four signals', /round >= 3/.test(d8) && /round >= 4/.test(d8) && /same signature/.test(d8) && /irreversible operation/.test(d8));
   ok('D8 justifies the pierced ceiling', /exempt from the ceiling/.test(d8));
   ok('D8 records the advisor exemption', /Advisor is exempt/.test(d8));
-  ok('D8 records the advisor pairing', /advisorPair/.test(d8) && /opus asks, fable answers/.test(d8));
+  ok('D8 records the advisor pairing', /advisorLadder/.test(d8) && /opus asks, fable answers/.test(d8));
   ok('D8 records that the advisor has no gate', /No gate on the advisor/.test(d8));
   ok('D8 records the blinding rule', /Blinding/.test(d8) && /draft decision/.test(d8));
   ok('D8 records the frequency rule', /Frequency, in force now/.test(d8) && /same message/.test(d8));
-  ok('D8 records the retired council and the advisor pairing', /council/i.test(d8) && /advisorPair/.test(d8));
+  ok('D8 records the retired council and the advisor pairing', /council/i.test(d8) && /advisorLadder/.test(d8));
   ok('D8 records the unarbitrated divergence', /unarbitrated/.test(d8) && /exit code/.test(d8));
 
   const d9 = decisions.slice(decisions.indexOf('## D9'), decisions.indexOf('## Standing law'));

@@ -134,5 +134,17 @@
   "line.fails": {
     "en": "failed",
     "tr": "hata"
+  },
+  "line.caution": {
+    "en": "heads up",
+    "tr": "dikkat"
+  },
+  "line.failRun": {
+    "en": "tool calls failed in a row",
+    "tr": "araç çağrısı üst üste başarısız"
+  },
+  "line.agent": {
+    "en": "agent",
+    "tr": "ajan"
   }
 }

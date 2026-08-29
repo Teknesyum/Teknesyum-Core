@@ -21,13 +21,13 @@ lives in the statusline, which the model never sees. You pay once, at install.
 ### Windows — one line
 
 ```powershell
-irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.10/install.ps1 | iex
+irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.11/install.ps1 | iex
 ```
 
 ### macOS / Linux — one line
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.10/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.1.11/install.sh | bash
 ```
 
 ### From inside Claude Code
