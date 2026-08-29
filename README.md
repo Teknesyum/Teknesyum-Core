@@ -116,13 +116,13 @@ unedited.*
 ### Windows — one line
 
 ```powershell
-irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.4.0/install.ps1 | iex
+irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.4.1/install.ps1 | iex
 ```
 
 ### macOS / Linux — one line
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.4.0/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.4.1/install.sh | bash
 ```
 
 ### From inside Claude Code

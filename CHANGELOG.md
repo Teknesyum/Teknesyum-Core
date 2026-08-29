@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.1
+
+- The banner names the seat and the cell instead of repeating the profile
+
 ## v0.4.0
 
 - Acceptance that cannot fail is refused, contracts carry a ceiling, and precheck pins the tree
