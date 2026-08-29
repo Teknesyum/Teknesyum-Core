@@ -3,7 +3,7 @@
 The README convention says to ask which diagram a repository needs and never ask again.
 Asked on 2026-08-29; this file is the answer.
 
-## Banner — `assets/banner.svg`
+## Banner — `assets/banner.svg` + `assets/banner.tr.svg`
 
 Three things in one plate, in this order of weight:
 
@@ -32,3 +32,15 @@ a dark plate carries its own background, so the figures read the same in either 
 theme.
 
 Alt text is a full descriptive sentence naming every stage in order.
+
+## One set per language
+
+Every figure ships twice: `<figure>.svg` for `README.md` and `<figure>.tr.svg` for
+`README.tr.md`, with every word inside translated. A figure whose labels are in the other
+language is a figure half the readers cannot read.
+
+Labels inside a figure are signage, not sentences: every word starts with a capital.
+Turkish needs the dotted İ, so `İşçi`, never `Işci`.
+
+Both sets are generated from one script rather than hand-drawn twice — the geometry is
+shared, only the strings differ.

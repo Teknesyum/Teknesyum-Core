@@ -1,40 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" width="900" height="380" role="img" aria-label="One turn through the plugin's hooks and what each writes into the model's context. The cue hook stays silent; the guard blocks a write outside the contract; the prefs hook blocks a README missing its markers; the watcher records the step to disk; the notice hook draws the banner as display only; the notifier plays a sound at the end. Every entry in the context column is empty, so the per-turn cost is zero tokens.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" width="900" height="380" role="img" aria-label="Bir turun eklenti kancalarından geçişi ve her birinin modelin bağlamına ne yazdığı. Cue kancası susar; guard sözleşme dışı yazımı engeller; prefs işaretsiz README'yi engeller; izleyici adımı diske yazar; notice kancası bannerı yalnızca görüntü olarak çizer; bildirici sonunda ses çalar. Bağlam sütunundaki her hücre boştur, yani tur başına maliyet sıfır tokendir.">
   <defs>
-    <linearGradient id="fken" x1="0" y1="0" x2="1" y2="0">
+    <linearGradient id="fktr" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-color="#00f3ff"/>
       <stop offset="100%" stop-color="#b026ff"/>
     </linearGradient>
-    <filter id="gfken" x="-50%" y="-50%" width="200%" height="200%">
+    <filter id="gfktr" x="-50%" y="-50%" width="200%" height="200%">
       <feGaussianBlur stdDeviation="2.2" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
-  <rect x="1" y="1" width="898" height="378" rx="18" fill="#0a0a0c" stroke="url(#fken)" stroke-width="2"/>
+  <rect x="1" y="1" width="898" height="378" rx="18" fill="#0a0a0c" stroke="url(#fktr)" stroke-width="2"/>
   <g font-family="Segoe UI, system-ui, sans-serif" font-size="13" fill="#5f6b78">
-    <text x="40" y="44">Hook</text>
-    <text x="330" y="44">What It Does</text>
-    <text x="700" y="44">Into Context</text>
+    <text x="40" y="44">Kanca</text>
+    <text x="330" y="44">Ne Yapıyor</text>
+    <text x="700" y="44">Bağlama Yazdığı</text>
   </g>
   <path d="M40 56 H860" stroke="#2a2a33"/>
   <text x="40" y="90" font-family="Consolas, 'Cascadia Mono', monospace" font-size="15" fill="#00f3ff">cue.js</text>
-  <text x="330" y="90" font-family="Segoe UI, system-ui, sans-serif" font-size="15" fill="#9aa3ad">Silent On An Ordinary Prompt</text>
+  <text x="330" y="90" font-family="Segoe UI, system-ui, sans-serif" font-size="15" fill="#9aa3ad">Sıradan İstemde Susuyor</text>
   <text x="760" y="90" font-family="Consolas, 'Cascadia Mono', monospace" font-size="15" fill="#3f4a55" text-anchor="middle">&#8212;</text>
   <text x="40" y="132" font-family="Consolas, 'Cascadia Mono', monospace" font-size="15" fill="#00f3ff">guard.js</text>
-  <text x="330" y="132" font-family="Segoe UI, system-ui, sans-serif" font-size="15" fill="#9aa3ad">Blocks A Write Outside The Contract</text>
+  <text x="330" y="132" font-family="Segoe UI, system-ui, sans-serif" font-size="15" fill="#9aa3ad">Sözleşme Dışı Yazımı Engelliyor</text>
   <text x="760" y="132" font-family="Consolas, 'Cascadia Mono', monospace" font-size="15" fill="#3f4a55" text-anchor="middle">&#8212;</text>
   <text x="40" y="174" font-family="Consolas, 'Cascadia Mono', monospace" font-size="15" fill="#00f3ff">prefs.js</text>
-  <text x="330" y="174" font-family="Segoe UI, system-ui, sans-serif" font-size="15" fill="#9aa3ad">Blocks A README Missing Its Markers</text>
+  <text x="330" y="174" font-family="Segoe UI, system-ui, sans-serif" font-size="15" fill="#9aa3ad">İşaretsiz README Yazımını Engelliyor</text>
   <text x="760" y="174" font-family="Consolas, 'Cascadia Mono', monospace" font-size="15" fill="#3f4a55" text-anchor="middle">&#8212;</text>
   <text x="40" y="216" font-family="Consolas, 'Cascadia Mono', monospace" font-size="15" fill="#00f3ff">watch.js</text>
-  <text x="330" y="216" font-family="Segoe UI, system-ui, sans-serif" font-size="15" fill="#9aa3ad">Records The Step To Disk</text>
+  <text x="330" y="216" font-family="Segoe UI, system-ui, sans-serif" font-size="15" fill="#9aa3ad">Adımı Diske Yazıyor</text>
   <text x="760" y="216" font-family="Consolas, 'Cascadia Mono', monospace" font-size="15" fill="#3f4a55" text-anchor="middle">&#8212;</text>
   <text x="40" y="258" font-family="Consolas, 'Cascadia Mono', monospace" font-size="15" fill="#00f3ff">notice.js</text>
-  <text x="330" y="258" font-family="Segoe UI, system-ui, sans-serif" font-size="15" fill="#9aa3ad">Draws The Banner, Display Only</text>
+  <text x="330" y="258" font-family="Segoe UI, system-ui, sans-serif" font-size="15" fill="#9aa3ad">Bannerı Çiziyor, Yalnız Görüntü</text>
   <text x="760" y="258" font-family="Consolas, 'Cascadia Mono', monospace" font-size="15" fill="#3f4a55" text-anchor="middle">&#8212;</text>
   <text x="40" y="300" font-family="Consolas, 'Cascadia Mono', monospace" font-size="15" fill="#00f3ff">notify.js</text>
-  <text x="330" y="300" font-family="Segoe UI, system-ui, sans-serif" font-size="15" fill="#9aa3ad">Plays A Sound When The Turn Ends</text>
+  <text x="330" y="300" font-family="Segoe UI, system-ui, sans-serif" font-size="15" fill="#9aa3ad">Tur Bitince Ses Çalıyor</text>
   <text x="760" y="300" font-family="Consolas, 'Cascadia Mono', monospace" font-size="15" fill="#3f4a55" text-anchor="middle">&#8212;</text>
   <path d="M40 322 H860" stroke="#2a2a33"/>
-  <text x="40" y="352" font-family="Segoe UI, system-ui, sans-serif" font-size="15" fill="#e6e6ea">Per-Turn Cost</text>
+  <text x="40" y="352" font-family="Segoe UI, system-ui, sans-serif" font-size="15" fill="#e6e6ea">Tur Başına Maliyet</text>
   <text x="760" y="352" font-family="Consolas, 'Cascadia Mono', monospace" font-size="16" fill="#00f3ff" text-anchor="middle">0 tok</text>
 </svg>

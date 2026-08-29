@@ -1,36 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 260" width="900" height="260" role="img" aria-label="Teknesyum Core, a contract gate for multi-agent work in Claude Code. Below the name, the line the plugin prints into the chat: Teknesyum, three Opus-Medium workers at work. Under it, three linked stages: hooks enforce, the gate closes, roles do the work.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 260" width="900" height="260" role="img" aria-label="Teknesyum Core, Claude Code'da çok ajanlı iş için sözleşme kapısı. Adın altında eklentinin sohbete bastığı satır: Teknesyum, 3 Opus-Medium İşçi Çalışıyor. Onun altında birbirine bağlı üç aşama: kancalar zorluyor, kapı kapatıyor, roller işi yapıyor.">
   <defs>
-    <linearGradient id="bnen" x1="0" y1="0" x2="1" y2="0">
+    <linearGradient id="bntr" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-color="#00f3ff"/>
       <stop offset="100%" stop-color="#b026ff"/>
     </linearGradient>
-    <filter id="gbnen" x="-50%" y="-50%" width="200%" height="200%">
+    <filter id="gbntr" x="-50%" y="-50%" width="200%" height="200%">
       <feGaussianBlur stdDeviation="2.2" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
-  <rect x="1" y="1" width="898" height="258" rx="18" fill="#0a0a0c" stroke="url(#bnen)" stroke-width="2"/>
-  <g filter="url(#gbnen)">
+  <rect x="1" y="1" width="898" height="258" rx="18" fill="#0a0a0c" stroke="url(#bntr)" stroke-width="2"/>
+  <g filter="url(#gbntr)">
     <circle cx="58" cy="62" r="9" fill="#00f3ff" fill-opacity="0.25" stroke="#00f3ff" stroke-width="3"/>
   </g>
   <g font-family="Segoe UI, system-ui, sans-serif">
     <text x="86" y="72" fill="#ffffff" font-size="42" font-weight="700">Teknesyum Core</text>
-    <text x="86" y="104" fill="#9aa3ad" font-size="18">A Contract Gate For Multi-Agent Work In Claude Code.</text>
+    <text x="86" y="104" fill="#9aa3ad" font-size="18">Claude Code'da Çok Ajanlı İş İçin Sözleşme Kapısı.</text>
   </g>
   <rect x="56" y="128" width="788" height="44" rx="10" fill="#111116" stroke="#2a2a33"/>
   <text x="76" y="157" font-family="Consolas, 'Cascadia Mono', monospace" font-size="17" fill="#00f3ff">Teknesyum</text>
   <text x="176" y="157" font-family="Consolas, 'Cascadia Mono', monospace" font-size="17" fill="#b026ff">&#9656;</text>
-  <text x="200" y="157" font-family="Consolas, 'Cascadia Mono', monospace" font-size="17" fill="#e6e6ea">3 Opus-Medium Worker At Work</text>
+  <text x="200" y="157" font-family="Consolas, 'Cascadia Mono', monospace" font-size="17" fill="#e6e6ea">3 Opus-Medium İşçi Çalışıyor</text>
   <g font-family="Segoe UI, system-ui, sans-serif" font-size="15">
     <rect x="56" y="196" width="220" height="42" rx="10" fill="none" stroke="#2f3a44"/>
-    <text x="166" y="222" fill="#8b95a1" text-anchor="middle">Hooks Enforce</text>
+    <text x="166" y="222" fill="#8b95a1" text-anchor="middle">Kancalar Zorluyor</text>
     <path d="M284 217 h32" stroke="#3a4550" stroke-width="2"/>
     <path d="M310 211 l8 6 -8 6 z" fill="#3a4550"/>
     <rect x="340" y="196" width="220" height="42" rx="10" fill="none" stroke="#2f3a44"/>
-    <text x="450" y="222" fill="#8b95a1" text-anchor="middle">The Gate Closes</text>
+    <text x="450" y="222" fill="#8b95a1" text-anchor="middle">Kapı Kapatıyor</text>
     <path d="M568 217 h32" stroke="#3a4550" stroke-width="2"/>
     <path d="M594 211 l8 6 -8 6 z" fill="#3a4550"/>
     <rect x="624" y="196" width="220" height="42" rx="10" fill="none" stroke="#2f3a44"/>
-    <text x="734" y="222" fill="#8b95a1" text-anchor="middle">Roles Do The Work</text>
+    <text x="734" y="222" fill="#8b95a1" text-anchor="middle">Roller İşi Yapıyor</text>
   </g>
 </svg>

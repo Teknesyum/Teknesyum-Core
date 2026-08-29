@@ -1,42 +1,42 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" width="900" height="340" role="img" aria-label="A contract's life: it is opened, an agent takes it to active, the agent submits it, and the gate then runs the contract's own verify commands. A failing command sends the contract back to active. When every command exits zero, the gate computes risk from the diff; at high risk it also demands an audit record, and only then does the contract move to done.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" width="900" height="340" role="img" aria-label="Bir sözleşmenin ömrü: açılır, bir ajan onu çalışılıyor duruma alır, ajan sunar ve kapı sözleşmenin kendi verify komutlarını çalıştırır. Başarısız bir komut sözleşmeyi geri gönderir. Her komut sıfırla çıktığında kapı riski diff'ten hesaplar; yüksek riskte ayrıca denetim kaydı ister ve ancak o zaman sözleşme biter.">
   <defs>
-    <linearGradient id="fcen" x1="0" y1="0" x2="1" y2="0">
+    <linearGradient id="fctr" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-color="#00f3ff"/>
       <stop offset="100%" stop-color="#b026ff"/>
     </linearGradient>
-    <filter id="gfcen" x="-50%" y="-50%" width="200%" height="200%">
+    <filter id="gfctr" x="-50%" y="-50%" width="200%" height="200%">
       <feGaussianBlur stdDeviation="2.2" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
-  <rect x="1" y="1" width="898" height="338" rx="18" fill="#0a0a0c" stroke="url(#fcen)" stroke-width="2"/>
+  <rect x="1" y="1" width="898" height="338" rx="18" fill="#0a0a0c" stroke="url(#fctr)" stroke-width="2"/>
   <g font-family="Segoe UI, system-ui, sans-serif" font-size="16">
     <rect x="40" y="48" width="150" height="46" rx="10" fill="#111116" stroke="#2f3a44"/>
-    <text x="115" y="77" fill="#e6e6ea" text-anchor="middle">Open</text>
+    <text x="115" y="77" fill="#e6e6ea" text-anchor="middle">Açıldı</text>
     <path d="M198 71 h38" stroke="#3a4550" stroke-width="2"/>
     <path d="M230 65 l8 6 -8 6 z" fill="#3a4550"/>
     <rect x="244" y="48" width="150" height="46" rx="10" fill="#111116" stroke="#2f3a44"/>
-    <text x="319" y="77" fill="#e6e6ea" text-anchor="middle">Active</text>
+    <text x="319" y="77" fill="#e6e6ea" text-anchor="middle">Çalışılıyor</text>
     <path d="M402 71 h38" stroke="#3a4550" stroke-width="2"/>
     <path d="M434 65 l8 6 -8 6 z" fill="#3a4550"/>
     <rect x="448" y="48" width="150" height="46" rx="10" fill="#111116" stroke="#2f3a44"/>
-    <text x="523" y="77" fill="#e6e6ea" text-anchor="middle">Submitted</text>
+    <text x="523" y="77" fill="#e6e6ea" text-anchor="middle">Sunuldu</text>
     <path d="M606 71 h38" stroke="#3a4550" stroke-width="2"/>
     <path d="M638 65 l8 6 -8 6 z" fill="#3a4550"/>
     <rect x="652" y="48" width="208" height="46" rx="10" fill="#111116" stroke="#00f3ff"/>
-    <text x="756" y="77" fill="#00f3ff" text-anchor="middle">Done</text>
+    <text x="756" y="77" fill="#00f3ff" text-anchor="middle">Bitti</text>
   </g>
   <g font-family="Segoe UI, system-ui, sans-serif" font-size="15">
     <rect x="380" y="150" width="470" height="140" rx="12" fill="none" stroke="#2f3a44" stroke-dasharray="5 5"/>
     <text x="400" y="176" fill="#b026ff" font-size="14" font-weight="700" font-family="Consolas, 'Cascadia Mono', monospace">contract.js complete</text>
-    <text x="400" y="206" fill="#9aa3ad">1. Run Every Verify Command — All Must Exit 0</text>
-    <text x="400" y="232" fill="#9aa3ad">2. Compute Risk From The Diff, Not From A Claim</text>
-    <text x="400" y="258" fill="#9aa3ad">3. At High Risk, Demand An Audit Record First</text>
-    <text x="400" y="282" fill="#5f6b78" font-size="13">Nothing Else Can Move A Contract To Done</text>
+    <text x="400" y="206" fill="#9aa3ad">1. Her Verify Komutunu Çalıştır — Hepsi 0 İle Çıkmalı</text>
+    <text x="400" y="232" fill="#9aa3ad">2. Riski Diff'ten Hesapla, Beyandan Değil</text>
+    <text x="400" y="258" fill="#9aa3ad">3. Yüksek Riskte Önce Denetim Kaydı İste</text>
+    <text x="400" y="282" fill="#5f6b78" font-size="13">Bir Sözleşmeyi Başka Hiçbir Şey Bitmiş Yapamaz</text>
   </g>
   <path d="M523 100 v46" stroke="#3a4550" stroke-width="2"/>
   <path d="M517 140 l6 8 6 -8 z" fill="#3a4550"/>
   <path d="M380 220 H319 V100" stroke="#b026ff" stroke-width="2" fill="none"/>
   <path d="M313 112 l6 -12 6 12 z" fill="#b026ff"/>
-  <text x="176" y="216" font-family="Segoe UI, system-ui, sans-serif" font-size="14" fill="#b026ff">A Command Failed</text>
+  <text x="176" y="216" font-family="Segoe UI, system-ui, sans-serif" font-size="14" fill="#b026ff">Bir Komut Başarısız</text>
 </svg>
