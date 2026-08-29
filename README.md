@@ -20,7 +20,8 @@ run in parallel, every task gets a model that fits it, and no contract closes un
 verification commands actually pass.
 
 It is the plugin I use to build my own applications, and it is shaped by that: everything
-in it exists because a real project needed it.
+in it exists because a real project needed it. It will most likely keep getting updates for
+as long as I keep building applications.
 
 ---
 
@@ -435,12 +436,11 @@ If it saves you time, you can [sponsor the work](https://github.com/sponsors/Tek
 
 ## Support
 
-Teknesyum Core is one developer's work, and I use it daily to build my own applications, so
-the work continues whether it is sponsored or not. Sponsorship changes how much time it gets,
-not whether it exists.
+The plugin is free and stays free — AGPL, no paid tier, nothing kept back for a version you
+have to buy. If it saved you a bad merge or an afternoon, sponsoring is one way to say so.
 
-The license is AGPL-3.0-or-later either way. Sponsoring buys no features and no priority;
-everything here stays free for everyone, sponsors included.
+There are free ways to help and they are worth as much: open an issue when something breaks,
+say which part of the README lost you, tell someone who runs agents that this exists.
 
 <!-- signature -->
 <div align="center">

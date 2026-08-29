@@ -20,7 +20,8 @@ kanıtlayacağını yazar. Ajanlar paralel çalışır, her işe boyuna uygun mo
 sözleşme doğrulama komutları gerçekten geçmeden kapanmaz.
 
 Kendi uygulamalarımı geliştirirken kullandığım plugin bu; şekli de oradan geliyor. İçindeki
-her şey gerçek bir projede gerektiği için var.
+her şey gerçek bir projede gerektiği için var. Muhtemelen ben uygulama geliştirmeye devam
+ettikçe güncelleme almaya devam edecek.
 
 ---
 
@@ -431,12 +432,12 @@ Vaktinizden kazandırıyorsa [çalışmayı destekleyebilirsiniz](https://github
 
 ## Destek
 
-Teknesyum Core tek kişinin işi ve kendi uygulamalarımı her gün onunla geliştiriyorum; destek
-gelse de gelmese de iş sürüyor. Destek, var olup olmayacağını değil, ne kadar vakit alacağını
-değiştiriyor.
+Eklenti ücretsiz ve ücretsiz kalacak — AGPL, ücretli sürüm yok, satın almanız için kenarda
+tutulan özellik yok. Kötü bir merge'ü ya da bir öğleden sonranızı kurtardıysa, destek bunu
+söylemenin bir yolu.
 
-Lisans her durumda AGPL-3.0-or-later. Destek özellik ya da öncelik satın almıyor; buradaki
-her şey, destekleyenler dahil herkes için ücretsiz kalıyor.
+Parasız yolları da var ve değeri aynı: bir şey kırıldığında issue açın, README'nin sizi
+kaybettiği yeri yazın, ajanla çalışan birine varlığından bahsedin.
 
 <!-- signature -->
 <div align="center">
