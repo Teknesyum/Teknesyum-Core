@@ -3,7 +3,7 @@
 **English** · [Türkçe](README.tr.md)
 
 <div align="center">
-<img src="assets/banner.svg" alt="Teknesyum Core, a multi-purpose workstation for Claude Code. Below the name, the line the plugin prints into the chat: Teknesyum, three Opus-Medium workers at work. Under it, three linked stages: hooks enforce, the gate closes, roles do the work." width="900">
+<img src="assets/banner.svg" alt="Teknesyum Core, a multi-purpose workstation for Claude Code. Below the name, the line the plugin prints into the chat: Teknesyum, three Opus-Medium workers assigned. Under it, three linked stages: hooks enforce, the gate closes, roles do the work." width="900">
 </div>
 
 # Teknesyum Core
@@ -18,6 +18,9 @@ Teknesyum Core is a multi-purpose plugin for Claude Code. It splits big jobs int
 contracts: each contract declares which files it owns and how it proves it is done. Agents
 run in parallel, every task gets a model that fits it, and no contract closes until its
 verification commands actually pass.
+
+It is the plugin I use to build my own applications, and it is shaped by that: everything
+in it exists because a real project needed it.
 
 ---
 
@@ -65,6 +68,41 @@ Some of it, yes: it spawns subagents, runs them in parallel, keeps a plan. What 
 
 ---
 
+## The three modes
+
+Core runs in one of three modes — `eco`, `normal`, `premium`. The mode picks a column out of
+the tier table, and the column decides which model and which effort each role gets.
+
+| Mode | What it is for |
+|---|---|
+| `eco` | Long, cheap sessions. Haiku and Sonnet do the work; the advisor is available. |
+| `normal` | Day to day. Sonnet builds, Opus plans and audits, no advisor. |
+| `premium` | Work that has to be right the first time. Opus across the board, Fable as advisor. |
+
+**You set the mode, and the plugin never changes it for you.** That is the design, not an
+omission: consumption stays minimal when the ceiling is a decision you made. Signals can
+raise a single cell inside the mode — a run of failures, high risk — but the mode caps them
+and nothing raises the mode itself.
+
+Pick one and run it:
+
+```bash
+node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js --profile eco
+```
+
+```bash
+node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js --profile normal
+```
+
+```bash
+node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js --profile premium
+```
+
+The mode is on the statusline, so you always know which one you are paying for. A single
+repository can pin its own in `.claude/relay/config.json`.
+
+---
+
 ## What it does not do
 
 - **It will not make your agents smarter.** It refuses bad closes, that is all.
@@ -82,35 +120,6 @@ Some of it, yes: it spawns subagents, runs them in parallel, keeps a plan. What 
 
 ---
 
-## Should you install this?
-
-Install it if you run several agents in parallel on one repository and have been burned by
-an agent reporting done when it wasn't. That is the one problem this plugin actually solves:
-`contract.js complete` re-runs the acceptance commands itself, refuses a close that fails
-them, and at high risk demands an audit record bound to the file contents and to HEAD.
-Native Claude Code has nothing equivalent — an agent's claim of success is taken at its word.
-
-You also get something rarer: discipline about your context window. On an ordinary turn no
-hook writes a single token into the model's context; status goes through the statusline and
-a display-only banner. Most plugins in this space cost you tokens every message. This one
-measurably doesn't.
-
-Do not install it for small work. A single-file fix does not need a contract, and the
-plugin's own skill says so. Skip it too if you need a security boundary: `guard.js` blocks
-writes through the editing tools, but an agent that shells out can write anywhere, verify
-steps run arbitrary shell for up to fifteen minutes, and outside a relay project the gate
-falls open, not closed.
-
-Weigh the maturity honestly. One developer, v0.2.0, first public tags this month. Audit
-records are individually bound but not chained to each other. Development is Windows-first;
-Linux and macOS are covered by CI, not daily use. The test suite (2,420 assertions, three
-platforms) is real, but the field history is weeks, not years.
-
-*Reviewed from the source by Claude (Fable 5), asked for an outside opinion and published
-unedited.*
-
----
-
 ## Install
 
 ### Windows — one line
@@ -123,16 +132,6 @@ irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.4.1/install.ps
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.4.1/install.sh | bash
-```
-
-### From inside Claude Code
-
-```
-/plugin marketplace add Teknesyum/Teknesyum-Core
-```
-
-```
-/plugin install teknesyum-core@teknesyum
 ```
 
 **Restart Claude Code afterwards.** Hooks reload mid-session; the desktop client does not
@@ -324,8 +323,7 @@ out of that table — on an ordinary turn, no hook writes into context.
 The chat banner rides on the `MessageDisplay` hook, which changes what is drawn without
 touching what is stored or what the model sees. The binary's own words: *"Display-only: the
 stored message and what the model sees are untouched."* Around 30 ms of node startup per
-message, no tokens. Fifteen other channels were tried and buried first; the funeral notices
-are in [docs/DECISIONS.md](docs/DECISIONS.md).
+message, no tokens.
 
 The hooks that watch tool calls carry a matcher, so reading a file does not start a process.
 
@@ -381,7 +379,7 @@ a dashboard.
 
 ```
 Teknesyum ▸ Opus-Medium Worker — Writing The Banner Code
-Teknesyum ▸ 3 Opus-Medium Worker At Work
+Teknesyum ▸ 3× Opus-Medium Worker Assigned
 Teknesyum ▸ Heads Up — 4 Tool Calls Failed In A Row
 Teknesyum ▸ Premium · 1 Contract Waiting At The Gate · 1 Contract Not Started
 ```

@@ -3,7 +3,7 @@
 **Türkçe** · [English](README.md)
 
 <div align="center">
-<img src="assets/banner.tr.svg" alt="Teknesyum Core, Claude Code için çok amaçlı iş istasyonu. Adın altında eklentinin sohbete bastığı satır: Teknesyum, 3 Opus-Medium İşçi Çalışıyor. Onun altında birbirine bağlı üç aşama: kancalar zorluyor, kapı kapatıyor, roller işi yapıyor." width="900">
+<img src="assets/banner.tr.svg" alt="Teknesyum Core, Claude Code için çok amaçlı iş istasyonu. Adın altında eklentinin sohbete bastığı satır: Teknesyum, 3× Opus-Medium İşçi Olarak Görevlendirildi. Onun altında birbirine bağlı üç aşama: kancalar zorluyor, kapı kapatıyor, roller işi yapıyor." width="900">
 </div>
 
 # Teknesyum Core
@@ -18,6 +18,9 @@ Teknesyum Core, Claude Code için tasarlanmış çok amaçlı bir plugindir. Bü
 sözleşmelere böler: her sözleşme hangi dosyalara sahip olduğunu ve bittiğini nasıl
 kanıtlayacağını yazar. Ajanlar paralel çalışır, her işe boyuna uygun model gider ve hiçbir
 sözleşme doğrulama komutları gerçekten geçmeden kapanmaz.
+
+Kendi uygulamalarımı geliştirirken kullandığım plugin bu; şekli de oradan geliyor. İçindeki
+her şey gerçek bir projede gerektiği için var.
 
 ---
 
@@ -64,6 +67,41 @@ Bir kısmını yapıyor: alt ajan açar, paralel çalıştırır, plan tutar. Co
 
 ---
 
+## Üç mod
+
+Core üç moddan birinde çalışır — `eco`, `normal`, `premium`. Mod, tier tablosundan bir sütun
+seçer; sütun da her role hangi modelin ve hangi eforun gideceğine karar verir.
+
+| Mod | Ne için |
+|---|---|
+| `eco` | Uzun ve ucuz oturumlar. İşi Haiku ve Sonnet yapar, danışman açıktır. |
+| `normal` | Gündelik iş. Sonnet yapar, Opus planlar ve denetler, danışman yok. |
+| `premium` | İlk seferde doğru olması gereken iş. Baştan sona Opus, danışman Fable. |
+
+**Modu siz ayarlarsınız, plugin sizin yerinize değiştirmez.** Bu bir eksik değil, tasarım:
+tavan sizin verdiğiniz bir karar olduğunda tüketim minimal kalır. Sinyaller mod içinde tek
+bir hücreyi yükseltebilir — üst üste başarısızlık, yüksek risk — ama mod onları sınırlar ve
+modun kendisini hiçbir şey yükseltmez.
+
+Birini seçin ve çalıştırın:
+
+```bash
+node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js --profile eco
+```
+
+```bash
+node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js --profile normal
+```
+
+```bash
+node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js --profile premium
+```
+
+Mod statusline'da yazar, yani hangisini ödediğinizi her an bilirsiniz. Tek bir depo kendi
+modunu `.claude/relay/config.json` içinde sabitleyebilir.
+
+---
+
 ## Neyi yapmıyor
 
 - **Ajanlarınızı akıllandırmıyor.** Kötü kapanışı reddeder, o kadar.
@@ -80,36 +118,6 @@ Bir kısmını yapıyor: alt ajan açar, paralel çalıştırır, plan tutar. Co
 
 ---
 
-## Kurmalı mısınız?
-
-Tek depoda paralel birkaç ajan çalıştırıyorsanız ve bir ajanın "bitti" dediği işin bitmemiş
-olması sizi yaktıysa kurun. Bu eklentinin gerçekten çözdüğü sorun bu:
-`contract.js complete` kabul komutlarını kendisi yeniden çalıştırır, geçmeyen kapanışı
-reddeder, yüksek riskte de dosya içeriklerine ve HEAD'e bağlı bir denetim kaydı ister.
-Native Claude Code'da bunun karşılığı yok — ajanın başarı iddiası sözüne inanılarak kabul
-edilir.
-
-Bir de daha nadir bir şey alıyorsunuz: bağlam penceresi konusunda disiplin. Sıradan bir
-turda hiçbir kanca modelin bağlamına tek token yazmaz; durum statusline'dan ve yalnızca
-çizilen bir banner'dan gider. Bu alandaki eklentilerin çoğu size her mesajda token'a mal
-olur. Bu, ölçülebilir biçimde olmuyor.
-
-Küçük iş için kurmayın. Tek dosyalık düzeltmenin sözleşmeye ihtiyacı yok, eklentinin kendi
-skill'i de bunu söylüyor. Güvenlik sınırı arıyorsanız da geçin: `guard.js` düzenleme
-araçlarından geçen yazımı engeller, ama kabuğa çıkan ajan her yere yazabilir, verify
-adımları on beş dakikaya kadar serbest kabuk çalıştırır ve relay'i olmayan bir projede kapı
-kapalı değil açık düşer.
-
-Olgunluğu da dürüstçe tartın. Tek geliştirici, v0.2.0, ilk açık etiketler bu ay. Denetim
-kayıtları tek tek bağlı ama birbirine zincirli değil. Geliştirme Windows öncelikli; Linux ve
-macOS'u günlük kullanım değil CI kapsıyor. Test takımı (2.420 assertion, üç platform)
-gerçek, ama sahadaki geçmiş yıllarla değil haftalarla ölçülüyor.
-
-*Kaynak üzerinden Claude (Fable 5) değerlendirdi; dışarıdan görüş istendi ve olduğu gibi
-yayımlandı.*
-
----
-
 ## Kurulum
 
 ### Windows — tek satır
@@ -122,16 +130,6 @@ irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.4.1/install.ps
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.4.1/install.sh | bash
-```
-
-### Claude Code içinden
-
-```
-/plugin marketplace add Teknesyum/Teknesyum-Core
-```
-
-```
-/plugin install teknesyum-core@teknesyum
 ```
 
 **Sonrasında Claude Code'u yeniden başlatın.** Kancalar oturum ortasında yeniden yüklenir
@@ -323,8 +321,7 @@ yazmıyor.
 Sohbet banner'ı `MessageDisplay` kancasında duruyor; bu kanca çizileni değiştiriyor,
 saklanana ve modelin gördüğüne dokunmuyor. İkilinin kendi ifadesiyle: *"Display-only: the
 stored message and what the model sees are untouched."* Mesaj başına yaklaşık 30 ms node
-açılışı, sıfır token. Ondan önce on beş kanal denendi ve gömüldü; taziyeler
-[docs/DECISIONS.md](docs/DECISIONS.md) içinde.
+açılışı, sıfır token.
 
 Araç çağrılarını izleyen kancalar artık matcher taşıyor, yani dosya okumak süreç açtırmıyor.
 
@@ -379,7 +376,7 @@ değil.
 
 ```
 Teknesyum ▸ Opus-Medium İşçi — Banner Kodunu Yazıyor
-Teknesyum ▸ 3 Opus-Medium İşçi Çalışıyor
+Teknesyum ▸ 3× Opus-Medium İşçi Olarak Görevlendirildi
 Teknesyum ▸ Dikkat — Üst Üste 4 Araç Çağrısı Başarısız
 Teknesyum ▸ Premium · 1 Sözleşme Kapıda · 1 Sözleşme Başlamadı
 ```
