@@ -108,12 +108,8 @@ function testGuard(root) {
 
   const finishedFile = path.join(root, FINISHED, 'T1.md').split(path.sep).join('/');
   ok(
-    'shell delete in the finished directory is blocked',
-    hook({ tool_name: 'Bash', tool_input: { command: 'rm ' + finishedFile } }, root).status === 2
-  );
-  ok(
-    'shell read in the finished directory passes',
-    hook({ tool_name: 'Bash', tool_input: { command: 'cat ' + finishedFile } }, root).status === 0
+    'the gate no longer reads shell commands at all',
+    hook({ tool_name: 'Bash', tool_input: { command: 'rm ' + finishedFile } }, root).status === 0
   );
 
   writeContract(root, 'R1', '---\nid: R1\nstatus: submitted\nowns: [src/ok.js]\nverify:\n  - true\n---\n');
@@ -267,12 +263,12 @@ function testBypass(root) {
   );
   const auditsUnix = audits.split(path.sep).join('/');
   ok(
-    'shell write into audits/ is blocked',
-    hook({ tool_name: 'Bash', tool_input: { command: 'echo {} > ' + auditsUnix + '/Z1-1.json' } }, root).status === 2
+    'the shell is not policed either - the record itself is the guarantee',
+    hook({ tool_name: 'Bash', tool_input: { command: 'echo {} > ' + auditsUnix + '/Z1-1.json' } }, root).status === 0
   );
   ok(
-    'shell read of audits/ passes',
-    hook({ tool_name: 'Bash', tool_input: { command: 'cat ' + auditsUnix + '/ledger.jsonl' } }, root).status === 0
+    'and a hand written record still cannot close a contract',
+    typeof require(path.join(CORE, 'hooks', 'seal.js')).checkRecord({}, { id: 'Z1' }) === 'string'
   );
 
   writeContract(

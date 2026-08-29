@@ -296,64 +296,6 @@ function decide(j) {
       'Completion goes through: node <plugin>/scripts/contract.js complete --id <ID>'
     );
   }
-
-  if (tool !== 'Bash') return;
-  const cmd = String(t.command || '');
-  if (/relay[\\/](audits|live)/i.test(cmd) && !cmd.split(/[\n;]|&&|\|\||\|/).every(readsOnly))
-    return block(
-      'audits/ and live/ are written by the gate, never from the shell.',
-      'Use: node <plugin>/scripts/contract.js audit --id <ID> --run-id <agent> --verification "..."'
-    );
-  if (!/contracts[\\/]done/i.test(cmd)) return;
-  const parts = cmd.split(/[\n;]|&&|\|\||\|/).filter((x) => /contracts[\\/]done/i.test(x));
-  if (!parts.length || parts.every(allowed)) return;
-  return block(
-    'Shell access to contracts/done/ is limited to reads and the canonical command.',
-    'Completion goes through: node <plugin>/scripts/contract.js complete --id <ID>'
-  );
-}
-
-const READ_CMDS = new Set([
-  'cat','type','less','more','head','tail','wc','ls','dir','grep','rg','egrep','fgrep','find',
-  'stat','file','diff','cmp','sed','awk','cut','sort','uniq','tr','basename','dirname','realpath',
-  'readlink','md5sum','sha256sum','get-content','get-childitem','select-string','test-path',
-  'resolve-path','get-item',
-]);
-
-const GIT_SAFE = new Set([
-  'status','diff','log','show','ls-files','grep','cat-file','blame','add','commit','push',
-]);
-
-function readsOnly(part) {
-  const p = String(part).replace(/#[^\n]*$/g, '').trim();
-  if (!/relay[\\/](audits|live)/i.test(p)) return true;
-  if (/>>?[ \t]*["']?[^\s"'|;&]*relay[\\/](audits|live)/i.test(p)) return false;
-  const m = /^[(\s]*(?:[A-Za-z_]\w*=\S*\s+)*(\S+)/.exec(p);
-  if (!m) return false;
-  const name = path
-    .basename(m[1].replace(/["']/g, ''))
-    .toLowerCase()
-    .replace(/\.(exe|cmd|bat|ps1)$/, '');
-  return READ_CMDS.has(name) || name === 'git';
-}
-
-function allowed(part) {
-  const p = String(part).replace(/#[^\n]*$/g, '').trim();
-  if (!/contracts[\\/]done/i.test(p)) return true;
-  if (CANONICAL.test(p)) return true;
-  if (/>>?[ \t]*["']?[^\s"'|;&]*contracts[\\/]done/i.test(p)) return false;
-  if (/[ \t]-i\b/.test(p) || /-delete\b|-exec\b/.test(p)) return false;
-  const m = /^[(\s]*(?:[A-Za-z_]\w*=\S*\s+)*(\S+)/.exec(p);
-  if (!m) return false;
-  const name = path
-    .basename(m[1].replace(/["']/g, ''))
-    .toLowerCase()
-    .replace(/\.(exe|cmd|bat|ps1)$/, '');
-  if (name === 'git') {
-    const sub = (p.match(/\bgit\b[^\S\n]+(?:-C[^\S\n]+\S+[^\S\n]+)?([a-z-]+)/i) || [])[1];
-    return GIT_SAFE.has(String(sub).toLowerCase());
-  }
-  return READ_CMDS.has(name);
 }
 
 function block(...lines) {

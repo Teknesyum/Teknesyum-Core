@@ -156,8 +156,9 @@ contract closes, the archived file is stamped `done`, and `contract.js reopen` t
 wrongly closed one back with its round raised and the closed round left in the ledger.
 
 Two hooks stand in front of the filesystem. `guard.js` blocks writes to files the current
-contract does not own, and shuts the shell out of the gate's own bookkeeping entirely — a
-shell that can edit those can forge a close. `prefs.js` blocks a README or LICENSE missing
+contract does not own. It does not read your shell commands: a gate that tries to parse
+shell is a gate you get past with `cd`, and the guarantee lives in the record instead —
+a close needs a record no hand-written file can satisfy. `prefs.js` blocks a README or LICENSE missing
 its required markers, and exits immediately when the author's preference file is absent, so
 for everyone else it does nothing at all.
 

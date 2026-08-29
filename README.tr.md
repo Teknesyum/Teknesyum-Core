@@ -154,8 +154,9 @@ kapanıyor, arşivlenen dosyaya `done` damgası vuruluyor, yanlış kapanan iş 
 ile turu artırılarak geri alınıyor ve kapanan tur defterde kalıyor.
 
 Dosya sisteminin önünde iki kanca duruyor. `guard.js` mevcut sözleşmenin sahip olmadığı
-dosyalara yazmayı engelliyor ve kapının kendi muhasebesini kabuğa tamamen kapatıyor — onları
-düzenleyebilen bir kabuk kapanış taklit edebilir. `prefs.js` gerekli işaretleri taşımayan
+dosyalara yazmayı engelliyor. Kabuk komutlarını okumuyor: kabuğu ayrıştırmaya çalışan bir
+kapı `cd` ile aşılan kapıdır, güvence de kaydın kendisinde — kapanış, elle yazılan hiçbir
+dosyanın karşılayamayacağı bir kayıt istiyor. `prefs.js` gerekli işaretleri taşımayan
 README ya da LICENSE yazımını engelliyor; yazarın tercih dosyası yoksa hemen çıkıyor, yani
 başkası için hiçbir şey yapmıyor.
 
