@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.5
+
+- Simpler wording for the free ways to help
+
 ## v0.4.4
 
 - The support section speaks to the reader
