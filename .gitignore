@@ -7,3 +7,5 @@ Teknesyum-Base/
 *.tmp
 *.log
 logs/openlogs/
+.claude/relay/HANDOFF.md
+.claude/relay/audits/
