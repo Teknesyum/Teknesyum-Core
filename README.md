@@ -3,63 +3,48 @@
 **English** · [Türkçe](README.tr.md)
 
 <div align="center">
-<img src="assets/banner.svg" alt="Teknesyum Core, multi-agent work in Claude Code with the plumbing done. Below the name, the line the plugin prints into the chat: Teknesyum, three Opus-Medium workers at work. Under it, three linked stages: hooks enforce, the gate closes, roles do the work." width="900">
+<img src="assets/banner.svg" alt="Teknesyum Core, a multi-purpose workstation for Claude Code. Below the name, the line the plugin prints into the chat: Teknesyum, three Opus-Medium workers at work. Under it, three linked stages: hooks enforce, the gate closes, roles do the work." width="900">
 </div>
 
 # Teknesyum Core
 
-Multi-agent work in Claude Code, with the plumbing already done.
+Multi-Purpose Workstation
 
 ---
 
-## What it is
+## What is it
 
-A job splits into contracts. A contract names the files it owns and the commands that prove
-it finished. Agents run in parallel, each at whatever model the work is actually worth, and
-the gate runs those commands itself before anything is called done.
-
-None of it costs you a token per turn. Getting that part right took fifteen abandoned
-attempts, all of which are written down.
+Teknesyum Core is a multi-purpose plugin for Claude Code. It splits big jobs into small
+contracts: each contract declares which files it owns and how it proves it is done. Agents
+run in parallel, every task gets a model that fits it, and no contract closes until its
+verification commands actually pass.
 
 ---
 
-## What it solves
+## Features
 
-Four things go wrong the moment more than one agent works on one repository.
-
-**They write over each other.** Two agents, one file, and the second one wins. A contract
-says which files are its own; `guard.js` refuses everything else before the write lands, so
-the collision never happens instead of being found later.
-
-**"Done" is a claim.** Everyone reports success, nobody ran anyone else's tests, and the
-branch stops building an hour later inside somebody else's work. `contract.js complete` runs
-the verify commands itself rather than believing the report, works risk out from the actual
-diff, and refuses a high-risk close outright until an audit record names who checked what.
-
-**One model does everything.** That is either too expensive for renaming a variable or too
-cheap for the design call. Role and profile pick a cell out of a table; repeated failure
-raises it, the profile caps it, nothing lowers it. Nobody has to remember any of this.
-
-**Structure gets bought with context.** This is the one plugins do to you. A command list,
-seven agent descriptions, a rule block stapled to every message — a bill you pay every turn,
-forever, resent with the whole transcript. Core's enforcement lives in hooks. They read
-files, write files, and never say a word to the model. **Zero tokens per turn**, measured
-rather than hoped for, table in [docs/COST-MODEL.md](docs/COST-MODEL.md).
+- **Contracts** — Each piece of work owns its files. Two agents cannot write to the same
+  file; who touches what is settled up front.
+- **Verification gate** — Saying "done" is not enough. Tests actually run before a contract
+  closes; if they fail, the job stays open.
+- **Parallel agents** — The job is split, agents run at the same time, each keeps its own
+  record.
+- **Right model for the job** — Simple tasks do not get the expensive model; nobody likes
+  the bill. Role and profile pick the model and the effort together.
+- **Risk-aware** — Risk is computed from the diff. When it is high the close demands an
+  audit record, and refuses without one.
+- **No room in context** — The rules live in hooks, not in the chat. Numbers below.
 
 ---
 
 ## What it does not do
 
-- **It will not make your agents smarter.** It refuses bad closes. It has nothing to say
-  about the work that led to one.
-- **No slash commands. On purpose.** Every command's name and description loads into every
-  session whether you use it or not. The entry point is the `relay` skill; the rest are
-  scripts you run by path.
-- **It is not a sandbox.** `guard.js` is a hook, and a hook is a policy, not a kernel. It
-  closes the paths a model actually walks. Someone determined to get around it will, and
-  the ways we know about are named in the tests that cover them.
-- **It cannot translate Claude Code itself.** Core's own output is in your language. The
-  client's built-in labels are nobody's to reach from a plugin.
+- **It will not make your agents smarter.** It refuses bad closes, that is all.
+- **No slash commands, on purpose.** The entry point is the `relay` skill; the rest are
+  scripts.
+- **It is not a sandbox.** `guard.js` is a policy, not a kernel.
+- **It cannot translate Claude Code.** Core speaks your language; the client's own labels
+  are out of reach.
 - **It does not touch your git.** No commits, no branches, no pushes.
 
 ---

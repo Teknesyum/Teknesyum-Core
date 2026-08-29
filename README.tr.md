@@ -3,63 +3,45 @@
 **Türkçe** · [English](README.md)
 
 <div align="center">
-<img src="assets/banner.tr.svg" alt="Teknesyum Core, Claude Code'da çok ajanlı iş, tesisatı döşenmiş hâli. Adın altında eklentinin sohbete bastığı satır: Teknesyum, 3 Opus-Medium İşçi Çalışıyor. Onun altında birbirine bağlı üç aşama: kancalar zorluyor, kapı kapatıyor, roller işi yapıyor." width="900">
+<img src="assets/banner.tr.svg" alt="Teknesyum Core, Claude Code için çok amaçlı iş istasyonu. Adın altında eklentinin sohbete bastığı satır: Teknesyum, 3 Opus-Medium İşçi Çalışıyor. Onun altında birbirine bağlı üç aşama: kancalar zorluyor, kapı kapatıyor, roller işi yapıyor." width="900">
 </div>
 
 # Teknesyum Core
 
-Claude Code'da çok ajanlı iş — tesisatı döşenmiş hâli.
+Çok Amaçlı İş İstasyonu
 
 ---
 
 ## Nedir
 
-İş sözleşmelere bölünüyor. Sözleşme, sahip olduğu dosyaları ve bittiğini kanıtlayan
-komutları yazıyor. Ajanlar paralel çalışıyor, her biri işin gerçekten hak ettiği modelde;
-kapı da bir şeye "bitti" demeden önce o komutları kendi çalıştırıyor.
-
-Hiçbiri tur başına token yakmıyor. O kısmı doğru yapmak on beş denemeyi çöpe attırdı,
-hepsi yazılı duruyor.
+Teknesyum Core, Claude Code için tasarlanmış çok amaçlı bir plugindir. Büyük işleri küçük
+sözleşmelere böler: her sözleşme hangi dosyalara dokunacağını ve bittiğini nasıl
+kanıtlayacağını baştan yazar. Ajanlar paralel çalışır, her iş kendine uygun modelde koşar ve
+doğrulama komutları geçmeden hiçbir sözleşme kapanmaz.
 
 ---
 
-## Neyi çözüyor
+## Özellikler
 
-Bir depoda birden fazla ajan çalışmaya başladığı anda dört şey bozuluyor.
-
-**Birbirinin üstüne yazıyorlar.** İki ajan, tek dosya, ikincisi kazanıyor. Sözleşme hangi
-dosyaların kendisine ait olduğunu söylüyor; `guard.js` gerisini yazma diske inmeden
-reddediyor. Çakışma sonradan bulunmuyor, hiç olmuyor.
-
-**"Bitti" bir iddia.** Herkes başarı bildiriyor, kimse ötekinin testini çalıştırmıyor, dal
-bir saat sonra başkasının işinde bozuluyor. `contract.js complete` rapora inanmak yerine
-doğrulama komutlarını kendi çalıştırıyor, riski sezgiden değil gerçek diff'ten çıkarıyor ve
-yüksek riskli kapanışı, neyi kimin denetlediğini yazan bir kayıt olmadan reddediyor.
-
-**Her işi tek model yapıyor.** Bu ya değişken adı değiştirmek için fazla pahalı, ya tasarım
-kararı için fazla ucuz. Rol ve profil tablodan bir hücre seçiyor; üst üste başarısızlık
-hücreyi yükseltiyor, profil tavanı koyuyor, hiçbir şey aşağı çekmiyor. Kimsenin bunu
-aklında tutması gerekmiyor.
-
-**Yapı bağlamla satın alınıyor.** Eklentilerin size yaptığı asıl şey bu. Komut listesi, yedi
-ajan açıklaması, her mesaja zımbalanmış kural bloğu — her turda ödediğiniz, sonsuza kadar
-süren, üstelik transkriptin tamamıyla yeniden gönderilen bir fatura. Core'un zorlaması
-kancalarda: dosya okuyorlar, dosya yazıyorlar, modele tek kelime etmiyorlar. **Tur başına
-sıfır token** — umut değil ölçüm, tablo [docs/COST-MODEL.md](docs/COST-MODEL.md) içinde.
+- **Sözleşmeler** — Her iş parçası kendi dosyalarını sahiplenir. İki ajan aynı dosyaya
+  yazamaz; kim neye dokunuyor baştan belli.
+- **Doğrulama kapısı** — "Bitti" demek yetmiyor. Sözleşme kapanmadan önce testler gerçekten
+  çalışır; geçmezse iş açık kalır.
+- **Paralel ajanlar** — İş bölünür, ajanlar aynı anda koşar, her biri kendi kaydını tutar.
+- **İşe göre model** — Basit iş güçlü modele gitmez; kimse faturayı sevmiyor. Rol ve profil
+  modeli ve eforu birlikte seçer.
+- **Riskten haberdar** — Risk diff'ten hesaplanır. Yükseldiğinde kapanış denetim kaydı
+  ister, yoksa reddeder.
+- **Bağlamda yer kaplamaz** — Kurallar kancalarda durur, sohbete girmez. Ölçüsü aşağıda.
 
 ---
 
 ## Neyi yapmıyor
 
-- **Ajanlarınızı akıllandırmıyor.** Kötü kapanışı reddediyor. O kapanışa götüren iş
-  hakkında söyleyecek bir şeyi yok.
-- **Slash komutu yok. Bilerek.** Her komutun adı ve açıklaması, kullanın kullanmayın, her
-  oturuma yükleniyor. Giriş noktası `relay` skill'i; gerisi yolla çalıştırdığınız betikler.
-- **Kum havuzu değil.** `guard.js` bir kanca, kanca da çekirdek değil politikadır. Modelin
-  gerçekten yürüdüğü yolları kapatıyor. Kararlı biri etrafından dolaşır; bildiğimiz yollar
-  da onları kapsayan testlerde adıyla yazılı.
-- **Claude Code'un kendisini çeviremiyor.** Core'un çıktısı sizin dilinizde. İstemcinin
-  hazır etiketlerine hiçbir eklentinin eli yetişmiyor.
+- **Ajanlarınızı akıllandırmıyor.** Kötü kapanışı reddeder, o kadar.
+- **Slash komutu yok, bilerek.** Giriş noktası `relay` skill'i; gerisi betik.
+- **Kum havuzu değil.** `guard.js` bir politika, çekirdek değil.
+- **Claude Code'u çeviremiyor.** Core sizin dilinizde konuşur, istemcinin etiketleri değil.
 - **Git'inize dokunmuyor.** Commit yok, dal yok, push yok.
 
 ---
