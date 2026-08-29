@@ -47,6 +47,13 @@ Some of it, yes: it spawns subagents, runs them in parallel, keeps a plan. What 
 - **Role files** — Builder, planner, auditor, advisor. The role text is paid for by the
   agent holding it, not by your session.
 - **Banner and statusline** — One line for what is happening right now. Not a dashboard.
+- **A handoff note** — `.claude/relay/HANDOFF.md` says where the project stands: what is
+  open, what closed last, which branch. A hook refreshes it when the session ends, so it
+  costs nothing, and any model can read it — not only Claude.
+- **Ask before you spawn** — `contract.js precheck` runs the verify steps first. If they
+  already pass, the work is done and no agent is worth starting.
+- **`doctor`** — One command answers whether the install is sound: versions, tier table,
+  roles, hooks, statusline, and every close accounted for in the ledger.
 
 ---
 

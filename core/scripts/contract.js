@@ -159,9 +159,20 @@ function roleRow(role) {
   return T.cells[row] ? row : null;
 }
 
+function projectProfile() {
+  const where = locate();
+  if (!where) return '';
+  try {
+    const cfg = JSON.parse(fs.readFileSync(path.join(where.relay, 'config.json'), 'utf8'));
+    return String((cfg && cfg.profile) || '').toLowerCase();
+  } catch {
+    return '';
+  }
+}
+
 function profileOf(want) {
   const T = tiers();
-  const p = String(want || settings().profile || 'normal').toLowerCase();
+  const p = String(want || projectProfile() || settings().profile || 'normal').toLowerCase();
   return T.profiles.indexOf(p) >= 0 ? p : 'normal';
 }
 
@@ -570,6 +581,32 @@ function complete() {
 
 const LADDER = ['open', 'active', 'submitted', 'done'];
 
+function precheck() {
+  const c = load(arg('id'));
+  if (c.error) return stop([c.error]);
+  const steps = verifySteps(c.body);
+  if (!steps.length)
+    return out([
+      c.id + ' carries no verify steps, so there is nothing to check before the work starts.',
+      'Add a ## verify section, or run the contract as it is.',
+    ], 1);
+  const results = runVerify(c.root, steps);
+  const met = results.every((r) => r.code === 0);
+  return out(
+    [c.id + ': ' + steps.length + ' verify step' + (steps.length > 1 ? 's' : '')]
+      .concat(reportVerify(results))
+      .concat([
+        '',
+        met
+          ? 'Every step already passes. The work is done - close it instead of spawning an agent:'
+          : 'The work is genuinely open. Spawning an agent is worth it.',
+        met ? '  node <plugin>/scripts/contract.js submit --id ' + c.id : '',
+      ])
+      .filter((x) => x !== ''),
+    met ? 0 : 1
+  );
+}
+
 function statusOf(body) {
   return String(field('status', body) || '').toLowerCase().trim();
 }
@@ -794,6 +831,7 @@ function help() {
   return out([
     'contract.js - the only legitimate way to close a contract',
     '',
+    '  precheck --id <ID>        run verify before the work starts; 0 means it is already done',
     '  check --id <ID> [--run]   report risk and verify steps; --run executes them',
     '  submit --id <ID>          mark the work finished and ready for the gate',
     '  complete --id <ID>        run verify, check risk, record, move to done/',
@@ -816,6 +854,7 @@ function main() {
   if (cmd === 'close') return close();
   if (cmd === 'check') return check();
   if (cmd === 'submit') return submit();
+  if (cmd === 'precheck') return precheck();
   if (cmd === 'reopen') return reopen();
   if (cmd === 'audit') return audit();
   if (cmd === 'ledger') return ledger();
@@ -825,6 +864,7 @@ function main() {
 
 if (require.main === module) main();
 module.exports = {
+  precheck,
   complete,
   close,
   check,

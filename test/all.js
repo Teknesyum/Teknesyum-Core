@@ -1390,6 +1390,62 @@ function testRaces() {
   } catch {}
 }
 
+function testTools() {
+  const root = fixture();
+  const relay = path.join(root, '.claude', 'relay');
+  const HANDOFF = path.join(CORE, 'scripts', 'handoff.js');
+  const DOCTOR = path.join(CORE, 'scripts', 'doctor.js');
+
+  writeContract(root, 'H1', '# H1 the banner cost\nstatus: active\nround: 2\nowns: [src/ok.js]\nverify:\n  - true\n');
+  const made = run(process.execPath, [HANDOFF, 'show', '--root', root], { cwd: root });
+  const note = made.stdout;
+  ok('the handoff note names the open contract', /H1/.test(note), note);
+  ok('and says where that contract stands', /active, round 2/.test(note), note);
+  ok('and carries the title so a stranger knows the subject', /the banner cost/.test(note), note);
+  ok('it reports the branch and head', /branch:/.test(note) && /head:/.test(note), note);
+  ok('it leaves a place for the one paragraph a model writes', /## Intent/.test(note), note);
+  ok('the note is a file, not something printed into a context', fs.existsSync(path.join(relay, 'HANDOFF.md')));
+
+  run(process.execPath, [HANDOFF, 'intent', 'Kapinin maliyetini olcuyoruz.', '--root', root], { cwd: root });
+  const kept = fs.readFileSync(path.join(relay, 'HANDOFF.md'), 'utf8');
+  ok('the intent is stored', /Kapinin maliyetini olcuyoruz/.test(kept), kept);
+  run(process.execPath, [HANDOFF, 'write', '--root', root], { cwd: root });
+  const again = fs.readFileSync(path.join(relay, 'HANDOFF.md'), 'utf8');
+  ok('and a refresh does not wipe what the model wrote', /Kapinin maliyetini olcuyoruz/.test(again), again);
+
+  writeContract(root, 'P1', '# P1\nstatus: open\nowns: [src/ok.js]\nverify:\n  - node -e "process.exit(0)"\n');
+  const met = contract(['precheck', '--id', 'P1'], root);
+  ok('precheck says so when the work is already done', met.status === 0, met.stdout + met.stderr);
+  ok('and points at the command that closes it instead of an agent', /submit --id P1/.test(met.stdout), met.stdout);
+
+  writeContract(root, 'P2', '# P2\nstatus: open\nowns: [src/ok.js]\nverify:\n  - node -e "process.exit(1)"\n');
+  const openWork = contract(['precheck', '--id', 'P2'], root);
+  ok('precheck sends real work to an agent', openWork.status === 1, openWork.stdout + openWork.stderr);
+
+  const machine = contract(['tier', '--role', 'builder'], root);
+  fs.writeFileSync(path.join(relay, 'config.json'), JSON.stringify({ profile: 'eco' }), 'utf8');
+  const project = contract(['tier', '--role', 'builder'], root);
+  ok('a project can hold its own profile', project.stdout !== machine.stdout, project.stdout);
+  ok('and the project profile is the one that answers', /eco/.test(project.stdout), project.stdout);
+  const asked = contract(['tier', '--role', 'builder', '--profile', 'premium'], root);
+  ok('an explicit profile still wins over the project file', /premium/.test(asked.stdout), asked.stdout);
+  fs.rmSync(path.join(relay, 'config.json'), { force: true });
+
+  const doc = run(process.execPath, [DOCTOR, '--json'], { cwd: root });
+  let rows = [];
+  try {
+    rows = JSON.parse(doc.stdout);
+  } catch {}
+  ok('doctor answers in a shape a script can read', Array.isArray(rows) && rows.length >= 8, doc.stdout.slice(0, 120));
+  ok('every check names itself and says yes or no', rows.every((r) => r.name && typeof r.ok === 'boolean'), JSON.stringify(rows[0] || {}));
+  ok('doctor sees the tier table', rows.some((r) => r.name === 'tier table' && r.ok), JSON.stringify(rows));
+  ok('doctor sees the two versions agree', rows.some((r) => r.name === 'version' && r.ok), JSON.stringify(rows.filter((r) => r.name === 'version')));
+
+  try {
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}
+
 function main() {
   const root = fixture();
   testGuard(root);
@@ -1409,6 +1465,7 @@ function main() {
   testLadder();
   testSafety();
   testRaces();
+  testTools();
   testFigures();
   testNoContextWrites();
 

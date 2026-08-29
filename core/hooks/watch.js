@@ -118,7 +118,12 @@ function record(j) {
   }
 
   save(file, rec);
-  if (ev === 'SessionEnd') closeAll(live, now);
+  if (ev === 'SessionEnd') {
+    closeAll(live, now);
+    try {
+      require('../scripts/handoff.js').writeAt(r.relay, path.dirname(path.dirname(r.relay)));
+    } catch {}
+  }
   if (ev === 'SessionEnd' || ev === 'Stop' || ev === 'SubagentStop') sweep(live);
 }
 

@@ -46,6 +46,13 @@ Bir kısmını yapıyor: subagent çağırır, paralel çalıştırır, plan tut
 - **Rol dosyaları** — Yapıcı, planlayıcı, denetçi, danışman. Rol metnini yalnızca o rolü
   taşıyan ajan ödüyor, sizin oturumunuz değil.
 - **Banner ve statusline** — O an ne olduğunu tek satırda söyler. Pano değil.
+- **Devir notu** — `.claude/relay/HANDOFF.md` projenin nerede olduğunu yazar: ne açık, en son
+  ne kapandı, hangi dal. Oturum biterken bir kanca tazeler, yani bedeli yok; Claude değil,
+  herhangi bir model okuyabilir.
+- **Ajanı çağırmadan sor** — `contract.js precheck` verify adımlarını önce çalıştırır.
+  Zaten geçiyorsa iş bitmiştir, ajan açmaya değmez.
+- **`doctor`** — Kurulumun sağlam olup olmadığını tek komut söyler: sürümler, tablo, roller,
+  kancalar, statusline ve defterde karşılığı olmayan kapanış var mı.
 
 ---
 
