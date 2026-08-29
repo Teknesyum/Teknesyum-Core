@@ -3,8 +3,14 @@
 Dört kol paralel tarandı: kapı/guard/seal, orkestrasyon, kurulum/araçlar, test/doküman.
 Aşağıdaki her madde tek bir sözleşmeye dönüşecek büyüklükte. Sıra önem sırasıdır.
 
-Doğrulananlar: v0.1.12 etiketi yok (son etiket v0.1.9), `sessionFile` lib.js'te yok,
-`checkAuditor` kayıt yoksa null dönüyor, `\*\.csproj` deseni ölü.
+**Kaynaktan doğruladıklarım** (elle, ajan raporuna güvenmeden): `v0.1.12` etiketi ne
+yerelde ne `origin`'de var — `git ls-remote --tags origin` en son `v0.1.9` diyor, yani
+README'deki kurulum komutu gerçekten 404. `contract.js` hiçbir yerde `status:` okumuyor.
+`checkAuditor` kayıt yoksa null dönüyor. `sessionFile` lib.js'te yok. `*.csproj` deseni ölü.
+`PostToolUse` ve `PostToolUseFailure` matcher'sız. `wireStatusline` bozuk settings'i `{}`
+sayıp üstüne yazıyor. `privateRepo` yalnız soruluyor ve saklanıyor, kullanan yok.
+
+**Düzelttiğim hata:** D5 yanlıştı, `check` komutu zaten var. Aşağıda üstü çizili.
 
 ---
 
@@ -49,7 +55,7 @@ Doğrulananlar: v0.1.12 etiketi yok (son etiket v0.1.9), `sessionFile` lib.js'te
 | D2 | Terk edilmiş sözleşme temizlenmiyor: ajan ölünce `active` sonsuza dek kalıyor, live kaydı 24 saatte siliniyor. `contract.js stale` listesi. |
 | D3 | Bağımlılık/sıra kavramı yok. `needs: [T3]` alanı + kapanışta ön koşul kontrolü. |
 | D4 | Sözleşme *oluşturma* komutu yok: `new`/`list` yok, t0 elle Write ediyor, ID çakışma kuralı yazılı değil. `contract.js new --id --goal --owns --verify` ve `list`. |
-| D5 | Kapanış öncesi kuru koşu yok: `contract.js check --id` (ne geçer, ne kalır, risk ne çıkar) — ret yemeden görülebilsin. |
+| D5 | ~~Kuru koşu yok~~ — **yanlıştı, geri alındı.** `contract.js check --id [--run]` zaten var (contract.js:719, help satırında). Bunu doğrulamadan yazmışım. Sole haklı. |
 
 ## E — Orkestrasyon boşlukları
 
@@ -132,3 +138,62 @@ Doğrulananlar: v0.1.12 etiketi yok (son etiket v0.1.9), `sessionFile` lib.js'te
 | J6 | `map.js` dil kapsamı iddiadan dar: JS/TS iyi, Python/C# kısmi, Go/Rust yok — oysa risk kuralları o dilleri sayıyor. Önce dil örneği, sonra iddia. | map.js · risk.js:8 |
 | J7 | `contract.js validate [--all]`: ajan token harcamadan önce şema, sahiplik çakışması, bağımlılık, verify taşınabilirliği ve defter tutarlılığı denetlensin. (D5'in geniş hâli.) | — |
 | J8 | Kurtarma akışı: devam edilebilir sözleşmeleri listele, öksüz live kaydını ve yarım işlemi bağdaştır. Tamamlanmayı asla tahmin etme. | — |
+
+---
+
+## K — Sole'un planından gelen, J'de de olmayanlar
+
+| # | Ne |
+|---|---|
+| K1 | **`owns` dışında değişen dosya hiç bakılmıyor.** Mühür yalnız `owns`'taki dosyaların digest'ini tutuyor; sınırın dışına taşan değişiklik kapanışta görünmüyor. Kapanış, sözleşmenin değiştirdiği dosya kümesini kanıtlasın. |
+| K2 | **Kapanış işlem değil.** Rename, denetim tüketimi ve deftere yazma arasında çöküş yarım durum bırakıyor; kurtarma yok. Günlük dosyası + idempotent kurtarma. |
+| K3 | **Denetim kanıtı komuta bağlı değil.** `--verification "..."` serbest metin; denetçinin komutu gerçekten çalıştırdığını göstermiyor. Kanıt, verify komutlarına ve çıkış koduna bağlansın; kanıt koşu başladıktan sonra üretilmiş olsun. |
+| K4 | **`verify: []` yapısal olarak tanımsız.** Çalıştırılabilir kabul kanıtı olmayan sözleşme sessizce düşük riskli oluyor. Boş verify, insan denetimi rotası zorunlu kılsın. |
+| K5 | **Hata imzası yok, yalnız sayaç var.** D8 "aynı verify adımı, aynı imza" diyor; watch yalnız ardışık hataları sayıyor ve tek araç adı tutuyor. |
+| K6 | **İstenen model/efor doğrulanmıyor.** `fable` yoksa, takma ad geldiğinde, yeni efor kademesi çıktığında ne olacağı tanımsız. |
+| K7 | **`privateRepo` ölü söz.** Soruluyor, config'e yazılıyor, hiçbir yerde kullanılmıyor — D4 ve README aksini ima ediyor. Ya uygula ya soruyu kaldır. |
+| K8 | **Node "isteğe bağlı" değil.** On iki kancanın hepsi node ile başlıyor; node yoksa ürün tezi çalışmıyor. README'de zorunlu yaz. |
+| K9 | **`MessageDisplay` mesaj başına bir kez çalışmıyor.** Her ekran flush'ında node başlıyor, `notice.js` ancak başladıktan sonra ara flush'ları eliyor. D15'teki "mesaj başına tek çalışma" yanlış; uzun akışta p50/p95 ölçülmeli. Token maliyeti sıfır kalıyor, süreç maliyeti kalmıyor. |
+| K10 | **Kurulum yeniden üretilebilir değil.** Etiketli betik indiriliyor, sonra sabitlenmemiş marketplace ekleniyor ve o anki eklenti kuruluyor. İkisinden biri: ya sabitleyin ya belgede doğruyu yazın. |
+| K11 | **Marketplace açıklaması eksik** — `claude plugin validate .` uyarıyor. |
+| K12 | **2294 iddianın büyük kısmı kademe matrisi.** Senaryo sayısı ile matris sayısı ayrı raporlansın; README'deki sayı olduğundan güçlü bir izlenim veriyor. |
+| K13 | **Model davranışı için eval yok.** Deterministik test, skill'e uyulduğunu kanıtlamıyor: iş bölme, kabul özeti, rol seçimi, advisor körlüğü, blocker dönüşü, sıkıştırma sonrası devam. `claude plugin eval` ile ayrı katman. |
+
+## L — Yön: bundan sonra nereye
+
+Kusur listesi bitince proje hâlâ "kuralları olan bir betik yığını" olur. Aşağıdakiler
+Core'u bir kontrol düzlemine çeviren yapısal adımlar; her biri kendi sözleşmesini hak ediyor.
+
+**L1 — İddia testi.** README ve SKILL'deki her söz bir teste bağlansın (`test/claims.js`):
+cümle → iddia kimliği → çalışan iddia. Bağı olmayan cümle README'ye giremesin. Denetçi satan
+bir ürünün kendi metnini denetlememesi, bu turda üç kez yakalandı; kural hâline gelsin.
+
+**L2 — Tahminden kanıta.** `guard` komutu okuyup ne yapacağını tahmin ediyor; kabuk bu şekilde
+güvenilir biçimde ayrıştırılamaz (B2, J3 bunun kanıtı). Yön: guard hızlı ve kaba kalsın, asıl
+karar `seal`'de kanıtla verilsin — ajan adımından önce ve sonra sahiplenilen ağacın ve relay
+dizininin anlık görüntüsü, fark sözleşmeye işlensin. Tahmin eden kapı yerine ölçen kapı.
+
+**L3 — Sözleşme başına worktree.** Paralel yazma sorunlarının (C1–C4, J3) kökten çözümü,
+her sözleşmeye kendi git worktree'sini vermek: sahiplik yapıdan gelir, çakışma imkânsızlaşır,
+kapanış birleştirme olur. Maliyeti ve Windows davranışı ölçülmeden karar verilmesin, ama
+masada dursun — tek tek yama yapmaktan ucuza gelebilir.
+
+**L4 — Yönlendirmeyi ölçüye bağla.** Kademe tablosu şu an birinin yazdığı bir kanaat. Her
+kapanış (rol, model, efor, tur sayısı, düşen verify adımı, süre) deftere düşsün; `stats`
+bunu göstersin. Tablo veriden ayarlansın. Bunun tur başına maliyeti sıfır, çünkü hepsi
+diskte ve kapanış anında.
+
+**L5 — Tehdit modeli belgesi.** Maliyet sınıflarında (S/O/C/Z) yaptığımızı güvenlikte de
+yap: her mekanizma **G** (garanti) veya **B** (elden geldiğince) diye işaretlensin.
+`guard` B'dir, `seal` G'dir. README bunu böyle söylesin; "kum havuzu değil" satırı bu
+tablonun özeti olsun.
+
+**L6 — Proje başına profil.** Profil şu an makine geneli. Aynı anda birden çok depoda
+çalışan biri için doğru yer `.claude/relay/config.json`. Makine ayarı varsayılan kalsın,
+proje ezsin.
+
+**L7 — Platform dürüstlüğü.** A3 gösteriyor ki macOS/Linux kurulumu hiç denenmemiş. İki yol:
+CI'da gerçekten denemek ya da README'de desteklenen platformu daraltmak. Üçüncüsü yok.
+
+**L8 — Sürüm hattı tek komut.** Sürümü tek kaynaktan yaz, etiketle, sağlamaları yayımla,
+CHANGELOG satırını üret, sürüm sapmasında CI kırılsın. A1/A2 bir daha yaşanmasın.
