@@ -125,29 +125,48 @@ function seatCell(row, c) {
   return t ? cellName(t.model, t.effort) : '';
 }
 
+function goalOf(relay, id, cache) {
+  if (!id) return '';
+  if (cache[id] !== undefined) return cache[id];
+  let line = '';
+  try {
+    const head = fs.readFileSync(path.join(relay, 'contracts', id + '.md'), 'utf8').slice(0, 200);
+    const m = /^#[ \t]+(.+)$/m.exec(head);
+    if (m) line = m[1].trim().slice(0, 60);
+  } catch {}
+  cache[id] = line;
+  return line;
+}
+
 function crew(relay) {
   const a = agents(relay);
   if (!a.running) return '';
   const pool = calls(relay);
+  const goals = {};
   const seats = a.rows.map((row) => {
     const c = taskFor(row, pool);
+    const id = row.contract || (c && c.contract) || '';
+    const what = goalOf(relay, id, goals) || (c && c.task) || '';
     return {
       role: roleName(row.role),
       cell: seatCell(row, c),
-      task: (c && c.task) || '',
+      what,
     };
   });
 
+  const whats = [];
+  for (const s of seats) if (s.what && !whats.includes(s.what)) whats.push(s.what);
+  const tail = whats.length ? ' — ' + whats.join(' · ') : ' ' + t('line.assigned');
+
   if (seats.length === 1) {
     const one = seats[0];
-    const head = [one.cell, one.role].filter(Boolean).join(' ');
-    return one.task ? head + ' — ' + one.task : head + ' ' + t('line.assigned');
+    return [one.cell, one.role].filter(Boolean).join(' ') + tail;
   }
 
   const same = seats.every((x) => x.role === seats[0].role && x.cell === seats[0].cell);
   if (same) {
     const one = seats[0];
-    return seats.length + '× ' + [one.cell, one.role].filter(Boolean).join(' ') + ' ' + t('line.assigned');
+    return seats.length + '× ' + [one.cell, one.role].filter(Boolean).join(' ') + tail;
   }
 
   const groups = [];
@@ -159,7 +178,7 @@ function crew(relay) {
   }
   return groups
     .map((g) => (g.n > 1 ? g.n + '× ' : '') + [g.cell, g.role].filter(Boolean).join(' '))
-    .join(' · ') + ' ' + t('line.assigned');
+    .join(' · ') + tail;
 }
 
 function label(r) {

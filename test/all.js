@@ -528,6 +528,48 @@ function testBanner(root) {
   ok('two of the same seat are counted, not listed twice', /2×/.test(banner(root)), banner(root));
   fs.writeFileSync(path.join(liveB, 'a7.json'), JSON.stringify({ id: 'a7', role: 'Explore', updated: new Date().toISOString(), files: [] }));
   ok('a built-in agent with no row of its own is named from the session cell', /Kâşif|Explorer/i.test(banner(root)) && /Opus|Sonnet|Haiku/.test(banner(root)), banner(root));
+
+  fs.writeFileSync(path.join(liveB, '_calls.json'), JSON.stringify([
+    { role: 'scout', model: '', task: 'lisans dosyalari tarandi', at: Date.now() - 1000 },
+    { role: 'Explore', model: '', task: 'rozet metni arandi', at: Date.now() },
+  ]));
+  const busy = banner(root);
+  ok('with several seats the banner still says what for', /Rozet Metni Arandi/.test(busy), busy);
+  ok('each distinct task is named once', /Lisans Dosyalari Tarandi/.test(busy), busy);
+  ok('a named task replaces the bare assignment word', !/Görevlendirildi|Assigned/i.test(busy), busy);
+
+  writeContract(root, 'K3', '# K3 rozet metni duzeni\nstatus: active\nowns: [src/ok.js]\nverify:\n  - node -e "process.exit(0)"\n');
+  fs.rmSync(path.join(liveB, 'a8.json'), { force: true });
+  fs.writeFileSync(path.join(liveB, 'a9.json'), JSON.stringify({ id: 'a9', role: 'scout', contract: 'K3', updated: new Date().toISOString(), files: [] }));
+  const bound = banner(root);
+  ok('a contract-bound seat answers with the contract goal', /K3 Rozet Metni Duzeni/.test(bound), bound);
+  ok('the contract goal outranks the spawn description', !/Lisans Dosyalari/.test(bound), bound);
+
+  run(process.execPath, [WATCH], {
+    cwd: root,
+    input: JSON.stringify({
+      hook_event_name: 'PreToolUse', tool_name: 'Agent', agent_id: 'spawner', cwd: root,
+      tool_input: { subagent_type: 'scout', description: 'goal probe', prompt: 'Contract: .claude/relay/contracts/K3.md\nread it first' },
+    }),
+  });
+  const logged = JSON.parse(fs.readFileSync(path.join(liveB, '_calls.json'), 'utf8'));
+  ok('the spawn log carries the contract named in the prompt', logged.some((c) => c.contract === 'K3'), JSON.stringify(logged));
+  fs.writeFileSync(path.join(liveB, 'a9.json'), JSON.stringify({ id: 'a9', role: 'scout', updated: new Date().toISOString(), files: [] }));
+  const viaCall = banner(root);
+  ok('an unbound seat still gets the goal through the spawn log', /K3 Rozet Metni Duzeni/.test(viaCall), viaCall);
+  fs.rmSync(path.join(liveB, 'spawner.json'), { force: true });
+  fs.rmSync(path.join(root, '.claude', 'relay', 'contracts', 'K3.md'), { force: true });
+
+  fs.writeFileSync(path.join(liveB, 'a8.json'), JSON.stringify({ id: 'a8', role: 'scout', updated: new Date().toISOString(), files: [] }));
+  fs.writeFileSync(path.join(liveB, '_calls.json'), JSON.stringify([
+    { role: 'scout', model: '', task: 'x'.repeat(60), at: Date.now() - 2000 },
+    { role: 'scout', model: '', task: 'y'.repeat(60), at: Date.now() - 1000 },
+    { role: 'Explore', model: '', task: 'z'.repeat(60), at: Date.now() },
+  ]));
+  const crowded = banner(root);
+  ok('a crowded line stays inside the cap', crowded.length <= 'Teknesyum ▸ '.length + 120, String(crowded.length));
+  ok('the seats survive the trim, the tasks give way', /Kâşif|Explorer|Gözcü|Scout/i.test(crowded), crowded);
+  fs.rmSync(path.join(liveB, '_calls.json'), { force: true });
   for (const x of ['a7', 'a8', 'a9']) fs.rmSync(path.join(liveB, x + '.json'), { force: true });
   for (const x of parked) fs.renameSync(path.join(liveB, x + '.parked'), path.join(liveB, x));
 

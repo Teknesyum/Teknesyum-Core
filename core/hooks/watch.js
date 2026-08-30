@@ -51,10 +51,12 @@ function logCall(live, role, input) {
   const f = path.join(live, '_calls.json');
   const cur = read(f);
   const list = Array.isArray(cur) ? cur : [];
+  const m = /contracts[\\/]+([A-Za-z]{1,4}\d{1,4})\.md/.exec(String(input.prompt || ''));
   list.push({
     role: role,
     model: String(input.model || ''),
     task: String(input.description || '').slice(0, 60),
+    contract: m ? m[1] : '',
     at: Date.now(),
   });
   write(f, list.slice(-12));
