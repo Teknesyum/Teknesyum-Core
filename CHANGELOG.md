@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.5.0
+
+- The banner says what the agents were sent to do
+
 ## v0.4.6
 
 - The README says who does the work before it says how, and the comparison comes last
