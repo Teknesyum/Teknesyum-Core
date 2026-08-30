@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.6.0
+
+- The banner reads as a heading and names the seat before the work
+
 ## v0.5.0
 
 - The banner says what the agents were sent to do
