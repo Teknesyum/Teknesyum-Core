@@ -158,7 +158,11 @@
   },
   "line.assigned": {
     "en": "assigned",
-    "tr": "olarak görevlendirildi"
+    "tr": "atandı"
+  },
+  "line.doing": {
+    "en": "in progress",
+    "tr": "yapılıyor"
   },
   "line.working": {
     "en": "at work",

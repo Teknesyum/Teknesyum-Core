@@ -386,23 +386,30 @@ One line above and below each answer, saying the single most important thing hap
 a dashboard.
 
 ```
-Teknesyum ▸ Opus-Medium Worker — Writing The Banner Code
-Teknesyum ▸ 2× Opus Explorer · Sonnet-Medium Scout — Badge Text · Prior Art On Gate Design
-Teknesyum ▸ 3× Opus-Medium Worker Assigned
-Teknesyum ▸ Heads Up — 4 Tool Calls Failed In A Row
-Teknesyum ▸ 1 Contract Waiting At The Gate · 1 Contract Not Started
+### Teknesyum ▸ Opus-High Auditor Assigned > T82 Audit In Progress
+### Teknesyum ▸ 2× Opus Explorer · Sonnet-Medium Scout Assigned > Badge Text · Gate Design In Progress
+### Teknesyum ▸ 3× Opus-Medium Worker Assigned
+### Teknesyum ▸ Heads Up — 4 Tool Calls Failed In A Row
+### Teknesyum ▸ 1 Contract Waiting At The Gate · 1 Contract Not Started
 ```
+
+It is written as a markdown heading, so the client renders it as one and the eye finds it
+without reading it.
 
 While agents run, the line names each seat with its cell — `Opus-Medium Worker` is the role
 and the model and effort it resolved to. Seats holding the same cell collapse into one
 entry; that is where the `3×` comes from.
 
-After the dash comes what they were sent to do. Where an agent is bound to a contract that
-is the contract's own title, which stays true long after the spawn; otherwise it is the
-description the agent was dispatched with. The tasks are listed, not paired off against the
-seats one by one: with two agents in the same role, which task belongs to which seat is a
-guess, and the line does not pretend otherwise. A spawn that carried no description at all
-says `Assigned` and nothing more — an invented answer would be worse than none.
+The seat comes first and the work after the `>`: who was assigned, then what is under way.
+Where an agent is bound to a contract the work is that contract's own title, which stays true
+long after the spawn; otherwise it is the description the agent was dispatched with. What
+does not fit inside the line is dropped from the end, so the seats survive and the tasks
+give way.
+
+The tasks are listed, not paired off against the seats one by one: with two agents in the
+same role, which task belongs to which seat is a guess, and the line does not pretend
+otherwise. A spawn that carried no description at all says `Assigned` and nothing more — an
+invented answer would be worse than none.
 
 A run of failed tool calls beats everything else. The closing line reports what finished,
 because it is computed after the message and simply knows more. Counters that only ever
@@ -442,7 +449,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,434 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,438 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
 scaffold, the cue, the banner, the handoff note, and one check that no hook writes into
 context. CI runs the same suite on Linux, Windows and macOS; development is Windows-first.

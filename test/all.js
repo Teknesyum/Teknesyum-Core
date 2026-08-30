@@ -452,12 +452,12 @@ function testBanner(root) {
   const { banner } = require(path.join(CORE, 'scripts', 'statusline.js'));
   const line = banner(root);
 
-  ok('the banner opens with the plugin mark', line.startsWith('Teknesyum ▸ '), line);
+  ok('the banner opens as a heading with the plugin mark', line.startsWith('### Teknesyum ▸ '), line);
   ok('the banner stays quiet while the gate holds', !/KAPI|GATE OFF/.test(line), line);
   ok('the banner carries no ANSI colour', !/\[/.test(line), JSON.stringify(line));
   ok('the banner is one line', line.indexOf(String.fromCharCode(10)) === -1, line);
 
-  const words = line.replace('Teknesyum ▸ ', '').split(' · ').join(' ').split(' ');
+  const words = line.replace('### Teknesyum ▸ ', '').split(' · ').join(' ').split(' ');
   const lower = words.filter((w) => /^\p{Ll}/u.test(w));
   ok('every word is capitalised', lower.length === 0, lower.join(','));
 
@@ -523,7 +523,7 @@ function testBanner(root) {
   ok('bookkeeping files are not counted as agents', !/1 Ajan|2 Ajan/.test(banner(root)), banner(root));
   fs.writeFileSync(path.join(liveB, 'a9.json'), JSON.stringify({ id: 'a9', role: 'scout', updated: new Date().toISOString(), files: [] }));
   ok('a seat with no model of its own is named from the tier table', /Sonnet|Opus|Haiku/.test(banner(root)), banner(root));
-  ok('and the banner says it was assigned, not merely that it is busy', /Görevlendirildi|Assigned/i.test(banner(root)), banner(root));
+  ok('and the banner says it was assigned, not merely that it is busy', /Atandı|Assigned/i.test(banner(root)), banner(root));
   fs.writeFileSync(path.join(liveB, 'a8.json'), JSON.stringify({ id: 'a8', role: 'scout', updated: new Date().toISOString(), files: [] }));
   ok('two of the same seat are counted, not listed twice', /2×/.test(banner(root)), banner(root));
   fs.writeFileSync(path.join(liveB, 'a7.json'), JSON.stringify({ id: 'a7', role: 'Explore', updated: new Date().toISOString(), files: [] }));
@@ -536,7 +536,17 @@ function testBanner(root) {
   const busy = banner(root);
   ok('with several seats the banner still says what for', /Rozet Metni Arandi/.test(busy), busy);
   ok('each distinct task is named once', /Lisans Dosyalari Tarandi/.test(busy), busy);
-  ok('a named task replaces the bare assignment word', !/Görevlendirildi|Assigned/i.test(busy), busy);
+  ok('the task follows the assignment, it does not replace it', / > /.test(busy) && /Yapılıyor|In Progress/i.test(busy), busy);
+  ok('the seat is named before the work, in that order', busy.indexOf('Atandı') < busy.indexOf(' > '), busy);
+  ok('the line reads as a heading, so the eye finds it', busy.startsWith('### '), busy);
+  fs.writeFileSync(path.join(liveB, '_calls.json'), JSON.stringify([{ role: 'scout', model: 'sonnet', task: 'tier effort probe', at: Date.now() }]));
+  fs.writeFileSync(path.join(liveB, 'a6.json'), JSON.stringify({ id: 'a6', role: 'scout', updated: new Date().toISOString(), files: [] }));
+  const tiered = banner(root);
+  ok('a model with no effort beside it borrows the effort its own row says', /Sonnet-Medium/.test(tiered), tiered);
+  fs.writeFileSync(path.join(liveB, '_calls.json'), JSON.stringify([{ role: 'scout', model: 'haiku', task: 'tier effort probe', at: Date.now() }]));
+  const odd = banner(root);
+  ok('a model the row does not name gets no invented effort', /Haiku(?!-)/.test(odd) && !/Haiku-/.test(odd), odd);
+  fs.rmSync(path.join(liveB, 'a6.json'), { force: true });
 
   writeContract(root, 'K3', '# K3 rozet metni duzeni\nstatus: active\nowns: [src/ok.js]\nverify:\n  - node -e "process.exit(0)"\n');
   fs.rmSync(path.join(liveB, 'a8.json'), { force: true });
@@ -567,7 +577,7 @@ function testBanner(root) {
     { role: 'Explore', model: '', task: 'z'.repeat(60), at: Date.now() },
   ]));
   const crowded = banner(root);
-  ok('a crowded line stays inside the cap', crowded.length <= 'Teknesyum ▸ '.length + 120, String(crowded.length));
+  ok('a crowded line stays inside the cap', crowded.length <= '### Teknesyum ▸ '.length + 120, String(crowded.length));
   ok('the seats survive the trim, the tasks give way', /Kâşif|Explorer|Gözcü|Scout/i.test(crowded), crowded);
   fs.rmSync(path.join(liveB, '_calls.json'), { force: true });
   for (const x of ['a7', 'a8', 'a9']) fs.rmSync(path.join(liveB, x + '.json'), { force: true });
@@ -609,19 +619,19 @@ function testMessageDisplay(root) {
   ok('the delta is kept', body.indexOf('son satir.') !== -1, body);
   ok('the notice is added, not substituted', body.indexOf('son satir.') !== -1 && body.indexOf('Teknesyum') !== -1, body);
   const NL = String.fromCharCode(10);
-  ok('a blank line separates the notice', body.indexOf('son satir.' + NL + NL + 'Teknesyum') > 0, JSON.stringify(body));
+  ok('a blank line separates the notice', body.indexOf('son satir.' + NL + NL + '### Teknesyum') > 0, JSON.stringify(body));
   ok('a single flush is framed above and below', body.split('Teknesyum').length === 3, body);
   const first = JSON.parse(call(ev({ index: 0, final: false, delta: 'ilk parca.' })).stdout).hookSpecificOutput.displayContent;
-  ok('the first flush carries the notice on top', first.startsWith('Teknesyum'), first);
+  ok('the first flush carries the notice on top', first.startsWith('### Teknesyum'), first);
   ok('the first flush keeps its delta below', first.trim().endsWith('ilk parca.'), first);
   const last = JSON.parse(call(ev({ index: 4, final: true, delta: 'son parca.' })).stdout).hookSpecificOutput.displayContent;
   ok('a later final flush carries it below only', last.startsWith('son parca.') && last.split('Teknesyum').length === 2, last);
-  ok('the notice is the last line', body.trim().split(String.fromCharCode(10)).pop().startsWith('Teknesyum'), body);
-  ok('the notice is also the first line', body.split(String.fromCharCode(10))[0].startsWith('Teknesyum'), body);
+  ok('the notice is the last line', body.trim().split(String.fromCharCode(10)).pop().startsWith('### Teknesyum'), body);
+  ok('the notice is also the first line', body.split(String.fromCharCode(10))[0].startsWith('### Teknesyum'), body);
 
   const empty = call(ev({ delta: '' }));
   const eb = JSON.parse(empty.stdout).hookSpecificOutput.displayContent;
-  ok('an empty delta yields no leading blank line', eb.startsWith('Teknesyum'), JSON.stringify(eb));
+  ok('an empty delta yields no leading blank line', eb.startsWith('### Teknesyum'), JSON.stringify(eb));
   ok('an empty delta is not doubled', eb.split('Teknesyum').length === 2, JSON.stringify(eb));
 
   const outside = call(ev({ cwd: os.tmpdir() }));
@@ -637,11 +647,11 @@ function testMessageDisplay(root) {
   ok('a head flush keeps its trailing newline', wrapped.endsWith('satir' + NLc), JSON.stringify(wrapped));
 
   const lateEmpty = JSON.parse(call(ev({ index: 4, final: true, delta: '' })).stdout).hookSpecificOutput.displayContent;
-  ok('a late empty final flush leads with the notice', lateEmpty.startsWith('Teknesyum'), JSON.stringify(lateEmpty));
+  ok('a late empty final flush leads with the notice', lateEmpty.startsWith('### Teknesyum'), JSON.stringify(lateEmpty));
   ok('a late empty final flush is one line', lateEmpty.indexOf(NLc) === -1, JSON.stringify(lateEmpty));
 
   const framed = JSON.parse(call(ev({ index: 0, final: true, delta: 'x' })).stdout).hookSpecificOutput.displayContent;
-  const bands = framed.split(NLc).filter((l) => l.startsWith('Teknesyum'));
+  const bands = framed.split(NLc).filter((l) => l.startsWith('### Teknesyum'));
   ok('both bands read the same', bands.length === 2 && bands[0] === bands[1], bands.join(' | '));
 
   const src = fs.readFileSync(HOOK, 'utf8');

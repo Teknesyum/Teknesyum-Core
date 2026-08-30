@@ -120,9 +120,11 @@ function tierCell(role) {
 function seatCell(row, c) {
   const model = row.model || (c && c.model) || '';
   const effort = row.effort || (c && c.effort) || '';
-  if (model) return cellName(model, effort);
   const t = tierCell(row.role);
-  return t ? cellName(t.model, t.effort) : '';
+  if (!model) return t ? cellName(t.model, t.effort) : '';
+  if (effort) return cellName(model, effort);
+  const same = t && String(t.model).toLowerCase() === String(model).toLowerCase();
+  return cellName(model, same ? t.effort : '');
 }
 
 function goalOf(relay, id, cache) {
@@ -156,29 +158,41 @@ function crew(relay) {
 
   const whats = [];
   for (const s of seats) if (s.what && !whats.includes(s.what)) whats.push(s.what);
-  const tail = whats.length ? ' — ' + whats.join(' · ') : ' ' + t('line.assigned');
 
-  if (seats.length === 1) {
-    const one = seats[0];
-    return [one.cell, one.role].filter(Boolean).join(' ') + tail;
+  const one = seats[0];
+  const solo = [one.cell, one.role].filter(Boolean).join(' ');
+  const same = seats.every((x) => x.role === one.role && x.cell === one.cell);
+  let head = solo;
+  if (seats.length > 1 && same) head = seats.length + '× ' + solo;
+
+  if (seats.length > 1 && !same) {
+    const groups = [];
+    for (const x of seats) {
+      const key = x.role + '|' + x.cell;
+      const hit = groups.find((g) => g.key === key);
+      if (hit) hit.n += 1;
+      else groups.push({ key, n: 1, role: x.role, cell: x.cell });
+    }
+    head = groups
+      .map((g) => (g.n > 1 ? g.n + '× ' : '') + [g.cell, g.role].filter(Boolean).join(' '))
+      .join(' · ');
   }
 
-  const same = seats.every((x) => x.role === seats[0].role && x.cell === seats[0].cell);
-  if (same) {
-    const one = seats[0];
-    return seats.length + '× ' + [one.cell, one.role].filter(Boolean).join(' ') + tail;
-  }
+  return head + ' ' + t('line.assigned') + doing(head, whats);
+}
 
-  const groups = [];
-  for (const x of seats) {
-    const key = x.role + '|' + x.cell;
-    const hit = groups.find((g) => g.key === key);
-    if (hit) hit.n += 1;
-    else groups.push({ key, n: 1, role: x.role, cell: x.cell });
+function doing(head, whats) {
+  const verb = ' ' + t('line.doing');
+  const room = BANNER_CAP - head.length - t('line.assigned').length - 1 - verb.length - 3;
+  const kept = [];
+  let used = 0;
+  for (const w of whats) {
+    const cost = (kept.length ? 3 : 0) + w.length;
+    if (used + cost > room) break;
+    kept.push(w);
+    used += cost;
   }
-  return groups
-    .map((g) => (g.n > 1 ? g.n + '× ' : '') + [g.cell, g.role].filter(Boolean).join(' '))
-    .join(' · ') + tail;
+  return kept.length ? ' > ' + kept.join(' · ') + verb : '';
 }
 
 function label(r) {
@@ -215,7 +229,7 @@ function titleCase(s) {
 function banner(cwd, phase) {
   const r = relayRoot(cwd, { git: false });
   if (!r) return '';
-  const mark = 'Teknesyum ▸ ';
+  const mark = '### Teknesyum ▸ ';
   const say = (body) => mark + trim(titleCase(body));
 
   const ty = counters(r.relay);

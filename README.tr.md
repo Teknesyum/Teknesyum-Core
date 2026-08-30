@@ -3,7 +3,7 @@
 **Türkçe** · [English](README.md)
 
 <div align="center">
-<img src="assets/banner.tr.svg" alt="Teknesyum Core, Claude Code için çok amaçlı iş istasyonu. Adın altında eklentinin sohbete bastığı satır: Teknesyum, 3× Opus-Medium İşçi Olarak Görevlendirildi. Onun altında birbirine bağlı üç aşama: kancalar zorluyor, kapı kapatıyor, roller işi yapıyor." width="900">
+<img src="assets/banner.tr.svg" alt="Teknesyum Core, Claude Code için çok amaçlı iş istasyonu. Adın altında eklentinin sohbete bastığı satır: Teknesyum, 3× Opus-Medium İşçi Atandı. Onun altında birbirine bağlı üç aşama: kancalar zorluyor, kapı kapatıyor, roller işi yapıyor." width="900">
 </div>
 
 # Teknesyum Core
@@ -384,23 +384,29 @@ Her cevabın altında ve üstünde tek satır; o an olup biten en önemli tek ş
 değil.
 
 ```
-Teknesyum ▸ Opus-Medium İşçi — Banner Kodunu Yazıyor
-Teknesyum ▸ 2× Opus Kâşif · Sonnet-Medium İzci — Rozet Metni · Kapı Tasarımında Önceki İşler
-Teknesyum ▸ 3× Opus-Medium İşçi Olarak Görevlendirildi
-Teknesyum ▸ Dikkat — 4 Araç Çağrısı Üst Üste Başarısız
-Teknesyum ▸ 1 Sözleşme Onay Bekliyor · 1 Sözleşme Başlanmadı
+### Teknesyum ▸ Opus-High Denetçi Atandı > T82 Denetimi Yapılıyor
+### Teknesyum ▸ 2× Opus Kâşif · Sonnet-Medium İzci Atandı > Rozet Metni · Kapı Tasarımı Yapılıyor
+### Teknesyum ▸ 3× Opus-Medium İşçi Atandı
+### Teknesyum ▸ Dikkat — 4 Araç Çağrısı Üst Üste Başarısız
+### Teknesyum ▸ 1 Sözleşme Onay Bekliyor · 1 Sözleşme Başlanmadı
 ```
+
+Satır markdown başlığı olarak yazılıyor; istemci de başlık gibi çiziyor, yani göz okumadan
+buluyor.
 
 Ajanlar çalışırken satır her koltuğu hücresiyle birlikte anıyor — `Opus-Medium İşçi`, rol ve
 onun çözüldüğü model ile efor demek. Aynı hücreyi tutan koltuklar tek girdide toplanıyor;
 `3×` oradan geliyor.
 
-Tireden sonrası ne için gönderildikleri. Ajan bir sözleşmeye bağlıysa sözleşmenin kendi
-başlığı — spawn'dan çok sonra da doğru kalan şey; değilse ajanın çağrıldığı açıklama.
+Önce koltuk, `>` işaretinden sonra iş: kim atandı, sonra ne yapılıyor. Ajan bir sözleşmeye
+bağlıysa iş, sözleşmenin kendi başlığı — spawn'dan çok sonra da doğru kalan şey; değilse
+ajanın çağrıldığı açıklama. Satıra sığmayan kısım sondan atılıyor, yani koltuklar kalıyor,
+yeri görevler veriyor.
+
 Görevler listeleniyor, koltuklarla teker teker eşleştirilmiyor: aynı rolde iki ajan varken
 hangi görevin hangi koltuğa ait olduğu tahmindir ve satır bunu bildiği gibi gösteriyor.
-Hiç açıklama taşımayan bir çağrı için yalnız `Görevlendirildi` yazıyor — uydurulmuş bir
-cevap hiç cevaptan kötü olurdu.
+Hiç açıklama taşımayan bir çağrı için yalnız `Atandı` yazıyor — uydurulmuş bir cevap hiç
+cevaptan kötü olurdu.
 
 Üst üste başarısız araç çağrısı her şeyin önüne geçiyor. Kapanış satırı biteni bildiriyor,
 çünkü mesajdan sonra hesaplanıyor ve daha fazlasını biliyor. Yalnızca büyüyen sayaçlar —
@@ -440,7 +446,7 @@ node test/all.js
 
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
 kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu ve hiçbir kancanın
-bağlama yazmadığı denetimi üzerine 2.434 assertion. Aynı takımı CI Linux, Windows ve
+bağlama yazmadığı denetimi üzerine 2.438 assertion. Aynı takımı CI Linux, Windows ve
 macOS'ta koşuyor; geliştirme Windows öncelikli.
 
 ---
