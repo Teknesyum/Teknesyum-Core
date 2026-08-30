@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.6
+
+- The README says who does the work before it says how, and the comparison comes last
+
 ## v0.4.5
 
 - Simpler wording for the free ways to help
