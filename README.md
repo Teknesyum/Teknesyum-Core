@@ -25,19 +25,30 @@ as long as I keep building applications.
 
 ---
 
-## Doesn't native Claude Code already do this?
+## Who does the work
 
-Some of it, yes: it spawns subagents, runs them in parallel, keeps a plan. What Core adds:
+`t0` is the session you are talking to. It does not write the code itself: it splits the job
+into contracts and hands each one to an agent.
 
-- **A script decides "done", not the model.** In native, an agent says it is finished and
-  that is that. In Core a contract cannot close until its verify commands actually pass —
-  `contract.js` runs them itself.
-- **File ownership is enforced.** In native, two parallel agents can clobber the same file.
-  Core's guard blocks writes to any file a contract does not own.
-- **Work lives on disk.** A contract is a file; the session ends, the contract stays. Pick
-  it up tomorrow where you left off.
-- **It takes no context space.** No command list, no rules block, no agent descriptions
-  injected into every message. Everything runs in hooks: 0 tokens per turn.
+<div align="center">
+<img src="assets/flow-agents.svg" alt="How work is dispatched. The main agent splits the job into contracts. Each contract names a role, and role times profile picks one cell from the tier table, which resolves to a model and an effort. Agents then run in parallel, each leaving its own record on disk. Beside them the advisor opens one rung above whoever asked: sonnet asks and opus answers, opus asks and fable answers." width="900">
+</div>
+
+Every agent is the same agent type. The role is a file it is told to read, so the role
+descriptions do not sit in your context — only the agent holding a role pays for it.
+
+| Role | What it does |
+|---|---|
+| `t0` | the session itself — splits the work, opens contracts, spawns the rest |
+| `planner` | proposes the split: ids, owned files, verify commands. Writes no code |
+| `builder` · `ui-builder` | writes what a contract asks for, only inside its `owns` list |
+| `scout` | reads prior art before a project from scratch gets an architecture |
+| `scribe` | mechanical work that carries no decision: renames, wording, inventories |
+| `auditor` | verifies a high-risk contract independently, and may not write a single file |
+| `advisor` | one question, one opinion, from a model one rung above whoever asked |
+
+Which model each of them gets is not a choice you make per agent — the mode and the role
+decide it together, and [the table](#the-agents) is below.
 
 ---
 
@@ -246,21 +257,14 @@ someone's unrelated repository is a worse failure than a missed check.
 
 ### The agents
 
-<div align="center">
-<img src="assets/flow-agents.svg" alt="How work is dispatched. The main agent splits the job into contracts. Each contract names a role, and role times profile picks one cell from the tier table, which resolves to a model and an effort. Agents then run in parallel, each leaving its own record on disk. Beside them the advisor opens one rung above whoever asked: sonnet asks and opus answers, opus asks and fable answers." width="900">
-</div>
-
-One agent type, `worker`. The role is a file named in the prompt:
+The one agent type is `worker`, and the role arrives as a path in its prompt:
 
 ```
 Read <plugin>/roles/builder.md and follow it.
 Contract: .claude/relay/contracts/T7.md
 ```
 
-Seven agent descriptions sitting in every context became one, and the role text is paid for
-only by the agent holding it.
-
-Role and profile pick a cell out of [core/tiers.json](core/tiers.json); the cell is a model
+Role and mode pick a cell out of [core/tiers.json](core/tiers.json); the cell is a model
 and an effort.
 
 | Role | `eco` | `normal` | `premium` |
@@ -356,6 +360,26 @@ it prints; run it rather than read about it.
 
 ---
 
+## Doesn't native Claude Code already do this?
+
+Some of it, yes: it spawns subagents, runs them in parallel, keeps a plan. Everything above
+is what Core adds on top. The short version:
+
+| | Native Claude Code | Teknesyum Core |
+|---|---|---|
+| Who decides "done" | the agent says so | `contract.js` runs the verify commands and refuses a close that fails them |
+| Acceptance criteria | prose in a prompt | commands that must exit 0, and a block where every step is `true` or `echo` is rejected as no acceptance at all |
+| Parallel writes | two agents can clobber one file | the guard blocks any write outside the contract's `owns` list |
+| High-risk changes | no distinction | risk is computed from the diff; a high-risk close demands an audit record bound to the file contents, to HEAD and to an auditor that actually ran |
+| A run that will not converge | keeps going | a contract may carry a `ceiling`, and past it the contract stops being writable |
+| Going back | your own git discipline | `precheck` pins the tracked tree as a real ref; `revert` puts the owned files back |
+| Work after the session ends | the plan is gone | contracts are files, and an abandoned one is written to the ledger |
+| Model choice | you pick per subagent | role times mode picks the cell, and signals raise it |
+| A second opinion | ask the same model again | the advisor runs one rung above whoever asked |
+| Cost per turn | descriptions and rules ride in every message | 0 tokens; every hook writes to disk or to the screen, never to the context |
+
+---
+
 ## What it looks like in use
 
 One line above and below each answer, saying the single most important thing happening. Not
@@ -365,8 +389,12 @@ a dashboard.
 Teknesyum ▸ Opus-Medium Worker — Writing The Banner Code
 Teknesyum ▸ 3× Opus-Medium Worker Assigned
 Teknesyum ▸ Heads Up — 4 Tool Calls Failed In A Row
-Teknesyum ▸ Premium · 1 Contract Waiting At The Gate · 1 Contract Not Started
+Teknesyum ▸ 1 Contract Waiting At The Gate · 1 Contract Not Started
 ```
+
+While agents run, the line names each seat with its cell — `Opus-Medium Worker` is the role
+and the model and effort it resolved to. Seats holding the same cell collapse into one
+entry; that is where the `3×` comes from.
 
 A run of failed tool calls beats everything else. The closing line reports what finished,
 because it is computed after the message and simply knows more. Counters that only ever
@@ -406,7 +434,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,420 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,425 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
 scaffold, the cue, the banner, the handoff note, and one check that no hook writes into
 context. CI runs the same suite on Linux, Windows and macOS; development is Windows-first.

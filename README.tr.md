@@ -25,19 +25,30 @@ ettikçe güncelleme almaya devam edecek.
 
 ---
 
-## Bunu native Claude Code zaten yapmıyor mu?
+## İşi kim yapıyor
 
-Bir kısmını yapıyor: alt ajan açar, paralel çalıştırır, plan tutar. Core'un eklediği:
+`t0`, konuştuğunuz oturumun kendisi. Kodu o yazmıyor: işi sözleşmelere bölüyor ve her birini
+bir ajana veriyor.
 
-- **"Bitti"ye model değil betik karar verir.** Native'de ajan bitirdim der ve iş biter.
-  Core'da sözleşme, verify komutları gerçekten geçmeden kapanamaz — komutları
-  `contract.js` kendi çalıştırır.
-- **Dosya sahipliği uygulanır.** Native'de paralel iki ajan aynı dosyayı ezebilir. Core'un
-  kapısı, sözleşmenin sahip olmadığı dosyaya yazmayı engeller.
-- **İş diskte durur.** Sözleşme bir dosyadır; oturum biter, sözleşme kalır. Yarın kaldığın
-  yerden devam edersin.
-- **Bağlamda yer kaplamaz.** Her mesaja komut listesi, kural bloğu, ajan açıklaması
-  eklenmez. Her şey kancalarda çalışır: tur başına 0 token.
+<div align="center">
+<img src="assets/flow-agents.tr.svg" alt="İşin nasıl dağıtıldığı. Ana ajan işi sözleşmelere bölüyor. Her sözleşme bir rol adı taşıyor, rol çarpı profil tablodan tek bir hücre seçiyor, hücre de bir modele ve bir efora karşılık geliyor. Ajanlar paralel çalışıyor, her biri diske kendi kaydını bırakıyor. Yanlarında danışman, soranın bir üst basamağında açılıyor: sonnet soruyor opus cevaplıyor, opus soruyor fable cevaplıyor." width="900">
+</div>
+
+Ajan türü tek. Rol, ajana okuması söylenen bir dosya; yani rol açıklamaları sizin
+bağlamınızda oturmuyor — rolün bedelini yalnız o rolü taşıyan ajan ödüyor.
+
+| Rol | Ne yapıyor |
+|---|---|
+| `t0` | oturumun kendisi — işi böler, sözleşmeleri açar, diğerlerini çağırır |
+| `planner` | bölünmeyi önerir: id'ler, sahiplenilen dosyalar, verify komutları. Kod yazmaz |
+| `builder` · `ui-builder` | sözleşmenin istediğini yazar, yalnız `owns` listesinin içinde |
+| `scout` | sıfırdan bir proje mimarisini almadan önce önceki işleri okur |
+| `scribe` | karar taşımayan mekanik iş: yeniden adlandırma, dil, envanter |
+| `auditor` | yüksek riskli sözleşmeyi bağımsız doğrular, tek dosyaya bile yazamaz |
+| `advisor` | tek soru, tek görüş; soranın bir üst basamağındaki modelden |
+
+Hangisine hangi modelin gideceği ajan ajan sizin seçiminiz değil — modla rol birlikte karar
+veriyor, [tablo](#ajanlar) aşağıda.
 
 ---
 
@@ -244,21 +255,14 @@ bir kanca, kaçırılan bir denetimden daha kötü bir arıza.
 
 ### Ajanlar
 
-<div align="center">
-<img src="assets/flow-agents.tr.svg" alt="İşin nasıl dağıtıldığı. Ana ajan işi sözleşmelere bölüyor. Her sözleşme bir rol adı taşıyor, rol çarpı profil tablodan tek bir hücre seçiyor, hücre de bir modele ve bir efora karşılık geliyor. Ajanlar paralel çalışıyor, her biri diske kendi kaydını bırakıyor. Yanlarında danışman, soranın bir üst basamağında açılıyor: sonnet soruyor opus cevaplıyor, opus soruyor fable cevaplıyor." width="900">
-</div>
-
-Tek ajan türü var: `worker`. Rol, istemde adı geçen bir dosya:
+Tek ajan türü `worker`, rol de istemine bir yol olarak geliyor:
 
 ```
 Read <plugin>/roles/builder.md and follow it.
 Contract: .claude/relay/contracts/T7.md
 ```
 
-Her bağlamda oturan yedi ajan açıklaması tek açıklamaya indi; rol metnini de yalnızca o rolü
-taşıyan ajan ödüyor.
-
-Rol ve profil, [core/tiers.json](core/tiers.json) içinden bir hücre seçiyor; hücre bir model
+Rol ve mod, [core/tiers.json](core/tiers.json) içinden bir hücre seçiyor; hücre bir model
 ve bir efor.
 
 | Rol | `eco` | `normal` | `premium` |
@@ -354,6 +358,26 @@ denetlediği, bastığı şeydir; okumak yerine çalıştırın.
 
 ---
 
+## Bunu native Claude Code zaten yapmıyor mu?
+
+Bir kısmını evet: alt ajan açıyor, paralel çalıştırıyor, plan tutuyor. Yukarıdaki her şey
+Core'un üstüne koyduğu. Kısa hali:
+
+| | Native Claude Code | Teknesyum Core |
+|---|---|---|
+| "Bitti"ye kim karar veriyor | ajan öyle diyor | `contract.js` verify komutlarını kendisi koşuyor ve geçmeyen kapanışı reddediyor |
+| Kabul ölçütü | istemdeki düz metin | 0 ile çıkması gereken komutlar; her adımı `true` ya da `echo` olan blok kabul sayılmıyor |
+| Paralel yazma | iki ajan aynı dosyayı ezebiliyor | kapı, sözleşmenin `owns` listesi dışına yazmayı engelliyor |
+| Yüksek riskli değişiklik | ayrımı yok | risk diff'ten hesaplanıyor; yüksek riskli kapanış, dosya içeriğine, HEAD'e ve gerçekten koşmuş bir denetçiye bağlı kayıt istiyor |
+| Yakınsamayan koşu | sürüp gidiyor | sözleşme `ceiling` taşıyabiliyor, sınırı geçince yazılabilir olmaktan çıkıyor |
+| Geri dönmek | kendi git disiplininiz | `precheck` izlenen ağacı gerçek bir ref olarak sabitliyor, `revert` sahiplenilen dosyaları geri koyuyor |
+| Oturum bitince | plan uçuyor | sözleşmeler dosya, sahipsiz kalan deftere yazılıyor |
+| Model seçimi | alt ajan başına siz seçiyorsunuz | rol çarpı mod hücreyi seçiyor, sinyaller yükseltiyor |
+| İkinci görüş | aynı modele tekrar sormak | danışman, soranın bir üst basamağında koşuyor |
+| Tur başına maliyet | açıklamalar ve kurallar her mesajda taşınıyor | 0 token; her kanca diske ya da ekrana yazıyor, bağlama değil |
+
+---
+
 ## Kullanımda nasıl görünüyor
 
 Her cevabın altında ve üstünde tek satır; o an olup biten en önemli tek şeyi söylüyor. Pano
@@ -362,9 +386,13 @@ değil.
 ```
 Teknesyum ▸ Opus-Medium İşçi — Banner Kodunu Yazıyor
 Teknesyum ▸ 3× Opus-Medium İşçi Olarak Görevlendirildi
-Teknesyum ▸ Dikkat — Üst Üste 4 Araç Çağrısı Başarısız
-Teknesyum ▸ Premium · 1 Sözleşme Kapıda · 1 Sözleşme Başlamadı
+Teknesyum ▸ Dikkat — 4 Araç Çağrısı Üst Üste Başarısız
+Teknesyum ▸ 1 Sözleşme Onay Bekliyor · 1 Sözleşme Başlanmadı
 ```
+
+Ajanlar çalışırken satır her koltuğu hücresiyle birlikte anıyor — `Opus-Medium İşçi`, rol ve
+onun çözüldüğü model ile efor demek. Aynı hücreyi tutan koltuklar tek girdide toplanıyor;
+`3×` oradan geliyor.
 
 Üst üste başarısız araç çağrısı her şeyin önüne geçiyor. Kapanış satırı biteni bildiriyor,
 çünkü mesajdan sonra hesaplanıyor ve daha fazlasını biliyor. Yalnızca büyüyen sayaçlar —
@@ -404,7 +432,7 @@ node test/all.js
 
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
 kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu ve hiçbir kancanın
-bağlama yazmadığı denetimi üzerine 2.420 assertion. Aynı takımı CI Linux, Windows ve
+bağlama yazmadığı denetimi üzerine 2.425 assertion. Aynı takımı CI Linux, Windows ve
 macOS'ta koşuyor; geliştirme Windows öncelikli.
 
 ---
