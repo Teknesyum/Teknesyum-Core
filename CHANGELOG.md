@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.7.3
+
+- The statusline repoints itself when the plugin updates, a verify that runs long has its process tree swept, and the Stop gate holds unassigned work
+
 ## v0.7.2
 
 - Banner: markdown instead of ANSI, since the client renders one and prints the other
