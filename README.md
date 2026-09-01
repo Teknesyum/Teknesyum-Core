@@ -120,13 +120,13 @@ repository can pin its own in `.claude/relay/config.json`.
 ### Windows — one line
 
 ```powershell
-irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.7.3/install.ps1 | iex
+irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.7.4/install.ps1 | iex
 ```
 
 ### macOS / Linux — one line
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.7.3/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.7.4/install.sh | bash
 ```
 
 **Restart Claude Code afterwards.** Hooks reload mid-session; the desktop client does not
@@ -199,6 +199,14 @@ than from anyone's description of the change.
 A contract climbs a ladder: `open`, `active`, `submitted`, `done`. Only a submitted contract
 closes, and the archived file is stamped `done`, so nothing under `done/` still claims to be
 in progress.
+
+Three things also have to be true about the tree around it. Nothing else that is still open
+may own a file this contract changed — otherwise whoever closes first seals work it never
+did. No source file outside `owns` may be sitting modified, because the verify steps run
+against the whole tree and would be testing changes the contract never claimed; documents do
+not count, since they cannot change what a command returns. And a contract that names
+`blocked-by: [T4]` does not close until `T4` is done. `contract.js list --ready` shows only
+the contracts nothing is waiting on.
 
 `contract.js reopen --reason "..."` takes a wrongly closed contract back with its round
 raised; the closed round stays in the ledger, so reopening is a fact on the record and not
@@ -352,8 +360,16 @@ It is a hint, not a guarantee: what it shows is true, but its silence does not p
 current. `node <plugin>/scripts/update.js` asks now and answers plainly.
 
 The map stamps the commit it was built from. Three weeks later it would otherwise state
-hubs, cycles and orphans that no longer exist, with full confidence; instead `doctor` says
-how many commits behind it is, and `map.js who` says so too.
+hubs, cycles and orphans that no longer exist, with full confidence. Instead the first lines
+of `map.md` name the HEAD it was built at, the statusline says `map stale` the moment HEAD
+moves past it, `doctor` says how many commits behind it is, and `map.js who` answers from a
+live scan rather than from the stale file. A generated output is checked for freshness where
+it is read, not where it is written; a silently stale answer is a wrong answer.
+
+`map.md` is written to a size budget (`--budget=<bytes>`, 64 KB by default) and says in plain
+words how many files it left out and where the rest are, instead of ending quietly. If a scan
+finds less than half the files the last map had, it refuses to overwrite and says so - that is
+what a wrong root looks like.
 
 `doctor.js` answers in `{name, ok, message}` rows and takes `--json`. What it checks is what
 it prints; run it rather than read about it.
@@ -382,40 +398,33 @@ is what Core adds on top. The short version:
 
 ## What Core replaces, measured
 
-Before reaching for a neighbouring tool, Core measures it. Sixteen projects were surveyed and
-two were put through a controlled experiment on this machine. None of them is installed, and
-every line below is a measurement rather than a preference.
+You do not need to install anything alongside Core. That is a claim, so here are the numbers
+behind it. Sixteen neighbouring projects were surveyed and two were put through a controlled
+experiment on this machine; the table is what came back, not what we assumed.
 
-**Code-graph indexers** (graphify, Aider's repo map, Serena). On a real repository — fastify,
-1,032 files — the same five architecture questions cost 63,462 tokens through a semantic graph
-index, 56,120 through Core's own `map.js`, and 50,525 through plain grep. Same five answers.
-An index buys precision, not tokens, and only for one class of question: *who calls this
-symbol*. `map.js` derives imports, hubs, cycles and orphans straight from the source with zero
-model calls, builds 3× faster and costs 74× less. Install a graph tool for one job in a large
-foreign codebase; do not carry one.
+| You might install | To get | What the measurement said | Where you land |
+|---|---|---|---|
+| A code-graph index — graphify, Aider's repo map, Serena | "what calls what" in a codebase | Five architecture questions on fastify (1,032 files): **63,462** tokens through the graph index, **56,120** through Core's `map.js`, **50,525** through plain grep. The same five answers. | `map.js` ships with Core. It builds 3× faster than the index and costs 74× less, because it never calls a model. |
+| An Obsidian-style vault, wiki-links, a backlink plugin | project memory that survives the session | Four note layouts, one question set, **5/5 correct on all four**. The vault cost **+10%** tokens; the backlink index **+14%** and gave worse citations. No agent ever followed a wiki-link. | One flat `MEMORY.md` and one roadmap file. Nothing to install, nothing to sync. |
+| An MCP orchestration suite | agents, swarms, task boards | One popular server publishes **358 tools**. Its schema is **~270 KB** and rides in *every* request — roughly **64–67k tokens** spent before a word of work — and it ships no completion gate. | Core's whole surface is scripts called on demand: **0 tokens** on an ordinary turn. |
+| CodeQL or Semgrep | deep static analysis | CodeQL's licence does not allow databases built from a private repository. Semgrep's cross-file analysis is the paid tier. | Neither is something a plugin can hand you. Run them in CI if you need them. |
+| A spec or PRD framework | acceptance criteria | Markdown ceremony that nothing executes. | Core's `verify:` steps are commands that must exit 0, and a step that cannot fail is rejected as no acceptance at all. |
+| A memory-layer MCP | remembering across sessions | To be worth anything it has to read and write on every turn. | That is the one thing Core will not do. |
 
-**Obsidian-style vaults.** Four note layouts — one flat file, folders, a vault with
-wiki-links, a vault with a backlink index — answered the same retrieval questions 5/5 each.
-The vault cost 10% more tokens, the backlink index 14% more with worse citations, and no agent
-ever followed a wiki-link. That is why Core keeps `MEMORY.md` and one roadmap file. The answer
-holds only while the corpus fits a single `Read`; past that it changes.
-
-**MCP-carried suites.** One popular orchestration server publishes 358 tools; its schema is
-~270 KB and rides in every request — roughly 64–67k tokens before a word of work is done, and
-it ships no completion gate. Core's entire surface is scripts called on demand: 0 tokens on an
-ordinary turn.
-
-**Scanners, spec frameworks, memory layers.** CodeQL's licence does not allow databases built
-from a private repository; Semgrep's cross-file analysis is the paid tier. Spec frameworks add
-markdown ceremony where Core already has a gate that runs commands. Memory layers have to read
-and write on every turn to be worth anything, which is the one thing Core will not do.
+The honest summary of the index result: **an index buys precision, not tokens**, and only for
+one class of question — *who calls this symbol*. If that is your daily question on a codebase
+you have never read, install a graph tool for that job. It does not belong in your plugin
+layer, where you pay for it on every session whether you ask it anything or not.
 
 ### What Core does not do
 
-No symbol-level call graph — `map.js` stops at file imports. No semantic search. No cross-file
-taint analysis. On a codebase far larger than the one Core was measured on, or a foreign one
-you have never read, a dedicated index earns its cost. That is the moment to install one, for
-that job.
+- **No symbol-level call graph.** `map.js` stops at file imports: hubs, cycles, orphans, edges.
+- **No semantic search.** Grep and the import map, nothing embedded.
+- **No cross-file taint analysis.**
+
+On a codebase far larger than the ones this was measured on, or a foreign one you have never
+opened, a dedicated index earns its cost. That is the moment to install one — for that job,
+not forever.
 
 ---
 
@@ -488,7 +497,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,438 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,494 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
 scaffold, the cue, the banner, the handoff note, and one check that no hook writes into
 context. CI runs the same suite on Linux, Windows and macOS; development is Windows-first.

@@ -119,13 +119,13 @@ modunu `.claude/relay/config.json` içinde sabitleyebilir.
 ### Windows — tek satır
 
 ```powershell
-irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.7.3/install.ps1 | iex
+irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.7.4/install.ps1 | iex
 ```
 
 ### macOS / Linux — tek satır
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.7.3/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.7.4/install.sh | bash
 ```
 
 **Sonrasında Claude Code'u yeniden başlatın.** Kancalar oturum ortasında yeniden yüklenir
@@ -197,6 +197,13 @@ komutlarını kendisi çalıştırıyor ve riski, değişikliğin tarifinden de�
 Sözleşme bir merdiven çıkıyor: `open`, `active`, `submitted`, `done`. Yalnız submitted olan
 kapanıyor, arşivlenen dosyaya `done` damgası vuruluyor; böylece `done/` altında hâlâ "devam
 ediyor" diyen bir dosya kalmıyor.
+
+Etrafındaki ağaç hakkında da üç şeyin doğru olması gerekiyor. Bu sözleşmenin değiştirdiği bir
+dosyayı açık başka bir sözleşme sahiplenemez — yoksa önce kapanan, kendi yapmadığı işi
+mühürler. `owns` dışında değişmiş bir kaynak dosya duramaz; verify adımları bütün ağaca karşı
+koşuyor ve sözleşmenin hiç sahiplenmediği değişiklikleri sınamış olurdu. Belgeler sayılmaz,
+çünkü bir komutun döndürdüğünü değiştiremezler. `blocked-by: [T4]` yazan bir sözleşme de `T4`
+bitene kadar kapanmıyor. `contract.js list --ready` yalnız hiçbir şeyi beklemeyenleri gösterir.
 
 `contract.js reopen --reason "..."` yanlış kapanan sözleşmeyi turunu artırarak geri alıyor;
 kapanan tur defterde kalıyor, yani geri alma bir silme değil bir kayıt. Geri alma altıncı
@@ -350,8 +357,16 @@ değil bir ipucu: gösterdiği şey doğru, ama susması güncel olduğunuzu kan
 `node <plugin>/scripts/update.js` şimdi sorar ve açıkça söyler.
 
 Harita üretildiği commit'i damgalıyor. Yoksa üç hafta sonra artık var olmayan merkezleri,
-döngüleri ve öksüzleri tam bir güvenle sayardı; onun yerine `doctor` kaç commit geride
-olduğunu söylüyor, `map.js who` da aynısını hatırlatıyor.
+döngüleri ve öksüzleri tam bir güvenle sayardı. Onun yerine `map.md` ilk satırında hangi
+HEAD'de üretildiğini yazıyor, HEAD ilerlediği anda statusline `harita bayat` diyor, `doctor`
+kaç commit geride olduğunu söylüyor ve `map.js who` bayat dosyadan değil canlı taramadan
+cevaplıyor. Üretilmiş bir çıktının tazeliği yazıldığı yerde değil okunduğu yerde sınanır;
+sessizce bayat bir cevap, yanlış cevaptır.
+
+`map.md` bir boyut bütçesiyle yazılıyor (`--budget=<bayt>`, öntanımlı 64 KB) ve sessizce
+kesilmek yerine kaç dosyayı dışarıda bıraktığını ve gerisinin nerede olduğunu açıkça yazıyor.
+Bir tarama, önceki haritanın yarısından az dosya bulursa üstüne yazmayı reddediyor ve nedenini
+söylüyor — yanlış kökte çalıştırmak böyle görünüyor.
 
 `doctor.js` `{name, ok, message}` satırlarıyla cevap veriyor ve `--json` alıyor. Neyi
 denetlediği, bastığı şeydir; okumak yerine çalıştırın.
@@ -380,38 +395,32 @@ Core'un üstüne koyduğu. Kısa hali:
 
 ## Core neyin yerine geçiyor, ölçüsüyle
 
-Komşu bir araca uzanmadan önce Core onu ölçer. On altı proje incelendi, ikisi bu makinede
-kontrollü deneye sokuldu. Hiçbiri kurulu değil ve aşağıdaki her satır tercih değil ölçümdür.
+Core'un yanına başka bir şey kurmanıza gerek yok. Bu bir iddia olduğu için altındaki rakamlar
+burada. On altı komşu proje incelendi, ikisi bu makinede kontrollü deneye sokuldu; tablodaki
+her satır varsayım değil, ölçümün döndürdüğü şey.
 
-**Kod grafiği indeksleyiciler** (graphify, Aider'in repo haritası, Serena). Gerçek bir depoda
-— fastify, 1.032 dosya — aynı beş mimari soru semantik grafik indeksiyle 63.462, Core'un kendi
-`map.js`'iyle 56.120, düz grep'le 50.525 token tuttu. Aynı beş cevap. İndeks token değil
-isabet satın alıyor, o da tek bir soru sınıfında: *bu sembolü kim çağırıyor*. `map.js`
-import'ları, hub'ları, döngüleri ve öksüzleri kaynaktan doğrudan çıkarır — sıfır model
-çağrısı, 3× hızlı kurulum, 74× ucuz. Grafik aracı büyük ve yabancı bir kod tabanında tek bir
-iş için kurulur; sırtta taşınmaz.
+| Kurmayı düşünebileceğiniz | Ne için | Ölçüm ne dedi | Nerede kalıyorsunuz |
+|---|---|---|---|
+| Kod grafiği indeksi — graphify, Aider repo haritası, Serena | "neyi ne çağırıyor" | fastify üzerinde beş mimari soru (1.032 dosya): grafik indeksiyle **63.462** token, Core'un `map.js`'iyle **56.120**, düz grep'le **50.525**. Aynı beş cevap. | `map.js` Core ile geliyor. İndeksten 3× hızlı kuruluyor ve 74× ucuz — çünkü hiç model çağırmıyor. |
+| Obsidian tarzı vault, wiki-bağlantı, backlink eklentisi | oturumdan artakalan proje hafızası | Dört not düzeni, tek soru seti, **dördünde de 5/5 doğru**. Vault **%10**, backlink indeksi **%14** fazla token yedi ve alıntıları daha kötüydü. Hiçbir ajan bir wiki-bağlantısını izlemedi. | Tek düz `MEMORY.md` ve tek bir yol haritası dosyası. Kurulacak bir şey yok, eşitlenecek bir şey yok. |
+| MCP orkestrasyon takımı | ajanlar, sürüler, görev panoları | Popüler bir sunucu **358 araç** yayımlıyor. Şeması **~270 KB** ve *her* isteğe biniyor — tek kelime iş yapılmadan yaklaşık **64–67 bin token** — üstelik tamamlanma kapısı yok. | Core'un bütün yüzeyi çağrılınca koşan betikler: sıradan turda **0 token**. |
+| CodeQL ya da Semgrep | derin statik analiz | CodeQL'in lisansı özel depodan veritabanı üretmeye izin vermiyor. Semgrep'in dosyalar arası analizi ücretli katman. | İkisi de bir eklentinin size verebileceği şey değil. İhtiyaç varsa CI'da koşturun. |
+| Şartname / PRD çerçevesi | kabul ölçütü | Hiçbir şeyin çalıştırmadığı markdown merasimi. | Core'un `verify:` adımları 0 ile çıkmak zorunda olan komutlardır; başarısız olamayan bir adım "kabul değildir" diye reddedilir. |
+| Hafıza katmanı MCP'si | oturumlar arası hatırlama | Değer üretmek için her turda okuyup yazmak zorunda. | Core'un yapmayacağı tek şey o. |
 
-**Obsidian tarzı vault'lar.** Dört not düzeni — tek düz dosya, klasörler, wiki-bağlantılı
-vault, backlink indeksli vault — aynı erişim sorularını 5/5 yanıtladı. Vault %10, backlink
-indeksi %14 fazla token yedi ve alıntıları daha kötüydü; hiçbir ajan bir wiki-bağlantısını
-izlemedi. Core bu yüzden `MEMORY.md` ve tek bir yol haritası dosyası tutuyor. Bu cevap külliyat
-tek bir `Read`'e sığdığı sürece geçerli; ötesinde değişir.
-
-**MCP ile taşınan takımlar.** Popüler bir orkestrasyon sunucusu 358 araç yayımlıyor; şeması
-~270 KB ve her isteğe biniyor — tek kelime iş yapılmadan yaklaşık 64–67 bin token, üstelik
-tamamlanma kapısı yok. Core'un bütün yüzeyi çağrılınca koşan betiklerdir: sıradan turda 0 token.
-
-**Tarayıcılar, şartname çerçeveleri, hafıza katmanları.** CodeQL'in lisansı özel depodan
-veritabanı üretmeye izin vermiyor; Semgrep'in dosyalar arası analizi ücretli katman. Şartname
-çerçeveleri, Core'da zaten komut koşturan bir kapı varken markdown merasimi ekliyor. Hafıza
-katmanları değer üretmek için her turda okuyup yazmak zorunda — Core'un yapmayacağı tek şey o.
+İndeks sonucunun dürüst özeti: **indeks token değil isabet satın alıyor**, o da tek bir soru
+sınıfında — *bu sembolü kim çağırıyor*. Hiç okumadığınız bir kod tabanında günlük sorunuz buysa,
+o iş için bir grafik aracı kurun. Yeri eklenti katmanı değil; orada hiç sormasanız da her
+oturumda bedelini ödersiniz.
 
 ### Core'un yapmadığı
 
-Sembol seviyesinde çağrı grafiği yok — `map.js` dosya import'unda durur. Semantik arama yok.
-Dosyalar arası taint analizi yok. Core'un ölçüldüğünden çok daha büyük bir kod tabanında ya da
-hiç okumadığın yabancı bir depoda özel bir indeks maliyetini hak eder. Kurma anı orasıdır, o iş
-için.
+- **Sembol seviyesinde çağrı grafiği yok.** `map.js` dosya import'unda durur: hub, döngü, öksüz, kenar.
+- **Semantik arama yok.** Grep ve import haritası; gömülü hiçbir şey yok.
+- **Dosyalar arası taint analizi yok.**
+
+Bunların ölçüldüğünden çok daha büyük bir kod tabanında ya da hiç açmadığınız yabancı bir depoda
+özel bir indeks maliyetini hak eder. Kurma anı orasıdır — o iş için, temelli değil.
 
 ---
 
@@ -483,7 +492,7 @@ node test/all.js
 
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
 kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu ve hiçbir kancanın
-bağlama yazmadığı denetimi üzerine 2.438 assertion. Aynı takımı CI Linux, Windows ve
+bağlama yazmadığı denetimi üzerine 2.494 sav. Aynı takımı CI Linux, Windows ve
 macOS'ta koşuyor; geliştirme Windows öncelikli.
 
 ---

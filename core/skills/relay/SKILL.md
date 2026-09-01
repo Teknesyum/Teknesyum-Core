@@ -58,9 +58,11 @@ Enforced, not advised:
   `done/`, `audits/`, `live/`, or call `contract.js`.
 - `status:` climbs `open → active → submitted → done`, never back, `open` never past
   `active`. `blocked` is free in both directions.
-- An agent binds to the contract it first edits. After that it may write **only** inside
-  that contract's `owns`. Widening the contract to fit an edit is the wrong move: record
-  the blocker under `## Checkpoint` and return.
+- `blocked-by: [T3]` must be `done` first; `list --ready` shows what nothing is holding. A
+  close also refuses on a changed file another open contract owns, or dirty tracked source
+  outside `owns`.
+- An agent binds to the contract it first edits, and writes **only** inside that contract's
+  `owns`. Widening it to fit an edit is wrong: record the blocker under `## Checkpoint`.
 
 ## Layout
 
@@ -82,12 +84,11 @@ node <P>/scripts/contract.js check --id T7      # risk and verify steps, no side
 node <P>/scripts/contract.js complete --id T7   # runs verify, gates, moves to done/
 ```
 
-Risk comes from the diff, not from a claim: sensitive paths (auth, migrations, hooks, CI,
-dependency and settings files), more than 8 owned files, or more than 300 changed lines
-mean **high**. A contract may write `risk: high` to escalate; it cannot declare itself low.
-
-Low risk closes on `verify:` alone. High risk also needs an audit record, which only the
-auditor role can produce and which is consumed on use.
+Risk comes from the diff since the merge-base, not from a claim: sensitive paths (auth,
+migrations, hooks, CI, dependency and settings files), more than 8 owned files, or more than
+300 changed lines mean **high**. A contract may escalate with `risk: high`, never lower
+itself. Low risk closes on `verify:` alone; high risk also needs an audit record, which only
+the auditor produces and which is consumed on use.
 
 Unmet work does not vanish:
 
@@ -117,8 +118,7 @@ plan that picks the product's direction or spans phases is one of those moments.
 guess itself. On premium it also opens beside every `builder`/`ui-builder` contract and when
 your own work trips `risk.js`. It is given the goal and the evidence, never your draft answer.
 
-Repeated failures are counted for you: the `PostToolUseFailure` hook keeps the run in
-`live/_tally.json`, the resolver reads it unasked, the banner shows it from two upward.
+Repeated failures are counted for you: the `PostToolUseFailure` hook keeps the run in `live/_tally.json`, the resolver reads it unasked, the banner shows it from two upward.
 
 - Independent contracts start together, not in sequence.
 - Two writers in one checkout share one git index; the first commit sweeps in the other's

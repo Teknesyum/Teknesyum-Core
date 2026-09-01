@@ -19,28 +19,8 @@ Aynı anda tek madde açık kalır.
 
 ## Açık maddeler
 
-On altı proje incelendi (`docs/inceleme/`), 74 fikir envanterlendi (`_SENTEZ.md`), iki
-kontrollü ölçüm yapıldı. Fable'ın sıralaması: önce yanlış olanı düzelt, sonra bedava
-veriyi al, en son yeni yetenek. Hiçbir dış araç kurulmuyor.
-
-- [ ] **1. Risk temeli `merge-base`.** (`risk.js gitNumstat`) Dalda biriken commit'ler
-      bugün riskten kaçıyor; bu eksik değil **yanlış** cevap.
-- [ ] **2. Diff'te A/M/D/R sınıfı.** (`--name-status --diff-filter`) Silme ile eklemeyi
-      aynı ağırlıkta saymak riski yanıltıyor.
-- [ ] **3. Hunk başlığından fonksiyon adı + satır aralığı.** (`risk.js`) Ölçüldü: 32.584 →
-      542 bayt, 60× daralma.
-- [ ] **4. Bağlam doluluğu statusline'da.** (`statusline.js build`) Veri zaten stdin'de,
-      okunmuyor.
-- [ ] **5. `complete()` kirli ağaç kontrolü.** (`contract.js`) Kirli ağaç belirsiz bir
-      ağacı mühürlüyor.
-- [ ] **6. `owns` kesişim kontrolü.** (`contract.js`) İki açık sözleşme aynı dosyayı
-      sahiplenebiliyor.
-- [ ] **7. `blocked-by` ve hazır-iş sorgusu.** (`contract.js`)
-- [ ] **8. map.json küçülme koruması + şema sürümü + `who` yedeği.** (`map.js`)
-- [ ] **9. Bayatlık protokolü.** `staleness()` var, kimse okumuyor: uyarı `map.md`'nin ilk
-      satırına ve statusline'a bassın.
-- [ ] **10. map.md çıktı bütçesi ve dürüst kırpma.** (`map.js emit`) Dört bağımsız projede
-      görülen tek ortak desen.
+Açık madde yok. Fable'ın sıraladığı on madde de kapandı; ikinci sıra aşağıda, koşulları
+dolmadı.
 
 İkinci sıra (koşulu dolmadı): #64 kabul↔verify kapsam eşlemesi, #42 ayrık güven ölçeği,
 #26 birlikte-değişim (depo genç), #43/#44 DECISIONS.md durumu ve `supersedes`, #67 diff'te
@@ -54,6 +34,31 @@ güncelliğe karşı denetlenir; bayatsa bunu çıktının ilk satırında söyl
 yanlış çıktıdır.
 
 ## Bitenler
+
+- [x] **On madde, Fable'ın sırasıyla.** (v0.7.4) On altı proje incelendi
+      (`docs/inceleme/`), 74 fikir envanterlendi (`_SENTEZ.md`), iki kontrollü ölçüm
+      yapıldı; hiçbir dış araç kurulmadı. 25 yeni sav, takım 2.494'te yeşil. İki kapı
+      Fable'ın künt halinden daraltıldı: kesişim yalnızca **değişmiş** ortak dosyayı
+      sayıyor, kirli ağaç yalnızca **çalıştırılabilir** dosyayı engelliyor.
+
+- [x] **1. Risk temeli `merge-base`.** (`risk.js gitNumstat`) Dalda biriken commit'ler
+      bugün riskten kaçıyor; bu eksik değil **yanlış** cevap.
+- [x] **2. Diff'te A/M/D/R sınıfı.** (`--name-status --diff-filter`) Silme ile eklemeyi
+      aynı ağırlıkta saymak riski yanıltıyor.
+- [x] **3. Hunk başlığından fonksiyon adı + satır aralığı.** (`risk.js`) Ölçüldü: 32.584 →
+      542 bayt, 60× daralma.
+- [x] **4. Bağlam doluluğu statusline'da.** (`statusline.js build`) Veri zaten stdin'de,
+      okunmuyor.
+- [x] **5. `complete()` kirli ağaç kontrolü.** (`contract.js`) Kirli ağaç belirsiz bir
+      ağacı mühürlüyor.
+- [x] **6. `owns` kesişim kontrolü.** (`contract.js`) İki açık sözleşme aynı dosyayı
+      sahiplenebiliyor.
+- [x] **7. `blocked-by` ve hazır-iş sorgusu.** (`contract.js`)
+- [x] **8. map.json küçülme koruması + şema sürümü + `who` yedeği.** (`map.js`)
+- [x] **9. Bayatlık protokolü.** `staleness()` var, kimse okumuyor: uyarı `map.md`'nin ilk
+      satırına ve statusline'a bassın.
+- [x] **10. map.md çıktı bütçesi ve dürüst kırpma.** (`map.js emit`) Dört bağımsız projede
+      görülen tek ortak desen.
 
 - [x] **6. Ekosistem raporu.** (`docs/EKOSISTEM.md`) Maliyet dört sınıfa ayrıldı;
       Core tamamen Z (sıfır). Karar: hiçbir şey kurulmuyor. Obsidian, kalıcı bellek

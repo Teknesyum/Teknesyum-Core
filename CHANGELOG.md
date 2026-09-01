@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.7.4
+
+- Risk is measured from the merge-base, classifies adds/edits/deletes/renames, and names the changed hunks; the close refuses on a blocked dependency, an overlapping owner, or a dirty tree; the map guards its own freshness and size
+
 ## v0.7.3
 
 - The statusline repoints itself when the plugin updates, a verify that runs long has its process tree swept, and the Stop gate holds unassigned work
