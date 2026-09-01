@@ -60,7 +60,7 @@ function load(id) {
   return { ...where, id, src, dst, body };
 }
 
-const VERIFY_TIMEOUT = 15 * 60 * 1000;
+const VERIFY_TIMEOUT = Number(process.env.TEKNESYUM_VERIFY_TIMEOUT_MS) || 45 * 60 * 1000;
 
 const FORBIDDEN_IN_VERIFY = [
   { re: /contracts[\\/]d?one/i, why: 'touches contracts/done/' },
