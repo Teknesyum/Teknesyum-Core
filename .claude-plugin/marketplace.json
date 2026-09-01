@@ -1,11 +1,25 @@
 {
   "name": "teknesyum",
-  "owner": { "name": "Teknesyum", "url": "https://github.com/Teknesyum" },
+  "owner": {
+    "name": "Teknesyum",
+    "url": "https://github.com/Teknesyum"
+  },
   "plugins": [
     {
       "name": "teknesyum-core",
       "source": "./core",
       "description": "Contract-gated multi-agent relay. Deterministic completion gate, no per-turn token cost."
+    },
+    {
+      "name": "teknesyum-ui",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/Teknesyum/Teknesyum-UI.git",
+        "path": "ui",
+        "ref": "main"
+      },
+      "description": "Interface standard as generated tokens plus a scanner. Off until a teknesyum-ui.json exists."
     }
-  ]
+  ],
+  "description": "Teknesyum plugins: the work relay and the interface standard."
 }

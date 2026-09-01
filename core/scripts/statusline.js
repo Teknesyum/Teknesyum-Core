@@ -15,8 +15,16 @@ const C = {
   magenta: '\x1b[35m',
 };
 
+const B = {
+  mark: '\x1b[38;5;51m',
+  seat: '\x1b[38;5;135m',
+  warn: '\x1b[38;5;201m',
+};
+
 const SEP = ' \x1b[2m·\x1b[0m ';
 const ACTIVE_MS = 5 * 60 * 1000;
+const QUIET_MS = 2 * 60 * 1000;
+const WORK_LINES = 2;
 
 function paint(c, s) {
   return process.env.NO_COLOR ? s : c + s + C.off;

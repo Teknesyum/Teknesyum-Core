@@ -8,13 +8,13 @@ const PREFIX = 'BUG-';
 
 function slug(s) {
   return String(s)
-    .toLowerCase()
     .replace(/[ıİ]/g, 'i')
     .replace(/[ğĞ]/g, 'g')
     .replace(/[üÜ]/g, 'u')
     .replace(/[şŞ]/g, 's')
     .replace(/[öÖ]/g, 'o')
     .replace(/[çÇ]/g, 'c')
+    .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
     .slice(0, 70);

@@ -36,7 +36,7 @@ function list(name, text) {
 
 function block(name, text) {
   const re = new RegExp('^' + name + ':[ \\t]*\\n((?:[ \\t]+-[ \\t]*.+\\n?)+)', 'im');
-  const m = String(text).match(re);
+  const m = String(text).replace(/\r\n/g, '\n').match(re);
   if (!m) return [];
   return m[1]
     .split('\n')

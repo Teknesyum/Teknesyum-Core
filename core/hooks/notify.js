@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { configRoot, sessionId, sessionFile, read } = require('./lib.js');
+const { configRoot, read } = require('./lib.js');
 
 const EVENTS = ['waiting', 'done', 'error'];
 
@@ -27,7 +27,6 @@ const MAC_DEFAULT = {
   error: '/System/Library/Sounds/Basso.aiff',
 };
 
-const STALE_MS = 7 * 24 * 60 * 60 * 1000;
 
 function mediaRoot() {
   if (process.env.TEKNESYUM_SES_KOKU) return process.env.TEKNESYUM_SES_KOKU;
@@ -45,25 +44,15 @@ function projectFile(cwd) {
   return path.join(path.resolve(cwd || '.'), '.claude', 'teknesyum-beep.json');
 }
 
-function sessionLayer(sid) {
-  if (!sid) return null;
-  const k = read(sessionFile(sid));
-  if (!k || !k.beep) return null;
-  const ts = Number(k.ts);
-  if (!Number.isFinite(ts) || Date.now() - ts > STALE_MS) return null;
-  return k.beep;
-}
-
-function layers(cwd, sid) {
+function layers(cwd) {
   return [
     { ad: 'proje', data: read(projectFile(cwd)) },
-    { ad: 'oturum', data: sessionLayer(sid) },
     { ad: 'makine', data: read(machineFile()) },
   ].filter((k) => k.data && typeof k.data === 'object');
 }
 
-function resolveSettings(cwd, sid) {
-  const stack = layers(cwd, sid);
+function resolveSettings(cwd) {
+  const stack = layers(cwd);
   const out = {};
   let blanket = { value: false, source: 'default' };
   for (const k of stack)
@@ -119,8 +108,8 @@ function soundPath(event, file) {
 
 function exec(kmt, arg) {
   try {
-    spawnSync(kmt, arg, { stdio: 'ignore', timeout: 8000, windowsHide: true });
-    return true;
+    const r = spawnSync(kmt, arg, { stdio: 'ignore', timeout: 8000, windowsHide: true });
+    return !!r && !r.error && r.status === 0;
   } catch {
     return false;
   }
@@ -174,28 +163,38 @@ function stampFile() {
   return path.join(configRoot(), 'teknesyum-beep-last.json');
 }
 
-function playedRecently(event, simdi) {
+function recently(event, simdi) {
+  const d = read(stampFile()) || {};
+  const last = Number(d[event]) || 0;
+  return !!last && simdi - last < (WINDOW[event] || 0);
+}
+
+function stamp(event, simdi) {
   const f = stampFile();
   const d = read(f) || {};
-  const last = Number(d[event]) || 0;
-  if (last && simdi - last < (WINDOW[event] || 0)) return true;
   d[event] = simdi;
   try {
     fs.mkdirSync(path.dirname(f), { recursive: true });
     fs.writeFileSync(f, JSON.stringify(d));
   } catch {}
+}
+
+function playedRecently(event, simdi) {
+  if (recently(event, simdi)) return true;
+  stamp(event, simdi);
   return false;
 }
 
 function run(j) {
   const event = HOOK_EVENT[j.hook_event_name];
   if (!event) return;
-  const cfg = resolveSettings(j.cwd, j.session_id || sessionId());
+  const cfg = resolveSettings(j.cwd);
   if (cfg.blanket.value) return;
   const field = cfg.events[event];
   if (!field || field.muted) return;
-  if (playedRecently(event, Date.now())) return;
-  play(field, event);
+  const now = Date.now();
+  if (recently(event, now)) return;
+  if (play(field, event)) stamp(event, now);
 }
 
 module.exports = {
@@ -213,6 +212,8 @@ module.exports = {
   WINDOW,
   stampFile,
   playedRecently,
+  recently,
+  stamp,
 };
 
 if (require.main === module) {
