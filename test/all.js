@@ -464,30 +464,32 @@ function testStatusline(root) {
 
 function testBanner(root) {
   const lib = require(path.join(CORE, 'hooks', 'lib.js'));
-  const { banner } = require(path.join(CORE, 'scripts', 'statusline.js'));
+  const { banner, plain } = require(path.join(CORE, 'scripts', 'statusline.js'));
   const line = banner(root);
 
-  ok('the banner opens as a heading with the plugin mark', line.startsWith('### Teknesyum ▸ '), line);
+  ok('the banner opens with the plugin mark', plain(line).startsWith('Teknesyum ▸ '), line);
   ok('the banner stays quiet while the gate holds', !/KAPI|GATE OFF/.test(line), line);
-  ok('the banner carries no ANSI colour', !/\[/.test(line), JSON.stringify(line));
-  ok('the banner is one line', line.indexOf(String.fromCharCode(10)) === -1, line);
-
-  const words = line.replace('### Teknesyum ▸ ', '').split(' · ').join(' ').split(' ');
-  const lower = words.filter((w) => /^\p{Ll}/u.test(w));
-  ok('every word is capitalised', lower.length === 0, lower.join(','));
+  ok('the banner is painted, so the eye finds it', plain(line) !== line, JSON.stringify(line));
+  ok('the paint washes out when the terminal asks', (() => {
+    process.env.NO_COLOR = '1';
+    const bare = banner(root);
+    delete process.env.NO_COLOR;
+    return plain(bare) === bare;
+  })(), line);
+  ok('the banner stays within three lines', line.split(String.fromCharCode(10)).length <= 3, line);
 
   ok('Turkish uppercase keeps the dot', !/Izlendi/.test(line), line);
 
   ok('the banner is silent outside a relay', banner(os.tmpdir()) === '');
 
-  ok('the banner stays inside its cap', line.length <= 120, String(line.length));
-  ok('the banner never cuts mid-word', !/·\s*$/.test(line), line);
+  ok('the banner stays inside its cap', plain(line).split(String.fromCharCode(10)).every((l) => l.length <= 120), String(plain(line).length));
+  ok('the banner never cuts mid-word', !/·\s*$/.test(plain(line)), line);
 
   const tally = path.join(lib.liveDir(path.join(root, '.claude', 'relay')), '_tally.json');
   fs.writeFileSync(tally, JSON.stringify({ steps: 41 }));
   ok('the step tally is off the banner for good', !/41/.test(banner(root)), banner(root));
   fs.rmSync(tally, { force: true });
-  ok('no step segment is left on the banner', !/Adım|Step/i.test(banner(root)), banner(root));
+  ok('the shared step tally never reaches the banner', !/41/.test(banner(root)), banner(root));
 
   const WATCH = path.join(CORE, 'hooks', 'watch.js');
   const fire = (ev, tool) =>
@@ -505,9 +507,9 @@ function testBanner(root) {
   fs.rmSync(path.join(lib.liveDir(path.join(root, '.claude', 'relay')), 'failer.json'), { force: true });
 
   fs.writeFileSync(tally, JSON.stringify({ steps: 3, fails: 1 }));
-  ok('a single failure stays off the banner', !/Dikkat|Heads/i.test(banner(root)), banner(root));
+  ok('a single failure stays off the banner', !/Dikkat|Heads/i.test(plain(banner(root))), plain(banner(root)));
   fs.writeFileSync(tally, JSON.stringify({ steps: 3, fails: 2 }));
-  ok('two failures in a row take over the banner', /Dikkat|Heads/i.test(banner(root)) && /2 /.test(banner(root)), banner(root));
+  ok('two failures in a row take over the banner', /Dikkat|Heads/i.test(plain(banner(root))) && /2 /.test(plain(banner(root))), plain(banner(root)));
   fs.rmSync(tally, { force: true });
 
   const liveB = lib.liveDir(path.join(root, '.claude', 'relay'));
@@ -515,60 +517,61 @@ function testBanner(root) {
   for (const x of parked) fs.renameSync(path.join(liveB, x), path.join(liveB, x + '.parked'));
   fs.writeFileSync(path.join(liveB, 'a1.json'), JSON.stringify({ id: 'a1', role: 'advisor', model: 'fable', effort: 'medium' }));
   fs.writeFileSync(path.join(liveB, '_calls.json'), JSON.stringify([{ role: 'advisor', model: 'fable', task: 'banner tasarimi soruldu', at: Date.now() }]));
-  const crewLine = banner(root);
+  const crewLine = plain(banner(root));
   ok('the banner names the role in the user language', /Dan\u0131\u015fman|Advisor/.test(crewLine), crewLine);
   ok('no English role name survives', !/Worker|Builder|Auditor|Scout|Scribe/.test(crewLine), crewLine);
   ok('the banner names the model and effort', /Fable-Medium/.test(crewLine), crewLine);
-  ok('the banner says what the agent was asked', /Banner Tasarimi Soruldu/.test(crewLine), crewLine);
+  ok('the banner says what the agent was asked, in its own words', /banner tasarimi soruldu/.test(crewLine), crewLine);
   ok('a working agent pushes the profile off the line', !/Premium|Normal|Eco/.test(crewLine), crewLine);
-  ok('the counters are gone from the busy line', !/Ad\u0131m|G\u00fcnl\u00fck/i.test(crewLine), crewLine);
+  ok('the work reads on a line of its own', /└ banner tasarimi soruldu/.test(crewLine), crewLine);
 
   fs.writeFileSync(path.join(liveB, '_duyuru.json'), JSON.stringify({ text: 'T7 kapandi', at: Date.now() }));
-  ok('the closing band reports what finished', /T7 Kapandi/.test(banner(root, 'foot')), banner(root, 'foot'));
-  ok('the opening band still reports what is running', /Dan\u0131\u015fman|Advisor/.test(banner(root, 'head')), banner(root, 'head'));
+  ok('the closing band reports what finished', /T7 Kapandi/.test(plain(banner(root, 'foot'))), plain(banner(root, 'foot')));
+  ok('the opening band still reports what is running', /Danışman|Advisor/.test(plain(banner(root, 'head'))), plain(banner(root, 'head')));
   fs.rmSync(path.join(liveB, '_duyuru.json'), { force: true });
   fs.rmSync(path.join(liveB, 'a1.json'), { force: true });
   fs.rmSync(path.join(liveB, '_calls.json'), { force: true });
-  ok('with nothing running the banner reports the work, not the profile again', !/Premium|Normal|Eco/.test(banner(root)), banner(root));
+  ok('with nothing running the banner reports the work, not the profile again', !/Premium|Normal|Eco/.test(plain(banner(root))), plain(banner(root)));
   const quiet = fixture();
   ok('and with nothing to say at all it says nothing', banner(quiet) === '', banner(quiet));
   try {
     fs.rmSync(quiet, { recursive: true, force: true, maxRetries: 3 });
   } catch {}
-  ok('bookkeeping files are not counted as agents', !/1 Ajan|2 Ajan/.test(banner(root)), banner(root));
+  ok('bookkeeping files are not counted as agents', !/1 Ajan|2 Ajan/.test(plain(banner(root))), plain(banner(root)));
   fs.writeFileSync(path.join(liveB, 'a9.json'), JSON.stringify({ id: 'a9', role: 'scout', updated: new Date().toISOString(), files: [] }));
-  ok('a seat with no model of its own is named from the tier table', /Sonnet|Opus|Haiku/.test(banner(root)), banner(root));
-  ok('and the banner says it was assigned, not merely that it is busy', /Atandı|Assigned/i.test(banner(root)), banner(root));
+  ok('a seat with no model of its own is named from the tier table', /Sonnet|Opus|Haiku/.test(plain(banner(root))), plain(banner(root)));
+  ok('no verb filler pads the seat', !/Atandı|Assigned|Yapılıyor|In Progress/i.test(plain(banner(root))), plain(banner(root)));
   fs.writeFileSync(path.join(liveB, 'a8.json'), JSON.stringify({ id: 'a8', role: 'scout', updated: new Date().toISOString(), files: [] }));
-  ok('two of the same seat are counted, not listed twice', /2×/.test(banner(root)), banner(root));
+  ok('two of the same seat are counted, not listed twice', /2×/.test(plain(banner(root))), plain(banner(root)));
   fs.writeFileSync(path.join(liveB, 'a7.json'), JSON.stringify({ id: 'a7', role: 'Explore', updated: new Date().toISOString(), files: [] }));
-  ok('a built-in agent with no row of its own is named from the session cell', /Kâşif|Explorer/i.test(banner(root)) && /Opus|Sonnet|Haiku/.test(banner(root)), banner(root));
+  ok('a built-in agent with no row of its own is named from the session cell', /Kâşif|Explorer/i.test(plain(banner(root))) && /Opus|Sonnet|Haiku/.test(plain(banner(root))), plain(banner(root)));
 
   fs.writeFileSync(path.join(liveB, '_calls.json'), JSON.stringify([
     { role: 'scout', model: '', task: 'lisans dosyalari tarandi', at: Date.now() - 1000 },
     { role: 'Explore', model: '', task: 'rozet metni arandi', at: Date.now() },
   ]));
-  const busy = banner(root);
-  ok('with several seats the banner still says what for', /Rozet Metni Arandi/.test(busy), busy);
-  ok('each distinct task is named once', /Lisans Dosyalari Tarandi/.test(busy), busy);
-  ok('the task follows the assignment, it does not replace it', / > /.test(busy) && /Yapılıyor|In Progress/i.test(busy), busy);
-  ok('the seat is named before the work, in that order', busy.indexOf('Atandı') < busy.indexOf(' > '), busy);
-  ok('the line reads as a heading, so the eye finds it', busy.startsWith('### '), busy);
+  const busy = plain(banner(root));
+  ok('with several seats the banner still says what for', /rozet metni arandi/.test(busy), busy);
+  ok('each distinct task is named once', /lisans dosyalari tarandi/.test(busy), busy);
+  ok('every job gets a branch line of its own', busy.split(String.fromCharCode(10)).filter((l) => l.startsWith('└')).length === 2, busy);
+  ok('the seat is named before the work, in that order', busy.indexOf(String.fromCharCode(10)) < busy.indexOf('rozet metni arandi'), busy);
+  ok('the seat line carries the mark, the work lines do not', busy.split(String.fromCharCode(10))[0].startsWith('Teknesyum ▸ '), busy);
   fs.writeFileSync(path.join(liveB, '_calls.json'), JSON.stringify([{ role: 'scout', model: 'sonnet', task: 'tier effort probe', at: Date.now() }]));
   fs.writeFileSync(path.join(liveB, 'a6.json'), JSON.stringify({ id: 'a6', role: 'scout', updated: new Date().toISOString(), files: [] }));
-  const tiered = banner(root);
+  const tiered = plain(banner(root));
   ok('a model with no effort beside it borrows the effort its own row says', /Sonnet-Medium/.test(tiered), tiered);
   fs.writeFileSync(path.join(liveB, '_calls.json'), JSON.stringify([{ role: 'scout', model: 'haiku', task: 'tier effort probe', at: Date.now() }]));
-  const odd = banner(root);
+  const odd = plain(banner(root));
   ok('a model the row does not name gets no invented effort', /Haiku(?!-)/.test(odd) && !/Haiku-/.test(odd), odd);
   fs.rmSync(path.join(liveB, 'a6.json'), { force: true });
 
   writeContract(root, 'K3', '# K3 rozet metni duzeni\nstatus: active\nowns: [src/ok.js]\nverify:\n  - node -e "process.exit(0)"\n');
   fs.rmSync(path.join(liveB, 'a8.json'), { force: true });
   fs.writeFileSync(path.join(liveB, 'a9.json'), JSON.stringify({ id: 'a9', role: 'scout', contract: 'K3', updated: new Date().toISOString(), files: [] }));
-  const bound = banner(root);
-  ok('a contract-bound seat answers with the contract goal', /K3 Rozet Metni Duzeni/.test(bound), bound);
-  ok('the contract goal outranks the spawn description', !/Lisans Dosyalari/.test(bound), bound);
+  const bound = plain(banner(root));
+  ok('a contract-bound seat answers with the contract goal', /K3 rozet metni duzeni/.test(bound), bound);
+  ok('the contract goal outranks the spawn description', !/lisans dosyalari/.test(bound), bound);
+  ok('the seat line names the contract it is bound to', bound.split(String.fromCharCode(10))[0].indexOf('K3') > 0, bound);
 
   run(process.execPath, [WATCH], {
     cwd: root,
@@ -580,8 +583,8 @@ function testBanner(root) {
   const logged = JSON.parse(fs.readFileSync(path.join(liveB, '_calls.json'), 'utf8'));
   ok('the spawn log carries the contract named in the prompt', logged.some((c) => c.contract === 'K3'), JSON.stringify(logged));
   fs.writeFileSync(path.join(liveB, 'a9.json'), JSON.stringify({ id: 'a9', role: 'scout', updated: new Date().toISOString(), files: [] }));
-  const viaCall = banner(root);
-  ok('an unbound seat still gets the goal through the spawn log', /K3 Rozet Metni Duzeni/.test(viaCall), viaCall);
+  const viaCall = plain(banner(root));
+  ok('an unbound seat still gets the goal through the spawn log', /K3 rozet metni duzeni/.test(viaCall), viaCall);
   fs.rmSync(path.join(liveB, 'spawner.json'), { force: true });
   fs.rmSync(path.join(root, '.claude', 'relay', 'contracts', 'K3.md'), { force: true });
 
@@ -591,12 +594,31 @@ function testBanner(root) {
     { role: 'scout', model: '', task: 'y'.repeat(60), at: Date.now() - 1000 },
     { role: 'Explore', model: '', task: 'z'.repeat(60), at: Date.now() },
   ]));
-  const crowded = banner(root);
-  ok('a crowded line stays inside the cap', crowded.length <= '### Teknesyum ▸ '.length + 120, String(crowded.length));
-  ok('the seats survive the trim, the tasks give way', /Kâşif|Explorer|Gözcü|Scout/i.test(crowded), crowded);
+  const crowded = plain(banner(root));
+  ok('a crowded banner stays inside the cap', crowded.split(String.fromCharCode(10)).every((l) => l.length <= 120), crowded);
+  ok('a crowded banner still stops at three lines', crowded.split(String.fromCharCode(10)).length <= 3, crowded);
+  ok('the seats survive the trim, the tasks give way', /Kâşif|Explorer|Gözcü|Scout|İzci/i.test(crowded.split(String.fromCharCode(10))[0]), crowded);
   fs.rmSync(path.join(liveB, '_calls.json'), { force: true });
   for (const x of ['a7', 'a8', 'a9']) fs.rmSync(path.join(liveB, x + '.json'), { force: true });
   for (const x of parked) fs.renameSync(path.join(liveB, x + '.parked'), path.join(liveB, x));
+
+  const detail = lib.liveDir(path.join(root, '.claude', 'relay'));
+  const parked2 = fs.readdirSync(detail).filter((x) => x.endsWith('.json'));
+  for (const x of parked2) fs.renameSync(path.join(detail, x), path.join(detail, x + '.parked'));
+  writeContract(root, 'K4', '# K4 ikinci tur' + String.fromCharCode(10) + 'status: active' + String.fromCharCode(10) + 'round: 2' + String.fromCharCode(10) + 'owns: [src/ok.js]' + String.fromCharCode(10) + 'verify:' + String.fromCharCode(10) + '  - node -e "process.exit(0)"' + String.fromCharCode(10));
+  fs.writeFileSync(path.join(detail, 'd1.json'), JSON.stringify({ id: 'd1', role: 'builder', contract: 'K4', steps: 12, files: ['core/scripts/statusline.js'], updated: new Date().toISOString() }));
+  const deep = plain(banner(root));
+  ok('a second round is named on the seat line', / R2/.test(deep.split(String.fromCharCode(10))[0]), deep);
+  ok('the work line counts the steps that seat took', /12/.test(deep), deep);
+  ok('the work line names the file last touched, bare', /statusline\.js/.test(deep) && !/core\/scripts\/statusline/.test(deep), deep);
+  ok('a working seat is not flagged as quiet', !/sessiz|quiet/i.test(deep), deep);
+
+  fs.writeFileSync(path.join(detail, 'd1.json'), JSON.stringify({ id: 'd1', role: 'builder', contract: 'K4', steps: 12, files: [], updated: new Date(Date.now() - 4 * 60 * 1000).toISOString() }));
+  const hush = plain(banner(root));
+  ok('a seat that has gone quiet says how long', /4 dk sessiz|4 min quiet/.test(hush), hush);
+  fs.rmSync(path.join(detail, 'd1.json'), { force: true });
+  fs.rmSync(path.join(root, '.claude', 'relay', 'contracts', 'K4.md'), { force: true });
+  for (const x of parked2) fs.renameSync(path.join(detail, x + '.parked'), path.join(detail, x));
 
   const many = lib.liveDir(path.join(root, '.claude', 'relay'));
   for (let i = 0; i < 60; i++) fs.writeFileSync(path.join(many, 'bulk' + i + '.json'), JSON.stringify({ id: 'b' + i, role: 'builder', ended: '2020-01-01' }));
@@ -634,19 +656,19 @@ function testMessageDisplay(root) {
   ok('the delta is kept', body.indexOf('son satir.') !== -1, body);
   ok('the notice is added, not substituted', body.indexOf('son satir.') !== -1 && body.indexOf('Teknesyum') !== -1, body);
   const NL = String.fromCharCode(10);
-  ok('a blank line separates the notice', body.indexOf('son satir.' + NL + NL + '### Teknesyum') > 0, JSON.stringify(body));
+  ok('a blank line separates the notice', body.indexOf('son satir.' + NL + NL + 'Teknesyum') > 0, JSON.stringify(body));
   ok('a single flush is framed above and below', body.split('Teknesyum').length === 3, body);
   const first = JSON.parse(call(ev({ index: 0, final: false, delta: 'ilk parca.' })).stdout).hookSpecificOutput.displayContent;
-  ok('the first flush carries the notice on top', first.startsWith('### Teknesyum'), first);
+  ok('the first flush carries the notice on top', first.startsWith('Teknesyum'), first);
   ok('the first flush keeps its delta below', first.trim().endsWith('ilk parca.'), first);
   const last = JSON.parse(call(ev({ index: 4, final: true, delta: 'son parca.' })).stdout).hookSpecificOutput.displayContent;
   ok('a later final flush carries it below only', last.startsWith('son parca.') && last.split('Teknesyum').length === 2, last);
-  ok('the notice is the last line', body.trim().split(String.fromCharCode(10)).pop().startsWith('### Teknesyum'), body);
-  ok('the notice is also the first line', body.split(String.fromCharCode(10))[0].startsWith('### Teknesyum'), body);
+  ok('the notice is the last line', body.trim().split(String.fromCharCode(10)).pop().startsWith('Teknesyum'), body);
+  ok('the notice is also the first line', body.split(String.fromCharCode(10))[0].startsWith('Teknesyum'), body);
 
   const empty = call(ev({ delta: '' }));
   const eb = JSON.parse(empty.stdout).hookSpecificOutput.displayContent;
-  ok('an empty delta yields no leading blank line', eb.startsWith('### Teknesyum'), JSON.stringify(eb));
+  ok('an empty delta yields no leading blank line', eb.startsWith('Teknesyum'), JSON.stringify(eb));
   ok('an empty delta is not doubled', eb.split('Teknesyum').length === 2, JSON.stringify(eb));
 
   const outside = call(ev({ cwd: os.tmpdir() }));
@@ -662,11 +684,11 @@ function testMessageDisplay(root) {
   ok('a head flush keeps its trailing newline', wrapped.endsWith('satir' + NLc), JSON.stringify(wrapped));
 
   const lateEmpty = JSON.parse(call(ev({ index: 4, final: true, delta: '' })).stdout).hookSpecificOutput.displayContent;
-  ok('a late empty final flush leads with the notice', lateEmpty.startsWith('### Teknesyum'), JSON.stringify(lateEmpty));
+  ok('a late empty final flush leads with the notice', lateEmpty.startsWith('Teknesyum'), JSON.stringify(lateEmpty));
   ok('a late empty final flush is one line', lateEmpty.indexOf(NLc) === -1, JSON.stringify(lateEmpty));
 
   const framed = JSON.parse(call(ev({ index: 0, final: true, delta: 'x' })).stdout).hookSpecificOutput.displayContent;
-  const bands = framed.split(NLc).filter((l) => l.startsWith('### Teknesyum'));
+  const bands = framed.split(NLc).filter((l) => l.startsWith('Teknesyum'));
   ok('both bands read the same', bands.length === 2 && bands[0] === bands[1], bands.join(' | '));
 
   const src = fs.readFileSync(HOOK, 'utf8');

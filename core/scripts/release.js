@@ -126,7 +126,7 @@ function status() {
 function note() {
   const bump = String(arg('bump') || 'patch').toLowerCase();
   if (!BUMPS.includes(bump)) return say(['--bump is one of: ' + BUMPS.join(', ')], 2);
-  const text = argv.filter((a, i) => a !== '--bump' && argv[i - 1] !== '--bump' && a !== 'note').join(' ').trim();
+  const text = argv.filter((a, i) => a !== 'note' && !/^--/.test(a) && argv[i - 1] !== '--bump').join(' ').trim();
   if (!text) return say(['Say what changed: release.js note --bump patch "the gate stops guessing at shell"'], 2);
   fs.mkdirSync(NOTES, { recursive: true });
   const slug = text

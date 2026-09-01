@@ -103,7 +103,10 @@
     "en": "logs",
     "tr": "günlük"
   },
-  "line.stale": { "en": "abandoned", "tr": "sahipsiz" },
+  "line.stale": {
+    "en": "abandoned",
+    "tr": "sahipsiz"
+  },
   "line.update": {
     "en": "is out",
     "tr": "çıktı"
@@ -219,5 +222,21 @@
   "role.general-purpose": {
     "en": "agent",
     "tr": "ajan"
+  },
+  "line.quiet": {
+    "en": "min quiet",
+    "tr": "dk sessiz"
+  },
+  "line.step": {
+    "en": "step",
+    "tr": "adım"
+  },
+  "line.last": {
+    "en": "last:",
+    "tr": "son:"
+  },
+  "line.more": {
+    "en": "more jobs",
+    "tr": "iş daha"
   }
 }

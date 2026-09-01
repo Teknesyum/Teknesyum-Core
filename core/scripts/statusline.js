@@ -30,6 +30,26 @@ function paint(c, s) {
   return process.env.NO_COLOR ? s : c + s + C.off;
 }
 
+const tint = paint;
+
+function plain(s) {
+  return String(s).replace(/\x1b\[[0-9;]*m/g, '');
+}
+
+function fit(parts, cap) {
+  const kept = [];
+  let used = 0;
+  for (const p of parts) {
+    if (!p) continue;
+    const w = plain(p).length + (kept.length ? 3 : 0);
+    if (used + w > cap) break;
+    kept.push(p);
+    used += w;
+  }
+  if (!kept.length && parts.length) kept.push(plain(parts[0]).slice(0, cap));
+  return kept.join(tint(C.dim, ' · '));
+}
+
 function contracts(relay) {
   const dir = path.join(relay, 'contracts');
   let files = [];
@@ -136,71 +156,98 @@ function seatCell(row, c) {
 }
 
 function goalOf(relay, id, cache) {
-  if (!id) return '';
+  const none = { title: '', round: 0 };
+  if (!id) return none;
   if (cache[id] !== undefined) return cache[id];
-  let line = '';
+  const got = { title: '', round: 0 };
   try {
-    const head = fs.readFileSync(path.join(relay, 'contracts', id + '.md'), 'utf8').slice(0, 200);
+    const head = fs.readFileSync(path.join(relay, 'contracts', id + '.md'), 'utf8').slice(0, 400);
     const m = /^#[ \t]+(.+)$/m.exec(head);
-    if (m) line = m[1].trim().slice(0, 60);
+    if (m) got.title = m[1].trim().slice(0, 60);
+    const n = /^round:[ \t]*(\d+)/m.exec(head);
+    if (n) got.round = Number(n[1]);
   } catch {}
-  cache[id] = line;
-  return line;
+  cache[id] = got;
+  return got;
 }
 
-function crew(relay) {
+function quietFor(row, now) {
+  const at = Date.parse(row.updated || row.started || '');
+  if (!at) return 0;
+  const gap = now - at;
+  return gap >= QUIET_MS ? Math.floor(gap / 60000) : 0;
+}
+
+function lastFile(row) {
+  const list = Array.isArray(row.files) ? row.files : [];
+  if (!list.length) return '';
+  return String(list[list.length - 1]).split('/').pop();
+}
+
+function seats(relay) {
   const a = agents(relay);
-  if (!a.running) return '';
+  if (!a.running) return [];
   const pool = calls(relay);
   const goals = {};
-  const seats = a.rows.map((row) => {
+  const now = Date.now();
+  return a.rows.map((row) => {
     const c = taskFor(row, pool);
     const id = row.contract || (c && c.contract) || '';
-    const what = goalOf(relay, id, goals) || (c && c.task) || '';
+    const g = goalOf(relay, id, goals);
     return {
-      role: roleName(row.role),
-      cell: seatCell(row, c),
-      what,
+      role: titleCase(roleName(row.role)),
+      cell: titleCase(seatCell(row, c)),
+      id,
+      round: g.round,
+      what: g.title || (c && c.task) || '',
+      steps: Number(row.steps || 0),
+      file: lastFile(row),
+      quiet: quietFor(row, now),
     };
   });
-
-  const whats = [];
-  for (const s of seats) if (s.what && !whats.includes(s.what)) whats.push(s.what);
-
-  const one = seats[0];
-  const solo = [one.cell, one.role].filter(Boolean).join(' ');
-  const same = seats.every((x) => x.role === one.role && x.cell === one.cell);
-  let head = solo;
-  if (seats.length > 1 && same) head = seats.length + '× ' + solo;
-
-  if (seats.length > 1 && !same) {
-    const groups = [];
-    for (const x of seats) {
-      const key = x.role + '|' + x.cell;
-      const hit = groups.find((g) => g.key === key);
-      if (hit) hit.n += 1;
-      else groups.push({ key, n: 1, role: x.role, cell: x.cell });
-    }
-    head = groups
-      .map((g) => (g.n > 1 ? g.n + '× ' : '') + [g.cell, g.role].filter(Boolean).join(' '))
-      .join(' · ');
-  }
-
-  return head + ' ' + t('line.assigned') + doing(head, whats);
 }
 
-function doing(head, whats) {
-  const verb = ' ' + t('line.doing');
-  const room = BANNER_CAP - head.length - t('line.assigned').length - 1 - verb.length - 3;
-  const kept = [];
-  let used = 0;
-  for (const w of whats) {
-    const cost = (kept.length ? 3 : 0) + w.length;
-    if (used + cost > room) break;
-    kept.push(w);
-    used += cost;
+function group(list) {
+  const out = [];
+  for (const s of list) {
+    const key = [s.role, s.cell, s.id].join('|');
+    const hit = out.find((g) => g.key === key);
+    if (hit) {
+      hit.n += 1;
+      hit.quiet = Math.max(hit.quiet, s.quiet);
+    } else out.push({ key, n: 1, role: s.role, cell: s.cell, id: s.id, round: s.round, quiet: s.quiet });
   }
-  return kept.length ? ' > ' + kept.join(' · ') + verb : '';
+  return out;
+}
+
+function seatLine(list) {
+  const parts = [];
+  for (const g of group(list)) {
+    const seat = (g.n > 1 ? g.n + '× ' : '') + [g.cell, g.role].filter(Boolean).join(' ');
+    parts.push(tint(B.seat, seat));
+    if (g.id) parts.push(g.id + (g.round > 1 ? ' R' + g.round : ''));
+    if (g.quiet) parts.push(tint(B.warn, g.quiet + ' ' + t('line.quiet')));
+  }
+  return parts;
+}
+
+function workLines(list) {
+  const seen = [];
+  for (const s of list) {
+    if (!s.what || seen.some((x) => x.what === s.what)) continue;
+    seen.push(s);
+  }
+  const room = seen.length > WORK_LINES ? WORK_LINES - 1 : WORK_LINES;
+  const lines = [];
+  for (const s of seen.slice(0, room)) {
+    const bits = [s.what];
+    if (s.steps) bits.push(tint(C.dim, t('line.step')) + ' ' + s.steps);
+    if (s.file) bits.push(tint(C.dim, t('line.last')) + ' ' + s.file);
+    lines.push(tint(C.dim, '└') + ' ' + fit(bits, BANNER_CAP - 2));
+  }
+  const rest = seen.length - lines.length;
+  if (rest > 0) lines.push(tint(C.dim, '└') + ' ' + tint(C.dim, '+' + rest + ' ' + t('line.more')));
+  return lines;
 }
 
 function label(r) {
@@ -234,22 +281,26 @@ function titleCase(s) {
   return String(s).replace(/(^|[\s·×—/-])(\p{L})/gu, (m, a, b) => a + b.toLocaleUpperCase('tr'));
 }
 
+function headLine(parts) {
+  return tint(B.mark, 'Teknesyum') + ' ' + tint(B.seat, '▸') + ' ' + fit(parts, BANNER_CAP - 12);
+}
+
 function banner(cwd, phase) {
   const r = relayRoot(cwd, { git: false });
   if (!r) return '';
-  const mark = '### Teknesyum ▸ ';
-  const say = (body) => mark + trim(titleCase(body));
 
   const ty = counters(r.relay);
-  if (ty.fails >= 2) return say(t('line.caution') + ' — ' + ty.fails + ' ' + t('line.failRun'));
+  if (ty.fails >= 2) {
+    return headLine([tint(B.warn, titleCase(t('line.caution')) + ' — ' + ty.fails + ' ' + t('line.failRun'))]);
+  }
 
   if (phase === 'foot') {
     const n = getNotice(r.relay);
-    if (n) return say(n);
+    if (n) return headLine([titleCase(n)]);
   }
 
-  const c = crew(r.relay);
-  if (c) return say(c);
+  const list = seats(r.relay);
+  if (list.length) return [headLine(seatLine(list))].concat(workLines(list)).join('\n');
 
   const bits = [];
   const k = contracts(r.relay);
@@ -266,7 +317,7 @@ function banner(cwd, phase) {
   if (!gateOn()) bits.push(t('line.gateOff'));
 
   if (!bits.length) return '';
-  return say(bits.join(' · '));
+  return headLine(bits.map(titleCase));
 }
 
 function update() {
@@ -284,13 +335,6 @@ function gateOn() {
   } catch {
     return false;
   }
-}
-
-function trim(line) {
-  if (line.length <= BANNER_CAP) return line;
-  const cut = line.slice(0, BANNER_CAP);
-  const back = cut.lastIndexOf(' · ');
-  return back > 20 ? cut.slice(0, back) : cut;
 }
 
 function build(input) {
@@ -367,4 +411,4 @@ function summary(cwd) {
 }
 
 if (require.main === module) main();
-module.exports = { build, main, summary, banner };
+module.exports = { build, main, summary, banner, plain };
