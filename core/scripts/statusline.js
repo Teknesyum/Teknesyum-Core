@@ -41,7 +41,7 @@ function fit(parts, cap) {
   let used = 0;
   for (const p of parts) {
     if (!p) continue;
-    const w = plain(p).length + (kept.length ? 3 : 0);
+    const w = wide(p).length + (kept.length ? 3 : 0);
     if (used + w > cap) break;
     kept.push(p);
     used += w;
@@ -220,13 +220,18 @@ function group(list) {
   return out;
 }
 
+function bold(x) { return x ? "**" + x + "**" : ""; }
+function chip(x) { return x ? "`" + x + "`" : ""; }
+function soft(x) { return x ? "_" + x + "_" : ""; }
+function wide(x) { return plain(x).replace(/[`*_]/g, ""); }
+
 function seatLine(list) {
   const parts = [];
   for (const g of group(list)) {
     const seat = (g.n > 1 ? g.n + '× ' : '') + [g.cell, g.role].filter(Boolean).join(' ');
-    parts.push(tint(B.seat, seat));
+    parts.push(bold(seat));
     if (g.id) parts.push(g.id + (g.round > 1 ? ' R' + g.round : ''));
-    if (g.quiet) parts.push(tint(B.warn, g.quiet + ' ' + t('line.quiet')));
+    if (g.quiet) parts.push(chip(g.quiet + ' ' + t('line.quiet')));
   }
   return parts;
 }
@@ -241,12 +246,12 @@ function workLines(list) {
   const lines = [];
   for (const s of seen.slice(0, room)) {
     const bits = [s.what];
-    if (s.steps) bits.push(tint(C.dim, t('line.step')) + ' ' + s.steps);
-    if (s.file) bits.push(tint(C.dim, t('line.last')) + ' ' + s.file);
-    lines.push(tint(C.dim, '└') + ' ' + fit(bits, BANNER_CAP - 2));
+    if (s.steps) bits.push(soft(t('line.step') + ' ' + s.steps));
+    if (s.file) bits.push(soft(t('line.last')) + ' ' + s.file);
+    lines.push('└ ' + fit(bits, BANNER_CAP - 2));
   }
   const rest = seen.length - lines.length;
-  if (rest > 0) lines.push(tint(C.dim, '└') + ' ' + tint(C.dim, '+' + rest + ' ' + t('line.more')));
+  if (rest > 0) lines.push('└ ' + soft('+' + rest + ' ' + t('line.more')));
   return lines;
 }
 
@@ -282,7 +287,7 @@ function titleCase(s) {
 }
 
 function headLine(parts) {
-  return tint(B.mark, 'Teknesyum') + ' ' + tint(B.seat, '▸') + ' ' + fit(parts, BANNER_CAP - 12);
+  return bold('Teknesyum') + ' ▸ ' + fit(parts, BANNER_CAP - 12);
 }
 
 function banner(cwd, phase) {

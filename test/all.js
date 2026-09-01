@@ -467,7 +467,7 @@ function testBanner(root) {
   const { banner, plain } = require(path.join(CORE, 'scripts', 'statusline.js'));
   const line = banner(root);
 
-  ok('the banner opens with the plugin mark', plain(line).startsWith('Teknesyum ▸ '), line);
+  ok('the banner opens with the plugin mark', plain(line).startsWith('**Teknesyum** ▸ '), line);
   ok('the banner stays quiet while the gate holds', !/KAPI|GATE OFF/.test(line), line);
   ok('the banner carries no escape the client would print raw', plain(line) === line, JSON.stringify(line));
   ok('the banner stays within three lines', line.split(String.fromCharCode(10)).length <= 3, line);
@@ -549,7 +549,7 @@ function testBanner(root) {
   ok('each distinct task is named once', /lisans dosyalari tarandi/.test(busy), busy);
   ok('every job gets a branch line of its own', busy.split(String.fromCharCode(10)).filter((l) => l.startsWith('└')).length === 2, busy);
   ok('the seat is named before the work, in that order', busy.indexOf(String.fromCharCode(10)) < busy.indexOf('rozet metni arandi'), busy);
-  ok('the seat line carries the mark, the work lines do not', busy.split(String.fromCharCode(10))[0].startsWith('Teknesyum ▸ '), busy);
+  ok('the seat line carries the mark, the work lines do not', busy.split(String.fromCharCode(10))[0].startsWith('**Teknesyum** ▸ '), busy);
   fs.writeFileSync(path.join(liveB, '_calls.json'), JSON.stringify([{ role: 'scout', model: 'sonnet', task: 'tier effort probe', at: Date.now() }]));
   fs.writeFileSync(path.join(liveB, 'a6.json'), JSON.stringify({ id: 'a6', role: 'scout', updated: new Date().toISOString(), files: [] }));
   const tiered = plain(banner(root));
@@ -650,20 +650,20 @@ function testMessageDisplay(root) {
   ok('the delta is kept', body.indexOf('son satir.') !== -1, body);
   ok('the notice is added, not substituted', body.indexOf('son satir.') !== -1 && body.indexOf('Teknesyum') !== -1, body);
   const NL = String.fromCharCode(10);
-  ok('a blank line separates the notice', body.indexOf('son satir.' + NL + NL + 'Teknesyum') > 0, JSON.stringify(body));
-  ok('a single flush is framed above and below', body.split('Teknesyum').length === 3, body);
+  ok('a blank line separates the notice', body.indexOf('son satir.' + NL + NL + '**Teknesyum**') > 0, JSON.stringify(body));
+  ok('a single flush is framed above and below', body.split('**Teknesyum**').length === 3, body);
   const first = JSON.parse(call(ev({ index: 0, final: false, delta: 'ilk parca.' })).stdout).hookSpecificOutput.displayContent;
-  ok('the first flush carries the notice on top', first.startsWith('Teknesyum'), first);
+  ok('the first flush carries the notice on top', first.startsWith('**Teknesyum**'), first);
   ok('the first flush keeps its delta below', first.trim().endsWith('ilk parca.'), first);
   const last = JSON.parse(call(ev({ index: 4, final: true, delta: 'son parca.' })).stdout).hookSpecificOutput.displayContent;
-  ok('a later final flush carries it below only', last.startsWith('son parca.') && last.split('Teknesyum').length === 2, last);
-  ok('the notice is the last line', body.trim().split(String.fromCharCode(10)).pop().startsWith('Teknesyum'), body);
-  ok('the notice is also the first line', body.split(String.fromCharCode(10))[0].startsWith('Teknesyum'), body);
+  ok('a later final flush carries it below only', last.startsWith('son parca.') && last.split('**Teknesyum**').length === 2, last);
+  ok('the notice is the last line', body.trim().split(String.fromCharCode(10)).pop().startsWith('**Teknesyum**'), body);
+  ok('the notice is also the first line', body.split(String.fromCharCode(10))[0].startsWith('**Teknesyum**'), body);
 
   const empty = call(ev({ delta: '' }));
   const eb = JSON.parse(empty.stdout).hookSpecificOutput.displayContent;
-  ok('an empty delta yields no leading blank line', eb.startsWith('Teknesyum'), JSON.stringify(eb));
-  ok('an empty delta is not doubled', eb.split('Teknesyum').length === 2, JSON.stringify(eb));
+  ok('an empty delta yields no leading blank line', eb.startsWith('**Teknesyum**'), JSON.stringify(eb));
+  ok('an empty delta is not doubled', eb.split('**Teknesyum**').length === 2, JSON.stringify(eb));
 
   const outside = call(ev({ cwd: os.tmpdir() }));
   ok('the notice is silent outside a relay', outside.stdout.trim() === '', outside.stdout);
@@ -678,11 +678,11 @@ function testMessageDisplay(root) {
   ok('a head flush keeps its trailing newline', wrapped.endsWith('satir' + NLc), JSON.stringify(wrapped));
 
   const lateEmpty = JSON.parse(call(ev({ index: 4, final: true, delta: '' })).stdout).hookSpecificOutput.displayContent;
-  ok('a late empty final flush leads with the notice', lateEmpty.startsWith('Teknesyum'), JSON.stringify(lateEmpty));
+  ok('a late empty final flush leads with the notice', lateEmpty.startsWith('**Teknesyum**'), JSON.stringify(lateEmpty));
   ok('a late empty final flush is one line', lateEmpty.indexOf(NLc) === -1, JSON.stringify(lateEmpty));
 
   const framed = JSON.parse(call(ev({ index: 0, final: true, delta: 'x' })).stdout).hookSpecificOutput.displayContent;
-  const bands = framed.split(NLc).filter((l) => l.startsWith('Teknesyum'));
+  const bands = framed.split(NLc).filter((l) => l.startsWith('**Teknesyum**'));
   ok('both bands read the same', bands.length === 2 && bands[0] === bands[1], bands.join(' | '));
 
   const src = fs.readFileSync(HOOK, 'utf8');
