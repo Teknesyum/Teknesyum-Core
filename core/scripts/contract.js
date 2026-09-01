@@ -611,7 +611,7 @@ function complete() {
   fs.writeFileSync(c.src, stampStatus(c.body, 'done'), 'utf8');
   fs.renameSync(c.src, c.dst);
   setNotice(c.relay, c.id + ' ' + t('notice.closed'));
-  dropSnapshot(c.root, c.id);
+  const dropped = dropSnapshot(c.root, c.id);
   if (recordFile) seal.consume(recordFile, headSha);
   seal.ledgerInit(c.relay);
   seal.ledgerAppend(c.relay, {
@@ -634,6 +634,14 @@ function complete() {
         'risk ' + level.level + (level.reasons.length ? ' (' + level.reasons.join('; ') + ')' : ''),
         'ledger written at HEAD ' + headSha.slice(0, 8) + (record ? ', audit record consumed' : ''),
       ],
+      dropped
+        ? []
+        : [
+            '',
+            'The snapshot ref is still there. Take it off by hand, or the next contract',
+            'with this id reverts to a tree that is no longer the one it pinned:',
+            '  git update-ref -d ' + snapRef(c.id),
+          ],
       dead.length
         ? ['', 'Nothing else in the tree names these files:']
             .concat(dead.map((p) => '  ' + p))
@@ -659,13 +667,16 @@ function takeSnapshot(root, id) {
   const held = snapshotOf(root, id);
   if (held) return held;
   const dirty = git(root, ['stash', 'create']);
+  if (dirty === null) return null;
   const sha = dirty || git(root, ['rev-parse', 'HEAD']);
   if (!sha) return null;
   return git(root, ['update-ref', snapRef(id), sha]) === null ? null : sha;
 }
 
 function dropSnapshot(root, id) {
-  if (snapshotOf(root, id)) git(root, ['update-ref', '-d', snapRef(id)]);
+  if (!snapshotOf(root, id)) return true;
+  if (git(root, ['update-ref', '-d', snapRef(id)]) === null) return false;
+  return !snapshotOf(root, id);
 }
 
 function snapshotCmd() {

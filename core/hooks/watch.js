@@ -88,8 +88,13 @@ function record(j) {
   rec.updated = now;
   rec.event = ev;
 
-  if (ev === 'SubagentStop' || ev === 'Stop' || ev === 'SessionEnd') rec.ended = now;
-  else delete rec.ended;
+  if (ev === 'SubagentStop' || ev === 'Stop' || ev === 'SessionEnd') {
+    rec.ended = now;
+    rec.endedBy = ev;
+  } else if (!rec.endedBy || rec.endedBy === 'Stop') {
+    delete rec.ended;
+    delete rec.endedBy;
+  }
 
   if (ev === 'SubagentStop' && rec.role) setNotice(r.relay, rec.role + ' ' + t('notice.done'));
 

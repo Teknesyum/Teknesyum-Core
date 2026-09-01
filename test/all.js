@@ -1502,6 +1502,40 @@ function testRaces() {
   lib.merge(merged, (cur) => Object.assign({}, cur, { b: 2 }));
   const m = JSON.parse(fs.readFileSync(merged, 'utf8'));
   ok('a merge keeps the field it did not come for', m.a === 1 && m.b === 2, JSON.stringify(m));
+  const shared = path.join(live, '_shared.json');
+  fs.rmSync(shared, { force: true });
+  const LIBP = path.join(CORE, 'hooks', 'lib.js');
+  const runner = path.join(root, 'bumper.js');
+  fs.writeFileSync(runner, "const path = require('path'); const { merge } = require(process.argv[2]); merge(process.argv[3], (c) => Object.assign({}, c, { n: (c.n || 0) + 1 }));");
+  const herd = path.join(root, 'herd.js');
+  fs.writeFileSync(herd, [
+    "const { spawn } = require('child_process');",
+    "let left = 12;",
+    "for (let i = 0; i < 12; i += 1) {",
+    "  const p = spawn(process.execPath, [process.argv[2], process.argv[3], process.argv[4]], { stdio: 'ignore' });",
+    "  p.on('exit', () => { left -= 1; });",
+    "}",
+  ].join(String.fromCharCode(10)));
+  run(process.execPath, [herd, runner, LIBP, shared], { cwd: root });
+  const counted = JSON.parse(fs.readFileSync(shared, 'utf8'));
+  ok('twelve hands on one file lose no count', counted.n === 12, JSON.stringify(counted));
+
+  ok('a write that lands says so', lib.write(path.join(live, '_w.json'), { a: 1 }) === true);
+  ok('a write that cannot land says that too', lib.write(path.join(live, 'no', 'such', 'dir', String.fromCharCode(0) + '.json'), { a: 1 }) === false);
+
+  const gone = path.join(live, 'sub1.json');
+  fire('SubagentStop', 'Bash', 'sub1');
+  ok('a subagent that stopped is marked ended', !!JSON.parse(fs.readFileSync(gone, 'utf8')).ended, fs.readFileSync(gone, 'utf8'));
+  fire('PostToolUse', 'Bash', 'sub1');
+  ok('a late tool call does not raise the dead', !!JSON.parse(fs.readFileSync(gone, 'utf8')).ended, fs.readFileSync(gone, 'utf8'));
+  fire('Stop', 'Bash', 'main1');
+  fire('PostToolUse', 'Bash', 'main1');
+  ok('but a session that stopped and went on is running again', !JSON.parse(fs.readFileSync(path.join(live, 'main1.json'), 'utf8')).ended, fs.readFileSync(path.join(live, 'main1.json'), 'utf8'));
+
+  const risk = require(path.join(CORE, 'scripts', 'risk.js'));
+  const blind = risk.assess(path.join(root, 'nowhere'), ['src/ok.js']);
+  ok('a diff that cannot be read is not read as small', blind.level === 'high', JSON.stringify(blind));
+
 
   const hooks = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8')).hooks;
   ok('the tool hook no longer runs on every read', /Write\|Edit/.test(hooks.PostToolUse[0].matcher || ''), String(hooks.PostToolUse[0].matcher));

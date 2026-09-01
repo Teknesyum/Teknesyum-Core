@@ -32,20 +32,68 @@ function write(f, data) {
   try {
     fs.mkdirSync(path.dirname(f), { recursive: true });
     fs.writeFileSync(tmp, JSON.stringify(data, null, 2));
-    fs.renameSync(tmp, f);
   } catch {
     try {
       fs.unlinkSync(tmp);
     } catch {}
+    return false;
+  }
+  for (let i = 0; i < 5; i += 1) {
+    try {
+      fs.renameSync(tmp, f);
+      return true;
+    } catch {
+      nap(5);
+    }
+  }
+  try {
+    fs.unlinkSync(tmp);
+  } catch {}
+  return false;
+}
+
+const LOCK_MS = 2000;
+
+function nap(ms) {
+  try {
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+  } catch {}
+}
+
+function lock(f, fn) {
+  const dir = f + '.lock';
+  let held = false;
+  for (let i = 0; i < 40; i += 1) {
+    try {
+      fs.mkdirSync(dir);
+      held = true;
+      break;
+    } catch {
+      try {
+        if (Date.now() - fs.statSync(dir).mtimeMs > LOCK_MS) fs.rmdirSync(dir);
+      } catch {}
+      nap(5);
+    }
+  }
+  try {
+    return fn();
+  } finally {
+    if (held) {
+      try {
+        fs.rmdirSync(dir);
+      } catch {}
+    }
   }
 }
 
 function merge(f, patch) {
-  const now = read(f);
-  const base = now && typeof now === 'object' && !Array.isArray(now) ? now : {};
-  const next = typeof patch === 'function' ? patch(base) : Object.assign({}, base, patch);
-  write(f, next);
-  return next;
+  return lock(f, () => {
+    const now = read(f);
+    const base = now && typeof now === 'object' && !Array.isArray(now) ? now : {};
+    const next = typeof patch === 'function' ? patch(base) : Object.assign({}, base, patch);
+    write(f, next);
+    return next;
+  });
 }
 
 function norm(p) {

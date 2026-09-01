@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { configRoot, read, write, sessionId, safe, stateFile } = require('./lib.js');
+const { configRoot, read, merge, sessionId, safe, stateFile } = require('./lib.js');
 
 const MAX_BLOCKS = 2;
 
@@ -47,9 +47,7 @@ function blocksFor(key) {
 }
 
 function noteBlock(key) {
-  const c = read(counterFile()) || {};
-  c[key] = (c[key] || 0) + 1;
-  write(counterFile(), c);
+  merge(counterFile(), (c) => Object.assign({}, c, { [key]: (c[key] || 0) + 1 }));
 }
 
 function decide(j) {

@@ -41,6 +41,7 @@ function assess(root, owns) {
   }
   if (owns.length > FILE_LIMIT) reasons.push('owns ' + owns.length + ' files (limit ' + FILE_LIMIT + ')');
   const stat = owns.length ? gitNumstat(root, owns) : null;
+  if (owns.length && stat === null) reasons.push('the diff could not be read, so its size is unknown');
   if (stat && stat.lines > DIFF_LIMIT)
     reasons.push('diff ' + stat.lines + ' lines (limit ' + DIFF_LIMIT + ')');
   return { level: reasons.length ? 'high' : 'low', reasons, stat };

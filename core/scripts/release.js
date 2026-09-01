@@ -143,7 +143,9 @@ function note() {
 function cut() {
   const pending = notes();
   if (!pending.length) return say(['Nothing is waiting. Write a note first.'], 1);
-  if (git(['status', '--porcelain']).out) return say(['The tree is dirty. Commit or stash first.'], 1);
+  const st = git(['status', '--porcelain']);
+  if (!st.ok) return say(['git status failed, so the tree cannot be read:', st.err], 1);
+  if (st.out) return say(['The tree is dirty. Commit or stash first.'], 1);
 
   const now = current();
   const bump = pending.some((n) => n.bump === 'major')
@@ -162,7 +164,8 @@ function cut() {
 
   if (argv.includes('--dry')) return say(['v' + now + ' → v' + version + ' prepared, nothing committed.']);
 
-  git(['add', '-A']);
+  const a = git(['add', '-A']);
+  if (!a.ok) return say(['git add failed, so nothing was committed:', a.err], 1);
   const c = git(['commit', '-m', 'Release ' + version]);
   if (!c.ok) return say(['git commit failed:', c.err], 1);
   const t = git(['tag', '-a', 'v' + version, '-m', 'v' + version]);
