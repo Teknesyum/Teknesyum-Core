@@ -6,9 +6,13 @@ const { status, isContractName } = require('./schema.js');
 let raw = '';
 process.stdin.on('data', (d) => (raw += d));
 process.stdin.on('end', () => {
+  let out = '';
   try {
-    record(JSON.parse(raw));
+    const j = JSON.parse(raw);
+    record(j);
+    out = halt(j);
   } catch {}
+  if (out) process.stdout.write(JSON.stringify({ decision: 'block', reason: out }));
   process.exit(0);
 });
 
@@ -163,6 +167,88 @@ function closeAll(live, now) {
     a.stop_reason = 'session_end';
     write(p, a);
   }
+}
+
+function lastSaid(file) {
+  if (!file) return '';
+  try {
+    const fd = fs.openSync(file, 'r');
+    const size = fs.fstatSync(fd).size;
+    const len = Math.min(size, 65536);
+    const buf = Buffer.alloc(len);
+    fs.readSync(fd, buf, 0, len, size - len);
+    fs.closeSync(fd);
+    const lines = buf.toString('utf8').split('\n').filter(Boolean);
+    for (let i = lines.length - 1; i >= 0; i--) {
+      let row = null;
+      try {
+        row = JSON.parse(lines[i]);
+      } catch {
+        continue;
+      }
+      const m = row && row.message;
+      if (!m || m.role !== 'assistant') continue;
+      const c = m.content;
+      const text = Array.isArray(c)
+        ? c
+            .filter((x) => x && x.type === 'text')
+            .map((x) => x.text)
+            .join(' ')
+        : String(c || '');
+      if (text.trim()) return text.trim();
+    }
+  } catch {}
+  return '';
+}
+
+function asksAQuestion(j) {
+  const said = lastSaid(j.transcript_path);
+  return /\?[)\?"'*_\s]*$/.test(said);
+}
+
+function halt(j) {
+  if ((j.hook_event_name || '') !== 'Stop' || j.stop_hook_active) return '';
+  const r = relayRoot(j.cwd || process.cwd(), { git: false });
+  if (!r) return '';
+  const dir = path.join(r.relay, 'contracts');
+  let files = [];
+  try {
+    files = fs.readdirSync(dir).filter(isContractName);
+  } catch {
+    return '';
+  }
+  const submitted = [];
+  const open = [];
+  for (const f of files) {
+    let body = '';
+    try {
+      body = fs.readFileSync(path.join(dir, f), 'utf8');
+    } catch {
+      continue;
+    }
+    const s = status(body);
+    const id = f.replace(/\.md$/i, '');
+    if (s === 'submitted') submitted.push(id);
+    else if (s === 'open') open.push(id);
+  }
+
+  if (submitted.length)
+    return [
+      submitted.join(', ') + ' is submitted and still waiting on you.',
+      'Audit it, then say what happens next in the same turn: the verdict goes to whoever',
+      'delivered it, and their next contract goes with it. A turn does not close on a',
+      'delivery it left unanswered.',
+    ].join('\n');
+
+  const idle = open.filter((id) => !heldContracts(liveDir(r.relay)).has(id));
+  if (idle.length && asksAQuestion(j))
+    return [
+      'Unassigned work is queued: ' + idle.join(', ') + ' - and this turn ends on a question.',
+      'If the answer is yours to give, assign the work and ask afterwards. If the decision is',
+      'really the user to make, put it under a closing heading and stop again - this gate fires once.',
+    ].join('\n');
+
+  return '';
 }
 
 function heldContracts(live) {

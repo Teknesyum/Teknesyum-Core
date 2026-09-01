@@ -304,10 +304,54 @@ function boundary(target, agentId) {
   );
 }
 
+const MERGING = /\bgit\s+(?:-[^\s]+\s+)*(merge|push)\b/i;
+
+function unfinished(cwd) {
+  const r = relayRoot(cwd || process.cwd(), { git: false });
+  if (!r) return [];
+  const dir = path.join(r.relay, 'contracts');
+  let files = [];
+  try {
+    files = fs.readdirSync(dir).filter(isContractName);
+  } catch {
+    return [];
+  }
+  const held = [];
+  for (const f of files) {
+    let body = '';
+    try {
+      body = fs.readFileSync(path.join(dir, f), 'utf8');
+    } catch {
+      continue;
+    }
+    const s = status(body);
+    if (s === 'submitted' || s === 'active') held.push(f.replace(/\.md$/i, '') + ' (' + s + ')');
+  }
+  return held;
+}
+
+function merging(j) {
+  if (process.env.TEKNESYUM_GATE_OPEN === '1') return;
+  const cmd = String((j.tool_input || {}).command || '');
+  if (!MERGING.test(cmd)) return;
+  const open = unfinished(j.cwd);
+  if (!open.length) return;
+  return block(
+    'A contract is still on the ladder: ' + open.join(', ') + '.',
+    '',
+    'Work reaches main through the gate, not around it. Close it first:',
+    '  node <plugin>/scripts/contract.js complete --id <ID>',
+    '',
+    'If this push has nothing to do with that contract, run it with TEKNESYUM_GATE_OPEN=1.'
+  );
+}
+
 function decide(j) {
   const tool = j.tool_name || '';
   const t = j.tool_input || {};
   const agentId = j.agent_id || null;
+
+  if (tool === 'Bash') return merging(j);
 
   if (/^(Write|Edit|NotebookEdit)$/.test(tool)) {
     const target = t.file_path || t.notebook_path || '';

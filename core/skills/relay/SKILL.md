@@ -111,12 +111,11 @@ never restate it: `node <P>/scripts/contract.js tier --role builder --id T7`. Si
 a cell, the profile caps it, nothing lowers it. Pass the result as the `Agent` call's
 `model`, and write `model`/`effort` into the agent's `live/` record.
 
-Open the advisor whenever a second mind would widen the view - there is no gate and no
-qualifying list. Pass `--asker <your own model>`; the resolver pairs you with a different
-one, because a model cannot give itself a second opinion. On premium it also opens beside
-every `builder`/`ui-builder` contract, in the same message as that agent, and when work you
-did yourself trips `risk.js`. It is given the goal, the acceptance and the evidence, never
-your draft answer.
+Open the advisor whenever a second mind would widen the view - no gate, no qualifying list. A
+plan that picks the product's direction or spans phases is one of those moments. Pass `--asker
+<your own model>`; the resolver pairs you with a different one, since a model cannot second-
+guess itself. On premium it also opens beside every `builder`/`ui-builder` contract and when
+your own work trips `risk.js`. It is given the goal and the evidence, never your draft answer.
 
 Repeated failures are counted for you: the `PostToolUseFailure` hook keeps the run in
 `live/_tally.json`, the resolver reads it unasked, the banner shows it from two upward.
@@ -145,5 +144,6 @@ A `_issues.log` line is `<contract> | <role> | <what was sought> | <what was mis
 
 ## Reporting
 
-What changed, where, what the gate said. The statusline already shows contracts, agents and
-problems; never narrate them.
+What changed, where, what the gate said. The statusline shows contracts, agents and
+problems; never narrate them. While work is open the turn ends on one line - what is next,
+who has it - and a delivery is answered in the turn it arrived, with its next contract.

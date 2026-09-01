@@ -577,8 +577,7 @@ model composes this markup and no project has to remember the shape of it.
 
 The rule that repository documents are English did not change: the Turkish README is its
 one user-facing exception, and internal papers — contracts, reports, decision packets —
-stay Turkish. Decision entries themselves follow the README pattern: written in English,
-reachable in Turkish through the same badge wherever a Turkish twin exists.
+stay Turkish. The pair is the README's alone; this file has no Turkish twin and needs none.
 
 ---
 

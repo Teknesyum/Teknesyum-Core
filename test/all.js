@@ -1723,6 +1723,38 @@ function testLifetime() {
   fire('Stop', '', 'w-c');
   ok('a contract an agent is still holding is not abandoned', JSON.parse(fs.readFileSync(marks, 'utf8')).ids.indexOf('W1') === -1, fs.readFileSync(marks, 'utf8'));
 
+  const bash = (cmd, env) =>
+    run(process.execPath, [path.join(CORE, 'hooks', 'guard.js')], {
+      cwd: root,
+      input: JSON.stringify({ tool_name: 'Bash', tool_input: { command: cmd }, cwd: root }),
+      env: Object.assign({}, process.env, env || {}),
+    });
+  ok('work does not reach main around the gate', bash('git push origin main').status === 2, bash('git push origin main').stderr);
+  ok('the block names the contract that is still open', /W1/.test(bash('git merge feature').stderr), bash('git merge feature').stderr);
+  ok('an ordinary command is not touched', bash('git status').status === 0, bash('git status').stderr);
+  ok('the gate can be opened on purpose', bash('git push origin main', { TEKNESYUM_GATE_OPEN: '1' }).status === 0);
+
+  const stop = (extra) =>
+    run(process.execPath, [WATCH], {
+      cwd: root,
+      input: JSON.stringify(Object.assign({ hook_event_name: 'Stop', cwd: root }, extra)),
+    }).stdout;
+
+  writeContract(root, 'W9', '# W9\nstatus: submitted\nowns: [src/ok.js]\nverify:\n  - node -e "process.exit(0)"\n');
+  ok('a turn does not close on a delivery nobody answered', /"decision":"block"/.test(stop({})), stop({}));
+  ok('the halt names the contract', /W9/.test(stop({})), stop({}));
+  ok('the second stop of the same turn goes through', stop({ stop_hook_active: true }) === '', stop({ stop_hook_active: true }));
+  fs.unlinkSync(path.join(relay, 'contracts', 'W9.md'));
+
+  const tape = path.join(root, 'tape.jsonl');
+  const said = (text) =>
+    fs.writeFileSync(tape, JSON.stringify({ message: { role: 'assistant', content: [{ type: 'text', text: text }] } }) + '\n');
+  writeContract(root, 'W8', '# W8\nstatus: open\nowns: [src/ok.js]\nverify:\n  - node -e "process.exit(0)"\n');
+  said('Faz 2 paketini yazayim mi, yoksa denetimleri mi kapatayim?');
+  ok('a turn that asks while work waits unassigned is held', /"decision":"block"/.test(stop({ transcript_path: tape })), stop({ transcript_path: tape }));
+  said('T8 ajana verildi, denetim kosuyor.');
+  ok('a turn that assigned the work closes', stop({ transcript_path: tape }) === '', stop({ transcript_path: tape }));
+
   writeContract(root, 'W2', '# W2\nstatus: active\nceiling: 2\nowns: [src/ok.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
   const edit = (n) => ({
     hook_event_name: 'PreToolUse',

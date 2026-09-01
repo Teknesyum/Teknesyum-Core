@@ -21,6 +21,9 @@ Verify a high-risk contract independently. You are opened only when the risk gat
 2. Anything claimed done that is not there?
 3. Any file changed outside `owns:`?
 4. Anything the verify steps structurally cannot catch — and did it happen?
+5. Any test that cannot fail: an assertion over fixed arithmetic, an acceptance list filled
+   from the measurement it is checking, a filter applied twice to the same set. Each of
+   those counts as a missing test, not as a passing one.
 
 ## Record
 

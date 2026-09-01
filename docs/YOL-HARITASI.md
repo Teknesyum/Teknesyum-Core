@@ -27,11 +27,21 @@ Aynı anda tek madde açık kalır.
       bağlama yazmayan başka kanal var mı. Sole'nin bulgusuyla karşılaştırılacak.
 - [ ] **4. Banner detayı — benim araştırmam.** Maliyet artmadan çok daha fazla
       bilgi verilebilir mi. Sole'nin bulgusuyla karşılaştırılacak.
-- [ ] **8. Fable'ın önerdiği üç kapı.** (kullanıcı onayı bekliyor)
-      watch.js Stop: submitted sözleşme varken tur kapanmasın;
-      aynı kapıda "?" ile biten tur + atanmamış iş varsa tek atış uyarı;
-      guard.js Bash: submitted/active sözleşme varken git merge/push bloklansın.
-      Artı üç metin satırı: SKILL.md Reporting, SKILL.md advisor, roles/auditor.md.
+- [ ] **9. Sole'nin bulduğu 12 hata.** Sırayla düzeltilecek: notify.js `sessionFile`
+      tanımsız (ses hiç çalmıyor) · ses alt sürecinin hata dönüşü başarı sayılıyor ·
+      schema.js `block()` CRLF'de owns/verify okumuyor · durum JSON'larında oku-yaz
+      yarışı · rename hatası yutulunca bağlama ve tavan düşüyor · geç olay bitmiş
+      ajanı canlı gösteriyor · dropSnapshot hatası yutuluyor · `stash create` hatası
+      sessizce HEAD'e düşüyor · git diff hatası riski low yapıyor · release.js
+      git status/add hatasını yutuyor · banner bütçesi `### ` başlığını saymıyor ·
+      log.js slug'ı `İ` harfini bozuyor. Şüpheliler: ledger appendFileSync yarışı,
+      _stale.json çift kayıt.
+- [ ] **10. Banner yeniden tasarımı.** Sole ölçtü: `###` başlık render edilmiyor,
+      ANSI renk çalışıyor (`ESC[31;47m`), markdown ve HTML çalışmıyor. Kullanıcı
+      çok daha ayrıntılı banner istiyor — ne ajanı, nereye, ne için, ne kadar
+      ilerlemiş. Eklenebilecekler (hepsi mevcut okumalardan): geçen süre, tavan
+      kullanımı (18/60), tur, sözleşme kimliği, sahipsiz sayısı, yüksek risk.
+      Uzun görev adları kısaltılacak.
 - [ ] **6. Ekosistem raporu.** Büyük MCP'ler, skill'ler, plugin'ler ve benzer
       projeler bizim mentalitemize (maliyet, sözleşme, denetim) uyuyor mu.
       Obsidian, graph tabanlı araçlar vb. kurulmalı mı. Bizim eklenti onların
@@ -41,6 +51,9 @@ Aynı anda tek madde açık kalır.
 
 ## Bitenler
 
+- [x] **8. Fable'ın üç kapısı.** watch.js Stop kapısı (submitted teslim + soruyla
+      biten tur), guard.js Bash kapısı (git merge/push), SKILL.md ve auditor.md
+      satırları. `TEKNESYUM_GATE_OPEN=1` kaçış yolu duruyor.
 - [x] **5. Altın kural denetimi.** İhlal yok. Bağlama yazan tek yüzey `cue.js`;
       o da yalnız "log yaz" cümlesinde ve açık sözleşmeli oturum açılışında
       konuşuyor. Kancaların hepsi ~30 ms, çıktıları boş.
