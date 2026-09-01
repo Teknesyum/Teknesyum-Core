@@ -223,6 +223,23 @@ function t(key) {
   return row[lang()] || row.en || key;
 }
 
+function rewire() {
+  const here = path.resolve(__dirname, '..');
+  const bridge = path.join(here, 'scripts', 'bridge.js').replace(/\\/g, '/');
+  const p = path.join(configRoot(), 'settings.json');
+  const s = read(p);
+  if (!s || !s.statusLine || typeof s.statusLine.command !== 'string') return false;
+  const cur = s.statusLine.command;
+  if (cur.indexOf('bridge.js') < 0 || cur.indexOf(bridge) >= 0) return false;
+  if (!/teknesyum[\\/-]/i.test(cur)) return false;
+  if (!fs.existsSync(bridge)) return false;
+  s.statusLine = { type: 'command', command: 'node "' + bridge + '"', padding: 0 };
+  if (!write(p, s)) return false;
+  const cfg = read(stateFile('config')) || {};
+  cfg.pluginDir = here;
+  write(stateFile('config'), cfg);
+  return true;
+}
 function coreRepo() {
   const seen = [process.env.TEKNESYUM_CORE, settings().coreRepo];
   let d = path.resolve(__dirname, '..', '..');
@@ -296,6 +313,7 @@ module.exports = {
   logProblem,
   pluginRoot,
   settings,
+  rewire,
   coreRepo,
   lang,
   t,

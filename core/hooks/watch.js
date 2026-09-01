@@ -246,11 +246,11 @@ function halt(j) {
     ].join('\n');
 
   const idle = open.filter((id) => !heldContracts(liveDir(r.relay)).has(id));
-  if (idle.length && asksAQuestion(j))
+  if (idle.length)
     return [
-      'Unassigned work is queued: ' + idle.join(', ') + ' - and this turn ends on a question.',
-      'If the answer is yours to give, assign the work and ask afterwards. If the decision is',
-      'really the user to make, put it under a closing heading and stop again - this gate fires once.',
+      'Unassigned work is queued: ' + idle.join(', ') + ' - and this turn is ending.',
+      'Hand it to an agent before you close. If the next step is really the user to decide,',
+      'put it under a closing heading and stop again - this gate fires once.',
     ].join('\n');
 
   return '';

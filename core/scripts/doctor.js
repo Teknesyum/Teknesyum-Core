@@ -73,6 +73,14 @@ function statuslineOk() {
   const m = /"([^"]+bridge\.js)"/.exec(String(s.statusLine.command));
   if (m && !fs.existsSync(m[1]))
     return { ok: false, message: 'the statusline points at a file that is gone: ' + m[1] };
+  const wired = m ? m[1].split('\\').join('/') : '';
+  const ver = /teknesyum-core\/([0-9]+\.[0-9]+\.[0-9]+)\//.exec(wired);
+  const now = require('./update.js').installed();
+  if (ver && now && ver[1] !== now)
+    return {
+      ok: false,
+      message: 'the statusline still runs v' + ver[1] + ' while v' + now + ' is installed - open a new session, or run setup.js --apply',
+    };
   return 'wired';
 }
 
@@ -162,6 +170,23 @@ function versionOk() {
   return 'v' + pkg.version;
 }
 
+function logsOk() {
+  const dir = lib.openLogs();
+  const spool = !lib.coreRepo();
+  let n = 0;
+  try {
+    n = fs.readdirSync(dir).filter((f) => f.endsWith('.md')).length;
+  } catch {
+    return { ok: true, message: 'no logs written yet - ' + dir };
+  }
+  if (spool)
+    return {
+      ok: false,
+      message: n + ' log(s) sit in the fallback spool, not in the repo: ' + dir,
+    };
+  return n + ' open log(s) at ' + dir;
+}
+
 function run(root) {
   return [
     check('node', nodeOk),
@@ -175,6 +200,7 @@ function run(root) {
     check('map', () => mapOk(root)),
     check('relay', () => relayOk(root)),
     check('ledger', () => ledgerOk(root)),
+    check('logs', logsOk),
   ];
 }
 

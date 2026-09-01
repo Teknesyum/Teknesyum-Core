@@ -19,15 +19,29 @@ Aynı anda tek madde açık kalır.
 
 ## Açık maddeler
 
-- [ ] **6. Ekosistem raporu.** Büyük MCP'ler, skill'ler, plugin'ler ve benzer
-      projeler bizim mentalitemize (maliyet, sözleşme, denetim) uyuyor mu.
-      Obsidian, graph tabanlı araçlar vb. kurulmalı mı. Bizim eklenti onların
-      yaptığının ne kadarını yapıyor. Maliyet karşılaştırmalı, detaylı.
-- [ ] **7. Graphify durumu.** Base'de "kısmen eklendi" denmişti, Base terk edildi.
-      Core'da var mı, yok mu, gömülü mü. Skill listesinde görünmüyor. Netleştir.
+Yok.
 
 ## Bitenler
 
+- [x] **6. Ekosistem raporu.** (`docs/EKOSISTEM.md`) Maliyet dört sınıfa ayrıldı;
+      Core tamamen Z (sıfır). Karar: hiçbir şey kurulmuyor. Obsidian, kalıcı bellek
+      MCP'leri, RAG ve GitHub-MCP kurma; graphify ve LSP koşullu; Windows-MCP
+      varsayılan kapalı olsun. Gerçek boşluk iki tane: kod tabanı anlama (graphify
+      kapatıyor) ve oturumlar arası hafıza (yerleşik hafıza + yol haritası kapatıyor).
+      Altın kuralı sessizce bozmanın beş yolu ve her birinin ölçüsü yazıldı.
+      Fable'a danışıldı; hükümler onun.
+- [x] **7. Graphify durumu.** (`docs/GRAPHIFY.md`) Core'da değil, hiç olmadı.
+      `~/.claude/skills/graphify` (v0.9.39) olarak kullanıcı seviyesinde kurulu, o
+      yüzden her oturumda görünür. Base'in "kısmen eklendi" dediği şey grafik değil
+      import haritasıydı; o parça `core/scripts/map.js` olarak Core'da. Ayrı kalır:
+      Core Node ve sıfır bağımlılık, graphify Python ve çağrı başına maliyet.
+- [x] **11. Açık günlüklerin hepsi.** (v0.7.3) On üç kayıt okundu, gerekçesiyle
+      kapatıldı: coreRepo makarası (setup + log.js sesi + doctor `logs` satırı),
+      verify zaman aşımının süreç ağacı (`killTree`), Stop kapısının soru şartının
+      kaldırılması, trash ölçüsü (`orphans`), plan konseyinin tetiği, denetçinin
+      eklenen sahte assertion kontrolü, paralel yazarların git indeksi, rozet
+      kontrastı, imza bloğu. Biri Core kaydı değildi (Avalonia konağı), o da
+      gerekçesiyle kapandı.
 - [x] **1/3/4. Sole raporu ve banner araştırması.** Rapor geldi, 12 hatanın hepsi
       işlendi (madde 9). Ölçülen: `###` başlık render **edilmiyor**, markdown ve
       HTML de çalışmıyor; **ANSI çalışıyor** — renk, kalın, ters video, yani

@@ -94,6 +94,23 @@ function unsafeStep(step) {
   return '';
 }
 
+function killTree(pid) {
+  if (!pid) return false;
+  if (process.platform === 'win32') {
+    const r = spawnSync('taskkill', ['/PID', String(pid), '/T', '/F'], { windowsHide: true, timeout: 20000 });
+    return !r.error && r.status === 0;
+  }
+  try {
+    process.kill(-pid, 'SIGKILL');
+    return true;
+  } catch {}
+  try {
+    process.kill(pid, 'SIGKILL');
+    return true;
+  } catch {}
+  return false;
+}
+
 function runVerify(root, steps) {
   const results = [];
   for (const step of steps) {
@@ -103,14 +120,20 @@ function runVerify(root, steps) {
       encoding: 'utf8',
       timeout: VERIFY_TIMEOUT,
       windowsHide: true,
+      detached: process.platform !== 'win32',
       maxBuffer: 16 * 1024 * 1024,
     });
     const code = r.error ? -1 : r.status;
+    const timedOut = !!(r.error && String(r.error.code || '') === 'ETIMEDOUT') || r.signal === 'SIGTERM';
+    let swept = null;
+    if (timedOut) swept = killTree(r.pid);
     const text = String((r.stdout || '') + (r.stderr || ''));
     results.push({
       step,
       code,
       ok: code === 0,
+      timedOut,
+      swept,
       tail: text.split('\n').filter(Boolean).slice(-12).join('\n'),
       error: r.error ? String(r.error.message) : '',
     });
@@ -124,6 +147,10 @@ function reportVerify(results) {
     lines.push((r.ok ? '  pass  ' : '  FAIL  ') + r.step + (r.ok ? '' : '  (exit ' + r.code + ')'));
     if (!r.ok) {
       if (r.error) lines.push('        ' + r.error);
+      if (r.timedOut)
+        lines.push(
+          '        it ran past the limit; the process tree was ' + (r.swept ? 'swept' : 'left behind - kill it by hand before the next run')
+        );
       for (const l of r.tail.split('\n').filter(Boolean)) lines.push('        ' + l);
     }
   }

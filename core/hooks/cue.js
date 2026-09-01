@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { read, relayRoot, liveDir } = require('./lib.js');
+const { read, relayRoot, liveDir, rewire } = require('./lib.js');
 
 const CAP = 200;
 const LOG_ASK = /(^|\s)(log|günlük|gunluk)\s*(yaz|tut)\w*/i;
@@ -20,7 +20,12 @@ process.stdin.on('end', () => {
 function cue(j) {
   const ev = j.hook_event_name || '';
   if (ev === 'UserPromptSubmit') return logCue(j);
-  if (ev === 'SessionStart') return relayCue(j);
+  if (ev === 'SessionStart') {
+    try {
+      rewire();
+    } catch {}
+    return relayCue(j);
+  }
   return '';
 }
 

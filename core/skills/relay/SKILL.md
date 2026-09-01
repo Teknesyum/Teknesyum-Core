@@ -121,14 +121,14 @@ Repeated failures are counted for you: the `PostToolUseFailure` hook keeps the r
 `live/_tally.json`, the resolver reads it unasked, the banner shows it from two upward.
 
 - Independent contracts start together, not in sequence.
-- Past three concurrent writers, give each a git worktree.
+- Two writers in one checkout share one git index; the first commit sweeps in the other's
+  files. Give each concurrent writer a worktree, or let exactly one commit.
 - The auditor never writes; one written file voids the audit and the gate rejects it.
 - An empty return is a failure. Reopen the agent; do not finish its work for it.
 
 ## Before reading source
 
-`node <P>/scripts/map.js` writes `.claude/relay/map.md` — hubs, cycles, orphans, edges.
-Read it before opening files. Regenerate after a refactor.
+`node <P>/scripts/map.js` writes `.claude/relay/map.md` — hubs, cycles, orphans, edges. Read it before opening files; regenerate after a refactor.
 
 ## Language
 

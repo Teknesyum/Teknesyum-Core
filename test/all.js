@@ -1530,6 +1530,19 @@ function testRaces() {
   const blind = risk.assess(path.join(root, 'nowhere'), ['src/ok.js']);
   ok('a diff that cannot be read is not read as small', blind.level === 'high', JSON.stringify(blind));
 
+  const cfgHome = path.join(root, 'wire-home');
+  fs.mkdirSync(path.join(cfgHome, 'teknesyum'), { recursive: true });
+  const wired = path.join(cfgHome, 'settings.json');
+  fs.writeFileSync(wired, JSON.stringify({ statusLine: { type: 'command', command: 'node "C:/x/teknesyum-core/0.1.12/scripts/bridge.js"' } }));
+  const rewired = run(process.execPath, ['-e', "console.log(require(process.argv[1]).rewire())", path.join(CORE, 'hooks', 'lib.js').split(String.fromCharCode(92)).join('/')], { cwd: root, env: Object.assign({}, process.env, { CLAUDE_CONFIG_DIR: cfgHome }) });
+  const after = JSON.parse(fs.readFileSync(wired, 'utf8'));
+  ok('a statusline left on an old copy is repointed', after.statusLine.command.indexOf('0.1.12') < 0 && after.statusLine.command.indexOf('bridge.js') > 0, rewired.stdout + ' ' + after.statusLine.command);
+  const twice = fs.readFileSync(wired, 'utf8');
+  run(process.execPath, ['-e', "require(process.argv[1]).rewire()", path.join(CORE, 'hooks', 'lib.js').split(String.fromCharCode(92)).join('/')], { cwd: root, env: Object.assign({}, process.env, { CLAUDE_CONFIG_DIR: cfgHome }) });
+  ok('a statusline already on this copy is left alone', fs.readFileSync(wired, 'utf8') === twice);
+
+
+
 
   const hooks = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8')).hooks;
   ok('the tool hook no longer runs on every read', /Write\|Edit/.test(hooks.PostToolUse[0].matcher || ''), String(hooks.PostToolUse[0].matcher));
@@ -1803,7 +1816,10 @@ function testLifetime() {
   said('Faz 2 paketini yazayim mi, yoksa denetimleri mi kapatayim?');
   ok('a turn that asks while work waits unassigned is held', /"decision":"block"/.test(stop({ transcript_path: tape })), stop({ transcript_path: tape }));
   said('T8 ajana verildi, denetim kosuyor.');
-  ok('a turn that assigned the work closes', stop({ transcript_path: tape }) === '', stop({ transcript_path: tape }));
+  ok('a turn that only says so is held too', /"decision":"block"/.test(stop({ transcript_path: tape })), stop({ transcript_path: tape }));
+  fs.writeFileSync(path.join(require(path.join(CORE, 'hooks', 'lib.js')).liveDir(relay), 'w8.json'), JSON.stringify({ id: 'w8', role: 'builder', contract: 'W8', updated: new Date().toISOString() }));
+  ok('a turn whose work is really on an agent closes', stop({ transcript_path: tape }) === '', stop({ transcript_path: tape }));
+  fs.unlinkSync(path.join(require(path.join(CORE, 'hooks', 'lib.js')).liveDir(relay), 'w8.json'));
 
   writeContract(root, 'W2', '# W2\nstatus: active\nceiling: 2\nowns: [src/ok.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
   const edit = (n) => ({
