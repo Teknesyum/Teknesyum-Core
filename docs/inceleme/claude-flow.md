@@ -118,6 +118,29 @@ her turda**, kullanıcı sürü istesin istemesin.
 daemon + oturum geri yükleme), `Stop`, `Notification`. Belgeler ayrıca "27
 kanca"dan söz ediyor; varsayılan ayar dosyasında saydığım **11 komut, 6 olay**.
 
+**4. Eklenti yolunun kendi kancaları — ölçüldü.** Yukarıdaki üç kalem CLI yolunu
+anlatıyor; eklenti yolunun da ayrı bir kanca seti var:
+`.claude-plugin/hooks/hooks.json` (3 966 bayt). `PreCompact` kancası modelin bağlamına
+**düz metin basıyor** — komutun kendisi bu:
+
+```bash
+echo "🔄 Auto-Compact Guidance (Context Window Full):";
+echo "   • All 54 agents available in .claude/agents/ directory";
+echo "   • Batchtools optimization for 300% performance gains";
+echo "⚡ Apply GOLDEN RULE: Always batch operations in single messages";
+```
+
+Depoda `.claude/agents/` altında **108** markdown var (831 192 bayt); kancanın modele
+söylediği "54" sayısı deponun kendi durumuyla tutarsız. Aynı dosyanın kendi
+`description` alanı şunu yazıyor: *"known-broken on native Windows"*, ve JSON'da
+`"_legacy_unaudited_shim": true` alanı duruyor.
+
+Deponun kendi kök `CLAUDE.md`'si ayrıca **66 757 bayt / 1493 satır** (bu, `init`'in
+ürettiği 7 742 baytlık dosyadan farklı bir dosyadır). `.claude/commands/` altında 168
+markdown (394 825 bayt), `.claude/skills/` altında 38 `SKILL.md`, depoda 40 plugin var.
+README aynı belgede hem **"314 MCP tools"** hem **"~210 tools"** diyor; yukarıdaki 358
+sayımı bu ikisinin de üstünde ve üst sınır olarak okunmalı.
+
 **Sıradan turun toplamı — tahmin:** ~1 900 (CLAUDE.md) + ~250-500 (route
 kancası) + katalog (kırpılmazsa ~67 500). Core'un sıradan turdaki karşılığı
 sıfır.

@@ -22,8 +22,8 @@ is not an Open Source Codebase (e.g., code in a private repo in GitHub)"* ve aç
 olmayan projelerde "automated analysis, CI or CD". Tek muafiyet ücretli **GitHub Advanced
 Security** lisansı.
 
-Boyut (gh API, v2.26.4): `codeql-win64.zip` **402 MB**, linux64 **551 MB**, osx64
-**1074 MB**, tümü **1694 MB**. Action bundle'ı ≈816 MB. Veritabanı derleme süresi için
+Boyut (gh API, v2.26.4): `codeql-win64.zip` **402 MB**, linux64 **552 MB**, osx64
+**1074 MB**, hepsi bir arada `codeql.zip` **1694 MB** (v2.26.4, gh API ile ölçüldü). Veritabanı derleme süresi için
 resmî rakam bulunamadı (**tahmin**: dile ve depoya göre dakikalar).
 
 ## Çözdüğü dert
@@ -132,7 +132,7 @@ range.startLine <= location.endLine AND location.startLine <= range.endLine
 Gereksinim: CLI ≥ 2.21.0 (overlay için ≥ 2.23.8, Git ≥ 2.38). `--overlay-base` /
 `--overlay-changes` ikinci eksen: default branch'in önbelleğe alınmış veritabanı üstüne
 yalnız değişen dosyaların katmanı bindirilir; dosya kimlikleri
-`git ls-files --format='%(objectname)_%(path)'` ile kaydedilir.
+`git ls-files --recurse-submodules --format='%(objectname)_%(path)'` ile kaydedilir.
 
 ## Bağlam maliyeti
 
@@ -160,7 +160,7 @@ filtresizdir. Diff'e kısıtlama tam da bunu kesen şey.
 - `core/scripts/map.js` — `who()` ters bağımlılık veriyor. CodeQL'in etki-yarıçapı
   sorgusunun ucuz karşılığı zaten Core'da var; risk hesabına bağlı değil.
 - `core/hooks/seal.js` — `ownsDigest` + `headSha`. CodeQL'in overlay dosya kimliği
-  (`git ls-files --format='%(objectname)_%(path)'`) aynı işi yapan resmî desen.
+  (`git ls-files --recurse-submodules --format='%(objectname)_%(path)'`) aynı işi yapan resmî desen.
 
 ## Çalınabilir fikir
 
