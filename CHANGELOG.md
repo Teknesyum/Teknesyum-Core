@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.7.2
+
+- Banner: markdown instead of ANSI, since the client renders one and prints the other
+
 ## v0.7.1
 
 - Banner: no ANSI in the message band, and roleless rows no longer take a seat
