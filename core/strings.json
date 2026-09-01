@@ -107,6 +107,14 @@
     "en": "abandoned",
     "tr": "sahipsiz"
   },
+  "line.context": {
+    "en": "context",
+    "tr": "bağlam"
+  },
+  "line.mapStale": {
+    "en": "map stale",
+    "tr": "harita bayat"
+  },
   "line.update": {
     "en": "is out",
     "tr": "çıktı"

@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 const { relayRoot, projectRoot, settings, liveDir, read, setNotice, t } = require('../hooks/lib.js');
-const { isContractName, field, list, owned, verifySteps } = require('../hooks/schema.js');
+const { isContractName, field, list, owned, verifySteps, entries } = require('../hooks/schema.js');
 const seal = require('../hooks/seal.js');
 const risk = require('./risk.js');
 
@@ -538,6 +538,99 @@ function orphans(root, owns) {
   return found;
 }
 
+function siblings(relay, id) {
+  const dir = path.join(relay, 'contracts');
+  let files = [];
+  try {
+    files = fs.readdirSync(dir).filter((f) => /\.md$/i.test(f) && f !== id + '.md');
+  } catch {
+    return [];
+  }
+  const rows = [];
+  for (const f of files.sort()) {
+    let body = '';
+    try {
+      body = fs.readFileSync(path.join(dir, f), 'utf8');
+    } catch {
+      continue;
+    }
+    rows.push({ id: f.replace(/\.md$/i, ''), body, status: statusOf(body) || 'open' });
+  }
+  return rows;
+}
+
+function keyOf(p) {
+  return String(p).replace(/\\/g, '/').replace(/^\.\//, '').toLowerCase();
+}
+
+function changedSet(root, owns) {
+  const base = risk.baseRef(root);
+  const raw = git(root, ['diff', '--name-only', base, '--'].concat(owns));
+  const set = new Set();
+  for (const row of String(raw || '').split('\n')) if (row.trim()) set.add(keyOf(row.trim()));
+  return set;
+}
+
+function overlaps(relay, id, owns, root) {
+  const changed = root ? changedSet(root, owns) : null;
+  const mine = new Set(owns.map(keyOf));
+  const hits = [];
+  for (const s of siblings(relay, id)) {
+    if (s.status === 'done') continue;
+    const shared = owned(s.body)
+      .filter((p) => mine.has(keyOf(p)))
+      .filter((p) => !changed || changed.has(keyOf(p)));
+    if (shared.length) hits.push({ id: s.id, status: s.status, shared });
+  }
+  return hits;
+}
+
+function blockedBy(body) {
+  return entries('blocked-by', body).filter((v) => isContractName(v + '.md'));
+}
+
+function blockers(relay, id, body) {
+  const want = blockedBy(body);
+  if (!want.length) return [];
+  const known = new Map();
+  for (const s of siblings(relay, id)) known.set(s.id.toLowerCase(), s.status);
+  const open = [];
+  for (const b of want) {
+    const st = known.get(b.toLowerCase());
+    if (st === undefined) {
+      if (!fs.existsSync(path.join(relay, 'contracts', 'done', b + '.md')))
+        open.push({ id: b, status: 'missing' });
+      continue;
+    }
+    if (st !== 'done') open.push({ id: b, status: st });
+  }
+  return open;
+}
+
+const EXECUTABLE = /\.(js|jsx|mjs|cjs|ts|tsx|py|cs|go|rs|java|rb|php|sh|ps1|bat|sql|json|ya?ml|toml|lock|csproj|sln|gradle)$|(^|\/)(Dockerfile|Makefile|[^/]*\.lock)$/i;
+
+function dirtyOutside(root, owns) {
+  const raw = git(root, ['status', '--porcelain', '--untracked-files=no']);
+  if (raw === null) return [];
+  const mine = new Set(owns.map(keyOf));
+  const dirty = [];
+  for (const row of String(raw).split('\n')) {
+    if (!row.trim()) continue;
+    const p = row
+      .trimStart()
+      .replace(/^[MADRCU]{1,2}\s+/, '')
+      .split(' -> ')
+      .pop()
+      .replace(/^"|"$/g, '');
+    const k = keyOf(p);
+    if (/^\.claude\/relay\//i.test(k)) continue;
+    if (mine.has(k)) continue;
+    if (!EXECUTABLE.test(k)) continue;
+    dirty.push(p);
+  }
+  return dirty;
+}
+
 function complete() {
   const c = load(arg('id'));
   if (c.error) return stop([c.error, '', 'Usage: contract.js complete --id T7']);
@@ -566,6 +659,43 @@ function complete() {
 
   const ladder = statusFault(c.body);
   if (ladder) return stop([c.id + ' cannot complete - ' + ladder]);
+
+  const held = blockers(c.relay, c.id, c.body);
+  if (held.length)
+    return stop([
+      c.id + ' cannot complete - it is blocked by work that has not landed:',
+      '',
+      ...held.map((b) => '  ' + b.id + '  ' + b.status),
+      '',
+      'Close the blocker first, or take it out of blocked-by if it no longer holds.',
+    ]);
+
+  const clash = overlaps(c.relay, c.id, owns, c.root);
+  if (clash.length)
+    return stop(
+      [c.id + ' cannot complete - another open contract owns the same files:', ''].concat(
+        clash.map((h) => '  ' + h.id + ' (' + h.status + ')  ' + h.shared.join(', ')),
+        [
+          '',
+          'The seal digests these files, so whoever closes first seals work it never did.',
+          'Split the owns sets, or close both in one contract.',
+        ]
+      )
+    );
+
+  const dirty = dirtyOutside(c.root, owns);
+  if (dirty.length)
+    return stop(
+      [c.id + ' cannot complete - tracked files outside owns are modified:', ''].concat(
+        dirty.slice(0, 20).map((p) => '  ' + p),
+        dirty.length > 20 ? ['  ... and ' + (dirty.length - 20) + ' more'] : [],
+        [
+          '',
+          'These can change what verify returns, and the contract never claimed them.',
+          'Commit them, stash them, or add them to owns.',
+        ]
+      )
+    );
 
   const steps = verifySteps(c.body);
   if (!steps.length && !/^verify:[ \t]*\[[ \t]*\]/im.test(c.body))
@@ -619,6 +749,9 @@ function complete() {
         c.id + ' is high risk and has no audit record: ' + path.relative(c.root, recordFile),
         '',
         'Why high risk: ' + level.reasons.join('; '),
+        ...(level.spots && level.spots.length
+          ? ['', 'What changed, by hunk:'].concat(risk.spotLines(level.spots))
+          : []),
         '',
         'Run the auditor role. It writes the record with fields:',
         '  ' + seal.RECORD_FIELDS.join(', '),
@@ -960,15 +1093,27 @@ function listCmd() {
       continue;
     const st = statusOf(body) || 'open';
     if (has('open') && st === 'done') continue;
+    const held = blockers(where.relay, id, body);
+    if (has('ready') && (st === 'done' || held.length)) continue;
     const title = (body.match(/^#[ \t]+(.+)$/m) || [])[1] || '';
     rows.push(
       id + '  ' + st + '  round ' + (field('round', body) || '1') +
         (title ? '  ' + title.trim() : '') +
-        (target ? '' : '\n    owns: ' + (owns.join(', ') || 'nothing'))
+        (target ? '' : '\n    owns: ' + (owns.join(', ') || 'nothing')) +
+        (!target && held.length ? '\n    blocked by: ' + held.map((b) => b.id).join(', ') : '')
     );
   }
   if (!rows.length)
-    return out([target ? 'No open contract owns ' + want + '.' : 'No contracts are open.'], target ? 1 : 0);
+    return out(
+      [
+        target
+          ? 'No open contract owns ' + want + '.'
+          : has('ready')
+            ? 'Nothing is ready - every open contract is waiting on another.'
+            : 'No contracts are open.',
+      ],
+      target ? 1 : 0
+    );
   return out(rows);
 }
 
@@ -987,6 +1132,17 @@ function check() {
   const lines = [
     c.id + ' - risk ' + level.level,
     ...(level.reasons.length ? level.reasons.map((r) => '  ' + r) : ['  no risk signal']),
+    ...(level.stat
+      ? [
+          '  diff ' + level.stat.lines + ' lines in ' + level.stat.files + ' file(s)' +
+            ' (+' + level.stat.classes.A + ' ~' + level.stat.classes.M +
+            ' -' + level.stat.classes.D + ' r' + level.stat.classes.R + ')' +
+            ' since ' + (level.stat.base === 'HEAD' ? 'HEAD' : level.stat.base.slice(0, 8) + ' (merge-base)'),
+        ]
+      : []),
+    ...(level.spots && level.spots.length
+      ? ['', 'changed hunks:'].concat(risk.spotLines(level.spots))
+      : []),
     '',
     'verify steps: ' + (steps.length || 'none declared'),
     ...steps.map((s) => '  - ' + s),
@@ -1015,6 +1171,29 @@ function check() {
     lines.push('');
     lines.push('owns names files that do not exist yet: ' + gone.owns.join(', '));
     lines.push('  that is the work, unless it is a typo.');
+  }
+  const held = blockers(c.relay, c.id, c.body);
+  if (held.length) {
+    lines.push('');
+    lines.push('blocked by work that has not landed:');
+    for (const b of held) lines.push('  ' + b.id + '  ' + b.status);
+  }
+  const clash = overlaps(c.relay, c.id, owns, c.root);
+  if (clash.length) {
+    lines.push('');
+    lines.push('another open contract owns the same files:');
+    for (const h of clash) lines.push('  ' + h.id + ' (' + h.status + ')  ' + h.shared.join(', '));
+    lines.push('  the gate refuses to close either of them until this is split.');
+  }
+  const outside = dirtyOutside(c.root, owns);
+  if (outside.length) {
+    lines.push('');
+    lines.push(
+      'tracked files outside owns are modified: ' +
+        outside.slice(0, 8).join(', ') +
+        (outside.length > 8 ? ' and ' + (outside.length - 8) + ' more' : '')
+    );
+    lines.push('  verify would run against changes this contract never claimed.');
   }
   if (!has('run')) return out(lines);
   const results = runVerify(c.root, steps);
@@ -1104,8 +1283,8 @@ function help() {
   return out([
     'contract.js - the only legitimate way to close a contract',
     '',
-    '  list [--open] [--owns <path>]',
-    '                            what is open, and which contract owns a file',
+    '  list [--open] [--ready] [--owns <path>]',
+    '                            what is open, what nothing blocks, who owns a file',
     '  precheck --id <ID>        run verify before the work starts; 0 means it is already done',
     '  snapshot --id <ID>        pin the tracked tree as refs/teknesyum/<ID>',
     '  revert --id <ID> --yes    put the owned files back to that pin',

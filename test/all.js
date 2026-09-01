@@ -1875,7 +1875,10 @@ function testSnapshot() {
   contract(['revert', '--id', 'S1', '--yes'], root);
   ok('revert stays inside the owns set', fs.readFileSync(other, 'utf8') === 'module.exports = 999;\n');
 
-  writeContract(root, 'S2', '# S2\nstatus: submitted\nowns: [src/ok.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
+  run('git', ['-C', root, 'add', '-A']);
+  run('git', ['-C', root, 'commit', '-qm', 'the unclaimed edit is put away']);
+  fs.writeFileSync(path.join(root, 'src', 'plain.js'), 'module.exports = 3;\n');
+  writeContract(root, 'S2', '# S2\nstatus: submitted\nowns: [src/plain.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
   contract(['snapshot', '--id', 'S2'], root);
   const held = run('git', ['-C', root, 'rev-parse', '--verify', '--quiet', 'refs/teknesyum/S2']);
   ok('a snapshot can also be taken by hand', held.status === 0, held.stdout + held.stderr);
@@ -1885,6 +1888,140 @@ function testSnapshot() {
 
   const none = contract(['revert', '--id', 'S2', '--yes'], root);
   ok('reverting to a pin that was never taken refuses instead of guessing', none.status === 2, none.stdout + none.stderr);
+
+  try {
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}
+
+function testBaseline() {
+  const root = fixture();
+  const risk = require(path.join(CORE, 'scripts', 'risk.js'));
+
+  run('git', ['-C', root, 'checkout', '-q', '-b', 'work']);
+  fs.writeFileSync(path.join(root, 'src', 'ok.js'), 'function widened() {\n  return 2;\n}\nmodule.exports = widened;\n');
+  run('git', ['-C', root, 'add', '-A']);
+  run('git', ['-C', root, 'commit', '-qm', 'work on a branch']);
+
+  const base = risk.baseRef(root);
+  ok('risk measures from the merge-base, not from HEAD', base !== 'HEAD' && /^[0-9a-f]{40}$/.test(base), base);
+
+  const a = risk.assess(root, ['src/ok.js']);
+  ok('a committed branch change is still counted', a.stat && a.stat.lines > 0, JSON.stringify(a.stat));
+  ok('the diff carries its A/M/D/R classes', a.stat && a.stat.classes && a.stat.classes.M === 1, JSON.stringify(a.stat));
+  ok('the hunk header gives back a line range', a.spots.length > 0 && a.spots[0].from > 0, JSON.stringify(a.spots));
+  ok(
+    'a spot line names the file and the range',
+    /src\/ok\.js:\d/.test(risk.spotLines(a.spots)[0]),
+    risk.spotLines(a.spots).join(' | ')
+  );
+
+  fs.unlinkSync(path.join(root, 'src', 'auth', 'token.js'));
+  const d = risk.assess(root, ['src/auth/token.js']);
+  ok('a deletion is called a deletion', d.reasons.some((r) => /deletes 1 file/.test(r)), d.reasons.join('; '));
+  run('git', ['-C', root, 'checkout', '--', 'src/auth/token.js']);
+
+  writeContract(root, 'N1', '# N1\nstatus: submitted\nowns: [src/ok.js]\nverify:\n  - node -e "process.exit(0)"\n');
+  writeContract(root, 'N2', '# N2\nstatus: active\nowns: [src/ok.js]\nverify:\n  - node -e "process.exit(0)"\n');
+  fs.writeFileSync(path.join(root, 'src', 'ok.js'), 'module.exports = 5;\n');
+  const clash = contract(['complete', '--id', 'N1'], root);
+  ok(
+    'two open contracts cannot both seal a changed file',
+    clash.status === 2 && /N2/.test(clash.stdout) && /owns the same files/.test(clash.stdout),
+    clash.stdout
+  );
+  fs.unlinkSync(path.join(root, CONTRACTS, 'N2.md'));
+
+  fs.writeFileSync(path.join(root, 'src', 'loose.js'), 'module.exports = 0;\n');
+  run('git', ['-C', root, 'add', '-A']);
+  const messy = contract(['complete', '--id', 'N1'], root);
+  ok(
+    'a source file nobody claimed blocks the close',
+    messy.status === 2 && /src\/loose\.js/.test(messy.stdout),
+    messy.stdout
+  );
+
+  fs.writeFileSync(path.join(root, 'notes.md'), 'a document cannot change what verify returns\n');
+  run('git', ['-C', root, 'rm', '-q', '--cached', 'src/loose.js']);
+  fs.unlinkSync(path.join(root, 'src', 'loose.js'));
+  run('git', ['-C', root, 'add', 'notes.md']);
+  const docs = contract(['complete', '--id', 'N1'], root);
+  ok('a modified document does not block the close', docs.status === 0, docs.stdout);
+
+  writeContract(
+    root,
+    'N3',
+    '# N3\nstatus: submitted\nowns: [src/ok.js]\nblocked-by: [N4]\nverify:\n  - node -e "process.exit(0)"\n'
+  );
+  writeContract(root, 'N4', '# N4\nstatus: open\nowns: [src/auth/token.js]\nverify:\n  - node -e "process.exit(0)"\n');
+  const held = contract(['complete', '--id', 'N3'], root);
+  ok('a blocked contract cannot close', held.status === 2 && /blocked by/.test(held.stdout), held.stdout);
+
+  const ready = contract(['list', '--ready'], root);
+  ok('the ready list leaves out what is blocked', !/N3/.test(ready.stdout) && /N4/.test(ready.stdout), ready.stdout);
+  const all = contract(['list'], root);
+  ok('the full list says what holds a contract', /blocked by: N4/.test(all.stdout), all.stdout);
+
+  try {
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}
+
+function testMapGuards() {
+  const root = fixture();
+  const MAP = path.join(CORE, 'scripts', 'map.js');
+  const map = require(MAP);
+
+  fs.writeFileSync(path.join(root, 'src', 'a.js'), "require('./ok.js');\n");
+  fs.writeFileSync(path.join(root, 'src', 'b.js'), "require('./ok.js');\nrequire('./a.js');\n");
+  run(process.execPath, [MAP, root], { cwd: root });
+
+  const json = JSON.parse(fs.readFileSync(path.join(root, '.claude', 'relay', 'map.json'), 'utf8'));
+  ok('the map stamps its schema version', json._map.schema === map.SCHEMA, JSON.stringify(json._map));
+  ok('the map stamps how many files it saw', json._map.files > 0, JSON.stringify(json._map));
+
+  ok('a map that lost half its files is refused', !!map.shrinkFault({ _map: { files: 100 } }, 20));
+  ok('a map that grew is not refused', !map.shrinkFault({ _map: { files: 100 } }, 120));
+  ok('a first map is not refused', !map.shrinkFault(null, 3));
+
+  const tight = run(process.execPath, [MAP, root, '--budget=400'], { cwd: root });
+  const md = fs.readFileSync(path.join(root, '.claude', 'relay', 'map.md'), 'utf8');
+  ok('a truncated map says so instead of ending quietly', /Showing \d+ of \d+ importing files/.test(md), md.slice(-400));
+  ok('and the run says it too', /left out of map\.md/.test(tight.stdout), tight.stdout);
+
+  run(process.execPath, [MAP, root], { cwd: root });
+  const first = fs.readFileSync(path.join(root, '.claude', 'relay', 'map.md'), 'utf8').split('\n').slice(0, 7).join('\n');
+  ok('the map says which HEAD it was built at, up top', /Built at HEAD [0-9a-f]{8}/.test(first), first);
+
+  const known = run(process.execPath, [MAP, 'who', 'src/a.js'], { cwd: root });
+  ok('who answers from the map when the map is fresh', /src\/b\.js/.test(known.stdout), known.stdout);
+
+  fs.writeFileSync(path.join(root, 'src', 'late.js'), "require('./ok.js');\n");
+  run('git', ['-C', root, 'add', '-A']);
+  run('git', ['-C', root, 'commit', '-qm', 'a file the map never saw']);
+  const late = run(process.execPath, [MAP, 'who', 'src/late.js'], { cwd: root });
+  ok(
+    'who falls back to a live scan instead of saying it is not there',
+    late.status === 0 && /live scan/.test(late.stdout),
+    late.stdout
+  );
+
+  const line = run(process.execPath, [STATUSLINE], {
+    cwd: root,
+    input: JSON.stringify({ workspace: { current_dir: root } }),
+  });
+  ok('a stale map is said on the statusline', /bayat|stale/i.test(line.stdout), line.stdout);
+
+  const full = run(process.execPath, [STATUSLINE], {
+    cwd: root,
+    input: JSON.stringify({ workspace: { current_dir: root }, context_window: { used_percentage: 91.2 } }),
+  });
+  ok('the context percentage reaches the statusline', /91%/.test(full.stdout), full.stdout);
+  const quiet = run(process.execPath, [STATUSLINE], {
+    cwd: root,
+    input: JSON.stringify({ workspace: { current_dir: root } }),
+  });
+  ok('and nothing is printed when the client did not send it', !/%/.test(quiet.stdout), quiet.stdout);
 
   try {
     fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
@@ -1918,6 +2055,8 @@ function main() {
   testSnapshot();
   testFigures();
   testNoContextWrites();
+  testBaseline();
+  testMapGuards();
 
   process.stdout.write('\n' + pass + ' passed, ' + fail + ' failed\n');
   if (failures.length) {

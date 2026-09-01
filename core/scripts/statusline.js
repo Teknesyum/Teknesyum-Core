@@ -75,6 +75,35 @@ function stale(relay) {
   return r && Array.isArray(r.ids) ? r.ids.length : 0;
 }
 
+function headSha(root) {
+  try {
+    const h = fs.readFileSync(path.join(root, '.git', 'HEAD'), 'utf8').trim();
+    if (!h.startsWith('ref:')) return h;
+    const ref = h.slice(4).trim();
+    try {
+      return fs.readFileSync(path.join(root, '.git', ref), 'utf8').trim();
+    } catch {
+      const packed = fs.readFileSync(path.join(root, '.git', 'packed-refs'), 'utf8');
+      const m = new RegExp('^([0-9a-f]{40}) ' + ref + '$', 'm').exec(packed);
+      return m ? m[1] : '';
+    }
+  } catch {
+    return '';
+  }
+}
+
+function mapStale(relay, cwd) {
+  const roots = [path.dirname(path.dirname(relay)), path.resolve(cwd)];
+  for (const root of roots)
+    for (const d of [path.join(root, '.claude', 'relay'), path.join(root, '.claude')]) {
+      const j = read(path.join(d, 'map.json'));
+      if (!j || !j._map || !j._map.head) continue;
+      const now = headSha(root);
+      if (now) return now !== j._map.head;
+    }
+  return false;
+}
+
 function agents(relay) {
   const live = liveDir(relay);
   let files = [];
@@ -346,6 +375,18 @@ function gateOn() {
   }
 }
 
+const CTX_WARN = 70;
+const CTX_LOUD = 85;
+
+function contextPart(input) {
+  const raw = input && input.context_window && input.context_window.used_percentage;
+  const pct = Number(raw);
+  if (!isFinite(pct) || pct <= 0) return '';
+  const n = Math.min(100, Math.round(pct));
+  const colour = n >= CTX_LOUD ? C.red : n >= CTX_WARN ? C.yellow : C.dim;
+  return paint(colour, t('line.context') + ' ' + n + '%');
+}
+
 function build(input) {
   const cwd = (input && input.workspace && input.workspace.current_dir) || process.cwd();
   const parts = [];
@@ -354,6 +395,9 @@ function build(input) {
 
   const cfg = settings();
   parts.push(paint(C.dim, String(cfg.profile || 'normal')));
+
+  const ctx = contextPart(input);
+  if (ctx) parts.push(ctx);
 
   const logs = openLogCount();
 
@@ -376,6 +420,9 @@ function build(input) {
 
   const st = stale(r.relay);
   if (st) parts.push(paint(C.yellow, st + ' ' + t('line.stale')));
+
+  if (mapStale(r.relay, cwd))
+    parts.push(paint(C.yellow, t('line.mapStale')));
 
   const a = agents(r.relay);
   if (a.running) parts.push(paint(C.magenta, a.running + ' ' + t('line.agents')) + (a.roles.length ? ' ' + paint(C.dim, tally(a.roles)) : ''));
