@@ -1894,6 +1894,51 @@ function testSnapshot() {
   } catch {}
 }
 
+function testBannerWakesOnAgents() {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-wake-'));
+  run('git', ['-C', root, 'init', '-q', '.']);
+  run('git', ['-C', root, 'config', 'user.email', 't@t.t']);
+  run('git', ['-C', root, 'config', 'user.name', 't']);
+  fs.writeFileSync(path.join(root, 'a.js'), 'module.exports = 1;\n');
+  run('git', ['-C', root, 'add', '-A']);
+  run('git', ['-C', root, 'commit', '-qm', 'init']);
+
+  const watch = path.join(CORE, 'hooks', 'watch.js');
+  const fire = (j) => run(process.execPath, [watch], { cwd: root, input: JSON.stringify(j) });
+
+  fire({ hook_event_name: 'PostToolUse', tool_name: 'Bash', cwd: root });
+  ok('an ordinary tool call does not create a relay folder', !fs.existsSync(path.join(root, '.claude', 'relay')));
+
+  fire({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Agent',
+    cwd: root,
+    agent_id: 'w1',
+    tool_input: { subagent_type: 'teknesyum-core:builder', prompt: 'Read roles/builder.md' },
+  });
+  const live = path.join(root, '.claude', 'relay', 'live');
+  ok('an agent call wakes the relay folder', fs.existsSync(path.join(live, 'w1.json')));
+  ok('the woken relay ignores its own scratch', /live\//.test(readIfAny(path.join(root, '.claude', 'relay', '.gitignore'))));
+
+  delete require.cache[require.resolve(path.join(CORE, 'scripts', 'statusline.js'))];
+  const line = require(path.join(CORE, 'scripts', 'statusline.js')).banner(root, 'head');
+  ok('the banner speaks without a single contract', line.length > 0, JSON.stringify(line));
+
+  const dirty = run('git', ['-C', root, 'status', '--porcelain']).stdout;
+  ok('the woken folder leaves the tree clean', !/relay\/live/.test(dirty), dirty);
+  try {
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}
+
+function readIfAny(p) {
+  try {
+    return fs.readFileSync(p, 'utf8');
+  } catch {
+    return '';
+  }
+}
+
 function testBaseline() {
   const root = fixture();
   const risk = require(path.join(CORE, 'scripts', 'risk.js'));
@@ -2055,6 +2100,7 @@ function main() {
   testSnapshot();
   testFigures();
   testNoContextWrites();
+  testBannerWakesOnAgents();
   testBaseline();
   testMapGuards();
 

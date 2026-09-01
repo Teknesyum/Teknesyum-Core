@@ -161,6 +161,24 @@ function relayRoot(start, opt) {
   return { relay, worktree: norm(git.top) !== norm(git.common) ? git.top : null };
 }
 
+const RELAY_IGNORE = ['live/', 'HANDOFF.md', ''].join('\n');
+
+function ensureRelay(start) {
+  const found = relayRoot(start);
+  if (found) return found;
+  const git = gitInfo(start);
+  if (!git) return null;
+  const relay = path.join(git.common, '.claude', 'relay');
+  try {
+    fs.mkdirSync(path.join(relay, 'live'), { recursive: true });
+    const ig = path.join(relay, '.gitignore');
+    if (!fs.existsSync(ig)) fs.writeFileSync(ig, RELAY_IGNORE);
+  } catch {
+    return null;
+  }
+  return { relay, worktree: norm(git.top) !== norm(git.common) ? git.top : null };
+}
+
 function liveDir(relay) {
   return path.join(relay, 'live');
 }
@@ -308,6 +326,7 @@ module.exports = {
   exists,
   gitInfo,
   relayRoot,
+  ensureRelay,
   liveDir,
   projectRoot,
   logProblem,

@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { read, write, merge, safe, relayRoot, liveDir, sessionId, setNotice, t } = require('./lib.js');
+const { read, write, merge, safe, relayRoot, ensureRelay, liveDir, sessionId, setNotice, t } = require('./lib.js');
 const { status, isContractName } = require('./schema.js');
 
 let raw = '';
@@ -68,7 +68,7 @@ function logCall(live, role, input) {
 
 function record(j) {
   const cwd = j.cwd || process.cwd();
-  const r = relayRoot(cwd, { git: false });
+  const r = relayRoot(cwd, { git: false }) || (AGENT_TOOLS.test(j.tool_name || '') ? ensureRelay(cwd) : null);
   if (!r) return;
   const live = liveDir(r.relay);
   try {
