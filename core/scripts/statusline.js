@@ -190,7 +190,7 @@ function seats(relay) {
   const pool = calls(relay);
   const goals = {};
   const now = Date.now();
-  return a.rows.map((row) => {
+  return a.rows.filter((row) => row.role).map((row) => {
     const c = taskFor(row, pool);
     const id = row.contract || (c && c.contract) || '';
     const g = goalOf(relay, id, goals);
@@ -286,6 +286,10 @@ function headLine(parts) {
 }
 
 function banner(cwd, phase) {
+  return plain(draw(cwd, phase));
+}
+
+function draw(cwd, phase) {
   const r = relayRoot(cwd, { git: false });
   if (!r) return '';
 

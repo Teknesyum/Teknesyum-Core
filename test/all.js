@@ -469,13 +469,7 @@ function testBanner(root) {
 
   ok('the banner opens with the plugin mark', plain(line).startsWith('Teknesyum ▸ '), line);
   ok('the banner stays quiet while the gate holds', !/KAPI|GATE OFF/.test(line), line);
-  ok('the banner is painted, so the eye finds it', plain(line) !== line, JSON.stringify(line));
-  ok('the paint washes out when the terminal asks', (() => {
-    process.env.NO_COLOR = '1';
-    const bare = banner(root);
-    delete process.env.NO_COLOR;
-    return plain(bare) === bare;
-  })(), line);
+  ok('the banner carries no escape the client would print raw', plain(line) === line, JSON.stringify(line));
   ok('the banner stays within three lines', line.split(String.fromCharCode(10)).length <= 3, line);
 
   ok('Turkish uppercase keeps the dot', !/Izlendi/.test(line), line);
