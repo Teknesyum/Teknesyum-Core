@@ -27,8 +27,11 @@ Aynı anda tek madde açık kalır.
       bağlama yazmayan başka kanal var mı. Sole'nin bulgusuyla karşılaştırılacak.
 - [ ] **4. Banner detayı — benim araştırmam.** Maliyet artmadan çok daha fazla
       bilgi verilebilir mi. Sole'nin bulgusuyla karşılaştırılacak.
-- [ ] **5. Altın kural denetimi.** Mevcut özelliklerin içinde maliyet ilkesine
-      tezat düşen var mı — çıkar, raporla.
+- [ ] **8. Fable'ın önerdiği üç kapı.** (kullanıcı onayı bekliyor)
+      watch.js Stop: submitted sözleşme varken tur kapanmasın;
+      aynı kapıda "?" ile biten tur + atanmamış iş varsa tek atış uyarı;
+      guard.js Bash: submitted/active sözleşme varken git merge/push bloklansın.
+      Artı üç metin satırı: SKILL.md Reporting, SKILL.md advisor, roles/auditor.md.
 - [ ] **6. Ekosistem raporu.** Büyük MCP'ler, skill'ler, plugin'ler ve benzer
       projeler bizim mentalitemize (maliyet, sözleşme, denetim) uyuyor mu.
       Obsidian, graph tabanlı araçlar vb. kurulmalı mı. Bizim eklenti onların
@@ -38,6 +41,14 @@ Aynı anda tek madde açık kalır.
 
 ## Bitenler
 
+- [x] **5. Altın kural denetimi.** İhlal yok. Bağlama yazan tek yüzey `cue.js`;
+      o da yalnız "log yaz" cümlesinde ve açık sözleşmeli oturum açılışında
+      konuşuyor. Kancaların hepsi ~30 ms, çıktıları boş.
+- [x] **3c/4c. Dil düğmesi ve karar notu.** (2c6d244) `assets/badge-lang.svg` +
+      `.tr.svg` iki yarımlı EN|TR düğmesi; `scaffold.js langlink` yazıyor.
+      YONTEM günlüğü `docs/DECISIONS.md` D16 oldu, günlük arşive alındı.
+- [x] **a. Trash disiplini.** (2c6d244) `contract.js complete` kapanışta ağacın
+      artık adını anmadığı sahipli dosyaları listeliyor, `trash/` gösteriyor.
 - [x] **2. openlogs denetimi.** (3dcfbf3) setup `coreRepo`yu yazıyor, günlük nereye
       düştüğünü söylüyor, `log close/archive` öneki ne olursa olsun buluyor.
       Guard günlüğü kapandı. Şüpheliler kullanıcıya soruldu.
