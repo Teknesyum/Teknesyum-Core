@@ -19,14 +19,6 @@ Aynı anda tek madde açık kalır.
 
 ## Açık maddeler
 
-- [ ] **1. Sole raporu.** Prompt yazıldı, kullanıcı yapıştıracak. Sole üç başlıkta
-      rapor yazacak: bug avı, banner görünümü (renk/başlık/alternatif ücretsiz
-      protokol), maliyet artmadan daha fazla detay. Rapor gelince işlenecek.
-- [ ] **3. Banner görünümü — benim araştırmam.** Başlık gibi görünmesi istendi,
-      görünmüyor. Kırmızı yazı / beyaz dolgu mümkün mü. MessageDisplay dışında
-      bağlama yazmayan başka kanal var mı. Sole'nin bulgusuyla karşılaştırılacak.
-- [ ] **4. Banner detayı — benim araştırmam.** Maliyet artmadan çok daha fazla
-      bilgi verilebilir mi. Sole'nin bulgusuyla karşılaştırılacak.
 - [ ] **6. Ekosistem raporu.** Büyük MCP'ler, skill'ler, plugin'ler ve benzer
       projeler bizim mentalitemize (maliyet, sözleşme, denetim) uyuyor mu.
       Obsidian, graph tabanlı araçlar vb. kurulmalı mı. Bizim eklenti onların
@@ -36,6 +28,14 @@ Aynı anda tek madde açık kalır.
 
 ## Bitenler
 
+- [x] **1/3/4. Sole raporu ve banner araştırması.** Rapor geldi, 12 hatanın hepsi
+      işlendi (madde 9). Ölçülen: `###` başlık render **edilmiyor**, markdown ve
+      HTML de çalışmıyor; **ANSI çalışıyor** — renk, kalın, ters video, yani
+      "beyaz dolgu üstüne kırmızı yazı" `ESC[31;47m` ile mümkün. Bağlama yazmayan
+      diğer kanallar: statusline, Notification kancası, `terminalSequence` (yalnız
+      OSC). Ücretsiz **olmayanlar**: `additionalContext`, SessionStart/
+      UserPromptSubmit stdout, kanca stderr/exit 2. Detay maliyeti artırmadan
+      artıyor, çünkü hepsi zaten diskteki kayıtlardan okunuyor — madde 10.
 - [x] **10. Banner yeniden tasarımı.** (04a881a) İki satır: üstte kim oturuyor
       — `2× Haiku-Low İzci · SZL12 R2 · 5 dk sessiz` —, altında dallarda ne
       yapıyor: `└ rozet metni duzeni · adım 12 · son: statusline.js`. Fiil dolgusu
