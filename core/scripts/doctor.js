@@ -142,12 +142,17 @@ function hooksOk() {
 }
 
 function versionOk() {
-  const pkg = JSON.parse(fs.readFileSync(path.join(CORE, '..', 'package.json'), 'utf8'));
   let man = null;
   try {
     man = JSON.parse(fs.readFileSync(path.join(CORE, '.claude-plugin', 'plugin.json'), 'utf8'));
   } catch {
     return { ok: false, message: 'the plugin manifest is missing' };
+  }
+  let pkg = null;
+  try {
+    pkg = JSON.parse(fs.readFileSync(path.join(CORE, '..', 'package.json'), 'utf8'));
+  } catch {
+    return 'v' + man.version;
   }
   if (String(pkg.version) !== String(man.version))
     return {
