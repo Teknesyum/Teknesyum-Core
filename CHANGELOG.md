@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.7.0
+
+- a turn cannot close on an unanswered delivery, and work no longer reaches main around the gate
+- records survive a crowd: merges take a lock, a stopped subagent stays stopped, an unreadable diff is not low risk
+- the language link is a two-half EN/TR button; a closing contract names the files nothing references any more
+- setup records the core repo; a bug log with no repo says where it landed; log close/archive finds a log whatever its prefix
+- the banner reads in two lines: who is seated, and what they are on
+
 ## v0.6.0
 
 - The banner reads as a heading and names the seat before the work
