@@ -55,6 +55,10 @@
     "en": "gated",
     "tr": "bekletilir"
   },
+  "setup.core": {
+    "en": "core repo",
+    "tr": "core deposu"
+  },
   "setup.none": {
     "en": "none",
     "tr": "yok"

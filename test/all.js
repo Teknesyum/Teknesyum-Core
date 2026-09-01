@@ -756,6 +756,18 @@ function testLanguage(root) {
   ok('every summary label is padded clear of its value', rows.every((l) => /^ {2}\S.*\s{2,}\S/.test(l)), JSON.stringify(rows));
   ok('the summary is translated', /kuruldu/.test(applied), applied);
 
+  const cfgPath = path.join(home, 'teknesyum', 'config.json');
+  ok('with no repo in sight the core row stays empty', !(JSON.parse(fs.readFileSync(cfgPath, 'utf8')).coreRepo), applied);
+  const repoRoot = path.resolve(CORE, '..');
+  run(process.execPath, [path.join(CORE, 'scripts', 'setup.js'), '--apply'], { cwd: root, env: env({ TEKNESYUM_CORE: repoRoot }) });
+  ok('setup records the core repo it found', JSON.parse(fs.readFileSync(cfgPath, 'utf8')).coreRepo === repoRoot.replace(/\\/g, '/'), fs.readFileSync(cfgPath, 'utf8'));
+
+  setLang(null);
+  const lone = path.join(root, 'lone-core');
+  fs.cpSync(CORE, lone, { recursive: true });
+  const spool = run(process.execPath, [path.join(lone, 'scripts', 'log.js'), 'write', '--title', 'silent fall', '--symptom', 's'], { cwd: root, env: env() }).stdout;
+  ok('a log with no repo says where it landed', /fallback spool/.test(spool), spool);
+
   setLang('zz');
   ok('an unknown language falls back to English', /open|agents|contracts/.test(statusline()), statusline());
 

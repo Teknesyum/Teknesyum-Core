@@ -74,6 +74,24 @@ function pluginDir() {
   return path.resolve(__dirname, '..');
 }
 
+function findCore() {
+  const seen = [process.env.TEKNESYUM_CORE];
+  let d = process.cwd();
+  for (;;) {
+    seen.push(d);
+    const up = path.dirname(d);
+    if (up === d) break;
+    d = up;
+  }
+  for (const c of seen) {
+    try {
+      if (c && fs.existsSync(path.join(c, 'core', '.claude-plugin', 'plugin.json')))
+        return c.replace(/\\/g, '/');
+    } catch {}
+  }
+  return null;
+}
+
 function inspect() {
   const cfg = read(stateFile('config')) || {};
   const s = read(settingsPath()) || {};
@@ -134,6 +152,10 @@ function apply(answers) {
   for (const q of QUESTIONS) if (cfg[q.key] === undefined) cfg[q.key] = q.fallback;
   cfg.installedAt = cfg.installedAt || new Date().toISOString();
   cfg.pluginDir = pluginDir();
+  if (!cfg.coreRepo) {
+    const core = findCore();
+    if (core) cfg.coreRepo = core;
+  }
   write(stateFile('config'), cfg);
 
   const beep = path.join(configRoot(), 'teknesyum-beep.json');
@@ -143,7 +165,7 @@ function apply(answers) {
   fs.writeFileSync(beep, JSON.stringify(current, null, 2) + '\n', 'utf8');
 
   const bridge = wireStatusline();
-  const labels = ['setup.config', 'setup.statusline', 'setup.contractLang', 'setup.profile', 'setup.sound', 'setup.research', 'setup.private'];
+  const labels = ['setup.config', 'setup.statusline', 'setup.contractLang', 'setup.profile', 'setup.sound', 'setup.research', 'setup.private', 'setup.core'];
   const width = Math.max(...labels.map((k) => t(k).length)) + 2;
   const row = (k, v) => '  ' + t(k).padEnd(width) + v;
 
@@ -157,6 +179,7 @@ function apply(answers) {
     row('setup.sound', t(cfg.notify ? 'setup.on' : 'setup.off')),
     row('setup.research', t(cfg.research ? 'setup.gated' : 'setup.off')),
     row('setup.private', cfg.privateRepo || t('setup.none')),
+    row('setup.core', cfg.coreRepo || t('setup.none')),
     '',
     t('setup.applies'),
   ].join('\n');

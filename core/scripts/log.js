@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { openLogs } = require('../hooks/lib.js');
+const { openLogs, coreRepo, stateFile } = require('../hooks/lib.js');
 
 const PREFIX = 'BUG-';
 
@@ -69,14 +69,29 @@ function write(o) {
     '',
   ].join('\n');
   fs.writeFileSync(file, body, 'utf8');
-  say(['Wrote ' + name, '  ' + file, '', 'Fill in sections 1 and 2 now.']);
+  const lines = ['Wrote ' + name, '  ' + file];
+  if (!coreRepo())
+    lines.push(
+      '',
+      'No core repo found, so this went to the fallback spool.',
+      'Set coreRepo in ' + stateFile('config') + ' and move it there.'
+    );
+  lines.push('', 'Fill in sections 1 and 2 now.');
+  say(lines);
 }
 
 function move(o, archive) {
   if (!o.id) die('--id is required');
   const dir = openLogs();
-  const from = path.join(dir, o.id.endsWith('.md') ? o.id : PREFIX + slug(o.id) + '.md');
-  if (!fs.existsSync(from)) die('not found: ' + path.basename(from));
+  let from = path.join(dir, o.id.endsWith('.md') ? o.id : PREFIX + slug(o.id) + '.md');
+  if (!fs.existsSync(from)) {
+    const want = slug(String(o.id).replace(/\.md$/i, ''));
+    const hit = (fs.existsSync(dir) ? fs.readdirSync(dir) : []).find(
+      (f) => f.endsWith('.md') && slug(f.slice(0, -3)).endsWith(want)
+    );
+    if (!hit) die('not found: ' + path.basename(from));
+    from = path.join(dir, hit);
+  }
   if (!archive) {
     fs.unlinkSync(from);
     return say(['Closed and deleted ' + path.basename(from)]);
