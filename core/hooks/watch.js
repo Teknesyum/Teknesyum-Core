@@ -293,10 +293,12 @@ function abandoned(relay, live, now) {
     if (status(body) === 'active') open.push(id);
   }
   const marks = path.join(live, '_stale.json');
-  const cur = read(marks);
-  const seen = cur && Array.isArray(cur.ids) ? cur.ids : [];
-  const fresh = open.filter((id) => !seen.includes(id));
-  write(marks, { ids: open, at: now });
+  let fresh = [];
+  merge(marks, (cur) => {
+    const seen = Array.isArray(cur.ids) ? cur.ids : [];
+    fresh = open.filter((id) => !seen.includes(id));
+    return { ids: open, at: now };
+  });
   if (!fresh.length) return;
   try {
     const seal = require('./seal.js');
