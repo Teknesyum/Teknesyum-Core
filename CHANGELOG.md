@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.7.1
+
+- Banner: no ANSI in the message band, and roleless rows no longer take a seat
+- doctor reads the version from the plugin manifest, so an installed copy is not a failure
+
 ## v0.7.0
 
 - a turn cannot close on an unanswered delivery, and work no longer reaches main around the gate
