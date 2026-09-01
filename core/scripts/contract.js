@@ -491,6 +491,26 @@ function tierCmd() {
 
   return out(lines);
 }
+const RELAY_PATH = /(^|\/)[.]claude\/relay\//;
+
+function orphans(root, owns) {
+  const keep = /^(readme|license|changelog|package[.]json|install[.])/i;
+  const held = owns.map((p) => p.replace(/\\/g, '/'));
+  const found = [];
+  for (const rel of held) {
+    const base = rel.split('/').pop();
+    if (keep.test(base)) continue;
+    const hits = git(root, ['grep', '-l', '--fixed-strings', '--', base]) || '';
+    const others = hits
+      .split('\n')
+      .map((x) => x.trim())
+      .filter(Boolean)
+      .filter((f) => !held.includes(f) && !f.startsWith('trash/') && !RELAY_PATH.test(f));
+    if (!others.length) found.push(rel);
+  }
+  return found;
+}
+
 function complete() {
   const c = load(arg('id'));
   if (c.error) return stop([c.error, '', 'Usage: contract.js complete --id T7']);
@@ -604,6 +624,8 @@ function complete() {
     at: new Date().toISOString(),
   });
 
+  const dead = orphans(c.root, owns);
+
   return out(
     [c.id + ' complete -> contracts/done/' + c.id + '.md', ''].concat(
       reportVerify(results),
@@ -611,7 +633,12 @@ function complete() {
         '',
         'risk ' + level.level + (level.reasons.length ? ' (' + level.reasons.join('; ') + ')' : ''),
         'ledger written at HEAD ' + headSha.slice(0, 8) + (record ? ', audit record consumed' : ''),
-      ]
+      ],
+      dead.length
+        ? ['', 'Nothing else in the tree names these files:']
+            .concat(dead.map((p) => '  ' + p))
+            .concat(['', 'If their work is done, move them under trash/. Do not delete them.'])
+        : []
     )
   );
 }
@@ -1084,6 +1111,7 @@ module.exports = {
   takeSnapshot,
   dropSnapshot,
   revert,
+  orphans,
   hollowStep,
   hollowVerify,
   listCmd,

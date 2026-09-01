@@ -557,6 +557,31 @@ serves terminal users, and this is the only thing the desktop user can actually 
 
 ---
 
+## D16 — English is the front page, Turkish is one click away
+
+**Two README files, joined by a button-shaped badge.** `README.md` is English and is what
+the repository serves; `README.tr.md` carries the Turkish text. Each one opens with a
+`<!-- lang -->` marker followed by a single linked figure: `assets/badge-lang.svg` on the
+English page, `assets/badge-lang.tr.svg` on the Turkish one. The figure is a two-half
+switch — EN | TR — with the current language lit, so the link reads as a toggle rather
+than as a line of prose.
+
+Nothing else on a GitHub README can behave like a control. Scripts never run, `<style>` is
+stripped, there is no `Accept-Language` negotiation, and the repository description is
+plain text. A `<details>` block looks like one click but doubles the page and breaks the
+anchors. A link dressed as a button is the whole of what the platform allows, so that is
+what we ship.
+
+`scaffold.js langlink` writes both lines and copies both figures out of the plugin, so no
+model composes this markup and no project has to remember the shape of it.
+
+The rule that repository documents are English did not change: the Turkish README is its
+one user-facing exception, and internal papers — contracts, reports, decision packets —
+stay Turkish. Decision entries themselves follow the README pattern: written in English,
+reachable in Turkish through the same badge wherever a Turkish twin exists.
+
+---
+
 ## Standing law
 
 No feature may write to `additionalContext`, and no feature may write `systemMessage` on an

@@ -117,23 +117,37 @@ function writeSignature() {
 
 function writeLangLink() {
   const pairs = [
-    ['README.md', 'README.tr.md'],
-    ['README.tr.md', 'README.md'],
+    ['README.md', 'README.tr.md', 'badge-lang.svg'],
+    ['README.tr.md', 'README.md', 'badge-lang.tr.svg'],
   ];
-  const labels = { 'README.md': 'English', 'README.tr.md': 'Türkçe' };
+  const alt = {
+    'badge-lang.svg': 'English selected, switch to Türkçe',
+    'badge-lang.tr.svg': 'Türkçe seçili, switch to English',
+  };
   const mark = '<!-- lang -->';
   const done = [];
+  const copied = [];
 
-  for (const [self, other] of pairs) {
+  const src = path.resolve(__dirname, '..', 'assets');
+  const dst = path.join(root(), 'assets');
+  for (const f of ['badge-lang.svg', 'badge-lang.tr.svg']) {
+    const from = path.join(src, f);
+    if (!fs.existsSync(from)) continue;
+    fs.mkdirSync(dst, { recursive: true });
+    fs.copyFileSync(from, path.join(dst, f));
+    copied.push('assets/' + f);
+  }
+
+  for (const [self, other, code] of pairs) {
     const p = path.join(root(), self);
     if (!fs.existsSync(p)) continue;
     const line =
       mark +
-      '\n\n**' +
-      labels[self] +
-      '** · [' +
-      labels[other] +
-      '](' +
+      '\n\n[<img src="assets/' +
+      code +
+      '" alt="' +
+      alt[code] +
+      '" width="124" height="44">](' +
       other +
       ')\n';
     let body = fs.readFileSync(p, 'utf8');
@@ -144,7 +158,11 @@ function writeLangLink() {
     done.push(self);
   }
   if (!done.length) return stop(['Neither README.md nor README.tr.md exists here.']);
-  return out(['Language link written into ' + done.join(', ')]);
+  return out(
+    ['Language toggle written into ' + done.join(', ')].concat(
+      copied.length ? ['Assets copied: ' + copied.join(', ')] : []
+    )
+  );
 }
 
 function help() {

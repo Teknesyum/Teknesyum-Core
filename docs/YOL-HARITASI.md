@@ -22,8 +22,6 @@ Aynı anda tek madde açık kalır.
 - [ ] **1. Sole raporu.** Prompt yazıldı, kullanıcı yapıştıracak. Sole üç başlıkta
       rapor yazacak: bug avı, banner görünümü (renk/başlık/alternatif ücretsiz
       protokol), maliyet artmadan daha fazla detay. Rapor gelince işlenecek.
-- [ ] **2. openlogs denetimi.** `logs/openlogs/` incelenecek; maliyeti 0 olan
-      eklenebilir özellik var mı. Şüpheli olanı kullanıcıya sor.
 - [ ] **3. Banner görünümü — benim araştırmam.** Başlık gibi görünmesi istendi,
       görünmüyor. Kırmızı yazı / beyaz dolgu mümkün mü. MessageDisplay dışında
       bağlama yazmayan başka kanal var mı. Sole'nin bulgusuyla karşılaştırılacak.
@@ -40,4 +38,6 @@ Aynı anda tek madde açık kalır.
 
 ## Bitenler
 
-(henüz yok)
+- [x] **2. openlogs denetimi.** (3dcfbf3) setup `coreRepo`yu yazıyor, günlük nereye
+      düştüğünü söylüyor, `log close/archive` öneki ne olursa olsun buluyor.
+      Guard günlüğü kapandı. Şüpheliler kullanıcıya soruldu.

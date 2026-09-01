@@ -1,6 +1,6 @@
 <!-- lang -->
 
-**Türkçe** · [English](README.md)
+[<img src="assets/badge-lang.tr.svg" alt="Türkçe seçili, switch to English" width="124" height="44">](README.md)
 
 <div align="center">
 <img src="assets/banner.tr.svg" alt="Teknesyum Core, Claude Code için çok amaçlı iş istasyonu. Adın altında eklentinin sohbete bastığı satır: Teknesyum, 3× Opus-Medium İşçi Atandı. Onun altında birbirine bağlı üç aşama: kancalar zorluyor, kapı kapatıyor, roller işi yapıyor." width="900">

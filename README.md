@@ -1,6 +1,6 @@
 <!-- lang -->
 
-**English** · [Türkçe](README.tr.md)
+[<img src="assets/badge-lang.svg" alt="English selected, switch to Türkçe" width="124" height="44">](README.tr.md)
 
 <div align="center">
 <img src="assets/banner.svg" alt="Teknesyum Core, a multi-purpose workstation for Claude Code. Below the name, the line the plugin prints into the chat: Teknesyum, three Opus-Medium workers assigned. Under it, three linked stages: hooks enforce, the gate closes, roles do the work." width="900">

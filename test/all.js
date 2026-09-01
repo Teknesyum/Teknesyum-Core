@@ -184,6 +184,21 @@ function testGate(root) {
   ok('passing verify completes a low-risk contract', t1.status === 0, t1.stdout);
   ok('completed contract moved', fs.existsSync(path.join(root, FINISHED, 'T1.md')));
 
+  fs.mkdirSync(path.join(root, 'notes'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'notes', 'dead.md'), 'a measurement, already used\n');
+  fs.writeFileSync(path.join(root, 'notes', 'kept.md'), 'still in the route\n');
+  fs.writeFileSync(path.join(root, 'notes', 'index.md'), 'the route runs through kept.md\n');
+  run('git', ['add', '-A'], { cwd: root });
+  writeContract(
+    root,
+    'T8',
+    '---\nid: T8\nstatus: submitted\nround: 1\nowns: [notes/dead.md, notes/kept.md]\nverify:\n  - node -e "process.exit(0)"\n---\n'
+  );
+  const t8 = contract(['complete', '--id', 'T8'], root);
+  ok('a closed contract names the file nothing references', /notes\/dead[.]md/.test(t8.stdout), t8.stdout);
+  ok('a file the tree still names is left alone', !/notes\/kept[.]md/.test(t8.stdout), t8.stdout);
+  ok('the gate points at trash, not at deletion', /trash\//.test(t8.stdout) && !/rm /.test(t8.stdout), t8.stdout);
+
   const t3a = contract(['complete', '--id', 'T3'], root);
   ok('high risk without a record is blocked', t3a.status === 2 && /audit record/.test(t3a.stdout), t3a.stdout);
 
