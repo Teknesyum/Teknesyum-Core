@@ -19,7 +19,39 @@ Aynı anda tek madde açık kalır.
 
 ## Açık maddeler
 
-Yok.
+On altı proje incelendi (`docs/inceleme/`), 74 fikir envanterlendi (`_SENTEZ.md`), iki
+kontrollü ölçüm yapıldı. Fable'ın sıralaması: önce yanlış olanı düzelt, sonra bedava
+veriyi al, en son yeni yetenek. Hiçbir dış araç kurulmuyor.
+
+- [ ] **1. Risk temeli `merge-base`.** (`risk.js gitNumstat`) Dalda biriken commit'ler
+      bugün riskten kaçıyor; bu eksik değil **yanlış** cevap.
+- [ ] **2. Diff'te A/M/D/R sınıfı.** (`--name-status --diff-filter`) Silme ile eklemeyi
+      aynı ağırlıkta saymak riski yanıltıyor.
+- [ ] **3. Hunk başlığından fonksiyon adı + satır aralığı.** (`risk.js`) Ölçüldü: 32.584 →
+      542 bayt, 60× daralma.
+- [ ] **4. Bağlam doluluğu statusline'da.** (`statusline.js build`) Veri zaten stdin'de,
+      okunmuyor.
+- [ ] **5. `complete()` kirli ağaç kontrolü.** (`contract.js`) Kirli ağaç belirsiz bir
+      ağacı mühürlüyor.
+- [ ] **6. `owns` kesişim kontrolü.** (`contract.js`) İki açık sözleşme aynı dosyayı
+      sahiplenebiliyor.
+- [ ] **7. `blocked-by` ve hazır-iş sorgusu.** (`contract.js`)
+- [ ] **8. map.json küçülme koruması + şema sürümü + `who` yedeği.** (`map.js`)
+- [ ] **9. Bayatlık protokolü.** `staleness()` var, kimse okumuyor: uyarı `map.md`'nin ilk
+      satırına ve statusline'a bassın.
+- [ ] **10. map.md çıktı bütçesi ve dürüst kırpma.** (`map.js emit`) Dört bağımsız projede
+      görülen tek ortak desen.
+
+İkinci sıra (koşulu dolmadı): #64 kabul↔verify kapsam eşlemesi, #42 ayrık güven ölçeği,
+#26 birlikte-değişim (depo genç), #43/#44 DECISIONS.md durumu ve `supersedes`, #67 diff'te
+sır taraması. ast-grep tek koşullu aday; koşul (günlükte kanıtlanmış AST isabet ihtiyacı)
+dolmadı.
+
+### Sınamadan eklenen ilke
+
+**Tazelik kanıtı okura bırakılmaz.** Üretilmiş her çıktı, tüketildiği anda betik tarafından
+güncelliğe karşı denetlenir; bayatsa bunu çıktının ilk satırında söyler. Sessiz bayat çıktı,
+yanlış çıktıdır.
 
 ## Bitenler
 

@@ -378,6 +378,43 @@ Core'un üstüne koyduğu. Kısa hali:
 
 ---
 
+## Core neyin yerine geçiyor, ölçüsüyle
+
+Komşu bir araca uzanmadan önce Core onu ölçer. On altı proje incelendi, ikisi bu makinede
+kontrollü deneye sokuldu. Hiçbiri kurulu değil ve aşağıdaki her satır tercih değil ölçümdür.
+
+**Kod grafiği indeksleyiciler** (graphify, Aider'in repo haritası, Serena). Gerçek bir depoda
+— fastify, 1.032 dosya — aynı beş mimari soru semantik grafik indeksiyle 63.462, Core'un kendi
+`map.js`'iyle 56.120, düz grep'le 50.525 token tuttu. Aynı beş cevap. İndeks token değil
+isabet satın alıyor, o da tek bir soru sınıfında: *bu sembolü kim çağırıyor*. `map.js`
+import'ları, hub'ları, döngüleri ve öksüzleri kaynaktan doğrudan çıkarır — sıfır model
+çağrısı, 3× hızlı kurulum, 74× ucuz. Grafik aracı büyük ve yabancı bir kod tabanında tek bir
+iş için kurulur; sırtta taşınmaz.
+
+**Obsidian tarzı vault'lar.** Dört not düzeni — tek düz dosya, klasörler, wiki-bağlantılı
+vault, backlink indeksli vault — aynı erişim sorularını 5/5 yanıtladı. Vault %10, backlink
+indeksi %14 fazla token yedi ve alıntıları daha kötüydü; hiçbir ajan bir wiki-bağlantısını
+izlemedi. Core bu yüzden `MEMORY.md` ve tek bir yol haritası dosyası tutuyor. Bu cevap külliyat
+tek bir `Read`'e sığdığı sürece geçerli; ötesinde değişir.
+
+**MCP ile taşınan takımlar.** Popüler bir orkestrasyon sunucusu 358 araç yayımlıyor; şeması
+~270 KB ve her isteğe biniyor — tek kelime iş yapılmadan yaklaşık 64–67 bin token, üstelik
+tamamlanma kapısı yok. Core'un bütün yüzeyi çağrılınca koşan betiklerdir: sıradan turda 0 token.
+
+**Tarayıcılar, şartname çerçeveleri, hafıza katmanları.** CodeQL'in lisansı özel depodan
+veritabanı üretmeye izin vermiyor; Semgrep'in dosyalar arası analizi ücretli katman. Şartname
+çerçeveleri, Core'da zaten komut koşturan bir kapı varken markdown merasimi ekliyor. Hafıza
+katmanları değer üretmek için her turda okuyup yazmak zorunda — Core'un yapmayacağı tek şey o.
+
+### Core'un yapmadığı
+
+Sembol seviyesinde çağrı grafiği yok — `map.js` dosya import'unda durur. Semantik arama yok.
+Dosyalar arası taint analizi yok. Core'un ölçüldüğünden çok daha büyük bir kod tabanında ya da
+hiç okumadığın yabancı bir depoda özel bir indeks maliyetini hak eder. Kurma anı orasıdır, o iş
+için.
+
+---
+
 ## Kullanımda nasıl görünüyor
 
 Her cevabın altında ve üstünde tek satır; o an olup biten en önemli tek şeyi söylüyor. Pano

@@ -380,6 +380,45 @@ is what Core adds on top. The short version:
 
 ---
 
+## What Core replaces, measured
+
+Before reaching for a neighbouring tool, Core measures it. Sixteen projects were surveyed and
+two were put through a controlled experiment on this machine. None of them is installed, and
+every line below is a measurement rather than a preference.
+
+**Code-graph indexers** (graphify, Aider's repo map, Serena). On a real repository — fastify,
+1,032 files — the same five architecture questions cost 63,462 tokens through a semantic graph
+index, 56,120 through Core's own `map.js`, and 50,525 through plain grep. Same five answers.
+An index buys precision, not tokens, and only for one class of question: *who calls this
+symbol*. `map.js` derives imports, hubs, cycles and orphans straight from the source with zero
+model calls, builds 3× faster and costs 74× less. Install a graph tool for one job in a large
+foreign codebase; do not carry one.
+
+**Obsidian-style vaults.** Four note layouts — one flat file, folders, a vault with
+wiki-links, a vault with a backlink index — answered the same retrieval questions 5/5 each.
+The vault cost 10% more tokens, the backlink index 14% more with worse citations, and no agent
+ever followed a wiki-link. That is why Core keeps `MEMORY.md` and one roadmap file. The answer
+holds only while the corpus fits a single `Read`; past that it changes.
+
+**MCP-carried suites.** One popular orchestration server publishes 358 tools; its schema is
+~270 KB and rides in every request — roughly 64–67k tokens before a word of work is done, and
+it ships no completion gate. Core's entire surface is scripts called on demand: 0 tokens on an
+ordinary turn.
+
+**Scanners, spec frameworks, memory layers.** CodeQL's licence does not allow databases built
+from a private repository; Semgrep's cross-file analysis is the paid tier. Spec frameworks add
+markdown ceremony where Core already has a gate that runs commands. Memory layers have to read
+and write on every turn to be worth anything, which is the one thing Core will not do.
+
+### What Core does not do
+
+No symbol-level call graph — `map.js` stops at file imports. No semantic search. No cross-file
+taint analysis. On a codebase far larger than the one Core was measured on, or a foreign one
+you have never read, a dedicated index earns its cost. That is the moment to install one, for
+that job.
+
+---
+
 ## What it looks like in use
 
 One line above and below each answer, saying the single most important thing happening. Not
