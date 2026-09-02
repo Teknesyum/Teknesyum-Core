@@ -120,7 +120,11 @@ function record(j) {
       const target = t.file_path || t.notebook_path || '';
       if (target) {
         const rel = path.relative(path.dirname(path.dirname(r.relay)), target).replace(/\\/g, '/');
-        if (!rec.files.includes(rel)) rec.files.push(rel);
+        const outside = rel.startsWith('../') || path.isAbsolute(rel);
+        if (outside) {
+          rec.outsideFiles = rec.outsideFiles || [];
+          if (!rec.outsideFiles.includes(rel)) rec.outsideFiles.push(rel);
+        } else if (!rec.files.includes(rel)) rec.files.push(rel);
       }
     }
   }
