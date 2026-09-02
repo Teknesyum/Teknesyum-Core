@@ -65,13 +65,19 @@ function resolveSettings(cwd) {
       file: v.file,
       hz: 0,
       ms: 0,
+      minMs: MIN_MS[event],
       source: 'default',
       mutedSource: '',
       soundSource: '',
+      minSource: '',
     };
     for (const k of stack) {
       const o = (k.data.events || {})[event];
       if (!o || typeof o !== 'object') continue;
+      if (typeof o.minMs === 'number' && !field.minSource) {
+        field.minMs = Math.max(0, o.minMs);
+        field.minSource = k.ad;
+      }
       if (typeof o.muted === 'boolean' && !field.mutedSource) {
         field.muted = o.muted;
         field.mutedSource = k.ad;
@@ -159,6 +165,8 @@ function play(field, event) {
 
 const WINDOW = { waiting: 60000, done: 10000, error: 10000 };
 
+const MIN_MS = { waiting: 0, done: 20000, error: 0 };
+
 function stampFile() {
   return path.join(configRoot(), 'teknesyum-beep-last.json');
 }
@@ -185,6 +193,13 @@ function playedRecently(event, simdi) {
   return false;
 }
 
+function tooQuick(field, now) {
+  const min = Number(field.minMs) || 0;
+  if (min <= 0) return false;
+  const at = Number((read(stampFile()) || {}).prompt) || 0;
+  return !!at && now - at < min;
+}
+
 function run(j) {
   const event = HOOK_EVENT[j.hook_event_name];
   if (!event) return;
@@ -193,6 +208,7 @@ function run(j) {
   const field = cfg.events[event];
   if (!field || field.muted) return;
   const now = Date.now();
+  if (event === 'done' && tooQuick(field, now)) return;
   if (recently(event, now)) return;
   if (play(field, event)) stamp(event, now);
 }
@@ -210,6 +226,8 @@ module.exports = {
   play,
   soundPath,
   WINDOW,
+  MIN_MS,
+  tooQuick,
   stampFile,
   playedRecently,
   recently,
@@ -217,6 +235,15 @@ module.exports = {
 };
 
 if (require.main === module) {
+  const argv = process.argv.slice(2);
+  const at = argv.indexOf('--event');
+  if (at >= 0) {
+    const where = argv.indexOf('--cwd');
+    try {
+      run({ hook_event_name: argv[at + 1], cwd: where >= 0 ? argv[where + 1] : process.cwd() });
+    } catch {}
+    process.exit(0);
+  }
   let raw = '';
   process.stdin.setEncoding('utf8');
   process.stdin.on('data', (d) => (raw += d));

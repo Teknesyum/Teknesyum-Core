@@ -19,7 +19,12 @@ process.stdin.on('end', () => {
 
 function cue(j) {
   const ev = j.hook_event_name || '';
-  if (ev === 'UserPromptSubmit') return logCue(j);
+  if (ev === 'UserPromptSubmit') {
+    try {
+      require('./notify.js').stamp('prompt', Date.now());
+    } catch {}
+    return logCue(j);
+  }
   if (ev === 'SessionStart') {
     try {
       rewire();

@@ -7,14 +7,28 @@ let raw = '';
 process.stdin.on('data', (d) => (raw += d));
 process.stdin.on('end', () => {
   let out = '';
+  let j = null;
   try {
-    const j = JSON.parse(raw);
+    j = JSON.parse(raw);
     record(j);
     out = halt(j);
   } catch {}
   if (out) process.stdout.write(JSON.stringify({ decision: 'block', reason: out }));
+  else if (j) chime(j);
   process.exit(0);
 });
+
+function chime(j) {
+  if ((j.hook_event_name || '') !== 'Stop') return;
+  try {
+    const child = require('child_process').spawn(
+      process.execPath,
+      [path.join(__dirname, 'notify.js'), '--event', 'Stop', '--cwd', j.cwd || process.cwd()],
+      { detached: true, stdio: 'ignore', windowsHide: true }
+    );
+    child.unref();
+  } catch {}
+}
 
 const WRITE_TOOLS = /^(Write|Edit|NotebookEdit)$/;
 const AGENT_TOOLS = /^(Agent|Task)$/;

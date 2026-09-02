@@ -54,6 +54,15 @@ altında aranıyor demektir.
 
 ## Bitenler
 
+- [x] **Bitiş sesi.** İki kusur vardı. Ses `Stop` olayına doğrudan bağlıydı ve `async`
+      çalışıyordu; kapı turu bloklasa bile — teslim edilmiş sözleşme ya da dağıtılmamış
+      iş varken — ding çalıyor, tur ise devam ediyordu. Şimdi sesi `watch.js` veriyor:
+      yalnız kapı turu bırakırsa. İkincisi, sesin işi uzun işten sonra çağırmaktı ama
+      üç saniyelik cevapta da çalıyordu; tek fren art arda gelen `Stop`ları yutan 10
+      saniyelik pencereydi. `cue.js` artık istemin saatini diske damgalıyor, tur 20
+      saniyeden kısaysa ses çalmıyor (`events.done.minMs` ile ayarlanabilir). Bekleme
+      ve hata sesleri gecikmesiz. 10 yeni sav.
+
 - [x] **Tur defterden sayılıyor, devir notu sıkıştırmadan önce tazeleniyor.**
       `round` alanı elle düzeltilebildiği için 54 yeniden açılan sözleşmenin 4'ünde
       gövdeyle defter uyuşmuyordu (%7); mühür artık turu defterdeki `reopened`

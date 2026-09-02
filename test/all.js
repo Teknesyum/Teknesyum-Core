@@ -2206,6 +2206,7 @@ function main() {
   testRoleFromPrompt();
   testRoundIsCounted();
   testPreCompact();
+  testChime();
   testBannerWakesOnAgents();
   testBaseline();
   testMapGuards();
@@ -2433,6 +2434,62 @@ function testPreCompact() {
   const hooks = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8'));
   const pre = (hooks.hooks || hooks).PreCompact;
   ok('the event is wired to the watcher', Array.isArray(pre) && /watch\.js/.test(JSON.stringify(pre)), JSON.stringify(pre));
+
+  try {
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}
+
+function testChime() {
+  const root = fixture();
+  const home = path.join(root, 'home');
+  fs.mkdirSync(home, { recursive: true });
+  const notify = path.join(CORE, 'hooks', 'notify.js');
+  const cue = path.join(CORE, 'hooks', 'cue.js');
+  const watch = path.join(CORE, 'hooks', 'watch.js');
+  const env = (extra) => ({ ...process.env, CLAUDE_CONFIG_DIR: home, TEKNESYUM_BEEP_SESSIZ: '1', ...extra });
+  const stamps = () => {
+    try {
+      return JSON.parse(fs.readFileSync(path.join(home, 'teknesyum-beep-last.json'), 'utf8'));
+    } catch {
+      return {};
+    }
+  };
+
+  run(process.execPath, [cue], {
+    cwd: root,
+    env: env(),
+    input: JSON.stringify({ hook_event_name: 'UserPromptSubmit', prompt: 'merhaba', cwd: root }),
+  });
+  ok('the prompt leaves a timestamp', Number(stamps().prompt) > 0, JSON.stringify(stamps()));
+
+  const n = require(notify);
+  const settings = n.resolveSettings(root);
+  ok('a finished turn waits twenty seconds by default', settings.events.done.minMs === 20000);
+  ok('waiting and error are not delayed', !settings.events.waiting.minMs && !settings.events.error.minMs);
+
+  const old = process.env.CLAUDE_CONFIG_DIR;
+  process.env.CLAUDE_CONFIG_DIR = home;
+  const now = Number(stamps().prompt) + 1000;
+  ok('a turn that took a second stays silent', n.tooQuick(settings.events.done, now));
+  ok('a turn that took a minute rings', !n.tooQuick(settings.events.done, now + 60000));
+  ok('an unset threshold never silences', !n.tooQuick({ minMs: 0 }, now));
+  if (old === undefined) delete process.env.CLAUDE_CONFIG_DIR;
+  else process.env.CLAUDE_CONFIG_DIR = old;
+
+  const hooks = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8'));
+  const stop = JSON.stringify((hooks.hooks || hooks).Stop);
+  ok('the bell is no longer wired to Stop on its own', !/notify\.js/.test(stop), stop);
+  ok('the watcher still is', /watch\.js/.test(stop), stop);
+  ok('the watcher decides when it rings', /chime/.test(fs.readFileSync(watch, 'utf8')));
+
+  writeContract(root, 'S1', '# S1\nstatus: submitted\nowns: [src/a.js]\nverify:\n  - node -e "process.exit(0)"\n');
+  const held = run(process.execPath, [watch], {
+    cwd: root,
+    env: env(),
+    input: JSON.stringify({ hook_event_name: 'Stop', cwd: root }),
+  });
+  ok('a turn held open by the gate is blocked', /decision/.test(held.stdout), held.stdout);
 
   try {
     fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
