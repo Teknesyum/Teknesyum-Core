@@ -53,7 +53,13 @@ Anahtar geçişleri: `bash` 126, `owns` 44, `python` 17, `dotnet` 17, `kapı/gat
 
 ---
 
-## 2. Kusur 1 — manşet kayması *(en pahalı, 18+ tekrar)*
+## 2. Kusur 1 — manşet kayması *(en pahalı, 22 sözleşmede)*
+
+> **Düzeltme, 2 Eylül 2026.** Bu başlık önce "18+ tekrar" diyordu. Sayı belirsizdi ve
+> tahminden geliyordu. Yeniden sayıldı: kusur **22 ayrı mühürlü sözleşmede** görüldü
+> (131 sözleşmenin %17'si) — bir sözleşmenin koşum sayısı değil, kaç ayrı sözleşmede
+> tekrarladığıdır. Sayım ve iki bağımsız sayacın listesi:
+> `rele-surec-kusurlari-127-sozlesmelik-olcum.md` §2d.
 
 **Belirti.** Tablo doğru, tabloyu özetleyen cümle yanlış. Rapor gövdesi ölçümle
 uyumlu; onu anlatan cümledeki sayı, sayım ya da oran uydurma.

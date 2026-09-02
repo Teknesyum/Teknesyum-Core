@@ -7,8 +7,16 @@ Aradaki fark önemli: birinci raporun 11 kusuru tek tek düzeltilebilir. Buradak
 kusur ise düzeltmenin kendisinin neden gelmediğini anlatıyor — yazılı kural var,
 kuralı işleten kapı yok.
 
-Ölçüm tabanı: VidShrink deposu, 127 mühürlü sözleşme, 5 görev paketi, 116 denetim
-kaydı. Sayılar `.claude/relay/` altından sayıldı, tahmin yok.
+Ölçüm tabanı: VidShrink deposu, 5 görev paketi, 116 denetim kaydı. Sayılar
+`.claude/relay/` altından sayıldı, tahmin yok.
+
+**Yeniden ölçüm — 2 Eylül 2026.** Rapor ilk yazıldığında defter 127 mühürlü
+sözleşmeydi; bugün **131**. Aşağıdaki her sayı 131'lik deftere göre yeniden
+sayıldı. Yeniden sayım rapordaki üç hatayı ortaya çıkardı ve üçü de düzeltildi:
+tur dağılımı tablosu 132 sözleşme topluyordu (bir fazla), danışmanın hiç
+çağrılmadığı iddiası yanlıştı (üç kez çağrıldı), "22 tur danışmansız" sayısı
+aritmetik olarak tutmuyordu (doğrusu 18). Başlıktaki 127 sayısı raporun kimliği
+olduğu için değiştirilmedi; ölçüm tabanı bu paragraftır.
 
 
 ## 0. Hüküm
@@ -21,7 +29,7 @@ kaydı. Sayılar `.claude/relay/` altından sayıldı, tahmin yok.
 |---|---|---|
 | Sözleşme | 127 | 116 |
 | Görev paketi | 5 | **0** |
-| Tur 3'ü geçen sözleşme (danışman zorunlu) | 14 | **0** |
+| Tur 4 açan sözleşme (danışman zorunlu) | 4 | 3 |
 
 Paket, sözleşmeyle aynı işi yapar: bir ajana ne yapacağını söyler, kabul kriteri
 koyar, çıktı bekler. Sözleşmenin geçtiği hiçbir kapıdan geçmez. Bugün bu yüzden
@@ -97,26 +105,43 @@ Röle kuralı (`references/protocol.md` §4) diyor ki:
 
 Ölçülen tur dağılımı:
 
-| Tur | Sözleşme sayısı |
-|---|---|
-| 0 | 10 |
-| 1 | 68 |
-| 2 | 40 |
-| 3 | 10 |
-| 4 | 4 |
+| Tur | Sözleşme sayısı | Ek tur (tur−1) |
+|---|---|---|
+| 0 | 10 | 0 |
+| 1 | 67 | 0 |
+| 2 | 40 | 40 |
+| 3 | 10 | 20 |
+| 4 | 4 | 12 |
+| **Toplam** | **131** | **72** |
 
-**14 sözleşme üçüncü turu gördü.** Danışman kaçında çağrıldı: **0.**
+`round: 0` alanı 10 sözleşmede duruyor; alan konvansiyonu T1–T9 döneminde henüz
+yoktu, o sözleşmelerin ek turu sayılmadı.
 
-`advisor`, `plan konseyi` ya da `fable` geçen üç sözleşme var — T44, T47, T96 — ve
-üçü de tur ≥3 listesinde **değil**:
+**14 sözleşme üçüncü turu gördü.** Bu raporun ilk hâli "danışman kaçında
+çağrıldı: **0**" diyordu. **Bu yanlıştı.** Yeniden sayımda üç çağrı bulundu:
 
-- `contracts/done/T44.md:82` — "İkinci görüş (fable)", tur 1'de alınmış.
-- `contracts/done/T47.md:48` — "Danışman kararı (fable, bu oturumda alındı)", tur 1.
-- `contracts/done/T96.md:5` — `model: fable`. Bu bir **model seçimi**, danışman
-  çağrısı değil.
+| Sözleşme | Nerede | Kayıt |
+|---|---|---|
+| T3 | tur 4 açılışı | `contracts/done/T3.md:743` — "Düzeltme turu 4 — hedef isabeti (T0, abiye danışıldı)" |
+| T63 | tur 4 açılışı | `contracts/done/T63.md:561` — "Danışman görüşü alındı (protokol §4, üçüncü turdan sonra zorunlu)" |
+| T126 | tur 4 açılışı | `contracts/done/T126.md:296` — "Danisman gorusu (tur 4 zorunlu kildi)" |
 
-Yani danışman iki kez çağrıldı ve ikisi de kuralın **gerektirmediği** yerdeydi.
-Kuralın gerektirdiği 14 yerin hiçbirinde çağrılmadı.
+Kuralın lafzı şudur: *üçüncü turdan **sonra** advisor zorunlu.* Yani kural tur 3'ü
+açarken değil, **tur 4'ü açarken** bağlar. Tur 4 açan sözleşme dörttür: T3, T28,
+T63, T126. Üçünde danışman çağrıldı, **birinde çağrılmadı: T28.**
+
+Kuralın gerektirdiği yerdeki ihlal sayısı: **1/4.** 14 değil.
+
+Kuralın gerektirmediği yerde de dört çağrı var — T44 (tur 2), T47 (tur 1),
+T48 (tur 2), T49 (tur 1). `contracts/done/T96.md:5`'teki `model: fable` bir
+**model seçimi**, danışman çağrısı değil; ilk sayımda o da yanlış sayılmıştı.
+
+Yani mekanizma çalışıyor ve kullanılıyor; **zorlanmıyor.** Kusur, "hiç
+çağrılmıyor" değil, "çağrılmadığında hiçbir şey durmuyor."
+
+**Tek ihlalin ikinci yüzü.** T28'in tur 4'ü zaten açılmamalıydı: gerekçesi bir
+KRİTİK değil, bir borçtu (`contracts/done/T28.md:299` — "Tur 4 — borç 3 kapandı").
+Danışman kuralının delindiği tek yer, Kusur C'nin de delindiği yer.
 
 ### Kök neden
 
@@ -130,11 +155,16 @@ Aradaki fark disiplin değil, kod.
 ### Neden bu pahalı
 
 Tur 3'e gelen bir sözleşme tanım gereği iki kez yanlış anlaşılmış demektir. Orası
-tam olarak ikinci bir aklın gerektiği yer. 14 kez o eşiğe gelindi, 14 kez aynı akıl
-üçüncü kez denedi. Dört sözleşme tur 4'e kadar gitti.
+tam olarak ikinci bir aklın gerektiği yer. 14 kez o eşiğe gelindi ve **14 kezin
+14'ünde de aynı akıl üçüncü kez denedi** — çünkü kuralın lafzı tur 3'ü bağlamıyor.
 
-Birinci raporun ölçtüğü 72 ek turun kuyruğu buradadır: tur 3 ve 4'ler toplam
-**22 tur** (10×1 + 4×2 fazladan) — ve hiçbirinde dışarıdan bir göz yok.
+72 ek turun kuyruğu buradadır: tur 3 ve 4 seviyesindeki turlar toplam **18**
+(14 üçüncü tur + 4 dördüncü tur). Raporun ilk hâlindeki "22 tur" sayısı yanlıştı;
+aritmetiği hiçbir tablodan gelmiyordu. Bu 18 turun **15'inde** dışarıdan bir göz
+yok; kalan 3'ü yukarıdaki danışman kayıtları.
+
+Asıl bulgu şu: kuralın eşiği yanlış yerde. Pahalıya mal olan tur 3'tür, ve kural
+tur 3'ü serbest bırakıyor. Aşağıdaki §2b bunu turların kendi gerekçesiyle gösteriyor.
 
 ### Öneri
 
@@ -147,6 +177,146 @@ Birinci raporun ölçtüğü 72 ek turun kuyruğu buradadır: tur 3 ve 4'ler top
   yeniden yazılsın.
 
 Danışmanın ne söylediği `audits/` gibi bir yere kaydedilsin ki sonradan sayılabilsin.
+
+
+## 2b. Üçüncü tura geçen 14 sözleşme — turu ne açtı, danışman neden yok
+
+Her satır o sözleşmenin **tur 3 açılışındaki** gerekçesidir; kaynak sözleşme
+dosyasının kendi tur 3 bölümüdür.
+
+| Sözleşme | Tur 3'ü açan gerekçe | Sınıf | Danışman |
+|---|---|---|---|
+| T102 | "Sebebi anahtar kare sayısı değil, yeri" iddiası hiç ölçülmemiş; belgenin kendi tablosu çürütüyor | manşet kayması | Kural tur 3'ü bağlamıyor |
+| T115 | Koşum kapısı bu makinede yeşil koşumda `kod=66` dönüyor | altyapı | Kural tur 3'ü bağlamıyor |
+| T118 | Çapa doğrulaması: dokuz alıntının ikisi sapıyor | manşet kayması | Kural tur 3'ü bağlamıyor |
+| T16 | Açıklama cümlesi iki durumda da tam bir kez görünsün | stil | Kural tur 3'ü bağlamıyor |
+| T23 | Ölçü ters kurulmuş — kaydırma çubuğunun **olmasını** zorunlu kılıyordu | eksik test | Kural tur 3'ü bağlamıyor |
+| T50 | Sınır maliyeti paragrafı ikinci koşumdan alıntılayıp ona "son koşum" diyor | manşet kayması | Kural tur 3'ü bağlamıyor |
+| T84 | Rozet sayımı 44'te dondurulmuş, gerçek popülasyon 23 | manşet kayması | Kural tur 3'ü bağlamıyor |
+| T87 | Boyut garantisi koşan hiçbir ölçüyle bağlı değil | eksik test | Kural tur 3'ü bağlamıyor |
+| T88 | Konteyner asimetrisi hareket ekseninde duruyor | ürün kriteri | Kural tur 3'ü bağlamıyor |
+| T99 | "Ölçülmüş" diye sunulan hücre ölçüldüğünde çürüyor | manşet kayması | Kural tur 3'ü bağlamıyor |
+| T126 | Kaldırıcı commit iddiası yanlış | manşet kayması | **Tur 4'te çağrıldı** |
+| T28 | Üç dal "hızlı düşür kapalı" cümlesini koşulsuz yazıyor | ürün kriteri | **Tur 4'te çağrılmadı — tek ihlal** |
+| T3 | Bulgu 1 sürüyor, çelişki derinleşti | ürün kriteri | **Tur 4'te çağrıldı** |
+| T63 | Ölçülmemiş sayı iki docstring'de duruyor, rapor kapandı diye beyan ediyor | manşet kayması | **Tur 4'te çağrıldı** |
+
+Tablodan çıkan iki sayı:
+
+- **14 tur 3 açılışının 14'ünde de danışman yok**, çünkü kural o eşiği bağlamıyor.
+- 14 açılışın **7'si manşet kayması** — yani sözleşmeyi üçüncü tura taşıyan en
+  yaygın tek sebep, kodun yanlış olması değil, **kodu anlatan cümlenin yanlış olması.**
+  Yedisi: T102, T118, T50, T84, T99, T126, T63.
+
+İkincisi kuralın eşiğinin neden yanlış yerde olduğunu gösteriyor. Danışman tur 4'te
+çağrıldığında iş çoktan üç kez yapılmıştır. T63 tur 4'ünde danışmanın söylediği tam
+olarak buydu: *"aynı ajana dördüncü kez 'cümleyi düzelt' demek en pahalı ve en
+riskli yol"* (`contracts/done/T63.md:562`). Bu yargı tur 3'te de aynen geçerliydi.
+
+
+## 2c. 72 ek turun kusur sınıfları
+
+Her ek tur, **o turu açan gerekçeye** göre tek bir sınıfa atandı. İki KRİTİK'le açılan
+turda ilk yazılan KRİTİK esas alındı. Kaynak: sözleşme dosyalarının kendi tur
+bölümleri; ham atama tablosu 72 satır.
+
+| Sınıf | Tanım | Tur | Pay |
+|---|---|---|---|
+| diğer | aşağıda kırılıyor | 25 | %35 |
+| manşet kayması | sayı/tablo doğru, üstündeki cümle yanlış; iddia veriden güçlü | 17 | %24 |
+| eksik test | ölçü ölçmüyor: totoloji, ölü süzgeç kolu, sessiz atlama, hayatta kalan mutasyon | 16 | %22 |
+| yanlış kapsam | T0'ın kendi kurgusu yanlıştı: `owns` dar/geniş, kriter hatalı tanımlı | 8 | %11 |
+| stil | yerleşim, metin, görsel rötuş | 6 | %8 |
+| **Toplam** | | **72** | **100** |
+
+### "diğer" neden en büyük kutu — kırılımı
+
+Verilen beş sınıf 72 turun 47'sini karşılıyor. Kalan 25'i tek bir sınıf değil, yedi
+ayrı sebep:
+
+| Alt sebep | Tur | Ne demek |
+|---|---|---|
+| ürün kriteri karşılanmadı | 13 | Kabul kriteri üründe gerçekten karşılanmamış. **Bu bir süreç kusuru değil, sıradan iş.** |
+| kayıt yok | 3 | `round: 2` yazıyor ama dosyada tur 2 bölümü yok (T72, T78, T100) |
+| dış birleşme | 3 | Başka bir sözleşme `main`e girdi, ağaç altından değişti (T54, T58, T98) |
+| borç üzerine açıldı | 2 | Denetim GEÇTİ verdi, tur yine de açıldı — Kusur C (T43, T28) |
+| altyapı | 2 | T0 worktree yalıtımı olmadan açtı; koşum kapısı yanlış kod döndürdü (T61, T115) |
+| usul | 1 | `_sorun.log` kaydı eksikti (T13) |
+| CI | 1 | Ölçüler CI'da düştü (T99) |
+
+**En önemli satır birincisi.** 72 ek turun 13'ü hiçbir sürecin önleyemeyeceği turdur:
+iş bitmemişti, denetim yakaladı, tur açıldı, iş bitti. Süreç tam da böyle çalışmalı.
+Kusur aranacak yer kalan 59 turdur.
+
+### Sınıfın turu nerede pahalıya patladığı
+
+Aynı 72 tur, seviyeye göre:
+
+| Sınıf | Tur 2 | Tur 3 | Tur 4 |
+|---|---|---|---|
+| diğer | 19 | 4 | 2 |
+| eksik test | 14 | 2 | 0 |
+| manşet kayması | 8 | 7 | 2 |
+| yanlış kapsam | 8 | 0 | 0 |
+| stil | 5 | 1 | 0 |
+| **Toplam** | **54** | **14** | **4** |
+
+Bu tablo raporun en pahalı tek bulgusudur:
+
+- **Tur 2'de manşet kayması payı 8/54 = %15.**
+- **Tur 3 ve 4'te 9/18 = %50.**
+
+Yani ilk turda yakalanan kusurların çoğu kod kusuru; **üçüncü ve dördüncü tura kadar
+yaşayan kusurların yarısı ise cümle kusuru.** Kod kusuru bir turda kapanıyor, cümle
+kusuru kapanmıyor — çünkü düzeltilen cümlenin yerine yazılan yeni cümle de
+denetlenmiyor. T126 bunun saf hâli: üç turun üçü de aynı sınıftan, her tur bir
+öncekinin düzeltmesini yeni bir kaymayla değiştirdi.
+
+`yanlış kapsam` sınıfının **8'inin 8'i de tur 2'de.** T0'ın kurgu hatası her zaman ilk
+denetimde yakalanıyor; hiçbiri tur 3'e taşmıyor. Bu iyi haber ve kapı gerektirmiyor.
+
+### `round` alanı sayaç olarak güvenilir değil
+
+Sınıflandırma sırasında ölçüldü: `round` alanı ile dosyanın gövdesi **54 sözleşmenin
+4'ünde** uyuşmuyor (%7).
+
+- Fazla sayan üç sözleşme: T72, T78, T100 — `round: 2` yazıyor, dosyada tur 2 bölümü
+  hiç yok, teslim raporu da yok.
+- Eksik sayan bir sözleşme: T98 — `round: 2` yazıyor ama gövdede
+  `## Denetim — tur 3 · GECTI` bölümü var (`contracts/done/T98.md:239`).
+
+Yani 72 sayısının kendisi ±%7 belirsizlik taşıyor. Alanı hiçbir betik yazmıyor; T0
+elle giriyor ve tur açılışında güncellemeyi unutabiliyor.
+
+**Öneri:** `reopen` alanı kendisi artırsın ve gövdeye `## Tur N` başlığını kendisi
+açsın. Elle girilen bir sayaç sayaç değildir.
+
+
+## 2d. "18+ tekrar" ne demekti — birinci rapora düzeltme
+
+Birinci rapor (`rele-israfi-124-sozlesmelik-olcum.md:56`) manşet kaymasını
+*"en pahalı, 18+ tekrar"* diye etiketliyor. Sayı belirsizdi: tek bir sözleşmenin koşum
+sayısı mı, yoksa kusurun kaç ayrı sözleşmede tekrarladığı mı belli değildi. Ölçüldü:
+
+**Kaç ayrı sözleşmede tekrarladığıdır.** Tek bir sözleşmenin koşum sayısı değil.
+
+İki bağımsız sayaçla ölçüldü:
+
+| Sayaç | Ne sayıyor | Sözleşme |
+|---|---|---|
+| Tur açan | Ek turun gerekçesi manşet kayması olan sözleşmeler | 12 |
+| Sözcüksel | Gövdesinde "veriden güçlü / manşet / özet cümle / tablo doğru" geçen sözleşmeler | 16 |
+| Kesişim | İkisinde birden | 6 |
+| **Birleşim** | **En az bir sayaçta görünen** | **22** |
+
+Birleşim listesi: T33, T50, T63, T64, T84, T95, T99, T102, T106, T108, T111, T115,
+T116, T118, T119, T120, T123, T124, T126, T134, T135, T138.
+
+**131 mühürlü sözleşmenin 22'si — %17.** Buna mühürsüz T137 dahil değil; onun 2 Eylül
+denetimi de aynı sınıftan bir KRİTİK verdi (rapor, var olmayan bir bölüme yönlendiriyor),
+yani açık sözleşmelerle birlikte 23.
+
+"18+" bir tahmindi ve **eksik tahmindi.** Doğrusu 22, ve anlamı "22 ayrı sözleşme"dir.
 
 
 ## 3. Kusur C — Tur, KRİTİK olmadan açılıyor (bugün yine oldu)
@@ -412,7 +582,7 @@ Beşi de deterministik. Model gerekmiyor. Bugün bunların **hiçbiri** koşmuyo
 | # | Kusur | Bugüne kadarki bedeli | Düzeltme | Nerede |
 |---|---|---|---|---|
 | 1 | Paketin kapısı yok | 1 paket düştü, 1 tur | `packet.js check` + `.gitignore` kesişimi | yeni betik |
-| 2 | Danışman kuralı işlemiyor | 14 sözleşmede eşik aşıldı, 22 tur danışmansız | `reopen --advisor` zorunlu | `contract.js` |
+| 2 | Danışman kuralı zorlanmıyor, eşiği de geç | 18 turun 15'i danışmansız; kuralın bağladığı 4 yerin 1'i ihlal | `reopen --advisor` zorunlu, eşik tur 3'e insin | `contract.js` |
 | 3 | Tur KRİTİK'siz açılıyor | 1. raporun ölçtüğü 72 ek turun bir kısmı | `reopen --kritik` zorunlu | `contract.js` |
 | 4 | T0 metni denetlenmiyor | Bugünkü hatanın tamamı | yazma anında deterministik sınama | `contract.js`, `packet.js` |
 | 5 | Paylaşılan girdi kayıtsız | 1 paket düştü, 1 ölçüm haksız çıktı | `kaynaklar.json` + sha256 | yeni betik |
