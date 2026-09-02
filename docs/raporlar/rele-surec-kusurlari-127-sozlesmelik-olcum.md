@@ -279,6 +279,42 @@ hesaplandığı için denetim kaydı zorunlu değildi ve mühür işlendi. Yani:
 
 Ölçüsü: kayıtsız kapanan sözleşme sayısı. Bugünkü değer 12'ye çıktı.
 
+## 4d. Kusur G — `verify` filtresinin ölü kolu sessizce geçiyor
+
+**Nerede.** `contract.js`, `verify` adımlarını çalıştıran yer.
+
+**Ne oldu.** `dotnet test --filter` içinde vstest'in varsayılan işleci
+`FullyQualifiedName~`, yani alt dizi eşlemesi. **Hiçbir teste denk gelmeyen bir
+filtre kolu hata vermez; sıfır test seçer ve süit yeşil döner.** Sözleşme
+mühürlenir, kimse ölçünün koşmadığını görmez.
+
+VidShrink'te iki mühürlü sözleşmede var. `grep -rl "class <ad>" tests/` ile sayıldı:
+
+| sözleşme | filtre kolu | eşleşen sınıf |
+|---|---|---:|
+| T116 | `MeasuredQualityTests` | 0 |
+| T130 | `HdrResolverTests` | 0 |
+
+Aynı sözleşmelerin öteki kolları gerçek (`QualityMeterTests`, `PlanCalculatorTests`,
+`PlanCalculatorProbeTests`, `EncoderCapabilitiesTests` — dördü de 1). Yani kusur
+"filtre tümden yanlış" değil, **çok kollu bir filtrenin bir kolu ölü**. Gözle en zor
+görülen hâli bu: komut çalışıyor, çıktı yeşil, sayı biraz düşük.
+
+İkinci bir yüzü T130'da duruyor: `verify` satırının kapanış tırnağı eksik —
+`...|EncoderCapabilitiesTests]`. Betik bunu da kabul etti.
+
+**Neden yakalanmadı.** `verify` çıkış koduna bakıyor. Sıfır test seçen bir koşum
+çıkış kodu 0 veriyor.
+
+**Önerilen çözüm.** İkisi de model çağırmaz:
+
+1. `verify` bir `dotnet test --filter` adımıysa `--list-tests` ile önce kolları say;
+   sıfır eşleşen kol varsa **reddet** ve hangi kol olduğunu yaz. Aynı denetim
+   `precheck --id` içinde de koşar, yani iş başlamadan görülür.
+2. `verify` satırını ayrıştırırken dengelenmemiş tırnak/parantez varsa reddet.
+
+**Nasıl ölçülür.** Kayıtsız kolla mühürlenen sözleşme sayısı. Bugünkü değer 2.
+
 ## 5. Neden hiçbiri fark edilmedi
 
 Ortak desen: **röle kendi ürettiği metni denetlemiyor.**
@@ -318,6 +354,7 @@ Beşi de deterministik. Model gerekmiyor. Bugün bunların **hiçbiri** koşmuyo
 | 5 | Paylaşılan girdi kayıtsız | 1 paket düştü, 1 ölçüm haksız çıktı | `kaynaklar.json` + sha256 | yeni betik |
 | 6 | `complete` yanlış alarm veriyor | uyarı fiilen yok sayılıyor, 2/2 yanlış | `tests/` ve `docs/*.md` muaf, ad yerine içe aktarma araması | `contract.js` |
 | 7 | Denetim kaydı ajan tipine bakıyor | 1 denetim kayıtsız kaldı, kayıtsız kapanan 12'ye çıktı | `audit --dry-run` + kayıtsız mühürde uyarı | `contract.js` |
+| 8 | `verify` filtresinin ölü kolu | 2 mühürlü sözleşmede ölçü hiç koşmadı | `--list-tests` ile kol sayımı + tırnak denetimi | `contract.js` |
 
 İlk dördü model çağırmaz. Beşincisi tek seferlik kurulum.
 
