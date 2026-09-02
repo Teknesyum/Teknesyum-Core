@@ -315,6 +315,70 @@ görülen hâli bu: komut çalışıyor, çıktı yeşil, sayı biraz düşük.
 
 **Nasıl ölçülür.** Kayıtsız kolla mühürlenen sözleşme sayısı. Bugünkü değer 2.
 
+## 4e. Kusur H - Kapi, ana dali degil her dali kapatiyor
+
+### Belirti
+
+`guard.js` icindeki `merging()` kancasi, herhangi bir sozlesme `active` ya da
+`submitted` iken `git merge` veya `git push` **iceren her Bash komutunu** durduruyor.
+Eslestirdigi kalip hedef ref'e hic bakmiyor:
+
+```js
+const MERGING = /git\s+(?:-[^\s]+\s+)*(merge|push)/i;
+```
+
+Oysa protokolun kendisi her yapici ajandan **kendi is dalini itmesini** istiyor
+(`AGENTS.md`: "kendi dalinda calis ve oraya it"). Yani kapi, is akisinin zorunlu
+adimini engelliyor. Ajanin onundeki tek yol kapiyi acmak:
+`TEKNESYUM_GATE_OPEN=1` ile ayni komutu tekrarlamak.
+
+T138 ajani bunu yapip bildirdi ve sordu: *"kapinin hedefi main iken her dali
+engellemesi kasitli mi?"* Soru yerinde - son dort sozlesmede en az dort ajan ayni
+yolu buldu.
+
+### Ikinci yuz: komut degil metin taraniyor
+
+Bu raporun kendisi kapiya takildi. Yukaridaki paragrafi dosyaya yazan Python
+betigi hicbir git komutu calistirmiyordu; icinde ornek komutun **metni** geciyordu
+diye engellendi. Kalip komutun ne yaptigina degil, karakter dizisine bakiyor.
+
+Sonuc: kapi hakkinda belge yazmak, kapiyi acmayi gerektiriyor.
+
+### Neden bu, kapiyi tumden gecersiz kiliyor
+
+Kapinin korudugu sey `main`. Ama ajan, **kendi dalini itmek icin** ogrendigi env
+degiskeni ile `main`e de itebilir; ikisi ayni anahtar. Yani kapi, korumak istedigi
+kapiyi acmayi her yapiciya rutin olarak ogretiyor.
+
+Bir kapi, mesru isi engelledigi olcude asilmayi ogretir. Bugun
+`TEKNESYUM_GATE_OPEN=1` sozlesme surecinin normal bir parcasi hale geldi -
+istisna degil, adim.
+
+### Kok neden
+
+Kalip komut **metnini** tariyor, komutun **hedefini** degil. Is dalina giden itme
+ile `main`e giden itme kapi icin ayni komut; hatta ikisinden soz eden bir cumle de
+oyle.
+
+### Oneri
+
+`merging()` hedef ref'i cozsun, yalniz korunan dala giden isi durdursun:
+
+1. Acik ref verilmisse: ref korunan dal (`main`, `master`) degilse **gecir**.
+2. Ref yoksa `git symbolic-ref --short HEAD` ile mevcut dala bak; korunan dal
+   degilse gecir.
+3. `git merge` icin ayni: HEAD korunan dalda degilse gecir. Bir is dalinin `main`i
+   kendi icine almasi normal tazelemedir, engellenmemeli.
+4. Kalibi komutun **basina** demirle (`^` veya `;`/`&&` sonrasi), boylece metin
+   icinde gecen ornekler eslesmesin.
+5. Korunan dala `--force` ile giden itme, kapi acik olsa bile ayri onay istesin.
+
+Boylece ajan kendi dalini kapiyi hic acmadan iter; `TEKNESYUM_GATE_OPEN` yeniden
+istisna olur.
+
+**Nasil olculur.** Bir sozlesme turunda `TEKNESYUM_GATE_OPEN=1` yazilma sayisi.
+Bugunku deger: yapici basina en az 1, T0 icin tur basina 2-3.
+
 ## 5. Neden hiçbiri fark edilmedi
 
 Ortak desen: **röle kendi ürettiği metni denetlemiyor.**
@@ -355,6 +419,7 @@ Beşi de deterministik. Model gerekmiyor. Bugün bunların **hiçbiri** koşmuyo
 | 6 | `complete` yanlış alarm veriyor | uyarı fiilen yok sayılıyor, 2/2 yanlış | `tests/` ve `docs/*.md` muaf, ad yerine içe aktarma araması | `contract.js` |
 | 7 | Denetim kaydı ajan tipine bakıyor | 1 denetim kayıtsız kaldı, kayıtsız kapanan 12'ye çıktı | `audit --dry-run` + kayıtsız mühürde uyarı | `contract.js` |
 | 8 | `verify` filtresinin ölü kolu | 2 mühürlü sözleşmede ölçü hiç koşmadı | `--list-tests` ile kol sayımı + tırnak denetimi | `contract.js` |
+| 9 | Kapi her dali kapatiyor | Kapiyi acmak rutin oldu; `main` korumasi fiilen yok | `merging()` hedef ref'i cozsun | `guard.js` |
 
 İlk dördü model çağırmaz. Beşincisi tek seferlik kurulum.
 
