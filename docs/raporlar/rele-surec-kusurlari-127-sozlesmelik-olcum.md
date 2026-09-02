@@ -207,6 +207,43 @@ Bugün bu elle yapıldı: üç parça özel bir depoya sürüm varlığı olarak
 sha256'ları yazıldı, bilinen ses kusuru sürüm notuna geçti. Betikle yapılmalıydı.
 
 
+## 4b. Kusur E — `complete`in "ölü dosya" uyarısı yanlış alarm veriyor
+
+`contract.js complete` mühürden sonra şunu basıyor:
+
+```
+Nothing else in the tree names these files:
+  tests/VidShrink.Tests/PlanCalculatorProbeTests.cs
+  docs/olcumler/ui-yoklama-donmasi.md
+If their work is done, move them under trash/. Do not delete them.
+```
+
+Uyarının ölçtüğü şey: dosyanın **adı** ağacın başka bir yerinde geçiyor mu.
+Ölçmek istediği şey: dosya kullanılıyor mu. İkisi iki farklı sorudur ve iki dosya
+sınıfında ayrışıyorlar:
+
+- **Test dosyaları.** xUnit testleri yansımayla bulunur; hiçbir dosya onların adını
+  yazmaz. Kural harfiyen uygulansa T130'un yeni ölçüleri `trash/`e taşınacaktı —
+  yani sözleşmenin ürettiği kanıt, sözleşme mühürlenir mühürlenmez silinecekti.
+- **`docs/olcumler/` raporları.** Bunlar tasarım gereği uç düğümdür; kimse onlara
+  bağlanmaz, proje kuralı da (`AGENTS.md`) "rapora giren sayı `docs/`e taşınır"
+  diyor. Uyarı, kendi projesinin kuralıyla çelişiyor.
+
+Bu turda uyarı iki kez çıktı, iki kez de yanlıştı. Tehlikesi düşük görünüyor ama
+değil: doğru olduğu durumla yanlış olduğu durum aynı metinle geliyor, bu yüzden
+T0 ya hepsini uygular (kanıt silinir) ya hiçbirini (uyarı gürültüye döner). Bugün
+ikincisi oldu — yani uyarı fiilen çalışmıyor.
+
+**Öneri.** Uyarıyı dosya sınıfına göre kısıtla, model gerekmez:
+
+- `tests/` altındaki dosyalar ve `docs/` altındaki `.md` dosyaları hiç sorulmaz.
+- Kalanlar için ad araması yerine **dile göre içe aktarma araması** yapılsın
+  (`import`/`require`/`using`/`#include`), ki `harita.js` bunu zaten üretiyor.
+- Eşleşme bulunamayan dosya için uyarı, "taşı" değil "şu dosyayı kimse çağırmıyor,
+  öyle mi" biçiminde sorulsun.
+
+Ölçüsü: uyarının çıktığı ilk 20 dosyada yanlış alarm oranı. Bugünkü oran 2/2.
+
 ## 5. Neden hiçbiri fark edilmedi
 
 Ortak desen: **röle kendi ürettiği metni denetlemiyor.**
@@ -244,6 +281,7 @@ Beşi de deterministik. Model gerekmiyor. Bugün bunların **hiçbiri** koşmuyo
 | 3 | Tur KRİTİK'siz açılıyor | 1. raporun ölçtüğü 72 ek turun bir kısmı | `reopen --kritik` zorunlu | `contract.js` |
 | 4 | T0 metni denetlenmiyor | Bugünkü hatanın tamamı | yazma anında deterministik sınama | `contract.js`, `packet.js` |
 | 5 | Paylaşılan girdi kayıtsız | 1 paket düştü, 1 ölçüm haksız çıktı | `kaynaklar.json` + sha256 | yeni betik |
+| 6 | `complete` yanlış alarm veriyor | uyarı fiilen yok sayılıyor, 2/2 yanlış | `tests/` ve `docs/*.md` muaf, ad yerine içe aktarma araması | `contract.js` |
 
 İlk dördü model çağırmaz. Beşincisi tek seferlik kurulum.
 
