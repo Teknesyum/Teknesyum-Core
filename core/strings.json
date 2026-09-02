@@ -115,6 +115,10 @@
     "en": "map stale",
     "tr": "harita bayat"
   },
+  "line.waiting": {
+    "en": "waiting on you",
+    "tr": "seni bekliyor"
+  },
   "line.update": {
     "en": "is out",
     "tr": "çıktı"

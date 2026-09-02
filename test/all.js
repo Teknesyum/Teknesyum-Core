@@ -683,7 +683,8 @@ function testMessageDisplay(root) {
 
   const framed = JSON.parse(call(ev({ index: 0, final: true, delta: 'x' })).stdout).hookSpecificOutput.displayContent;
   const bands = framed.split(NLc).filter((l) => l.startsWith('**Teknesyum**'));
-  ok('both bands read the same', bands.length === 2 && bands[0] === bands[1], bands.join(' | '));
+  ok('a framed message carries both bands', bands.length === 2, bands.join(' | '));
+  ok('the closing band says something the opening one did not', bands[0] !== bands[1], bands.join(' | '));
 
   const src = fs.readFileSync(HOOK, 'utf8');
   ok('the notice hook delegates its line', /banner\(cwd, phase\)/.test(src));
@@ -1379,7 +1380,13 @@ function testLadder() {
   const archived = fs.readFileSync(path.join(done, 'L1.md'), 'utf8');
   ok('the archived contract carries a terminal status', /status: done/.test(archived), archived.slice(0, 60));
 
-  const back = contract(['reopen', '--id', 'L1', '--reason', 'the verify step was wrong'], root);
+  const noCrit = contract(['reopen', '--id', 'L1', '--reason', 'the verify step was wrong'], root);
+  ok('a round does not open without a critical finding', noCrit.status === 2 && /--critical/.test(noCrit.stdout), noCrit.stdout);
+
+  const back = contract(
+    ['reopen', '--id', 'L1', '--reason', 'the verify step was wrong', '--critical', 'the seal ran no test at all'],
+    root
+  );
   ok('a closed contract can be reopened', back.status === 0, back.stdout + back.stderr);
   const reopened = fs.readFileSync(path.join(root, CONTRACTS, 'L1.md'), 'utf8');
   ok('reopening returns it to active', /status: active/.test(reopened), reopened.slice(0, 60));
@@ -1389,10 +1396,10 @@ function testLadder() {
 
   writeContract(root, 'L9', '# L9\nstatus: submitted\nround: 6\nowns: [src/ok.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
   contract(['complete', '--id', 'L9'], root);
-  const capped = contract(['reopen', '--id', 'L9', '--reason', 'this one will not converge'], root);
+  const capped = contract(['reopen', '--id', 'L9', '--reason', 'this one will not converge', '--critical', 'the gate accepted a broken build'], root);
   ok('a seventh round is refused - the contract is wrong, not the agent', capped.status === 2, capped.stdout + capped.stderr);
   ok('and the refusal says to split it instead', /Split it/.test(capped.stdout + capped.stderr), capped.stdout);
-  const forced = contract(['reopen', '--id', 'L9', '--reason', 'this one will not converge', '--force'], root);
+  const forced = contract(['reopen', '--id', 'L9', '--reason', 'this one will not converge', '--critical', 'the gate accepted a broken build', '--force'], root);
   ok('the cap can still be overridden on purpose', forced.status === 0, forced.stdout + forced.stderr);
 
   writeContract(root, 'L2', '# L2\nstatus: submitted\nowns: [src/gone.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
@@ -1894,6 +1901,77 @@ function testSnapshot() {
   } catch {}
 }
 
+function testWasteGates() {
+  const root = fixture();
+
+  writeContract(root, 'W1', '# W1\nstatus: submitted\nowns: [src/ok.js]\nverify: node -e "process.exit(0)"\n');
+  const loose = contract(['complete', '--id', 'W1'], root);
+  ok(
+    'a verify written as one plain line is refused, not read as zero steps',
+    loose.status === 2 && /zero steps/.test(loose.stdout),
+    loose.stdout
+  );
+  const looseSub = contract(['submit', '--id', 'W1'], root);
+  ok('and submit refuses it at delivery, not at the seal', looseSub.status === 2, looseSub.stdout);
+
+  writeContract(
+    root,
+    'W2',
+    '# W2\nstatus: submitted\nowns: [src/ok.js]\nverify:\n  - node -e "console.log(\'No tests ran\')"\n'
+  );
+  const empty = contract(['complete', '--id', 'W2'], root);
+  ok(
+    'a step that passes without running a test is refused',
+    empty.status === 2 && /without running anything/.test(empty.stdout),
+    empty.stdout
+  );
+
+  writeContract(
+    root,
+    'W3',
+    '# W3\nstatus: submitted\nowns: [src/ok.js]\nverify:\n  - node -e "console.log(\'10 tests ran, 10 passed\')"\n'
+  );
+  const real = contract(['complete', '--id', 'W3'], root);
+  ok('a run that did collect tests still closes', real.status === 0, real.stdout);
+
+  const live = path.join(root, '.claude', 'relay', 'live');
+  fs.mkdirSync(live, { recursive: true });
+  fs.writeFileSync(
+    path.join(live, '_verify.lock'),
+    JSON.stringify({ pid: process.pid, id: 'W8', at: new Date().toISOString() })
+  );
+  writeContract(root, 'W4', '# W4\nstatus: submitted\nowns: [src/ok.js]\nverify:\n  - node -e "process.exit(0)"\n');
+  const locked = contract(['complete', '--id', 'W4'], root);
+  ok(
+    'two verify runs in one checkout do not overlap',
+    locked.status === 2 && /W8 is running its verify steps/.test(locked.stdout),
+    locked.stdout
+  );
+  fs.unlinkSync(path.join(live, '_verify.lock'));
+  ok('and the lock is gone once the run is over', contract(['complete', '--id', 'W4'], root).status === 0);
+
+  fs.mkdirSync(path.join(root, 'tests'), { recursive: true });
+  fs.mkdirSync(path.join(root, 'docs'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'tests', 'probe.test.js'), 'test("x", () => {});\n');
+  fs.writeFileSync(path.join(root, 'docs', 'measure.md'), 'a measurement nobody links\n');
+  run('git', ['-C', root, 'add', '-A']);
+  writeContract(
+    root,
+    'W5',
+    '# W5\nstatus: submitted\nowns: [tests/probe.test.js, docs/measure.md]\nverify:\n  - node -e "process.exit(0)"\n'
+  );
+  const quiet = contract(['complete', '--id', 'W5'], root);
+  ok(
+    'a test file and a docs note are never called dead',
+    quiet.status === 0 && !/probe\.test\.js/.test(quiet.stdout) && !/measure\.md/.test(quiet.stdout),
+    quiet.stdout
+  );
+
+  try {
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}
+
 function testBannerWakesOnAgents() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-wake-'));
   run('git', ['-C', root, 'init', '-q', '.']);
@@ -2100,6 +2178,7 @@ function main() {
   testSnapshot();
   testFigures();
   testNoContextWrites();
+  testWasteGates();
   testBannerWakesOnAgents();
   testBaseline();
   testMapGuards();

@@ -25,7 +25,7 @@ function build(j) {
   const delta = String(j.delta || '');
   let body = foot ? delta.replace(/\s+$/, '') : delta;
   if (head && top) body = body ? top + '\n\n' + body : top;
-  if (foot && end && body !== end) body = body ? body + '\n\n' + end : end;
+  if (foot && end && body !== end && (delta.trim() || !body)) body = body ? body + '\n\n' + end : end;
 
   return JSON.stringify({
     hookSpecificOutput: { hookEventName: 'MessageDisplay', displayContent: body },

@@ -66,6 +66,12 @@ function entries(name, text) {
   return section(name, text);
 }
 
+function scalar(name, text) {
+  const raw = field(name, text);
+  if (!raw || raw.startsWith('[')) return '';
+  return raw;
+}
+
 function owned(text) {
   return entries('owns', text);
 }
@@ -87,6 +93,7 @@ module.exports = {
   block,
   section,
   entries,
+  scalar,
   owned,
   verifySteps,
 };

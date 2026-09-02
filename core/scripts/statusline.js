@@ -335,6 +335,10 @@ function draw(cwd, phase) {
   if (phase === 'foot') {
     const n = getNotice(r.relay);
     if (n) return headLine([titleCase(n)]);
+    const k = contracts(r.relay);
+    const wait = k ? Number(k.count.submitted || 0) + Number(k.count.blocked || 0) : 0;
+    if (wait) return headLine([titleCase(wait + ' ' + t('line.contract') + ' ' + t('line.waiting'))]);
+    return '';
   }
 
   const list = seats(r.relay);

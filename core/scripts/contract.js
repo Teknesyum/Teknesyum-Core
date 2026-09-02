@@ -4,9 +4,11 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 const { relayRoot, projectRoot, settings, liveDir, read, setNotice, t } = require('../hooks/lib.js');
-const { isContractName, field, list, owned, verifySteps, entries } = require('../hooks/schema.js');
+const { isContractName, field, list, owned, verifySteps, entries, scalar } = require('../hooks/schema.js');
 const seal = require('../hooks/seal.js');
 const risk = require('./risk.js');
+
+const NL = String.fromCharCode(10);
 
 const argv = process.argv.slice(2);
 
@@ -87,6 +89,56 @@ function hollowVerify(steps) {
   if (!steps.length) return [];
   const graded = steps.map((s) => [s, hollowStep(s)]);
   return graded.every(([, why]) => why) ? graded : [];
+}
+
+function looseVerify(body) {
+  if (verifySteps(body).length) return '';
+  return scalar('verify', body);
+}
+
+const NO_TESTS = [
+  /(^|[^a-z])no tests? (were )?(ran|run|found|to run|executed)/i,
+  /Total tests: 0(?![0-9])/i,
+  /(^|[^0-9])0 tests? (ran|passed|executed)/i,
+  /collected 0 items/i,
+  /(^|[^a-z])no test (matches|matched|files? found)/i,
+  /tests? run: 0(?![0-9])/i,
+];
+
+function emptyRun(text) {
+  for (const re of NO_TESTS) if (re.test(text)) return true;
+  return false;
+}
+
+function lockPath(relay) {
+  return path.join(liveDir(relay), '_verify.lock');
+}
+
+function alive(pid) {
+  if (!pid) return false;
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (e) {
+    return String((e && e.code) || '') === 'EPERM';
+  }
+}
+
+function takeLock(relay, id) {
+  const f = lockPath(relay);
+  const held = read(f);
+  if (held && held.pid !== process.pid && alive(held.pid)) return held;
+  try {
+    fs.mkdirSync(path.dirname(f), { recursive: true });
+    fs.writeFileSync(f, JSON.stringify({ pid: process.pid, id: id, at: new Date().toISOString() }));
+  } catch {}
+  return null;
+}
+
+function dropLock(relay) {
+  try {
+    fs.unlinkSync(lockPath(relay));
+  } catch {}
 }
 
 function unsafeStep(step) {
@@ -520,19 +572,42 @@ function tierCmd() {
 }
 const RELAY_PATH = /(^|\/)[.]claude\/relay\//;
 
+const NEVER_ASKED = [
+  /(^|\/)tests?\//i,
+  /(^|\/)docs\/.+\.md$/i,
+  /\.(test|spec|tests)\.[a-z]+$/i,
+  /(^|\/)(readme|license|changelog|package\.json|install\.)/i,
+];
+
+const CODE_FILE = /\.(js|jsx|mjs|cjs|ts|tsx|py|cs|go|rs|java|rb|php|swift|kt|c|h|cpp|hpp|scala)$/i;
+
+function callers(root, rel) {
+  const base = rel.split('/').pop();
+  if (!CODE_FILE.test(base)) return named(root, base);
+  const stem = base.replace(/\.[a-z0-9]+$/i, '');
+  const pattern = '(import|require|using|include|from)[^' + NL + ']*' + stem;
+  return lines(git(root, ['grep', '-l', '-i', '-E', '--', pattern]));
+}
+
+function named(root, base) {
+  return lines(git(root, ['grep', '-l', '--fixed-strings', '--', base]));
+}
+
+function lines(raw) {
+  return String(raw || '')
+    .split(NL)
+    .map((x) => x.trim())
+    .filter(Boolean);
+}
+
 function orphans(root, owns) {
-  const keep = /^(readme|license|changelog|package[.]json|install[.])/i;
   const held = owns.map((p) => p.replace(/\\/g, '/'));
   const found = [];
   for (const rel of held) {
-    const base = rel.split('/').pop();
-    if (keep.test(base)) continue;
-    const hits = git(root, ['grep', '-l', '--fixed-strings', '--', base]) || '';
-    const others = hits
-      .split('\n')
-      .map((x) => x.trim())
-      .filter(Boolean)
-      .filter((f) => !held.includes(f) && !f.startsWith('trash/') && !RELAY_PATH.test(f));
+    if (NEVER_ASKED.some((re) => re.test(rel))) continue;
+    const others = callers(root, rel).filter(
+      (f) => !held.includes(f) && !f.startsWith('trash/') && !RELAY_PATH.test(f)
+    );
     if (!others.length) found.push(rel);
   }
   return found;
@@ -697,6 +772,16 @@ function complete() {
       )
     );
 
+  const loose = looseVerify(c.body);
+  if (loose)
+    return stop([
+      c.id + ' writes its verify as one plain line, so it has zero steps:',
+      '  verify: ' + loose,
+      '',
+      'That parses to an empty list and the seal would run nothing at all. Write it as a',
+      'list, `verify: [' + loose + ']`, or as a block of `  - ' + loose + '` lines.',
+    ]);
+
   const steps = verifySteps(c.body);
   if (!steps.length && !/^verify:[ \t]*\[[ \t]*\]/im.test(c.body))
     return stop([
@@ -727,10 +812,36 @@ function complete() {
       )
     );
 
-  const results = runVerify(c.root, steps);
+  const busy = takeLock(c.relay, c.id);
+  if (busy)
+    return stop([
+      c.id + ' cannot complete - ' + busy.id + ' is running its verify steps right now (pid ' + busy.pid + ').',
+      '',
+      'Two verify runs in one checkout share a build output and a test host, so whichever',
+      'finishes second measures the other one. Wait for it, or run this in a worktree.',
+    ]);
+  let results;
+  try {
+    results = runVerify(c.root, steps);
+  } finally {
+    dropLock(c.relay);
+  }
   const failed = results.filter((r) => !r.ok);
   if (failed.length)
     return stop([c.id + ' cannot complete - verification failed.', ''].concat(reportVerify(results)));
+
+  const hollowRun = results.filter((r) => emptyRun(r.tail));
+  if (hollowRun.length)
+    return stop(
+      [c.id + ' cannot complete - a verify step passed without running anything:', ''].concat(
+        hollowRun.map((r) => '  ' + r.step),
+        [
+          '',
+          'Exit 0 on zero collected tests is not acceptance, it is a filter that matches',
+          'nothing. Fix the filter, or name a step that would fail if the work were undone.',
+        ]
+      )
+    );
 
   const level = risk.resolve(c.root, owns, field('risk', c.body));
 
@@ -803,7 +914,7 @@ function complete() {
             '  git update-ref -d ' + snapRef(c.id),
           ],
       dead.length
-        ? ['', 'Nothing else in the tree names these files:']
+        ? ['', 'Nothing in the tree imports these files. Is that right?']
             .concat(dead.map((p) => '  ' + p))
             .concat(['', 'If their work is done, move them under trash/. Do not delete them.'])
         : []
@@ -940,6 +1051,15 @@ function stampStatus(body, want) {
 function submit() {
   const c = load(arg('id'));
   if (c.error) return stop([c.error, '', 'Usage: contract.js submit --id T7']);
+  const loose = looseVerify(c.body);
+  if (loose)
+    return stop([
+      c.id + ' writes its verify as one plain line, so it has zero steps:',
+      '  verify: ' + loose,
+      '',
+      'Submitting it now would hand the gate a contract that runs nothing. Write it as a',
+      'list or a block of `  - ` lines first.',
+    ]);
   const now = statusOf(c.body);
   if (now === 'submitted') return out([c.id + ' is already submitted.']);
   if (now && !['open', 'active'].includes(now))
@@ -958,6 +1078,17 @@ function reopen() {
     return stop(['Missing or malformed contract id.', '', 'Usage: contract.js reopen --id T7 --reason "..."']);
   if (!reason || reason.trim().length < 10)
     return stop(['--reason is required: one line saying why the close was wrong.']);
+  const critical = arg('critical');
+  if (!critical || critical.trim().length < 20)
+    return stop([
+      'A round costs a builder and an auditor. It opens for one thing only: something',
+      'critical that the seal let through.',
+      '',
+      'Name it: --critical "<what is broken, in 20 characters or more>"',
+      '',
+      'Everything else - style, a nicer name, a test you would also like - is debt.',
+      'Write it under ## Checkpoint and leave the contract closed.',
+    ]);
   const where = locate();
   if (!where) return stop(['No relay root - .claude/relay does not exist.']);
   const done = path.join(where.relay, 'contracts', 'done', id + '.md');
@@ -990,11 +1121,12 @@ function reopen() {
     result: 'reopened',
     round,
     reason: reason.trim(),
+    critical: critical.trim(),
     at: new Date().toISOString(),
   });
   return out([
     id + ' reopened -> contracts/' + id + '.md',
-    'round ' + round + ', status active, the ledger keeps the closed round.',
+    'round ' + round + ', status active, the ledger keeps the closed round and what was critical.',
   ]);
 }
 
