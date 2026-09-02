@@ -19,13 +19,14 @@ Aynı anda tek madde açık kalır.
 
 ## Açık maddeler
 
-- [ ] **Bench pilotu.** (`docs/BENCH.md`) 5 görev × 3 tekrar × 4 profil = 60 koşu.
-      Durma kuralı: Core native'den %40 fazla token harcıyorsa bench durur.
-      `bench/run.js` ve `bench/rapor.md` henüz yazılmadı.
 - [ ] **teknesyum-ui deposu.** Arayüz standardı ayrı depoda ve kurulu değil; her arayüz
       işinde renk/ölçü kullanıcıya soruluyor.
 
 Fable'ın sıraladığı on madde kapandı; ikinci sıra aşağıda, koşulları dolmadı.
+
+**Ertelendi — en sona.** Bench pilotu (`docs/BENCH.md`, plan hazır, betik yazılmadı).
+Karar 2026-09-02: mekanizma daha oturmadan ölçüm anlamsız. Bench, her şey bittiğinde
+en son iş.
 
 İkinci sıra (koşulu dolmadı): #64 kabul↔verify kapsam eşlemesi, #42 ayrık güven ölçeği,
 #26 birlikte-değişim (depo genç), #43/#44 DECISIONS.md durumu ve `supersedes`, #67 diff'te

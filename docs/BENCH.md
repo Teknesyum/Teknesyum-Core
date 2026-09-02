@@ -1,6 +1,6 @@
 # Bench: dört profil, aynı iş
 
-**Durum:** pilot, koşulmadı. **Karar:** kullanıcı, 2026-09-02. **Danışman:** Fable.
+**Durum:** ertelendi (2026-09-02) — en sona. Plan hazır, betik yazılmadı. **Karar:** kullanıcı, 2026-09-02. **Danışman:** Fable.
 
 Ölçtüğümüz şey: Teknesyum Core kurulu bir Claude Code oturumu ile kurulu olmayanı,
 aynı görev ve aynı kabul testi altında karşılaştırmak.
