@@ -205,7 +205,7 @@ koşuyor ve sözleşmenin hiç sahiplenmediği değişiklikleri sınamış olurd
 çünkü bir komutun döndürdüğünü değiştiremezler. `blocked-by: [T4]` yazan bir sözleşme de `T4`
 bitene kadar kapanmıyor. `contract.js list --ready` yalnız hiçbir şeyi beklemeyenleri gösterir.
 
-`contract.js reopen --reason "..."` yanlış kapanan sözleşmeyi turunu artırarak geri alıyor;
+`contract.js reopen --reason "..." --critical "..."` yanlış kapanan sözleşmeyi turunu artırarak geri alıyor;
 kapanan tur defterde kalıyor, yani geri alma bir silme değil bir kayıt. Geri alma altıncı
 turda duruyor. Yedinci tur, ajanın şanssız değil sözleşmenin yanlış olduğunu söyler — böl,
 ya da sahiplendiğini daralt. Katılmadığınız gün için `--force` duruyor.
@@ -220,6 +220,20 @@ Her adımı `true`, `:`, `exit 0`, `ls`, `echo` ya da yorum olan bir `verify` bl
 olamaz; başarısız olamayan şey de kabul ölçütü değildir. Kapı bunun üstüne kapatmayı
 reddediyor ve adımı adıyla söylüyor. Başarısız olabilen tek komut yeter, gerisi gürültü
 olabilir.
+
+Mührün ölçmeden geçebileceği üç sessiz yol daha kapandı. Liste yerine tek düz satır yazılan
+bir `verify` sıfır adıma ayrışıyor, sıfır adım da her zaman geçiyor; kapı bunu artık hem
+submit'te hem kapanışta reddediyor — sessizliği mühürlemiyor. Hiç test toplamadan sıfırla
+çıkan adım da aynı kuralla reddediliyor: `no tests ran`, `collected 0 items`, `Total tests:
+0` — hiçbir şeye uymayan bir filtre geçmiş takım değildir. Ve tek çalışma kopyasında iki
+sözleşme verify adımlarını aynı anda koşamıyor; her biri ötekinin yarım yazılmış dosyalarını
+ölçerdi. İkincisine kimin koştuğu söyleniyor.
+
+Sistemin en büyük gideri tur. 124 mühürlü sözleşme üzerinde ölçüldü: 54'ü en az bir ek tur
+gördü, toplam 72 tur, her biri bir yapıcı artı bir denetçi. Bu yüzden `reopen` artık
+`--critical "<mührün kaçırdığı şey>"` istiyor. Stil, daha iyi bir ad, "şunu da test
+etseydik" — bunlar borçtur, `## Checkpoint` altına yazılır; iki ajan daha ödemenin
+gerekçesi değildir.
 
 Sözleşme `ceiling: <n>` taşıyabilir — kaç araç adımı ettiği. Tavanı geçince kapı kancası o
 sözleşme altındaki yazmaları kabul etmiyor; yakınsamayan bir koşu kimse başında beklemeden
@@ -318,6 +332,12 @@ Sohbet banner'ı `MessageDisplay` kancasında duruyor; bu kanca çizileni deği�
 saklanana ve modelin gördüğüne dokunmuyor. İkilinin kendi ifadesiyle: *"Display-only: the
 stored message and what the model sees are untouched."* Mesaj başına yaklaşık 30 ms node
 açılışı, sıfır token.
+
+Bandın bir biçimi var: cevabın üstünde tezgâhı adlandıran bir baş satırı ve en çok iki iş
+satırı, altında en çok bir satır. Kapanış satırı açılışın tekrarı değil — cevap yazılırken
+ne değiştiğini ya da şimdi seni neyin beklediğini taşıyor, ikisi de yoksa boş kalıyor.
+Okuduğu kayıt, oturum ilk ajanını başlattığı anda doğuyor; sözleşme açılması gerekmiyor.
+Yani hiç sözleşme yazmayan bir oturum da bandını görüyor.
 
 Araç çağrılarını izleyen kancalar artık matcher taşıyor, yani dosya okumak süreç açtırmıyor.
 
@@ -492,7 +512,7 @@ node test/all.js
 
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
 kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu ve hiçbir kancanın
-bağlama yazmadığı denetimi üzerine 2.494 sav. Aynı takımı CI Linux, Windows ve
+bağlama yazmadığı denetimi üzerine 2.508 sav. Aynı takımı CI Linux, Windows ve
 macOS'ta koşuyor; geliştirme Windows öncelikli.
 
 ---

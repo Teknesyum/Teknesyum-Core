@@ -224,6 +224,21 @@ A `verify` block whose every step is `true`, `:`, `exit 0`, `ls`, `echo` or a co
 fail, and something that cannot fail is not acceptance. The gate refuses to close on it and
 names the step. One command that can fail is enough; the rest may be noise.
 
+Three quieter ways a seal could pass without measuring anything are closed too. A `verify`
+written as one plain line instead of a list parses to zero steps, and zero steps always
+pass; the gate now refuses it at submit and at close rather than sealing silence. A step
+that exits zero after collecting no tests — `no tests ran`, `collected 0 items`, `Total
+tests: 0` — is refused by the same rule: a filter that matches nothing is not a passing
+suite. And two contracts cannot run their verify steps at the same time in one checkout,
+because each would be measuring the other's half-written files; the second one is told who
+is running and waits.
+
+Rounds are the largest cost in the system. Measured over 124 sealed contracts, 54 of them
+took at least one extra round — 72 rounds in total, each one a builder plus an auditor. So
+`reopen` now demands `--critical "<what the seal let through>"`. Style, a better name, a
+test you would also have liked: those are debt, written under `## Checkpoint`, not a reason
+to pay for two more agents.
+
 A contract may carry `ceiling: <n>` — the number of tool steps it is worth. Past it the guard
 stops accepting writes under that contract, so a run that is not converging ends without
 anyone watching it. Contracts without the line get a generous default. When a session ends
@@ -320,6 +335,13 @@ The chat banner rides on the `MessageDisplay` hook, which changes what is drawn 
 touching what is stored or what the model sees. The binary's own words: *"Display-only: the
 stored message and what the model sees are untouched."* Around 30 ms of node startup per
 message, no tokens.
+
+The band has a shape: one head line naming the workstation and at most two lines of work
+above the answer, and at most one line below it. The closing line is not a repeat of the
+opening one — it carries what changed while the answer was being written, or what is now
+waiting on you, and stays empty when there is neither. The record it reads from is created
+the moment a session spawns its first agent, not only when a contract is opened, so a
+session that never writes a contract still gets its band.
 
 The hooks that watch tool calls carry a matcher, so reading a file does not start a process.
 
@@ -497,7 +519,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,494 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,508 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
 scaffold, the cue, the banner, the handoff note, and one check that no hook writes into
 context. CI runs the same suite on Linux, Windows and macOS; development is Windows-first.

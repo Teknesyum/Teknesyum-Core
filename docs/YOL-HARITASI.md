@@ -19,8 +19,13 @@ Aynı anda tek madde açık kalır.
 
 ## Açık maddeler
 
-Açık madde yok. Fable'ın sıraladığı on madde de kapandı; ikinci sıra aşağıda, koşulları
-dolmadı.
+- [ ] **Bench pilotu.** (`docs/BENCH.md`) 5 görev × 3 tekrar × 4 profil = 60 koşu.
+      Durma kuralı: Core native'den %40 fazla token harcıyorsa bench durur.
+      `bench/run.js` ve `bench/rapor.md` henüz yazılmadı.
+- [ ] **teknesyum-ui deposu.** Arayüz standardı ayrı depoda ve kurulu değil; her arayüz
+      işinde renk/ölçü kullanıcıya soruluyor.
+
+Fable'ın sıraladığı on madde kapandı; ikinci sıra aşağıda, koşulları dolmadı.
 
 İkinci sıra (koşulu dolmadı): #64 kabul↔verify kapsam eşlemesi, #42 ayrık güven ölçeği,
 #26 birlikte-değişim (depo genç), #43/#44 DECISIONS.md durumu ve `supersedes`, #67 diff'te
@@ -33,7 +38,22 @@ dolmadı.
 güncelliğe karşı denetlenir; bayatsa bunu çıktının ilk satırında söyler. Sessiz bayat çıktı,
 yanlış çıktıdır.
 
+**Bir tur, KRİTİK olmadan açılmaz.** Ölçüldü: 124 sözleşmenin 54'ü ek tur gördü, toplam
+72 tur. Turun bedeli bir yapıcı artı bir denetçi; stil, daha iyi bir ad, "şunu da test
+etseydik" borçtur, tur değil.
+
 ## Bitenler
+
+- [x] **Rölenin israfı: iki raporun sekiz kusuru.** (v0.7.4) `docs/raporlar/` altındaki
+      124 ve 127 sözleşmelik ölçümler işlendi. Kapatılanlar: düz dizge `verify` (sıfır
+      adım, sessiz mühür), sıfır test toplayan adım, iki verify koşusunun birbirini
+      ölçmesi (koşum kilidi), KRİTİK'siz açılan tur, ölü dosya uyarısının yanlış alarmı
+      (2/2 yanlıştı; test ve docs notu artık hiç sorulmuyor, kod içe aktaranından
+      aranıyor). 8 yeni sav, takım 2.508'de yeşil.
+- [x] **Banner ajanla uyanıyor.** Banner yalnız `.claude/relay/` varken konuşuyordu ve o
+      klasörü yalnız `contract.js` yaratıyordu; sözleşmesiz çalışan her oturumda —yani
+      araştırmanın tamamında— banner sustu. Ajan çağrısı artık klasörü kendisi doğuruyor.
+      Foot bandı da head'in tekrarı olmaktan çıktı: ya biten iş, ya "seni bekliyor".
 
 - [x] **On madde, Fable'ın sırasıyla.** (v0.7.4) On altı proje incelendi
       (`docs/inceleme/`), 74 fikir envanterlendi (`_SENTEZ.md`), iki kontrollü ölçüm
