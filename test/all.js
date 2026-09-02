@@ -195,8 +195,9 @@ function testGate(root) {
     '---\nid: T8\nstatus: submitted\nround: 1\nowns: [notes/dead.md, notes/kept.md]\nverify:\n  - node -e "process.exit(0)"\n---\n'
   );
   const t8 = contract(['complete', '--id', 'T8'], root);
-  ok('a closed contract names the file nothing references', /notes\/dead[.]md/.test(t8.stdout), t8.stdout);
-  ok('a file the tree still names is left alone', !/notes\/kept[.]md/.test(t8.stdout), t8.stdout);
+  const t8dead = t8.stdout.split('imports these files')[1] || '';
+  ok('a closed contract names the file nothing references', /notes\/dead[.]md/.test(t8dead), t8.stdout);
+  ok('a file the tree still names is left alone', !/notes\/kept[.]md/.test(t8dead), t8.stdout);
   ok('the gate points at trash, not at deletion', /trash\//.test(t8.stdout) && !/rm /.test(t8.stdout), t8.stdout);
 
   const t3a = contract(['complete', '--id', 'T3'], root);
@@ -1394,12 +1395,31 @@ function testLadder() {
   ok('the closed round stays in the ledger', /reopened/.test(fs.readFileSync(path.join(root, '.claude', 'relay', 'audits', 'ledger.jsonl'), 'utf8')));
   ok('reopen refuses without a reason', contract(['reopen', '--id', 'L1'], root).status === 2);
 
-  writeContract(root, 'L9', '# L9\nstatus: submitted\nround: 6\nowns: [src/ok.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
+  const advisorRec = path.join(root, '.claude', 'relay', 'live', 'a9.json');
+  fs.mkdirSync(path.dirname(advisorRec), { recursive: true });
+  fs.writeFileSync(advisorRec, JSON.stringify({ id: 'a9', role: 'advisor', files: [] }));
+  const builderRec = path.join(root, '.claude', 'relay', 'live', 'b9.json');
+  fs.writeFileSync(builderRec, JSON.stringify({ id: 'b9', role: 'builder', files: [] }));
+  writeContract(root, 'L7', '# L7\nstatus: submitted\nround: 3\nowns: [src/ok.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
+  contract(['complete', '--id', 'L7'], root);
+  const why = ['--reason', 'the third try is the same mind', '--critical', 'the seal let a broken build through'];
+  const alone = contract(['reopen', '--id', 'L7'].concat(why), root);
+  ok('a fourth round does not open without a second mind', alone.status === 2 && /--advisor/.test(alone.stdout), alone.stdout);
+  const wrongKind = contract(['reopen', '--id', 'L7'].concat(why, ['--advisor', 'b9']), root);
+  ok('and a builder record cannot stand in for the advisor', wrongKind.status === 2, wrongKind.stdout);
+  const asked = contract(['reopen', '--id', 'L7'].concat(why, ['--advisor', 'a9']), root);
+  ok('with the advisor named, the round opens', asked.status === 0, asked.stdout + asked.stderr);
+  ok(
+    'and the ledger keeps who was asked',
+    /"advisor": ?"a9"/.test(fs.readFileSync(path.join(root, '.claude', 'relay', 'audits', 'ledger.jsonl'), 'utf8'))
+  );
+
+  writeContract(root, 'L9', '# L9\nstatus: submitted\nround: 5\nowns: [src/ok.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
   contract(['complete', '--id', 'L9'], root);
   const capped = contract(['reopen', '--id', 'L9', '--reason', 'this one will not converge', '--critical', 'the gate accepted a broken build'], root);
-  ok('a seventh round is refused - the contract is wrong, not the agent', capped.status === 2, capped.stdout + capped.stderr);
+  ok('a sixth round is refused - the contract is wrong, not the agent', capped.status === 2, capped.stdout + capped.stderr);
   ok('and the refusal says to split it instead', /Split it/.test(capped.stdout + capped.stderr), capped.stdout);
-  const forced = contract(['reopen', '--id', 'L9', '--reason', 'this one will not converge', '--critical', 'the gate accepted a broken build', '--force'], root);
+  const forced = contract(['reopen', '--id', 'L9', '--reason', 'this one will not converge', '--critical', 'the gate accepted a broken build', '--advisor', 'a9', '--force'], root);
   ok('the cap can still be overridden on purpose', forced.status === 0, forced.stdout + forced.stderr);
 
   writeContract(root, 'L2', '# L2\nstatus: submitted\nowns: [src/gone.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
@@ -1963,7 +1983,7 @@ function testWasteGates() {
   const quiet = contract(['complete', '--id', 'W5'], root);
   ok(
     'a test file and a docs note are never called dead',
-    quiet.status === 0 && !/probe\.test\.js/.test(quiet.stdout) && !/measure\.md/.test(quiet.stdout),
+    quiet.status === 0 && !quiet.stdout.includes('imports these files'),
     quiet.stdout
   );
 
@@ -2179,6 +2199,11 @@ function main() {
   testFigures();
   testNoContextWrites();
   testWasteGates();
+  testHeadlineGate();
+  testOwnsGlob();
+  testGateTargets();
+  testAuditKind();
+  testRoleFromPrompt();
   testBannerWakesOnAgents();
   testBaseline();
   testMapGuards();
@@ -2192,3 +2217,165 @@ function main() {
 }
 
 main();
+
+function testHeadlineGate() {
+  const root = fixture();
+  const MANSET = path.join(__dirname, '..', 'core', 'scripts', 'manset.js');
+  const doc = path.join(root, 'docs', 'olcum.md');
+  fs.mkdirSync(path.dirname(doc), { recursive: true });
+  const manset = (p) => run(process.execPath, [MANSET, p], { cwd: root });
+
+  const drifted = [
+    '# Olcum',
+    '',
+    '## Sureler',
+    '',
+    'Kosumlar 0,1-8,8 s arasinda.',
+    '',
+    '| kosum | sure |',
+    '|---|---|',
+    '| K1 | 0,093 |',
+    '| K2 | 0,427 |',
+    '',
+  ].join('\n');
+  fs.writeFileSync(doc, drifted);
+  const drift = manset(doc);
+  ok('a figure in prose that no cell produces is a finding', drift.status > 0, drift.stdout);
+  ok('and the finding names the number', /8,8/.test(drift.stdout), drift.stdout);
+
+  fs.writeFileSync(doc, drifted.replace('0,1-8,8 s', '0,093-0,427 s'));
+  const honest = manset(doc);
+  ok('a figure the table does give passes', honest.status === 0, honest.stdout);
+
+  const counted = ['# Sayim', '', '## Olculer', '', 'Dokuz olcu kirildi.', '', '- bir', '- iki', ''].join('\n');
+  fs.writeFileSync(doc, counted);
+  const miscount = manset(doc);
+  ok('a count claim is measured against the list under it', miscount.status > 0, miscount.stdout);
+
+  fs.writeFileSync(doc, counted.replace('Dokuz olcu', 'Iki olcu'));
+  ok('and the honest count passes', manset(doc).status === 0);
+
+  fs.writeFileSync(doc, 'nothing but prose, 1,5 kat daha hizli\n');
+  ok('prose with no table and no list is left alone', manset(doc).status === 0);
+
+  fs.writeFileSync(doc, drifted);
+  run('git', ['-C', root, 'add', '-A']);
+  writeContract(root, 'M1', '# M1\nstatus: submitted\nowns: [docs/olcum.md]\nverify:\n  - node -e "process.exit(0)"\n');
+  const sealed = contract(['complete', '--id', 'M1'], root);
+  ok('a contract that owns a document has its numbers checked without asking', sealed.status !== 0, sealed.stdout);
+  ok('and the failing step is named', /manset/.test(sealed.stdout), sealed.stdout);
+
+  fs.writeFileSync(path.join(root, 'docs', 'olcum2.md'), drifted);
+  run('git', ['-C', root, 'add', '-A']);
+  writeContract(root, 'M2', '# M2\nmanset: off\nstatus: submitted\nowns: [docs/olcum2.md]\nverify:\n  - node -e "process.exit(0)"\n');
+  const off = contract(['complete', '--id', 'M2'], root);
+  ok('a contract can opt out in one line', off.status === 0, off.stdout);
+
+  try {
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}
+
+function testOwnsGlob() {
+  const root = fixture();
+  fs.mkdirSync(path.join(root, 'tools', 'probe'), { recursive: true });
+  for (const n of ['a.js', 'b.js', 'c.js']) fs.writeFileSync(path.join(root, 'tools', 'probe', n), 'module.exports = 0;\n');
+  run('git', ['-C', root, 'add', '-A']);
+  run('git', ['-C', root, 'commit', '-qm', 'probe']);
+
+  writeContract(root, 'G1', '# G1\nstatus: active\nowns: [tools/probe/**]\nverify:\n  - node -e "process.exit(0)"\n');
+  const sent = contract(['submit', '--id', 'G1'], root);
+  ok('a glob is expanded at delivery, not refused at the seal', sent.status === 0, sent.stdout);
+  const body = fs.readFileSync(path.join(root, CONTRACTS, 'G1.md'), 'utf8');
+  ok('the expansion is written into the contract', /tools\/probe\/a\.js/.test(body) && /tools\/probe\/c\.js/.test(body), body);
+  ok('and the pattern is gone from owns', !/probe\/\*\*/.test(body), body);
+
+  writeContract(root, 'G2', '# G2\nstatus: active\nowns: [tools/nothing/**]\nverify:\n  - node -e "process.exit(0)"\n');
+  const empty = contract(['submit', '--id', 'G2'], root);
+  ok('a pattern that matches nothing is refused where it is cheap to fix', empty.status === 2, empty.stdout);
+
+  try {
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}
+
+function testGateTargets() {
+  const root = fixture();
+  const shell = (command, tool, env) =>
+    run(process.execPath, [GUARD], {
+      cwd: root,
+      input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: tool || 'Bash', tool_input: { command }, cwd: root }),
+      env: env ? { ...process.env, ...env } : process.env,
+    });
+  const home = run('git', ['-C', root, 'rev-parse', '--abbrev-ref', 'HEAD']).stdout.trim();
+  writeContract(root, 'B1', '# B1\nstatus: active\nowns: [src/ok.js]\nverify:\n  - node -e "process.exit(0)"\n');
+
+  const onHome = shell('git push origin ' + home);
+  ok('a push to the trunk is held while a contract is open', onHome.status === 2, onHome.stdout + onHome.stderr);
+
+  run('git', ['-C', root, 'checkout', '-qb', 'work/B1']);
+  const onBranch = shell('git push -u origin work/B1');
+  ok('a push to the work branch is the normal step, not a breach', onBranch.status === 0, onBranch.stdout + onBranch.stderr);
+
+  const refresh = shell('git merge ' + home);
+  ok('taking the trunk into a work branch is a refresh', refresh.status === 0, refresh.stdout + refresh.stderr);
+
+  const prose = shell('grep -n "git push origin main" docs/notes.md');
+  ok('writing about the gate is not passing through it', prose.status === 0, prose.stdout + prose.stderr);
+
+  run('git', ['-C', root, 'checkout', '-q', home]);
+  const other = shell('git push origin ' + home, 'PowerShell');
+  ok('the other shell is held by the same gate', other.status === 2, other.stdout + other.stderr);
+
+  const forced = shell('git push --force origin ' + home, 'Bash', { TEKNESYUM_GATE_OPEN: '1' });
+  ok('a forced push to the trunk is refused even with the gate open', forced.status === 2, forced.stdout + forced.stderr);
+
+  try {
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}
+
+function testAuditKind() {
+  const root = fixture();
+  const live = path.join(root, '.claude', 'relay', 'live');
+  fs.mkdirSync(live, { recursive: true });
+  fs.writeFileSync(path.join(live, 'w7.json'), JSON.stringify({ id: 'w7', role: 'worker', files: [] }));
+  fs.writeFileSync(path.join(live, 'a7.json'), JSON.stringify({ id: 'a7', role: 'auditor', files: [] }));
+  writeContract(root, 'A1', '# A1\nstatus: submitted\nowns: [src/ok.js]\nverify:\n  - node -e "process.exit(0)"\n');
+
+  const wrong = contract(['audit', '--id', 'A1', '--run-id', 'w7', '--dry-run', '--verification', 'x'], root);
+  ok('the gate says before the audit runs that this agent cannot sign it', wrong.status === 2, wrong.stdout);
+
+  const right = contract(['audit', '--id', 'A1', '--run-id', 'a7', '--dry-run', '--verification', 'x'], root);
+  ok('an auditor record is cleared in advance', right.status === 0, right.stdout);
+
+  const quiet = contract(['complete', '--id', 'A1'], root);
+  ok('a low-risk seal with no record says so in one line', /no audit record/i.test(quiet.stdout), quiet.stdout);
+
+  try {
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}
+
+function testRoleFromPrompt() {
+  const root = fixture();
+  const watch = path.join(__dirname, '..', 'core', 'hooks', 'watch.js');
+  run(process.execPath, [watch], {
+    cwd: root,
+    input: JSON.stringify({
+      hook_event_name: 'PreToolUse',
+      tool_name: 'Task',
+      agent_id: 'r1',
+      agent_type: 'teknesyum-core:worker',
+      tool_input: { prompt: 'Read core/roles/auditor.md and do that job.' },
+      cwd: root,
+    }),
+  });
+  const p = path.join(root, '.claude', 'relay', 'live', 'r1.json');
+  const rec = fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, 'utf8')) : {};
+  ok('the role in the prompt outranks a generic agent type', rec.role === 'auditor', JSON.stringify(rec));
+
+  try {
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}

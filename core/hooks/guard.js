@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { spawnSync } = require('child_process');
 const { read, write, merge, safe, norm, relayRoot, projectRoot, liveDir, logProblem, settings } = require('./lib.js');
 const { RANK, isContractName, status, isKnownStatus, field, list, owned } = require('./schema.js');
 
@@ -304,7 +305,57 @@ function boundary(target, agentId) {
   );
 }
 
-const MERGING = /\bgit\s+(?:-[^\s]+\s+)*(merge|push)\b/i;
+const MERGING = /^git\s+(?:-[^\s]+\s+)*(merge|push)\b/i;
+
+const PROTECTED = /^(main|master)$/i;
+
+function segments(raw) {
+  const text = String(raw).replace(/<<-?\s*['"]?(\w+)['"]?[\s\S]*?^\s*\1\s*$/gm, ' ');
+  return text
+    .split(/[\n;]|&&|\|\||\|/)
+    .map((s) => s.trim().replace(/^[A-Za-z_][A-Za-z0-9_]*=\S*\s+/, ''))
+    .filter(Boolean);
+}
+
+function branch(cwd) {
+  const r = spawnSync('git', ['-C', cwd || process.cwd(), 'symbolic-ref', '--quiet', '--short', 'HEAD'], {
+    encoding: 'utf8',
+    timeout: 5000,
+    windowsHide: true,
+  });
+  if (r.error || r.status !== 0) return '';
+  return String(r.stdout || '').trim();
+}
+
+function words(part) {
+  return part
+    .split(/\s+/)
+    .slice(1)
+    .filter((w) => w && !w.startsWith('-'));
+}
+
+function pushTarget(part, cwd) {
+  const w = words(part).filter((x) => x !== 'push');
+  const ref = w[1] || '';
+  if (!ref) return branch(cwd);
+  const dst = ref.includes(':') ? ref.split(':').pop() : ref;
+  return dst.replace(/^refs\/heads\//, '');
+}
+
+function forcing(part) {
+  return /(^|\s)(-f|--force|--force-with-lease)(\s|=|$)/.test(part);
+}
+
+function protectedWork(cmd, cwd) {
+  for (const part of segments(cmd)) {
+    const m = MERGING.exec(part);
+    if (!m) continue;
+    const target = m[1].toLowerCase() === 'push' ? pushTarget(part, cwd) : branch(cwd);
+    if (!PROTECTED.test(String(target))) continue;
+    return { part, target, force: m[1].toLowerCase() === 'push' && forcing(part) };
+  }
+  return null;
+}
 
 function unfinished(cwd) {
   const r = relayRoot(cwd || process.cwd(), { git: false });
@@ -331,13 +382,22 @@ function unfinished(cwd) {
 }
 
 function merging(j) {
-  if (process.env.TEKNESYUM_GATE_OPEN === '1') return;
   const cmd = String((j.tool_input || {}).command || '');
-  if (!MERGING.test(cmd)) return;
+  const hit = protectedWork(cmd, j.cwd);
+  if (!hit) return;
+  if (hit.force)
+    return block(
+      'A forced push to ' + hit.target + ' rewrites what everyone else already has.',
+      '',
+      'The gate does not carry this one, open or closed. Ask for it in one sentence and',
+      'let the person who owns the branch answer.'
+    );
+  if (process.env.TEKNESYUM_GATE_OPEN === '1') return;
   const open = unfinished(j.cwd);
   if (!open.length) return;
   return block(
     'A contract is still on the ladder: ' + open.join(', ') + '.',
+    'This command reaches ' + hit.target + '.',
     '',
     'Work reaches main through the gate, not around it. Close it first:',
     '  node <plugin>/scripts/contract.js complete --id <ID>',
@@ -351,7 +411,7 @@ function decide(j) {
   const t = j.tool_input || {};
   const agentId = j.agent_id || null;
 
-  if (tool === 'Bash') return merging(j);
+  if (tool === 'Bash' || tool === 'PowerShell') return merging(j);
 
   if (/^(Write|Edit|NotebookEdit)$/.test(tool)) {
     const target = t.file_path || t.notebook_path || '';

@@ -45,6 +45,16 @@ etseydik" borçtur, tur değil.
 
 ## Bitenler
 
+- [x] **Manşet kayması, danışman ve kapının yönü.** VidShrink günlüğündeki en pahalı
+      kusur sınıfı kapatıldı: sözleşme bir `.md` sahipleniyorsa `manset.js` düzyazıdaki
+      her sayıyı aynı bölümün tablosuna/listesine bağlıyor (`manset: off` ile muaf).
+      Üçüncü turdan itibaren `reopen --advisor <id>` zorunlu ve id'nin rolü danışman
+      olmalı — "iki turdan sonra Fable'a danışılsın" kuralı ilk kez koda döndü. Denetçi
+      artık istemindeki rolden tanınıyor (tür değil), `audit --dry-run` imza yetkisini
+      bedeli ödenmeden söylüyor, kayıtsız mühür bunu tek satırla itiraf ediyor. Kapı
+      `main`'e ulaşan işi durduruyor, çalışma dalını bırakıyor, heredoc'u kesiyor ve
+      PowerShell'i de görüyor. Tur tavanı 6 → 5. 27 yeni sav, takım 2.535'te yeşil.
+
 - [x] **Rölenin israfı: iki raporun sekiz kusuru.** (v0.7.4) `docs/raporlar/` altındaki
       124 ve 127 sözleşmelik ölçümler işlendi. Kapatılanlar: düz dizge `verify` (sıfır
       adım, sessiz mühür), sıfır test toplayan adım, iki verify koşusunun birbirini

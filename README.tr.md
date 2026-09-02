@@ -235,6 +235,19 @@ gördü, toplam 72 tur, her biri bir yapıcı artı bir denetçi. Bu yüzden `re
 etseydik" — bunlar borçtur, `## Checkpoint` altına yazılır; iki ajan daha ödemenin
 gerekçesi değildir.
 
+Üçüncü turdan itibaren aynı istek bir adım ileri gidiyor: `reopen`, `--advisor <ajan-id>`
+olmadan tur açmıyor ve verilen id'nin diskte, rolü danışman olan canlı bir kaydı olması
+gerekiyor. Üçüncü tur, sözleşmeyi iki aklın aynı biçimde yanlış okuduğu anlamına geliyor; o
+noktada en ucuz şey üçüncü bir akıl. Kural uzun süredir yazılıydı ve bir kez bile
+işlemedi, çünkü onu kimse istemiyordu. Kimin danışıldığını defter tutuyor.
+
+Sözleşme bir `.md` dosyası sahipleniyorsa kapı, mühürden önce üzerinde `manset.js`
+koşuyor: düzyazıdaki her sayının aynı bölümdeki bir tabloda, listede ya da kod bloğunda
+geçmesi — ya da o sütunun toplamı olması — gerekiyor. Sayıyı ölçüm üretiyor, cümleyi
+sonradan model yazıyor ve ikisini bağlayan hiçbir şey yoktu; günlükteki en çok tekrar eden
+kusur buydu. Hiçbir tablonun tutmadığı bir şeyi özetleyen belge `manset: off` ile
+muaf tutulabiliyor.
+
 Sözleşme `ceiling: <n>` taşıyabilir — kaç araç adımı ettiği. Tavanı geçince kapı kancası o
 sözleşme altındaki yazmaları kabul etmiyor; yakınsamayan bir koşu kimse başında beklemeden
 bitiyor. Satırı olmayan sözleşmeye cömert bir varsayılan veriliyor. Oturum, hâlâ `active`
@@ -250,7 +263,10 @@ Yüksek riskte kapanış, kayıt olmadan reddediliyor ve kayıt dört yerden ba�
   tutmuyor
 - **HEAD'e** — başka bir commit için yazılmış kayıt burada geçmiyor
 - **gerçekten koşmuş bir run-id'ye** — diskte canlı kaydı olan, rolü denetçi olan ve denetim
-  boyunca hiçbir dosyaya yazmamış bir ajan
+  boyunca hiçbir dosyaya yazmamış bir ajan. Rol, ajanın isteminde verilen rol; doğduğu tür
+  değil. Buradaki her ajan `worker` olarak doğuyor, dolayısıyla yalnız türe bakmak işi
+  yapmış denetçiyi reddediyordu. `audit --dry-run`, denetimin bedeli ödenmeden önce o
+  id'nin imzalayıp imzalayamayacağını söylüyor.
 - **tek kullanıma** — kayıt sözleşme kapanırken tükeniyor, tekrar oynatılamıyor
 
 Her kapanış, her karşılanmamış kapanış ve her geri alma `audits/ledger.jsonl` dosyasına
@@ -266,10 +282,14 @@ dizinini salt okunur tutuyor. `prefs.js` gerekli işaretleri taşımayan README 
 yazımını engelliyor; yazarın tercih dosyası yoksa hemen çıkıyor, yani başkası için hiçbir
 şey yapmıyor.
 
-Kabuk komutlarınızı okumuyor. Bu denetim v0.2.0'a kadar vardı ve düz metin eşleşmesiydi:
-`cd` içinden geçip gidiyordu, buna karşılık defteri okuyan meşru bir tek satır
-reddediliyordu. Kabuk metnini tahmin etmeye çalışan kapı, korumayı değil koruma sanısını
-satın alır — güvence bunun yerine kaydın kendisinde.
+Kabuk komutlarını tek bir şey için okuyor: sözleşme açıkken `main`'e ulaşan iş. Komutu
+arayarak değil ayrıştırarak bakıyor — heredoc'lar önce kesiliyor, yani `git push origin
+main` geçen bir belge yazmak kapıdan geçmek değil; kendi çalışma dalınıza itmek de zaten
+dokunmadığı olağan adım. Korumalı bir dala zorlamalı itme, kapı bilerek açıkken bile
+reddediliyor. `Bash` ve `PowerShell` ikisi de önünde; bir süre yalnız biri öyleydi, yani
+denetim ajanın hangi kabuğu seçtiğine bağlıydı. Komutlarınızın gerisi tahmin edilmiyor: o
+denetim v0.2.0'a kadar düz metin eşleşmesiydi, `cd` içinden geçip gidiyor, defteri okuyan
+meşru bir tek satır reddediliyordu — güvence kaydın kendisinde.
 
 Relay'i olmayan bir projede kapı kapalı değil açık düşüyor. Birinin ilgisiz deposunu bozan
 bir kanca, kaçırılan bir denetimden daha kötü bir arıza.
@@ -512,7 +532,7 @@ node test/all.js
 
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
 kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu ve hiçbir kancanın
-bağlama yazmadığı denetimi üzerine 2.508 sav. Aynı takımı CI Linux, Windows ve
+bağlama yazmadığı denetimi üzerine 2.535 sav. Aynı takımı CI Linux, Windows ve
 macOS'ta koşuyor; geliştirme Windows öncelikli.
 
 ---

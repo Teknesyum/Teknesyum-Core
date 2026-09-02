@@ -27,13 +27,16 @@ function agentKey(j) {
   return sessionId() || 'main';
 }
 
+const GENERIC = /^(worker|general-purpose|claude|task|agent)$/i;
+
 function roleOf(j) {
   const t = j.tool_input || {};
   const raw = String(j.agent_type || t.subagent_type || '');
   const clean = raw.replace(/^teknesyum(-core)?:/, '');
-  if (clean) return clean;
   const prompt = String(t.prompt || '');
   const m = /roles[\\/]([a-z-]+)\.md/i.exec(prompt);
+  if (m && (!clean || GENERIC.test(clean))) return m[1].toLowerCase();
+  if (clean) return clean;
   return m ? m[1].toLowerCase() : '';
 }
 

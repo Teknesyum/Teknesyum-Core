@@ -706,6 +706,24 @@ function dirtyOutside(root, owns) {
   return dirty;
 }
 
+const MANSET = path.join(__dirname, 'manset.js');
+
+function prose(root, body, owns) {
+  if (/^manset:[ \t]*(off|no|false)/im.test(body)) return [];
+  const docs = owns
+    .map(String)
+    .filter((p) => /\.md$/i.test(p))
+    .filter((p) => {
+      try {
+        return fs.statSync(path.join(root, p)).isFile();
+      } catch {
+        return false;
+      }
+    });
+  if (!docs.length) return [];
+  return ['node "' + MANSET + '" ' + docs.map((p) => '"' + p + '"').join(' ')];
+}
+
 function complete() {
   const c = load(arg('id'));
   if (c.error) return stop([c.error, '', 'Usage: contract.js complete --id T7']);
@@ -782,7 +800,7 @@ function complete() {
       'list, `verify: [' + loose + ']`, or as a block of `  - ' + loose + '` lines.',
     ]);
 
-  const steps = verifySteps(c.body);
+  const steps = verifySteps(c.body).concat(prose(c.root, c.body, owns));
   if (!steps.length && !/^verify:[ \t]*\[[ \t]*\]/im.test(c.body))
     return stop([
       c.id + ' has no verify steps.',
@@ -905,6 +923,9 @@ function complete() {
         'risk ' + level.level + (level.reasons.length ? ' (' + level.reasons.join('; ') + ')' : ''),
         'ledger written at HEAD ' + headSha.slice(0, 8) + (record ? ', audit record consumed' : ''),
       ],
+      record
+        ? []
+        : ['', 'Sealed with no audit record: nobody but the builder read this work.'],
       dropped
         ? []
         : [
@@ -1001,7 +1022,7 @@ function revert() {
 function precheck() {
   const c = load(arg('id'));
   if (c.error) return stop([c.error]);
-  const steps = verifySteps(c.body);
+  const steps = verifySteps(c.body).concat(prose(c.root, c.body, owned(c.body)));
   if (!steps.length)
     return out([
       c.id + ' carries no verify steps, so there is nothing to check before the work starts.',
@@ -1048,6 +1069,49 @@ function stampStatus(body, want) {
   return body.replace(/^(#.*\n)/, '$1status: ' + want + '\n');
 }
 
+function globRe(pattern) {
+  const s = String(pattern).split(path.sep).join('/');
+  let re = '';
+  for (let i = 0; i < s.length; i += 1) {
+    const ch = s[i];
+    if (ch === '*') {
+      if (s[i + 1] === '*') {
+        re += '.*';
+        i += 1;
+        if (s[i + 1] === '/') i += 1;
+      } else re += '[^/]*';
+    } else if (ch === '?') re += '[^/]';
+    else if ('.+^${}()|[]'.indexOf(ch) >= 0) re += '[' + ch + ']';
+    else re += ch;
+  }
+  return new RegExp('^' + re + '$', 'i');
+}
+
+function expandOwns(root, owns) {
+  const globs = owns.filter((p) => /[*?]/.test(String(p)));
+  if (!globs.length) return null;
+  const tracked = lines(git(root, ['ls-files']));
+  const out = [];
+  const seen = new Set();
+  for (const p of owns) {
+    if (!/[*?]/.test(String(p))) {
+      if (!seen.has(p)) seen.add(p), out.push(p);
+      continue;
+    }
+    const re = globRe(p);
+    const hits = tracked.filter((f) => re.test(f)).sort();
+    if (!hits.length) return { pattern: p, error: true };
+    for (const h of hits) if (!seen.has(h)) seen.add(h), out.push(h);
+  }
+  return { files: out, globs };
+}
+
+function rewriteOwns(body, files) {
+  const block = 'owns:' + NL + files.map((f) => '  - ' + f).join(NL);
+  if (/^owns:[ \t]*\[[^\]]*\]/im.test(body)) return body.replace(/^owns:[ \t]*\[[^\]]*\]/im, block);
+  return body.replace(/^owns:[ \t]*\n(?:[ \t]+-[ \t]*.+\n?)+/im, block + NL);
+}
+
 function submit() {
   const c = load(arg('id'));
   if (c.error) return stop([c.error, '', 'Usage: contract.js submit --id T7']);
@@ -1060,15 +1124,68 @@ function submit() {
       'Submitting it now would hand the gate a contract that runs nothing. Write it as a',
       'list or a block of `  - ` lines first.',
     ]);
+  let body = c.body;
+  let widened = null;
+  const grown = expandOwns(c.root, owned(c.body));
+  if (grown && grown.error)
+    return stop([
+      c.id + ' owns a pattern that matches nothing tracked: ' + grown.pattern,
+      '',
+      'A glob is expanded here, at delivery, not at the seal. Correct the pattern, or',
+      'name the files.',
+    ]);
+  if (grown) {
+    body = rewriteOwns(body, grown.files);
+    widened = grown;
+  }
+
   const now = statusOf(c.body);
   if (now === 'submitted') return out([c.id + ' is already submitted.']);
   if (now && !['open', 'active'].includes(now))
     return stop([c.id + ' cannot be submitted from status ' + now + '.']);
-  fs.writeFileSync(c.src, stampStatus(c.body, 'submitted'), 'utf8');
-  return out([
-    c.id + ' submitted.',
-    'Next: contract.js complete --id ' + c.id + ' runs the verify steps and decides.',
-  ]);
+  fs.writeFileSync(c.src, stampStatus(body, 'submitted'), 'utf8');
+  return out(
+    [c.id + ' submitted.'].concat(
+      widened
+        ? [
+            widened.globs.join(', ') +
+              ' expanded to ' +
+              widened.files.length +
+              ' file' +
+              (widened.files.length > 1 ? 's' : '') +
+              ', written into the contract.',
+          ]
+        : [],
+      ['Next: contract.js complete --id ' + c.id + ' runs the verify steps and decides.']
+    )
+  );
+}
+
+const ADVISOR_FROM = 3;
+
+function roleRecord(relay, runId, want) {
+  const rec = read(path.join(liveDir(relay), String(runId).replace(/[^A-Za-z0-9_.-]/g, '_') + '.json'));
+  if (!rec) return 'no live record for ' + runId + ' - an advisor is an agent that ran, not a name';
+  const role = String(rec.role || rec.agent_type || '?').replace(/^teknesyum(-core)?:/, '');
+  if (role !== want) return runId + ' is a ' + role + ' record, not an ' + want;
+  return '';
+}
+
+function secondOpinion(relay, round, advisor) {
+  if (round < ADVISOR_FROM) return null;
+  if (!advisor)
+    return [
+      'Round ' + round + ' means the contract has been misread twice already. That is where a',
+      'second mind is worth more than a third attempt by the same one.',
+      '',
+      'Open the advisor role, then name its agent id: --advisor <agent-id>',
+      '',
+      'The rule was written down for a long time and never once fired, because nothing',
+      'asked for it. Now the gate asks.',
+    ];
+  const why = roleRecord(relay, advisor, 'advisor');
+  if (why) return ['Refused - ' + why + '.'];
+  return null;
 }
 
 function reopen() {
@@ -1078,6 +1195,7 @@ function reopen() {
     return stop(['Missing or malformed contract id.', '', 'Usage: contract.js reopen --id T7 --reason "..."']);
   if (!reason || reason.trim().length < 10)
     return stop(['--reason is required: one line saying why the close was wrong.']);
+  const advisor = arg('advisor');
   const critical = arg('critical');
   if (!critical || critical.trim().length < 20)
     return stop([
@@ -1109,6 +1227,8 @@ function reopen() {
       '',
       'If you really mean it: add --force.',
     ]);
+  const second = secondOpinion(where.relay, Number(round), advisor);
+  if (second) return stop(second);
   let next = stampStatus(body, 'active');
   next = /^round:.*$/im.test(next)
     ? next.replace(/^round:.*$/im, 'round: ' + round)
@@ -1122,6 +1242,7 @@ function reopen() {
     round,
     reason: reason.trim(),
     critical: critical.trim(),
+    advisor: advisor ? advisor.trim() : null,
     at: new Date().toISOString(),
   });
   return out([
@@ -1347,6 +1468,18 @@ function audit() {
   const runId = arg('run-id');
   if (!runId) return stop(['--run-id is required: the auditor agent id from live/.']);
 
+  if (has('dry-run')) {
+    const why = seal.checkAuditor(c.relay, runId);
+    if (why)
+      return stop([
+        'This agent cannot sign the audit of ' + c.id + ' - ' + why + '.',
+        '',
+        'Asked before the audit ran, so nothing is spent. Open the auditor role itself,',
+        'or name the agent that will do the reading.',
+      ]);
+    return out([runId + ' can sign the audit of ' + c.id + '. Nothing written; this was a dry run.']);
+  }
+
   const evidence = [];
   for (let i = 0; i < argv.length; i += 1)
     if (argv[i] === '--verification' && argv[i + 1]) evidence.push(argv[i + 1]);
@@ -1423,8 +1556,9 @@ function help() {
     '  check --id <ID> [--run]   report risk and verify steps; --run executes them',
     '  submit --id <ID>          mark the work finished and ready for the gate',
     '  complete --id <ID>        run verify, check risk, record, move to done/',
-    '  reopen --id <ID> --reason "..." [--force]',
-    '                            take a closed contract back, round + 1; capped at round 6',
+    '  reopen --id <ID> --reason "..." --critical "..." [--advisor <agent>] [--force]',
+    '                            take a closed contract back, round + 1; capped at round 5,',
+    '                            an advisor record required from round 3 on',
     '  close --id <ID> --reason "..."',
     '                            close an unmet contract without a seal',
     '  audit --id <ID> --run-id <agent> --verification "..."',

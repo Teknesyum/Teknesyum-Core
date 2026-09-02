@@ -239,6 +239,18 @@ took at least one extra round — 72 rounds in total, each one a builder plus an
 test you would also have liked: those are debt, written under `## Checkpoint`, not a reason
 to pay for two more agents.
 
+From the third round the same demand goes one step further: `reopen` refuses to open a round
+without `--advisor <agent-id>`, and the id has to belong to a live record whose role is
+advisor. A third round means two minds have now read the contract the same wrong way; the
+cheapest thing at that point is a third one. The rule had been written down for a long time
+and never once fired, because nothing asked for it. The ledger keeps who was asked.
+
+When a contract owns a `.md` file, the gate runs `manset.js` over it before sealing: every
+number in prose has to appear in a table, a list or a code block in the same section, or be
+that column's sum. Numbers are produced by measurement and sentences are written afterwards,
+and nothing had ever tied the two together — the single most repeated defect in the log. A
+document that summarises something no table holds can opt out with `manset: off`.
+
 A contract may carry `ceiling: <n>` — the number of tool steps it is worth. Past it the guard
 stops accepting writes under that contract, so a run that is not converging ends without
 anyone watching it. Contracts without the line get a generous default. When a session ends
@@ -254,7 +266,10 @@ At high risk the close is refused until a record exists, and the record is bound
   no longer matches
 - to **HEAD**, so a record written for another commit does not apply here
 - to a **run-id that actually ran** — a live record on disk, whose role is auditor, and
-  which wrote no files during the audit
+  which wrote no files during the audit. The role is the one the agent was given in its
+  prompt, not the type it was spawned as; every agent here is spawned as `worker`, so
+  reading the type alone rejected auditors that had done the work. `audit --dry-run`
+  answers whether an id can sign before the audit is paid for.
 - to **one use**: the record is spent when the contract closes and cannot be replayed
 
 Every close, every unmet close and every reopen is appended to `audits/ledger.jsonl`, and
@@ -270,10 +285,15 @@ read-only. `prefs.js` blocks a README or LICENSE missing its required markers, a
 immediately when the author's preference file is absent, so for everyone else it does
 nothing at all.
 
-It does not read your shell commands. That check existed until v0.2.0 and was plain-text
-matching: `cd` walked through it while a legitimate one-liner reading the ledger was
-refused. A gate that guesses at shell strings buys the belief in protection, not protection
-— the guarantee lives in the record instead.
+It reads shell commands for one thing only: work reaching `main` while a contract is still
+open. It parses the command instead of searching it — heredocs are cut out first, so writing
+a document that mentions `git push origin main` is not passing through the gate, and pushing
+your own work branch is the normal step it never touches. A forced push to a protected
+branch is refused even when the gate is deliberately open. `Bash` and `PowerShell` are both
+in front of it; for a while only one of them was, which meant the check depended on which
+shell the agent happened to pick. Nothing else about your commands is guessed at: that check
+existed until v0.2.0 as plain-text matching, `cd` walked through it while a legitimate
+one-liner reading the ledger was refused, and the guarantee lives in the record instead.
 
 Outside a project with a relay, the gate falls open rather than closed. A hook that breaks
 someone's unrelated repository is a worse failure than a missed check.
@@ -519,7 +539,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,508 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,535 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
 scaffold, the cue, the banner, the handoff note, and one check that no hook writes into
 context. CI runs the same suite on Linux, Windows and macOS; development is Windows-first.
