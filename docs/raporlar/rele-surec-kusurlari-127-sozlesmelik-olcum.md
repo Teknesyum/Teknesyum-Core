@@ -244,6 +244,41 @@ ikincisi oldu — yani uyarı fiilen çalışmıyor.
 
 Ölçüsü: uyarının çıktığı ilk 20 dosyada yanlış alarm oranı. Bugünkü oran 2/2.
 
+## 4c. Kusur F — Denetim kaydı ajanın TİPİNE bakıyor, işine değil
+
+T128'in denetimi yapıldı, geçti, üç koşumla mutasyonları kendi elinde yeniden
+üretti. Kayıt tutulamadı:
+
+```
+node contract.js audit --id T128 --run-id <ajan> --verification "..."
+Refused - auditorRunId points at a non-auditor agent record: worker
+```
+
+Sebep: denetçi ajanı `teknesyum-core:worker` tipiyle açılmıştı. Ajanın *rolü*
+istemde yazılıydı, rol dosyası (`agents/auditor.md`) okundu, ajan kurallara
+harfiyen uydu — depoya hiç yazmadı, `git status --porcelain` boş döndü. Ama
+kapı istemi okumuyor, ajan kaydındaki tip alanına bakıyor.
+
+Asıl tehlike bu değil. Tehlike şu: **`complete` yine de geçti.** Risk `low`
+hesaplandığı için denetim kaydı zorunlu değildi ve mühür işlendi. Yani:
+
+- Düşük riskli sözleşmede kayıt sessizce kaybolur; denetim yapılmış görünmez.
+- Yüksek riskli sözleşmede mühür düşer ve sebebi **ancak o an** görülür — yani
+  denetim koştuktan, token harcandıktan sonra.
+
+İkisi de aynı kök: tip uyuşmazlığı denetim **başlarken** değil, denetim
+**bittikten sonra** yakalanıyor.
+
+**Öneri.** İki yerde kapı, ikisi de model çağırmaz:
+
+1. `contract.js` bir `audit --dry-run <ajan-id>` alt komutu versin; T0 denetçiyi
+   açmadan önce tipin kabul edilip edilmeyeceğini sorabilsin.
+2. `complete`, risk `low` olsa bile kayıtsız mühürde **tek satır uyarı** bassın:
+   "bu sözleşme denetim kaydı olmadan kapandı". Bugün hiçbir şey demiyor;
+   127 sözleşmenin 116'sında kayıt var, 11'inde neden yok, bilinmiyor.
+
+Ölçüsü: kayıtsız kapanan sözleşme sayısı. Bugünkü değer 12'ye çıktı.
+
 ## 5. Neden hiçbiri fark edilmedi
 
 Ortak desen: **röle kendi ürettiği metni denetlemiyor.**
@@ -282,6 +317,7 @@ Beşi de deterministik. Model gerekmiyor. Bugün bunların **hiçbiri** koşmuyo
 | 4 | T0 metni denetlenmiyor | Bugünkü hatanın tamamı | yazma anında deterministik sınama | `contract.js`, `packet.js` |
 | 5 | Paylaşılan girdi kayıtsız | 1 paket düştü, 1 ölçüm haksız çıktı | `kaynaklar.json` + sha256 | yeni betik |
 | 6 | `complete` yanlış alarm veriyor | uyarı fiilen yok sayılıyor, 2/2 yanlış | `tests/` ve `docs/*.md` muaf, ad yerine içe aktarma araması | `contract.js` |
+| 7 | Denetim kaydı ajan tipine bakıyor | 1 denetim kayıtsız kaldı, kayıtsız kapanan 12'ye çıktı | `audit --dry-run` + kayıtsız mühürde uyarı | `contract.js` |
 
 İlk dördü model çağırmaz. Beşincisi tek seferlik kurulum.
 
