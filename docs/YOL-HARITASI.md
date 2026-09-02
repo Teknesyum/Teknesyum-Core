@@ -54,6 +54,16 @@ altında aranıyor demektir.
 
 ## Bitenler
 
+- [x] **Tur defterden sayılıyor, devir notu sıkıştırmadan önce tazeleniyor.**
+      `round` alanı elle düzeltilebildiği için 54 yeniden açılan sözleşmenin 4'ünde
+      gövdeyle defter uyuşmuyordu (%7); mühür artık turu defterdeki `reopened`
+      satırlarından sayıyor ve gövde onunla çelişirse kapanmıyor. Defterin hiç
+      duymadığı sözleşme muaf, yani devralınan ağaç kapanmaya devam ediyor. Ayrıca
+      `PreCompact` kancası bağlandı: sıkıştırmadan hemen önce `handoff.js` aynı
+      `HANDOFF.md`'yi tazeliyor. Fikir kullanıcının, biçimi Fable'ın kararı — yeni
+      dosya yok, bağlama tek token yazılmıyor, not diske düşüyor. 5 yeni sav, takım
+      2.545'te yeşil.
+
 - [x] **Manşet kayması, danışman ve kapının yönü.** VidShrink günlüğündeki en pahalı
       kusur sınıfı kapatıldı: sözleşme bir `.md` sahipleniyorsa `manset.js` düzyazıdaki
       her sayıyı aynı bölümün tablosuna/listesine bağlıyor (`manset: off` ile muaf).

@@ -138,6 +138,12 @@ function record(j) {
   }
 
   save(file, rec);
+  if (ev === 'PreCompact') {
+    try {
+      require('../scripts/handoff.js').writeAt(r.relay, path.dirname(path.dirname(r.relay)));
+    } catch {}
+    return;
+  }
   if (ev === 'SessionEnd') {
     closeAll(live, now);
     try {

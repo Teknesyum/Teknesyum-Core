@@ -63,8 +63,8 @@ decide it together, and [the table](#the-agents) is below.
   agent holding it, not by your session.
 - **Banner and statusline** — One line for what is happening right now. Not a dashboard.
 - **A handoff note** — `.claude/relay/HANDOFF.md` says where the project stands: what is
-  open, what closed last, which branch. A hook refreshes it when the session ends, so it
-  costs nothing, and any model can read it — not only Claude.
+  open, what closed last, which branch. A hook refreshes it when the session ends and again
+  before a compaction, so it costs nothing, and any model can read it — not only Claude.
 - **Ask before you spawn** — `contract.js precheck` runs the verify steps first. If they
   already pass, the work is done and no agent is worth starting.
 - **Acceptance that can fail** — A `verify` block where every step is `true`, `echo`, or a
@@ -385,9 +385,9 @@ The hooks that watch tool calls carry a matcher, so reading a file does not star
 
 The handoff note is split in two. The mechanical half — open contracts with their status and
 round, the last closes, the branch, the head, how much is uncommitted, which agents are stuck
-— is refreshed by the session-end hook, so it costs nothing and is never out of date. The
-other half is the one paragraph a machine cannot write, the intent, and a refresh preserves
-it. The file is plain markdown, so the next model to open the project can read it whether or
+— is refreshed by the session-end hook, and again before a compaction, so it costs nothing
+and is never out of date. The other half is the one paragraph a machine cannot write, the
+intent, and a refresh preserves it. The file is plain markdown, so the next model to open the project can read it whether or
 not it is Claude.
 
 `contract.js check` also reads the contract for references to things that do not exist: a
@@ -539,7 +539,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,540 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,545 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
 scaffold, the cue, the banner, the handoff note, and one check that no hook writes into
 context. CI runs the same suite on Linux, Windows and macOS; development is Windows-first.

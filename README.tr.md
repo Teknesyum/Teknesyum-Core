@@ -62,7 +62,8 @@ veriyor, [tablo](#ajanlar) aşağıda.
   taşıyan ajan ödüyor, sizin oturumunuz değil.
 - **Banner ve statusline** — O an ne olduğunu tek satırda söyler. Pano değil.
 - **Devir notu** — `.claude/relay/HANDOFF.md` projenin nerede olduğunu yazar: ne açık, en
-  son ne kapandı, hangi dal. Oturum biterken bir kanca tazeler, yani bedeli yok; Claude
+  son ne kapandı, hangi dal. Oturum biterken ve sıkıştırmadan önce bir kanca tazeler, yani
+  bedeli yok; Claude
   değil, herhangi bir model okuyabilir.
 - **Ajanı çağırmadan sor** — `contract.js precheck` verify adımlarını önce çalıştırır.
   Zaten geçiyorsa iş bitmiştir, ajan açmaya değmez.
@@ -381,9 +382,9 @@ Araç çağrılarını izleyen kancalar artık matcher taşıyor, yani dosya oku
 
 Devir notu ikiye ayrılıyor. Mekanik yarısı — açık sözleşmeler, durumları ve turları, son
 kapanışlar, dal, baş, ne kadarı commit edilmemiş, hangi ajan takılmış — oturum sonu
-kancasıyla tazeleniyor; bedeli yok ve hiç bayatlamıyor. Öteki yarısı makinenin yazamayacağı
-tek paragraf, yani niyet; tazeleme onu koruyor. Dosya düz markdown, yani projeyi sonra açan
-model Claude olmasa da okuyabiliyor.
+kancasıyla ve sıkıştırmadan hemen önce tazeleniyor; bedeli yok ve hiç bayatlamıyor. Öteki
+yarısı makinenin yazamayacağı tek paragraf, yani niyet; tazeleme onu koruyor. Dosya düz
+markdown, yani projeyi sonra açan model Claude olmasa da okuyabiliyor.
 
 `contract.js check` ayrıca sözleşmede adı geçip de var olmayan şeyleri okuyor: kimsenin
 yazmadığı bir betiği çağıran verify adımı kabul ölçütü değil, çalışamayacak bir adımdır ve
@@ -532,7 +533,7 @@ node test/all.js
 
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
 kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu ve hiçbir kancanın
-bağlama yazmadığı denetimi üzerine 2.540 sav. Aynı takımı CI Linux, Windows ve
+bağlama yazmadığı denetimi üzerine 2.545 sav. Aynı takımı CI Linux, Windows ve
 macOS'ta koşuyor; geliştirme Windows öncelikli.
 
 ---

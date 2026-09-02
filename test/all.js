@@ -2205,6 +2205,7 @@ function main() {
   testAuditKind();
   testRoleFromPrompt();
   testRoundIsCounted();
+  testPreCompact();
   testBannerWakesOnAgents();
   testBaseline();
   testMapGuards();
@@ -2401,6 +2402,37 @@ function testRoundIsCounted() {
   fs.writeFileSync(file, fs.readFileSync(file, 'utf8').replace(/^round:.*$/im, 'round: 2'));
   const honest = contract(['complete', '--id', 'R1'], root);
   ok('the round the ledger counted seals', honest.status === 0, honest.stdout);
+
+  try {
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}
+
+function testPreCompact() {
+  const root = fixture();
+  const watch = path.join(__dirname, '..', 'core', 'hooks', 'watch.js');
+  writeContract(root, 'P1', '# P1\nstatus: active\nowns: [src/ok.js]\nverify:\n  - node -e "process.exit(0)"\n');
+  const note = path.join(root, '.claude', 'relay', 'HANDOFF.md');
+
+  const out = run(process.execPath, [watch], {
+    cwd: root,
+    input: JSON.stringify({ hook_event_name: 'PreCompact', trigger: 'auto', cwd: root }),
+  });
+  ok('compaction leaves the note on disk', fs.existsSync(note), out.stdout + out.stderr);
+  ok('and writes nothing into the context', !out.stdout.trim(), out.stdout);
+  const body = fs.existsSync(note) ? fs.readFileSync(note, 'utf8') : '';
+  ok('the note names the contract that is still open', /P1/.test(body), body);
+
+  fs.unlinkSync(note);
+  run(process.execPath, [watch], {
+    cwd: root,
+    input: JSON.stringify({ hook_event_name: 'PreCompact', trigger: 'manual', cwd: root }),
+  });
+  ok('a compaction you asked for is written the same way', fs.existsSync(note));
+
+  const hooks = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8'));
+  const pre = (hooks.hooks || hooks).PreCompact;
+  ok('the event is wired to the watcher', Array.isArray(pre) && /watch\.js/.test(JSON.stringify(pre)), JSON.stringify(pre));
 
   try {
     fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
