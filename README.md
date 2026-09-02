@@ -539,7 +539,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,535 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,540 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
 scaffold, the cue, the banner, the handoff note, and one check that no hook writes into
 context. CI runs the same suite on Linux, Windows and macOS; development is Windows-first.

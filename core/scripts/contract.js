@@ -867,6 +867,16 @@ function complete() {
   if (!headSha) return stop(['Cannot read HEAD - not a git repository, or no commit yet.']);
 
   const round = field('round', c.body) || '1';
+  const counted = roundsOpened(c.relay, c.id);
+  if (counted !== null && Number(round) !== counted)
+    return stop([
+      c.id + ' says round ' + round + ', the ledger has opened ' + counted + '.',
+      '',
+      'The round is a count of what the ledger recorded, not a number the body carries.',
+      'Measured over 54 reopened contracts, 4 of them drifted: the field had been edited by',
+      'hand, and the audit record for the round was then looked for under the wrong name.',
+      'Set round: ' + counted + ', or reopen the contract properly if a round is missing.',
+    ]);
   let record = null;
   let recordFile = null;
 
@@ -1169,6 +1179,23 @@ function roleRecord(relay, runId, want) {
   const role = String(rec.role || rec.agent_type || '?').replace(/^teknesyum(-core)?:/, '');
   if (role !== want) return runId + ' is a ' + role + ' record, not an ' + want;
   return '';
+}
+
+function roundsOpened(relay, id) {
+  let rows = [];
+  try {
+    rows = seal.ledgerRead(relay) || [];
+  } catch {
+    return null;
+  }
+  let n = 1;
+  let known = false;
+  for (const r of rows) {
+    if (!r || r.id !== id) continue;
+    known = true;
+    if (r.result === 'reopened') n += 1;
+  }
+  return known ? n : null;
 }
 
 function secondOpinion(relay, round, advisor) {

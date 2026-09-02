@@ -2204,6 +2204,7 @@ function main() {
   testGateTargets();
   testAuditKind();
   testRoleFromPrompt();
+  testRoundIsCounted();
   testBannerWakesOnAgents();
   testBaseline();
   testMapGuards();
@@ -2374,6 +2375,32 @@ function testRoleFromPrompt() {
   const p = path.join(root, '.claude', 'relay', 'live', 'r1.json');
   const rec = fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, 'utf8')) : {};
   ok('the role in the prompt outranks a generic agent type', rec.role === 'auditor', JSON.stringify(rec));
+
+  try {
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}
+
+function testRoundIsCounted() {
+  const root = fixture();
+  const live = path.join(root, '.claude', 'relay', 'live');
+  fs.mkdirSync(live, { recursive: true });
+  fs.writeFileSync(path.join(live, 'f1.json'), JSON.stringify({ id: 'f1', role: 'advisor', files: [] }));
+  const file = writeContract(root, 'R1', '# R1\nstatus: submitted\nowns: [src/ok.js]\nverify:\n  - node -e "process.exit(0)"\n');
+
+  ok('the first close is recorded', contract(['complete', '--id', 'R1'], root).status === 0);
+  const back = contract(['reopen', '--id', 'R1', '--reason', 'the seal let a broken build through', '--critical', 'the build was broken'], root);
+  ok('and a round opens on it', back.status === 0, back.stdout);
+
+  const body = fs.readFileSync(file, 'utf8');
+  fs.writeFileSync(file, body.replace(/^round:.*$/im, 'round: 4').replace(/^status:.*$/im, 'status: submitted'));
+  const drifted = contract(['complete', '--id', 'R1'], root);
+  ok('a round the ledger never opened does not seal', drifted.status === 2, drifted.stdout);
+  ok('and the gate says what the ledger counted', /the ledger has opened 2/.test(drifted.stdout), drifted.stdout);
+
+  fs.writeFileSync(file, fs.readFileSync(file, 'utf8').replace(/^round:.*$/im, 'round: 2'));
+  const honest = contract(['complete', '--id', 'R1'], root);
+  ok('the round the ledger counted seals', honest.status === 0, honest.stdout);
 
   try {
     fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });

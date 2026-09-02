@@ -43,6 +43,15 @@ yanlış çıktıdır.
 72 tur. Turun bedeli bir yapıcı artı bir denetçi; stil, daha iyi bir ad, "şunu da test
 etseydik" borçtur, tur değil.
 
+**Danışman eşiği tur 3.** VidShrink'in düzeltilmiş sayımı: eski kuralın lafzı tur 4'ü
+bağlıyordu, tur 3'e geçen 14 sözleşmenin 14'ünde danışman yok. Manşet kayması tur 2'de
+8/54, tur 3–4'te 9/18 — kod kusuru bir turda kapanıyor, cümle kusuru kapanmıyor. Eşik
+bu yüzden bir basamak aşağıda.
+
+**Tur, defterin saydığı şeydir.** Gövdedeki `round` alanı elle düzenlenebiliyordu ve
+54 sözleşmenin 4'ünde defterle uyuşmuyordu; o sözleşmelerde denetim kaydı yanlış adın
+altında aranıyor demektir.
+
 ## Bitenler
 
 - [x] **Manşet kayması, danışman ve kapının yönü.** VidShrink günlüğündeki en pahalı
@@ -53,7 +62,7 @@ etseydik" borçtur, tur değil.
       artık istemindeki rolden tanınıyor (tür değil), `audit --dry-run` imza yetkisini
       bedeli ödenmeden söylüyor, kayıtsız mühür bunu tek satırla itiraf ediyor. Kapı
       `main`'e ulaşan işi durduruyor, çalışma dalını bırakıyor, heredoc'u kesiyor ve
-      PowerShell'i de görüyor. Tur tavanı 6 → 5. 27 yeni sav, takım 2.535'te yeşil.
+      PowerShell'i de görüyor. Tur tavanı 6 → 5. 27 yeni sav, takım 2.540'ta yeşil.
 
 - [x] **Rölenin israfı: iki raporun sekiz kusuru.** (v0.7.4) `docs/raporlar/` altındaki
       124 ve 127 sözleşmelik ölçümler işlendi. Kapatılanlar: düz dizge `verify` (sıfır
