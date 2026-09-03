@@ -2219,6 +2219,7 @@ function main() {
   testPreCompact();
   testChime();
   testCheapFirst();
+  testOwed();
   testBannerWakesOnAgents();
   testBaseline();
   testMapGuards();
@@ -2565,6 +2566,60 @@ function testCheapFirst() {
   const problems = path.join(root, '.claude', 'relay', 'live', 'problems.log');
   const logged = fs.existsSync(problems) ? fs.readFileSync(problems, 'utf8') : '';
   ok('but it writes the overspend down', /tier \| M1 ran on opus/.test(logged), logged);
+
+  try {
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}
+
+function testOwed() {
+  const root = fixture();
+  const relay = path.join(root, '.claude', 'relay');
+  const HANDOFF = path.join(CORE, 'scripts', 'handoff.js');
+  const owe = (args) => run(process.execPath, [HANDOFF, 'owe'].concat(args), { cwd: root });
+  const prompt = () =>
+    run(process.execPath, [path.join(CORE, 'hooks', 'cue.js')], {
+      cwd: root,
+      input: JSON.stringify({ hook_event_name: 'UserPromptSubmit', prompt: 'carry on', cwd: root }),
+    }).stdout;
+
+  ok('an empty debt costs nothing at all', prompt() === '', JSON.stringify(prompt()));
+  ok('nothing is owed until something is', /Nothing is owed/.test(owe([]).stdout));
+
+  ok('a debt is taken on by the command', owe(['--add', 'ask fable about the tier table']).status === 0);
+  const first = prompt();
+  ok('and every prompt carries it from then on', /ask fable about the tier table/.test(first), first);
+  ok('the cue tells the model what to do with it', /do it this turn or tell the user why not/.test(first), first);
+  ok('it stays inside the cue budget', first.length <= 200, String(first.length));
+
+  ok('the same debt is not taken on twice', /Already owed/.test(owe(['--add', 'ask fable about the tier table']).stdout));
+  owe(['--add', 'measure 30 contracts on the new cell']);
+  owe(['--add', 'check the bell after a compaction']);
+  const full = owe(['--add', 'one more thing']);
+  ok('three is the ceiling', /ceiling and it is full/.test(full.stdout), full.stdout);
+  ok('and it says what to do instead', /open a contract, or put it in the roadmap/.test(full.stdout), full.stdout);
+
+  const longLine = owe(['--add', 'x'.repeat(61)]);
+  ok('a debt that will not fit on a line is refused', /at most 60 characters/.test(longLine.stdout), longLine.stdout);
+
+  const silent = owe(['--done', '1']);
+  ok('a debt cannot be closed in silence', /a debt closed in silence is a debt dropped/.test(silent.stdout), silent.stdout);
+
+  const closed = owe(['--done', '1', '--because', 'the advisor answered on the seventh try']);
+  ok('a debt closes when it is answered for', /Closed: ask fable/.test(closed.stdout), closed.stdout);
+  const handoff = fs.readFileSync(path.join(relay, 'HANDOFF.md'), 'utf8');
+  ok('and the reason is left where the user reads it', /closed: ask fable about the tier table - the advisor answered/.test(handoff), handoff);
+  ok('the cue drops what was closed', !/ask fable/.test(prompt()), prompt());
+
+  const byHand = hook(
+    { tool_name: 'Write', tool_input: { file_path: path.join(relay, 'OWED.md'), content: '- 2026-01-01 whatever\n' }, cwd: root },
+    root
+  );
+  ok('the debt file is not written by hand', byHand.status === 2, byHand.stderr);
+
+  fs.writeFileSync(path.join(relay, 'OWED.md'), '- 2020-01-01 something from long ago\n');
+  ok('an old debt is not dropped for the user', /something from long ago/.test(prompt()), prompt());
+  ok('it is marked stale instead', /stale/.test(prompt()), prompt());
 
   try {
     fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });

@@ -387,6 +387,7 @@ Araç çağrılarını izleyen kancalar artık matcher taşıyor, yani dosya oku
 | `contract.js snapshot` | izlenen ağacı `refs/teknesyum/<ID>` olarak sabitler |
 | `contract.js revert` | sahiplenilen dosyaları o sabite geri koyar |
 | `handoff.js` | `.claude/relay/HANDOFF.md` dosyasını, projenin durumunu yazıyor |
+| `handoff.js owe` | söz verilip henüz yapılmayanların kısa listesi |
 | `doctor.js` | kurulum sağlam mı söylüyor |
 | `release.js` | sonraki sürümü `.changes/` içindeki notlardan belirliyor |
 | `update.js` | yeni bir sürüm çıkmış mı söylüyor |
@@ -400,6 +401,23 @@ kapanışlar, dal, baş, ne kadarı commit edilmemiş, hangi ajan takılmış �
 kancasıyla ve sıkıştırmadan hemen önce tazeleniyor; bedeli yok ve hiç bayatlamıyor. Öteki
 yarısı makinenin yazamayacağı tek paragraf, yani niyet; tazeleme onu koruyor. Dosya düz
 markdown, yani projeyi sonra açan model Claude olmasa da okuyabiliyor.
+
+Turun ortasında verilen söz dünyanın en kolay kaybedilen şeyidir — model ikinci bir görüş
+soracağını söyler, tur işle dolar, söz de bağlamla birlikte gider. `.claude/relay/OWED.md`
+bunun cevabı ve bilerek küçük: üç satır, her biri altmış karakter, her birinin bir tarihi.
+
+```bash
+node <eklenti>/scripts/handoff.js owe --add "tablo için fable'a danış"
+node <eklenti>/scripts/handoff.js owe --done 1 --because "danışıldı; sonnet'te kaldı"
+```
+
+Listeyi her istem geri getiriyor, hem de zaten orada olan işaret dizisinin başında; yani boş
+defterin bedeli yok, dolu defterin bedeli bir satır. Hiçbir şey zaman aşımına uğramıyor: üç
+günlük borç düşmüyor, `stale` diye işaretleniyor — sürekli yapmadığın şey, görülmeye en değer
+olandır. Kapatmak gerekçe istiyor ve gerekçe `HANDOFF.md` içinde **Closed debts** başlığına
+düşüyor; sessizce kapatılan borç, düşürülen borçtur. Dördüncü madde reddediliyor: dörtte artık
+hatırlatma değil, sözleşme ya da yol haritası satırıdır. Dosyayı komut yazıyor, el değil —
+kapı `Edit`'i engelliyor.
 
 `contract.js check` ayrıca sözleşmede adı geçip de var olmayan şeyleri okuyor: kimsenin
 yazmadığı bir betiği çağıran verify adımı kabul ölçütü değil, çalışamayacak bir adımdır ve
@@ -532,6 +550,7 @@ Yok. Giriş noktası `relay` skill'i; gerisi betik ve betikler yukarıdaki tablo
   live/                ajan kayıtları, kanca yazıyor
   config.json          bu projenin profili, sabitlediyse
   HANDOFF.md           proje nerede
+  OWED.md              söz verilen, henüz yapılmayan
   map.md               import haritası
 ```
 
@@ -547,8 +566,8 @@ node test/all.js
 ```
 
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
-kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu ve hiçbir kancanın
-bağlama yazmadığı denetimi üzerine 2.568 sav. Aynı takımı CI Linux, Windows ve
+kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu, borç defteri ve hiçbir
+kancanın bağlama yazmadığı denetimi üzerine 2.585 sav. Aynı takımı CI Linux, Windows ve
 macOS'ta koşuyor; geliştirme Windows öncelikli.
 
 ---

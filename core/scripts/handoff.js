@@ -199,11 +199,127 @@ function intent() {
   return 0;
 }
 
+const OWED = 'OWED.md';
+const OWED_CAP = 3;
+const OWED_LINE = 60;
+const STALE_DAYS = 3;
+
+function owedFile(relay) {
+  return path.join(relay, OWED);
+}
+
+function owedRead(relay) {
+  let body = '';
+  try {
+    body = fs.readFileSync(owedFile(relay), 'utf8');
+  } catch {
+    return [];
+  }
+  const out = [];
+  for (const line of body.split('\n')) {
+    const m = /^- (\d{4}-\d{2}-\d{2}) (.+)$/.exec(line.trim());
+    if (m) out.push({ at: m[1], text: m[2] });
+  }
+  return out.slice(0, OWED_CAP);
+}
+
+function owedWrite(relay, items) {
+  const body = items.map((x) => '- ' + x.at + ' ' + x.text).join('\n');
+  fs.writeFileSync(owedFile(relay), body ? body + '\n' : '', 'utf8');
+}
+
+function ageDays(at) {
+  const t = Date.parse(at + 'T00:00:00Z');
+  if (!t) return 0;
+  return Math.max(0, Math.floor((Date.now() - t) / 86400000));
+}
+
+function owedCue(relay) {
+  const items = owedRead(relay);
+  if (!items.length) return '';
+  const parts = items.map((x) => {
+    const d = ageDays(x.at);
+    return x.text + (d >= STALE_DAYS ? ' (stale, ' + d + 'd)' : d ? ' (' + d + 'd)' : '');
+  });
+  return 'owed: ' + parts.join('; ') + ' - do it this turn or tell the user why not';
+}
+
+function owe() {
+  const w = where();
+  if (!w) return 1;
+  const add = flag('--add');
+  const done = flag('--done');
+
+  if (add) {
+    const text = add.replace(/\s+/g, ' ').trim();
+    if (!text) return say('Give the sentence: handoff.js owe --add "ask fable about X"');
+    if (text.length > OWED_LINE)
+      return say('An owed line is at most ' + OWED_LINE + ' characters; this one is ' + text.length + '.');
+    const items = owedRead(w.relay);
+    if (items.some((x) => x.text === text)) return say('Already owed - nothing added.');
+    if (items.length >= OWED_CAP)
+      return say(
+        'Three is the ceiling and it is full. Close one with --done, or the work is not a',
+        'debt at all: open a contract, or put it in the roadmap.'
+      );
+    items.push({ at: new Date().toISOString().slice(0, 10), text: text });
+    owedWrite(w.relay, items);
+    return say('Owed (' + items.length + '/' + OWED_CAP + '): ' + text);
+  }
+
+  if (done) {
+    const n = Number(done);
+    const because = flag('--because');
+    const items = owedRead(w.relay);
+    if (!items.length) return say('Nothing is owed.');
+    if (!(n >= 1 && n <= items.length)) return say('Give the number: 1..' + items.length);
+    if (!because || !because.trim())
+      return say('Say why it is closed: --because "..." - a debt closed in silence is a debt dropped.');
+    const gone = items.splice(n - 1, 1)[0];
+    owedWrite(w.relay, items);
+    trail(w, gone, because.trim());
+    return say('Closed: ' + gone.text);
+  }
+
+  const items = owedRead(w.relay);
+  if (!items.length) return say('Nothing is owed.');
+  return say.apply(null, items.map((x, i) => i + 1 + '. ' + x.text + ' (' + ageDays(x.at) + 'd)'));
+}
+
+function trail(w, item, because) {
+  const line = '- ' + new Date().toISOString().slice(0, 10) + ' closed: ' + item.text + ' - ' + because;
+  let body = '';
+  try {
+    body = fs.readFileSync(w.file, 'utf8');
+  } catch {
+    body = '';
+  }
+  const head = '## Closed debts';
+  const i = body.indexOf(head);
+  if (i < 0) body = body.replace(/\s*$/, '\n\n' + head + '\n\n' + line + '\n');
+  else {
+    const rest = body.slice(i + head.length);
+    body = body.slice(0, i + head.length) + '\n\n' + line + rest.replace(/^\s*\n/, '\n');
+  }
+  fs.writeFileSync(w.file, body, 'utf8');
+}
+
+function flag(name) {
+  const i = argv.indexOf(name);
+  return i >= 0 && argv[i + 1] !== undefined ? String(argv[i + 1]) : '';
+}
+
+function say() {
+  process.stdout.write(Array.prototype.slice.call(arguments).join('\n') + '\n');
+  return 0;
+}
+
 function main() {
   const cmd = argv[0] || 'write';
   if (cmd === 'write') return process.exit(write());
   if (cmd === 'show') return process.exit(show());
   if (cmd === 'intent') return process.exit(intent());
+  if (cmd === 'owe') return process.exit(owe());
   process.stdout.write(
     [
       'handoff.js - where the project stands, for whoever opens it next',
@@ -211,6 +327,7 @@ function main() {
       '  write            refresh the mechanical part (a hook does this; costs nothing)',
       '  show             refresh and print it',
       '  intent "..."     replace the one paragraph a model writes',
+      '  owe              list what is owed; --add "...", --done N --because "..."',
       '',
     ].join('\n')
   );
@@ -218,4 +335,4 @@ function main() {
 }
 
 if (require.main === module) main();
-module.exports = { render, write, writeAt, intentOf, contracts };
+module.exports = { render, write, writeAt, intentOf, contracts, owedCue, owedRead, OWED, OWED_CAP, OWED_LINE };

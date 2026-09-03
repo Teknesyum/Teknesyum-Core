@@ -23,15 +23,29 @@ function cue(j) {
     try {
       require('./notify.js').stamp('prompt', Date.now());
     } catch {}
-    return logCue(j);
+    return join(owedCue(j), logCue(j));
   }
   if (ev === 'SessionStart') {
     try {
       rewire();
     } catch {}
-    return relayCue(j);
+    return join(owedCue(j), relayCue(j));
   }
   return '';
+}
+
+function join(a, b) {
+  return [a, b].filter(Boolean).join(' | ');
+}
+
+function owedCue(j) {
+  const r = relayRoot(j.cwd || process.cwd(), { git: false });
+  if (!r) return '';
+  try {
+    return require('../scripts/handoff.js').owedCue(r.relay);
+  } catch {
+    return '';
+  }
 }
 
 function logCue(j) {

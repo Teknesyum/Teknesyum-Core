@@ -390,6 +390,7 @@ The hooks that watch tool calls carry a matcher, so reading a file does not star
 | `contract.js snapshot` | pins the tracked tree as `refs/teknesyum/<ID>` |
 | `contract.js revert` | puts the owned files back to that pin |
 | `handoff.js` | writes `.claude/relay/HANDOFF.md`, the state of the project |
+| `handoff.js owe` | the short list of what was promised and not yet done |
 | `doctor.js` | says whether the install is sound |
 | `release.js` | decides the next version from notes left in `.changes/` |
 | `update.js` | says whether a newer release exists |
@@ -404,6 +405,24 @@ round, the last closes, the branch, the head, how much is uncommitted, which age
 and is never out of date. The other half is the one paragraph a machine cannot write, the
 intent, and a refresh preserves it. The file is plain markdown, so the next model to open the project can read it whether or
 not it is Claude.
+
+A promise made in the middle of a turn is the easiest thing in the world to lose — the model
+says it will ask a second opinion, the turn fills with work, and the promise leaves with the
+context. `.claude/relay/OWED.md` is the answer, and it is deliberately small: three lines,
+sixty characters each, one date apiece.
+
+```bash
+node <plugin>/scripts/handoff.js owe --add "ask fable about the tier table"
+node <plugin>/scripts/handoff.js owe --done 1 --because "asked; it kept sonnet"
+```
+
+Every prompt carries the list back, at the front of the same cue string that was already
+there, so an empty ledger costs nothing and a full one costs a line. Nothing expires: a debt
+three days old is marked `stale`, not dropped, because a thing you keep not doing is the one
+worth seeing. Closing needs a reason, which goes to `HANDOFF.md` under **Closed debts** — a
+debt closed in silence is a debt dropped. A fourth item is refused; at four it is not a
+reminder any more, it is a contract or a roadmap line. The file is written by the command,
+not by hand: the guard blocks an `Edit` to it.
 
 `contract.js check` also reads the contract for references to things that do not exist: a
 verify step calling a script nobody wrote is not acceptance, it is a step that cannot run,
@@ -540,6 +559,7 @@ in the table above.
   live/                agent records, written by the hook
   config.json          this project's profile, if it pins one
   HANDOFF.md           where the project stands
+  OWED.md              promised, not yet done
   map.md               import graph
 ```
 
@@ -554,10 +574,10 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,568 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,585 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
-scaffold, the cue, the banner, the handoff note, and one check that no hook writes into
-context. CI runs the same suite on Linux, Windows and macOS; development is Windows-first.
+scaffold, the cue, the banner, the handoff note, the debt ledger, and one check that no hook
+writes into context. CI runs the same suite on Linux, Windows and macOS; development is Windows-first.
 
 ---
 

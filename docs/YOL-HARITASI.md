@@ -54,6 +54,15 @@ altında aranıyor demektir.
 
 ## Bitenler
 
+- [x] **Borç defteri.** Turun ortasında verilen söz bağlamla birlikte gidiyordu; bir Fable
+      danışması tam böyle düştü. `.claude/relay/OWED.md` açıldı: en fazla üç satır, her
+      biri altmış karakter, tarihli. `handoff.js owe --add` yazıyor, `owe --done <n>
+      --because "..."` kapatıyor ve gerekçe `HANDOFF.md` içinde **Closed debts** altına
+      düşüyor. Listeyi her istem `cue.js` üzerinden geri getiriyor, zaten var olan işaret
+      dizisinin başında; boş defterin bedeli yok, `CAP = 200` değişmedi. Zaman aşımı yok,
+      üç günlük borç `stale` diye işaretleniyor. Dosyayı el yazamıyor, `guard.js`
+      engelliyor. Tasarım Fable ile birlikte kararlaştırıldı. 17 yeni sav.
+
 - [x] **Kapı mühürde değil dağıtımda.** Fable'ın itirazı: mühür anında yakalamak parayı
       geri getirmiyor, üstelik açmaz doğuruyor — sinyalsiz bir sözleşme hiç
       mühürlenemezdi. Kapı `Agent`/`Task` çağrısının önüne alındı: `watch.js` zaten o
