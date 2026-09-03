@@ -10,6 +10,11 @@ process.stdin.on('end', () => {
   let j = null;
   try {
     j = JSON.parse(raw);
+    const deny = dispatch(j);
+    if (deny) {
+      process.stderr.write('BLOCKED: ' + deny);
+      process.exit(2);
+    }
     record(j);
     out = halt(j);
   } catch {}
@@ -17,6 +22,25 @@ process.stdin.on('end', () => {
   else if (j) chime(j);
   process.exit(0);
 });
+
+function dispatch(j) {
+  if ((j.hook_event_name || '') !== 'PreToolUse') return '';
+  if (!AGENT_TOOLS.test(j.tool_name || '')) return '';
+  const input = j.tool_input || {};
+  const asked = String(input.model || '').toLowerCase();
+  const role = roleOf(j);
+  if (!asked || !role) return '';
+  const r = relayRoot(j.cwd || process.cwd(), { git: false });
+  if (!r) return '';
+
+  let lines = null;
+  try {
+    lines = require('../scripts/contract.js').overDispatch(r, role, asked, String(input.prompt || ''));
+  } catch {
+    return '';
+  }
+  return lines ? lines.join('\n') : '';
+}
 
 function chime(j) {
   if ((j.hook_event_name || '') !== 'Stop') return;

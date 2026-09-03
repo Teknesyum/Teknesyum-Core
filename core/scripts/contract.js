@@ -753,6 +753,45 @@ function overModel(c, level, round) {
   ];
 }
 
+function overDispatch(r, role, asked, prompt) {
+  if (MODEL_RANK[asked] === undefined) return null;
+  if (!roleRow(role)) return null;
+
+  const m = /contracts[\\/]+([A-Za-z]{1,4}\d{1,4})\.md/.exec(String(prompt || ''));
+  const relay = r.relay;
+  let body = '';
+  let id = m ? m[1] : '';
+  if (id) {
+    try {
+      body = fs.readFileSync(path.join(relay, 'contracts', id + '.md'), 'utf8');
+    } catch {
+      id = '';
+    }
+  }
+
+  const owns = body ? owned(body) : [];
+  const level = body ? risk.resolve(projectRoot(relay), owns, field('risk', body)) : null;
+  const t = tier(role, {
+    risk: level ? level.level : null,
+    round: body ? field('round', body) : 0,
+    repeatFail: tallyFails(relay, ''),
+    irreversible: body ? risk.irreversible(owns, verifySteps(body)).hit : false,
+  });
+  if (!t || MODEL_RANK[asked] <= MODEL_RANK[t.model]) return null;
+
+  return [
+    (id || role) + ' is being sent to ' + asked + '; ' + role + ' resolves to ' + t.model + '.',
+    '',
+    'No signal here asks for the bigger model - risk is ' +
+      (level ? level.level : 'unset') + ', the round is ' + (body ? field('round', body) || '1' : '1') + '.',
+    'A first attempt is cheap on purpose. The ladder pays for the bigger model once the',
+    'cheaper one has tried and missed, not before.',
+    '',
+    'Send ' + t.model + '. If it comes back short, the next round raises it for you; declare',
+    'risk: high on the contract if the work truly needs the ceiling now.',
+  ];
+}
+
 function complete() {
   const c = load(arg('id'));
   if (c.error) return stop([c.error, '', 'Usage: contract.js complete --id T7']);
@@ -908,7 +947,11 @@ function complete() {
     ]);
 
   const overspend = overModel(c, level, round);
-  if (overspend) return stop(overspend);
+  if (overspend) {
+    try {
+      require('../hooks/lib.js').logProblem(c.relay, 'tier', overspend[0]);
+    } catch {}
+  }
   let record = null;
   let recordFile = null;
 
@@ -1648,6 +1691,8 @@ function main() {
 
 if (require.main === module) main();
 module.exports = {
+  overDispatch,
+  overModel,
   snapRef,
   snapshotOf,
   takeSnapshot,

@@ -296,7 +296,8 @@ existed until v0.2.0 as plain-text matching, `cd` walked through it while a legi
 one-liner reading the ledger was refused, and the guarantee lives in the record instead.
 
 `TEKNESYUM_GATE_OPEN=1` opens the gate for one command. It is ignored when the variable is
-pinned in the environment itself — a hatch left open is not a hatch, and the block says so
+pinned in the environment itself — the Windows registry, or an `export` in a shell profile.
+A hatch left open is not a hatch, and the block says so
 rather than letting a machine run for months with its gate quietly off.
 
 Outside a project with a relay, the gate falls open rather than closed. A hook that breaks
@@ -345,8 +346,10 @@ the effort turned up — and reaches opus when a signal says the cheap attempt w
 Measured over 156 contracts in one project, 118 ran on opus and 59 of those were still on
 round 1 with no risk field at all: the first attempt was never allowed to be cheap.
 
-So the gate reads the contract's own `model:` at seal time. Above what the role resolves to,
-with no signal behind it, the seal is refused; below it is always free.
+So the gate reads the model at dispatch, not at the seal. An `Agent` call above what the
+role resolves to, with no signal behind it, is refused before a token is spent; below the
+cell is always free. The seal still checks, but by then the money is gone, so it writes the
+overspend to `live/problems.log` instead of holding finished work hostage.
 
 The **advisor** runs one rung above whoever asked: sonnet asks, opus answers; opus asks,
 fable answers. A model cannot give itself a second opinion. There is no qualifying list —
@@ -551,7 +554,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,567 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,568 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
 scaffold, the cue, the banner, the handoff note, and one check that no hook writes into
 context. CI runs the same suite on Linux, Windows and macOS; development is Windows-first.

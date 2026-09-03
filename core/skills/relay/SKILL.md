@@ -110,7 +110,7 @@ Contract: .claude/relay/contracts/T7.md
 names its row; row x profile picks the cell in `<P>/tiers.json`. Resolve it, never restate it:
 `node <P>/scripts/contract.js tier --role builder --id T7`. Signals raise a cell, the profile
 caps it, nothing lowers it. Pass it as the `Agent` call's `model`, write `model`/`effort` into
-`live/` and into the contract - the seal refuses a model above the cell that no signal earned.
+`live/` and into the contract - a call above the cell that no signal earned is refused.
 
 Open the advisor whenever a second mind would widen the view - no gate, no qualifying list. A
 plan that picks the product's direction or spans phases is one of those moments. Pass `--asker

@@ -293,7 +293,8 @@ denetim v0.2.0'a kadar düz metin eşleşmesiydi, `cd` içinden geçip gidiyor, 
 meşru bir tek satır reddediliyordu — güvence kaydın kendisinde.
 
 `TEKNESYUM_GATE_OPEN=1` kapıyı tek bir komut için açıyor. Değişken ortamın kendisine kalıcı
-yazılmışsa yok sayılıyor: açık bırakılmış bir kaçış kolu kaçış kolu değildir. Engel bunu
+yazılmışsa yok sayılıyor — Windows kayıt defteri ya da bir kabuk profilindeki `export`.
+Açık bırakılmış bir kaçış kolu kaçış kolu değildir. Engel bunu
 söylüyor da; bir makine aylarca kapısı sessizce açık çalışmasın diye.
 
 Relay'i olmayan bir projede kapı kapalı değil açık düşüyor. Birinin ilgisiz deposunu bozan
@@ -342,8 +343,10 @@ eforu artırılmış olarak — ve ucuz denemenin yetmediğini bir sinyal söyle
 çıkıyor. Bir projede 156 sözleşme ölçüldü: 118'i opus'ta koşmuş, bunların 59'u hâlâ 1. turda
 ve risk alanı bile yokmuş. İlk denemenin ucuz olmasına hiç izin verilmemiş.
 
-Bu yüzden kapı, mühür anında sözleşmenin kendi `model:` alanını okuyor. Rolün çözdüğü modelin
-üstündeyse ve arkasında bir sinyal yoksa mühür reddediliyor; altına inmek her zaman serbest.
+Bu yüzden kapı modeli mühürde değil dağıtımda okuyor. Rolün çözdüğü modelin üstündeki bir
+`Agent` çağrısı, arkasında sinyal yoksa tek token harcanmadan reddediliyor; hücrenin altına
+inmek her zaman serbest. Mühür yine bakıyor, ama o noktada para çoktan gitti: bitmiş işi
+rehin almak yerine aşımı `live/problems.log`'a yazıyor.
 
 **Danışman** soranın bir üst basamağında çalışıyor: sonnet soruyor, opus cevaplıyor; opus
 soruyor, fable cevaplıyor. Bir model kendine ikinci görüş veremiyor. Hak kazanma listesi yok
@@ -545,7 +548,7 @@ node test/all.js
 
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
 kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu ve hiçbir kancanın
-bağlama yazmadığı denetimi üzerine 2.567 sav. Aynı takımı CI Linux, Windows ve
+bağlama yazmadığı denetimi üzerine 2.568 sav. Aynı takımı CI Linux, Windows ve
 macOS'ta koşuyor; geliştirme Windows öncelikli.
 
 ---

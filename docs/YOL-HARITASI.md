@@ -54,6 +54,16 @@ altında aranıyor demektir.
 
 ## Bitenler
 
+- [x] **Kapı mühürde değil dağıtımda.** Fable'ın itirazı: mühür anında yakalamak parayı
+      geri getirmiyor, üstelik açmaz doğuruyor — sinyalsiz bir sözleşme hiç
+      mühürlenemezdi. Kapı `Agent`/`Task` çağrısının önüne alındı: `watch.js` zaten o
+      olayı görüyordu, artık `contract.js overDispatch` ile modeli hücreye karşı ölçüp
+      tek token harcanmadan reddediyor. Mühür yine bakıyor ama reddetmiyor, aşımı
+      `live/problems.log`'a yazıyor. `envPinned()` ayrıca kabuk profillerine de bakıyor
+      (`.bashrc`, `.zshrc`, `.profile`, `.bash_profile`) — Fable'ın gösterdiği açık.
+      Fable'ın onaylamadığı tek şey kalmadı; `sonnet/high` seçimi ise ölçülmeden kalıcı
+      sayılmayacak.
+
 - [x] **Çivilenmiş kaçış kolu.** Makinede `TEKNESYUM_GATE_OPEN=1` kullanıcı ortam
       değişkeni olarak kalıcı duruyordu; ana dal kapısı bütün oturumlarda fiilen
       kapalıydı. Kol artık tek komutluk: `lib.js` içindeki `envPinned()` değişkenin

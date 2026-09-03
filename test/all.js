@@ -2536,24 +2536,35 @@ function testCheapFirst() {
   const body = (model) =>
     '# M1\nstatus: submitted\nrole: builder\nmodel: ' + model +
     '\nround: 1\nowns: [src/ok.js]\nverify:\n  - node -e "process.exit(0)"\n';
+  writeContract(root, 'M1', body('opus'));
 
-  const file = writeContract(root, 'M1', body('opus'));
-  const rich = contract(['complete', '--id', 'M1'], root);
-  ok('a first round on the big model does not seal', rich.status === 2, rich.stdout);
-  ok('and the gate names the model the role resolves to', /resolves to sonnet/.test(rich.stdout), rich.stdout);
-  ok('the refusal says what would have justified it', /risk: high/.test(rich.stdout), rich.stdout);
+  const send = (model) =>
+    run(process.execPath, [path.join(CORE, 'hooks', 'watch.js')], {
+      cwd: root,
+      input: JSON.stringify({
+        hook_event_name: 'PreToolUse',
+        tool_name: 'Task',
+        agent_id: 'w1',
+        tool_input: {
+          model: model,
+          prompt: 'Read core/roles/builder.md and follow it.\nContract: .claude/relay/contracts/M1.md',
+        },
+        cwd: root,
+      }),
+    });
 
-  fs.writeFileSync(file, body('haiku'));
-  const lean = contract(['complete', '--id', 'M1'], root);
-  ok('below the cell is always free', lean.status === 0, lean.stdout);
+  const rich = send('opus');
+  ok('a first round is not dispatched to the big model', rich.status === 2, rich.stderr);
+  ok('the block names the model the role resolves to', /resolves to sonnet/.test(rich.stderr), rich.stderr);
+  ok('and it says the next round would raise it', /next round raises it/.test(rich.stderr), rich.stderr);
+  ok('the cell itself is dispatched', send('sonnet').status === 0);
+  ok('below the cell is always free', send('haiku').status === 0);
 
-  writeContract(root, 'M3', body('sonnet').replace(/M1/g, 'M3'));
-  const even = contract(['complete', '--id', 'M3'], root);
-  ok('the cell itself seals', even.status === 0, even.stdout);
-
-  writeContract(root, 'M4', body('opus').replace(/M1/g, 'M4').replace(/^role:.*$/m, ''));
-  const quiet = contract(['complete', '--id', 'M4'], root);
-  ok('a contract that names no role is not second-guessed', quiet.status === 0, quiet.stdout);
+  const sealed = contract(['complete', '--id', 'M1'], root);
+  ok('the seal does not punish work that is already done', sealed.status === 0, sealed.stdout);
+  const problems = path.join(root, '.claude', 'relay', 'live', 'problems.log');
+  const logged = fs.existsSync(problems) ? fs.readFileSync(problems, 'utf8') : '';
+  ok('but it writes the overspend down', /tier \| M1 ran on opus/.test(logged), logged);
 
   try {
     fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });

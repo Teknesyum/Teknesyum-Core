@@ -320,8 +320,23 @@ const PINNED = {
   ],
 };
 
+const RC = ['.bashrc', '.bash_profile', '.zshrc', '.profile'];
+
+function pinnedInShell(name) {
+  const at = home();
+  if (!at) return false;
+  const re = new RegExp('^[ \\t]*(export[ \\t]+)?' + name + '[ \\t]*=', 'm');
+  for (const f of RC) {
+    try {
+      if (re.test(fs.readFileSync(path.join(at, f), 'utf8'))) return true;
+    } catch {}
+  }
+  return false;
+}
+
 function envPinned(name) {
   if (!/^[A-Z_][A-Z0-9_]*$/i.test(String(name || ''))) return false;
+  if (pinnedInShell(name)) return true;
   const keys = PINNED[process.platform];
   if (!keys) return false;
   for (const key of keys) {
