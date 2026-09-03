@@ -115,7 +115,7 @@ function checkAuditor(relay, runId) {
       runId +
       ' - the auditor must be an agent that actually ran, not a name'
     );
-  const role = String(rec.role || rec.agent_type || '?').replace(/^teknesyum:/, '');
+  const role = String(rec.role || rec.agent_type || '?').replace(/^teknesyum(-core)?:/, '');
   if (role !== 'auditor') return 'auditorRunId points at a non-auditor agent record: ' + role;
   const written = Array.isArray(rec.files) ? rec.files : [];
   if (written.length) return 'the auditor wrote files during the audit: ' + written.join(', ');
@@ -194,6 +194,7 @@ function gitMoved(root, relay) {
 function auditDone(root, relay) {
   const known = new Set(
     ledgerInit(relay)
+      .filter((x) => x && (x.source === 'adopted' || (x.result === 'unmet' && x.headSha && x.reason) || (!x.result && x.headSha && Array.isArray(x.verify))))
       .map((x) => x && x.id)
       .filter(Boolean)
   );

@@ -126,18 +126,34 @@ function alive(pid) {
 
 function takeLock(relay, id) {
   const f = lockPath(relay);
-  const held = read(f);
-  if (held && held.pid !== process.pid && alive(held.pid)) return held;
   try {
     fs.mkdirSync(path.dirname(f), { recursive: true });
+    // Atomic ownership, unlike a read-then-write PID file. A crashed holder's
+    // directory requires explicit recovery, never a fail-open concurrent run.
+    fs.mkdirSync(f + '.held');
+  } catch (e) {
+    return read(f) || { id: 'verify lock unavailable (' + e.code + ')', pid: 'unknown' };
+  }
+  const held = read(f);
+  if (held && held.pid !== process.pid && alive(held.pid)) {
+    fs.rmdirSync(f + '.held');
+    return held;
+  }
+  try {
     fs.writeFileSync(f, JSON.stringify({ pid: process.pid, id: id, at: new Date().toISOString() }));
-  } catch {}
+  } catch (e) {
+    fs.rmdirSync(f + '.held');
+    return { id: 'verify lock could not be written (' + e.code + ')', pid: 'unknown' };
+  }
   return null;
 }
 
 function dropLock(relay) {
+  const f = lockPath(relay);
+  if (read(f)?.pid !== process.pid) return;
   try {
-    fs.unlinkSync(lockPath(relay));
+    fs.unlinkSync(f);
+    fs.rmdirSync(f + '.held');
   } catch {}
 }
 
@@ -166,28 +182,29 @@ function killTree(pid) {
 function runVerify(root, steps) {
   const results = [];
   for (const step of steps) {
-    const r = spawnSync(step, {
-      cwd: root,
-      shell: true,
+    const r = spawnSync(process.execPath, [path.join(__dirname, 'verify-runner.js')], {
+      input: JSON.stringify({ root, step, timeout: VERIFY_TIMEOUT }),
       encoding: 'utf8',
-      timeout: VERIFY_TIMEOUT,
+      timeout: VERIFY_TIMEOUT + 15000,
       windowsHide: true,
-      detached: process.platform !== 'win32',
-      maxBuffer: 16 * 1024 * 1024,
+      maxBuffer: 32 * 1024 * 1024,
     });
-    const code = r.error ? -1 : r.status;
-    const timedOut = !!(r.error && String(r.error.code || '') === 'ETIMEDOUT') || r.signal === 'SIGTERM';
-    let swept = null;
-    if (timedOut) swept = killTree(r.pid);
-    const text = String((r.stdout || '') + (r.stderr || ''));
+    let result;
+    try { result = JSON.parse(r.stdout); } catch {
+      result = { code: -1, text: String(r.stderr || ''), error: 'verify supervisor failed: ' + String(r.error || r.status), swept: false };
+    }
+    const { code, timedOut, swept } = result;
+    const text = String(result.text || '');
+    const empty = emptyRun(text);
     results.push({
       step,
       code,
-      ok: code === 0,
+      ok: code === 0 && !empty,
+      empty,
       timedOut,
       swept,
       tail: text.split('\n').filter(Boolean).slice(-12).join('\n'),
-      error: r.error ? String(r.error.message) : '',
+      error: result.error || '',
     });
   }
   return results;
@@ -198,6 +215,7 @@ function reportVerify(results) {
   for (const r of results) {
     lines.push((r.ok ? '  pass  ' : '  FAIL  ') + r.step + (r.ok ? '' : '  (exit ' + r.code + ')'));
     if (!r.ok) {
+      if (r.empty) lines.push('        no tests were collected or executed; exit 0 is not acceptance');
       if (r.error) lines.push('        ' + r.error);
       if (r.timedOut)
         lines.push(
@@ -340,6 +358,27 @@ function tier(role, opt) {
         model = m2;
         reasons.push('the failure survived the effort raise, so the model goes to ' + model);
       }
+    }
+  }
+
+  const reach = Number(o.fanIn || 0);
+  if (reach >= (T.signals.fanIn || Infinity) && T.riskExempt.indexOf(row) >= 0) {
+    signals.push('fan-in ' + reach);
+    if (MODEL_RANK[model] < MODEL_RANK.opus) {
+      model = 'opus';
+      reasons.push(
+        (o.fanInFile ? o.fanInFile + ' is imported by ' + reach + ' files' : reach + ' files import what this owns') +
+          ', so the first attempt is not the cheap one'
+      );
+    }
+  }
+
+  const raise = String(o.raise || '').toLowerCase();
+  if (BUMP_CHAIN.indexOf(raise) >= 0 && String(o.raiseWhy || '').trim()) {
+    if (MODEL_RANK[raise] > MODEL_RANK[model]) {
+      signals.push('planner raise');
+      model = raise;
+      reasons.push('the planner asked for ' + raise + ': ' + String(o.raiseWhy).trim());
     }
   }
 
@@ -498,6 +537,9 @@ function tierCmd() {
   let irrev = null;
   let round = arg('round');
   let relay = null;
+  let reach = { max: 0, file: '' };
+  let raise = '';
+  let raiseWhy = '';
 
   if (id) {
     const c = load(id);
@@ -506,6 +548,9 @@ function tierCmd() {
     const owns = owned(c.body);
     level = risk.resolve(c.root, owns, field('risk', c.body));
     irrev = risk.irreversible(owns, verifySteps(c.body));
+    reach = reachOf(c.relay, owns);
+    raise = field('raise', c.body);
+    raiseWhy = field('why', c.body);
     if (!round) round = field('round', c.body);
   } else {
     const where = locate();
@@ -525,6 +570,10 @@ function tierCmd() {
     effort: arg('effort'),
     asker: arg('asker'),
     userAsked: has('user'),
+    fanIn: reach.max,
+    fanInFile: reach.file,
+    raise: raise,
+    raiseWhy: raiseWhy,
   });
 
   const quota = t.row === 'advisor' && relay ? advisorQuota(relay, t.profile, id) : null;
@@ -605,6 +654,9 @@ function orphans(root, owns) {
   const found = [];
   for (const rel of held) {
     if (NEVER_ASKED.some((re) => re.test(rel))) continue;
+    // Filename/import matching cannot establish reachability for namespace, type,
+    // package or build-system based languages. Never recommend trashing those.
+    if (/\.(cs|go|rs|java|swift|kt|c|h|cpp|hpp|scala)$/i.test(rel)) continue;
     const others = callers(root, rel).filter(
       (f) => !held.includes(f) && !f.startsWith('trash/') && !RELAY_PATH.test(f)
     );
@@ -661,7 +713,8 @@ function overlaps(relay, id, owns, root) {
 }
 
 function blockedBy(body) {
-  return entries('blocked-by', body).filter((v) => isContractName(v + '.md'));
+  return Array.from(new Set(entries('blocked-by', body).concat(entries('depends', body))))
+    .filter((v) => isContractName(v + '.md'));
 }
 
 function blockers(relay, id, body) {
@@ -724,6 +777,15 @@ function prose(root, body, owns) {
   return ['node "' + MANSET + '" ' + docs.map((p) => '"' + p + '"').join(' ')];
 }
 
+function reachOf(relay, owns) {
+  if (!owns || !owns.length) return { max: 0, file: '' };
+  try {
+    return require('./map.js').fanIn(projectRoot(relay), owns);
+  } catch {
+    return { max: 0, file: '' };
+  }
+}
+
 function overModel(c, level, round) {
   const asked = String(field('model', c.body) || '').toLowerCase();
   if (MODEL_RANK[asked] === undefined) return null;
@@ -731,11 +793,17 @@ function overModel(c, level, round) {
   if (!roleRow(role)) return null;
   const agent = field('agent', c.body) || field('run-id', c.body);
 
+  const owns = owned(c.body);
+  const reach = reachOf(c.relay, owns);
   const t = tier(role, {
     risk: level ? level.level : null,
     round,
     repeatFail: agent ? tallyFails(c.relay, agent) : 0,
-    irreversible: risk.irreversible(owned(c.body), verifySteps(c.body)).hit,
+    irreversible: risk.irreversible(owns, verifySteps(c.body)).hit,
+    fanIn: reach.max,
+    fanInFile: reach.file,
+    raise: field('raise', c.body),
+    raiseWhy: field('why', c.body),
   });
   if (!t || MODEL_RANK[asked] <= MODEL_RANK[t.model]) return null;
 
@@ -757,7 +825,7 @@ function overDispatch(r, role, asked, prompt) {
   if (MODEL_RANK[asked] === undefined) return null;
   if (!roleRow(role)) return null;
 
-  const m = /contracts[\\/]+([A-Za-z]{1,4}\d{1,4})\.md/.exec(String(prompt || ''));
+  const m = /contracts[\\/]+(?:done[\\/]+)?([A-Za-z]{1,4}\d{1,4})\.md/.exec(String(prompt || ''));
   const relay = r.relay;
   let body = '';
   let id = m ? m[1] : '';
@@ -765,17 +833,29 @@ function overDispatch(r, role, asked, prompt) {
     try {
       body = fs.readFileSync(path.join(relay, 'contracts', id + '.md'), 'utf8');
     } catch {
-      id = '';
+      if (roleRow(role) === 'advisor') {
+        try { body = fs.readFileSync(path.join(relay, 'contracts', 'done', id + '.md'), 'utf8'); }
+        catch { id = ''; }
+      } else id = '';
     }
   }
 
   const owns = body ? owned(body) : [];
+  // A mandatory second opinion must remain reachable even when the normal
+  // profile closes optional advisor calls. It happens before reopening round 3.
+  if (roleRow(role) === 'advisor' && asked === 'fable' &&
+      Number(field('round', body) || 0) >= Number(tiers().signals.roundAdvisorRequired) - 1) return null;
   const level = body ? risk.resolve(projectRoot(relay), owns, field('risk', body)) : null;
+  const reach = reachOf(relay, owns);
   const t = tier(role, {
     risk: level ? level.level : null,
     round: body ? field('round', body) : 0,
     repeatFail: tallyFails(relay, ''),
     irreversible: body ? risk.irreversible(owns, verifySteps(body)).hit : false,
+    fanIn: reach.max,
+    fanInFile: reach.file,
+    raise: body ? field('raise', body) : '',
+    raiseWhy: body ? field('why', body) : '',
   });
   if (!t || MODEL_RANK[asked] <= MODEL_RANK[t.model]) return null;
 
@@ -955,8 +1035,9 @@ function complete() {
   let record = null;
   let recordFile = null;
 
-  if (level.level === 'high') {
-    recordFile = seal.recordPath(c.relay, c.id, round);
+  const availableRecord = seal.recordPath(c.relay, c.id, round);
+  if (level.level === 'high' || fs.existsSync(availableRecord)) {
+    recordFile = availableRecord;
     record = require('../hooks/lib.js').read(recordFile);
     if (!record)
       return stop([
@@ -1010,7 +1091,7 @@ function complete() {
       ],
       record
         ? []
-        : ['', 'Sealed with no audit record: nobody but the builder read this work.'],
+        : ['', 'Sealed with no audit record: independent review is not evidenced by this seal.'],
       dropped
         ? []
         : [
@@ -1020,9 +1101,9 @@ function complete() {
             '  git update-ref -d ' + snapRef(c.id),
           ],
       dead.length
-        ? ['', 'Nothing in the tree imports these files. Is that right?']
+        ? ['', 'No filename/import reference was found for these files (heuristic only):']
             .concat(dead.map((p) => '  ' + p))
-            .concat(['', 'If their work is done, move them under trash/. Do not delete them.'])
+            .concat(['', 'Check entry points, dynamic loading and build configuration before moving anything.'])
         : []
     )
   );
@@ -1114,8 +1195,11 @@ function precheck() {
       'Add a ## verify section, or run the contract as it is.',
     ], 1);
   const pin = takeSnapshot(c.root, c.id);
-  const results = runVerify(c.root, steps);
-  const met = results.every((r) => r.code === 0);
+  const busy = takeLock(c.relay, c.id);
+  if (busy) return stop(['Verification is locked by ' + busy.id + ' (pid ' + busy.pid + ').']);
+  let results;
+  try { results = runVerify(c.root, steps); } finally { dropLock(c.relay); }
+  const met = results.every((r) => r.ok);
   return out(
     [c.id + ': ' + steps.length + ' verify step' + (steps.length > 1 ? 's' : '')]
       .concat(reportVerify(results))
@@ -1246,7 +1330,7 @@ function submit() {
   );
 }
 
-const ADVISOR_FROM = 3;
+const ADVISOR_FROM = Number(tiers().signals.roundAdvisorRequired);
 
 function roleRecord(relay, runId, want) {
   const rec = read(path.join(liveDir(relay), String(runId).replace(/[^A-Za-z0-9_.-]/g, '_') + '.json'));
@@ -1273,7 +1357,7 @@ function roundsOpened(relay, id) {
   return known ? n : null;
 }
 
-function secondOpinion(relay, round, advisor) {
+function secondOpinion(relay, round, advisor, id) {
   if (round < ADVISOR_FROM) return null;
   if (!advisor)
     return [
@@ -1287,6 +1371,13 @@ function secondOpinion(relay, round, advisor) {
     ];
   const why = roleRecord(relay, advisor, 'advisor');
   if (why) return ['Refused - ' + why + '.'];
+  const rec = read(path.join(liveDir(relay), String(advisor).replace(/[^A-Za-z0-9_.-]/g, '_') + '.json'));
+  if (!/^(fable|claude-fable-[\w.-]+)$/.test(String(rec.model || '')))
+    return ['Refused - the advisor must have a resolved Fable model; a role name alone is not a second-model review.'];
+  if (String(rec.contract || '') !== String(id) || Number(rec.round) !== round - 1)
+    return ['Refused - the advisor record belongs to another contract or round.'];
+  if (!rec.ended)
+    return ['Refused - wait for the advisor to finish before opening the next round.'];
   return null;
 }
 
@@ -1329,7 +1420,7 @@ function reopen() {
       '',
       'If you really mean it: add --force.',
     ]);
-  const second = secondOpinion(where.relay, Number(round), advisor);
+  const second = secondOpinion(where.relay, Number(round), advisor, id);
   if (second) return stop(second);
   let next = stampStatus(body, 'active');
   next = /^round:.*$/im.test(next)
@@ -1551,7 +1642,10 @@ function check() {
     lines.push('  verify would run against changes this contract never claimed.');
   }
   if (!has('run')) return out(lines);
-  const results = runVerify(c.root, steps);
+  const busy = takeLock(c.relay, c.id);
+  if (busy) return stop(['Verification is locked by ' + busy.id + ' (pid ' + busy.pid + ').']);
+  let results;
+  try { results = runVerify(c.root, steps); } finally { dropLock(c.relay); }
   return out(
     lines.concat(['', 'verification run:'], reportVerify(results)),
     results.some((r) => !r.ok) ? 2 : 0
@@ -1691,6 +1785,7 @@ function main() {
 
 if (require.main === module) main();
 module.exports = {
+  blockers,
   overDispatch,
   overModel,
   snapRef,

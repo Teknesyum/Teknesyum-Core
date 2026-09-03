@@ -23,12 +23,10 @@ const NEAR = 2;
 
 function canon(raw) {
   const s = String(raw).replace(/\s/g, '');
-  const dot = s.replace(/,/g, '.');
-  const bare = s.replace(/[.,]/g, '');
-  const out = new Set([s, dot, bare]);
-  const trimmed = dot.replace(/^0+(?=\d)/, '').replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
-  out.add(trimmed);
-  return out;
+  // This checker accepts decimal comma or decimal point, not ambiguous
+  // thousands grouping. Dropping punctuation made 1.2 equal to 12.
+  if (/^-?\d+(?:[.,]\d+)?$/.test(s)) return new Set([String(Number(s.replace(',', '.')))]);
+  return new Set([s]);
 }
 
 function numbersIn(text) {
@@ -103,19 +101,20 @@ function columnSums(section) {
   for (const line of section.support) {
     if (!/^\|/.test(line)) continue;
     const cells = line.split('|').slice(1, -1);
+    if (/^\s*\**\s*(total|toplam|sum)\b/i.test(cells[0] || '')) continue;
     for (let i = 0; i < cells.length; i++) {
       const n = numbersIn(cells[i]);
       if (!n.length) continue;
-      cols[i] = (cols[i] || 0) + Number(String(n[0].raw).replace(/,/g, ''));
+      cols[i] = (cols[i] || 0) + Number(String(n[0].raw).replace(',', '.'));
     }
   }
   return cols.filter((x) => Number.isFinite(x) && x);
 }
 
 function rounded(value, sums) {
-  const n = Number(String(value).replace(/,/g, ''));
+  const n = Number(String(value).replace(',', '.'));
   if (!Number.isFinite(n) || !n) return false;
-  return sums.some((s) => Math.abs(s - n) / Math.max(s, n) <= 0.05);
+  return sums.some((s) => Math.abs(s - n) <= 1e-9 * Math.max(1, Math.abs(s), Math.abs(n)));
 }
 
 function nearTable(section, line) {

@@ -105,17 +105,32 @@ function open(relay, o) {
   }
   const cur = read(pendingFile(relay));
   const list = Array.isArray(cur) ? cur : [];
-  list.push({ file: name, model: String(o.model || ''), at: Date.now() });
+  list.push({ file: name, model: String(o.model || ''), toolUseId: String(o.toolUseId || ''), runId: '', at: Date.now() });
   write(pendingFile(relay), list.slice(-8));
   return name;
 }
 
-function close(relay, model, transcript) {
+function bind(relay, toolUseId, runId) {
+  if (!toolUseId || !runId) return false;
+  const cur = read(pendingFile(relay));
+  const list = Array.isArray(cur) ? cur : [];
+  const matches = list.filter((x) => x.toolUseId === String(toolUseId));
+  if (matches.length !== 1) return false;
+  matches[0].runId = String(runId);
+  write(pendingFile(relay), list);
+  return true;
+}
+
+function close(relay, model, transcript, runId) {
   const cur = read(pendingFile(relay));
   const list = Array.isArray(cur) ? cur : [];
   if (!list.length) return '';
-  let i = list.findIndex((x) => x.model === String(model || ''));
-  if (i < 0) i = 0;
+  // Completion order and model are not identities. An unrelated builder must
+  // never become the answer to a pending advisor question.
+  if (!runId) return '';
+  const matches = list.filter((x) => x.runId === String(runId));
+  if (matches.length !== 1) return '';
+  const i = list.indexOf(matches[0]);
   const entry = list[i];
   const reply = lastReply(transcript);
   if (!reply) return '';
@@ -166,4 +181,4 @@ function main(argv) {
 
 if (require.main === module) process.exit(main(process.argv.slice(2)));
 
-module.exports = { open, close, list, lastReply, slugOf, DIR };
+module.exports = { open, bind, close, list, lastReply, slugOf, DIR };

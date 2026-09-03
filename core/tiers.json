@@ -95,7 +95,8 @@
     },
     "roundCap": 5,
     "roundModelBump": 3,
-    "roundAdvisorRequired": 4,
+    "roundAdvisorRequired": 3,
+    "fanIn": 5,
     "irreversibleOpensAuditor": true,
     "selfRiskOpensAdvisor": true
   },

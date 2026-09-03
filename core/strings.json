@@ -235,6 +235,14 @@
     "en": "agent",
     "tr": "ajan"
   },
+  "line.files": {
+    "en": "files",
+    "tr": "dosya"
+  },
+  "line.age": {
+    "en": "min running",
+    "tr": "dk sürüyor"
+  },
   "line.quiet": {
     "en": "min quiet",
     "tr": "dk sessiz"

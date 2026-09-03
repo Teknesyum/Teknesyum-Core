@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { read, write, merge, safe, relayRoot, ensureRelay, liveDir, sessionId, setNotice, t } = require('./lib.js');
-const { status, isContractName } = require('./schema.js');
+const { status, isContractName, field } = require('./schema.js');
 
 let raw = '';
 process.stdin.on('data', (d) => (raw += d));
@@ -29,13 +29,19 @@ function dispatch(j) {
   const input = j.tool_input || {};
   const asked = String(input.model || '').toLowerCase();
   const role = roleOf(j);
-  if (!asked || !role) return '';
+  if (!role) return '';
   const r = relayRoot(j.cwd || process.cwd(), { git: false });
   if (!r) return '';
 
   let lines = null;
   try {
-    lines = require('../scripts/contract.js').overDispatch(r, role, asked, String(input.prompt || ''));
+    const contracts = require('../scripts/contract.js');
+    if (!contracts.roleRow(role)) return '';
+    if (!asked)
+      return 'Set an explicit model for ' + role + '. An omitted model inherits the parent and bypasses the cost ladder. Run contract.js tier --role ' + role + ' first.';
+    if (contracts.MODEL_RANK[asked] === undefined)
+      return 'Unknown model for ' + role + ': ' + asked + '. Use a model alias supported by tiers.json.';
+    lines = contracts.overDispatch(r, role, asked, String(input.prompt || ''));
   } catch {
     return '';
   }
@@ -69,10 +75,11 @@ const GENERIC = /^(worker|general-purpose|claude|task|agent)$/i;
 
 function roleOf(j) {
   const t = j.tool_input || {};
-  const raw = String(j.agent_type || t.subagent_type || '');
+  const raw = String(AGENT_TOOLS.test(j.tool_name || '')
+    ? t.subagent_type || j.agent_type || '' : j.agent_type || t.subagent_type || '');
   const clean = raw.replace(/^teknesyum(-core)?:/, '');
   const prompt = String(t.prompt || '');
-  const m = /roles[\\/]([a-z-]+)\.md/i.exec(prompt);
+  const m = /(?:roles|agents)[\\/]([a-z-]+)\.md/i.exec(prompt);
   if (m && (!clean || GENERIC.test(clean))) return m[1].toLowerCase();
   if (clean) return clean;
   return m ? m[1].toLowerCase() : '';
@@ -96,7 +103,7 @@ function logCall(live, role, input) {
   const f = path.join(live, '_calls.json');
   const cur = read(f);
   const list = Array.isArray(cur) ? cur : [];
-  const m = /contracts[\\/]+([A-Za-z]{1,4}\d{1,4})\.md/.exec(String(input.prompt || ''));
+  const m = /contracts[\\/]+(?:done[\\/]+)?([A-Za-z]{1,4}\d{1,4})\.md/.exec(String(input.prompt || ''));
   list.push({
     role: role,
     model: String(input.model || ''),
@@ -121,18 +128,28 @@ function counsel(j, r) {
     const input = j.tool_input || {};
     const model = String(input.model || '').toLowerCase();
     const role = roleOf(j);
+    if (role && role !== 'advisor') return;
     if (!COUNSEL.test(model) && role !== 'advisor') return;
     advice.open(r.relay, {
       topic: String(input.description || '').slice(0, 60),
       asker: String(j.model || 'T0'),
       model: model,
+      toolUseId: j.tool_use_id,
       prompt: String(input.prompt || ''),
     });
     return;
   }
+  if (ev === 'PostToolUse' && AGENT_TOOLS.test(j.tool_name || '')) {
+    const response = j.tool_response || {};
+    const runId = response.agentId || response.agent_id;
+    if (advice.bind(r.relay, j.tool_use_id, runId)) {
+      const ended = read(path.join(liveDir(r.relay), safe(runId) + '.json'));
+      if (ended && ended.ended && ended.transcript) advice.close(r.relay, '', ended.transcript, runId);
+    }
+  }
   if (ev === 'SubagentStop') {
     const t = j.agent_transcript_path || j.transcript_path;
-    if (t) advice.close(r.relay, '', String(t));
+    if (t) advice.close(r.relay, '', String(t), j.agent_id);
   }
 }
 
@@ -155,15 +172,18 @@ function record(j) {
   const file = path.join(live, key + '.json');
   const now = new Date().toISOString();
   const rec = read(file) || { id: key, role: '', files: [], steps: 0, started: now };
+  if (j.session_id) rec.sessionId = j.session_id;
 
   const role = roleOf(j);
-  if (role && role !== 'general-purpose') rec.role = role;
+  // Agent tool input describes the CHILD; the hook's agent_id belongs to its caller.
+  if (!AGENT_TOOLS.test(j.tool_name || '') && role && (!GENERIC.test(role) || !rec.role)) rec.role = role;
   rec.updated = now;
   rec.event = ev;
 
   if (ev === 'SubagentStop' || ev === 'Stop' || ev === 'SessionEnd') {
     rec.ended = now;
     rec.endedBy = ev;
+    if (ev === 'SubagentStop' && j.agent_transcript_path) rec.transcript = j.agent_transcript_path;
   } else if (!rec.endedBy || rec.endedBy === 'Stop') {
     delete rec.ended;
     delete rec.endedBy;
@@ -204,6 +224,28 @@ function record(j) {
     if (child) {
       rec.spawned = (rec.spawned || []).concat(child).slice(-40);
       logCall(live, child, j.tool_input || {});
+    }
+  }
+
+  if (AGENT_TOOLS.test(j.tool_name || '') && ev === 'PostToolUse') {
+    const response = j.tool_response || {};
+    const childId = response.agentId || response.agent_id;
+    if (childId) {
+      const input = j.tool_input || {};
+      const m = /contracts[\\/]+(?:done[\\/]+)?([A-Za-z]{1,4}\d{1,4})\.md/i.exec(String(input.prompt || ''));
+      let round = '';
+      if (m) for (const dir of ['contracts', 'contracts/done']) {
+        try { round = field('round', fs.readFileSync(path.join(r.relay, dir, m[1] + '.md'), 'utf8')); break; } catch {}
+      }
+      merge(path.join(live, safe(childId) + '.json'), (cur) => ({
+        id: String(childId), files: [], steps: 0, started: now, ...cur,
+        role: roleOf(j) || cur.role || '', contract: m ? m[1] : cur.contract || '',
+        round: round || cur.round || '',
+        // Requested and resolved models are separate evidence; never invent resolution.
+        requestedModel: String(input.model || ''),
+        model: String(response.resolvedModel || response.model || cur.model || ''),
+        parentId: key, sessionId: j.session_id || cur.sessionId || '', updated: now,
+      }));
     }
   }
 
@@ -317,7 +359,10 @@ function halt(j) {
     const s = status(body);
     const id = f.replace(/\.md$/i, '');
     if (s === 'submitted') submitted.push(id);
-    else if (s === 'open') open.push(id);
+    else if (s === 'open') {
+      const blocked = require('../scripts/contract.js').blockers(r.relay, id, body);
+      if (!blocked.length) open.push(id);
+    }
   }
 
   if (submitted.length)

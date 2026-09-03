@@ -295,10 +295,10 @@ shell the agent happened to pick. Nothing else about your commands is guessed at
 existed until v0.2.0 as plain-text matching, `cd` walked through it while a legitimate
 one-liner reading the ledger was refused, and the guarantee lives in the record instead.
 
-`TEKNESYUM_GATE_OPEN=1` opens the gate for one command. It is ignored when the variable is
-pinned in the environment itself — the Windows registry, or an `export` in a shell profile.
-A hatch left open is not a hatch, and the block says so
-rather than letting a machine run for months with its gate quietly off.
+For an unrelated push, the explicit single Bash invocation
+`TEKNESYUM_GATE_OPEN=1 git push ...` opens the gate for that command only. Inherited
+environment variables never open it, even after a registry value is removed. Compound
+commands do not get this exception. Forced pushes are still refused.
 
 Outside a project with a relay, the gate falls open rather than closed. A hook that breaks
 someone's unrelated repository is a worse failure than a missed check.
@@ -333,6 +333,16 @@ Signals raise a cell, the profile caps it, nothing lowers it.
 | Round 3 | the model goes up |
 | Round 4 | the advisor is required, not offered |
 | The change touches an irreversible path | the auditor opens |
+| What the contract owns is imported by five files or more | the first attempt is not the cheap one |
+| The contract carries a `raise:` line with a `why:` behind it | the planner's model wins |
+
+The last two rungs exist because every other signal is loud. A failing verify, a third
+round, a delete under `owns` — all of them announce themselves. The failure nobody hears is
+the plausible wrong diff: small, green, and confidently wrong. So two things speak for it.
+The import map already knows which files the project leans on, and a file five others import
+is not where a cheap first attempt belongs. And the planner, who read the goal before anyone
+wrote a line, can say `raise: opus` in the contract — but only with a `why:` on the same
+page, because a raise nobody has to justify is just the ceiling again.
 
 The run of failures is counted per agent by a hook, so one agent's bad afternoon cannot
 spend another agent's budget — and it acts on the second failure, because waiting for a
@@ -543,10 +553,14 @@ same role, which task belongs to which seat is a guess, and the line does not pr
 otherwise. A spawn that carried no description at all says `Assigned` and nothing more — an
 invented answer would be worse than none.
 
+A seat also says how many files it has touched and how long it has been running, and the
+work line counts its steps against the contract's ceiling — `Adım 12/150`. That last part is
+the whole rule: a counter that only ever grows is decoration, so a number goes on the line
+only once it has something to be measured against. Steps have a ceiling, so they earn a
+place; open logs never did, and were cut.
+
 A run of failed tool calls beats everything else. The closing line reports what finished,
-because it is computed after the message and simply knows more. Counters that only ever
-grow — steps taken, logs open — were cut: a number with nothing to compare it against is
-decoration.
+because it is computed after the message and simply knows more.
 
 ---
 
@@ -582,7 +596,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,596 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,607 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
 scaffold, the cue, the banner, the handoff note, the debt ledger, the consultation record, and
 one check that no hook writes into context. CI runs the same suite on Linux, Windows and macOS; development is Windows-first.

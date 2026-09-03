@@ -195,10 +195,10 @@ function testGate(root) {
     '---\nid: T8\nstatus: submitted\nround: 1\nowns: [notes/dead.md, notes/kept.md]\nverify:\n  - node -e "process.exit(0)"\n---\n'
   );
   const t8 = contract(['complete', '--id', 'T8'], root);
-  const t8dead = t8.stdout.split('imports these files')[1] || '';
+  const t8dead = t8.stdout.split('reference was found for these files')[1] || '';
   ok('a closed contract names the file nothing references', /notes\/dead[.]md/.test(t8dead), t8.stdout);
   ok('a file the tree still names is left alone', !/notes\/kept[.]md/.test(t8dead), t8.stdout);
-  ok('the gate points at trash, not at deletion', /trash\//.test(t8.stdout) && !/rm /.test(t8.stdout), t8.stdout);
+  ok('a heuristic requires reachability checks before moving files', /dynamic loading and build configuration/.test(t8.stdout) && !/move them under trash/.test(t8.stdout), t8.stdout);
 
   const t3a = contract(['complete', '--id', 'T3'], root);
   ok('high risk without a record is blocked', t3a.status === 2 && /audit record/.test(t3a.stdout), t3a.stdout);
@@ -572,7 +572,7 @@ function testBanner(root) {
     cwd: root,
     input: JSON.stringify({
       hook_event_name: 'PreToolUse', tool_name: 'Agent', agent_id: 'spawner', cwd: root,
-      tool_input: { subagent_type: 'scout', description: 'goal probe', prompt: 'Contract: .claude/relay/contracts/K3.md\nread it first' },
+      tool_input: { subagent_type: 'scout', model: 'sonnet', description: 'goal probe', prompt: 'Contract: .claude/relay/contracts/K3.md\nread it first' },
     }),
   });
   const logged = JSON.parse(fs.readFileSync(path.join(liveB, '_calls.json'), 'utf8'));
@@ -604,13 +604,13 @@ function testBanner(root) {
   fs.writeFileSync(path.join(detail, 'd1.json'), JSON.stringify({ id: 'd1', role: 'builder', contract: 'K4', steps: 12, files: ['core/scripts/statusline.js'], updated: new Date().toISOString() }));
   const deep = plain(banner(root));
   ok('a second round is named on the seat line', / R2/.test(deep.split(String.fromCharCode(10))[0]), deep);
-  ok('the work line counts the steps that seat took', /12/.test(deep), deep);
+  ok('the work line counts the steps that seat took against its ceiling', /12\/150/.test(deep), deep);
   ok('the work line names the file last touched, bare', /statusline\.js/.test(deep) && !/core\/scripts\/statusline/.test(deep), deep);
   ok('a working seat is not flagged as quiet', !/sessiz|quiet/i.test(deep), deep);
 
   fs.writeFileSync(path.join(detail, 'd1.json'), JSON.stringify({ id: 'd1', role: 'builder', contract: 'K4', steps: 12, files: [], updated: new Date(Date.now() - 4 * 60 * 1000).toISOString() }));
   const hush = plain(banner(root));
-  ok('a seat that has gone quiet says how long', /4 dk sessiz|4 min quiet/.test(hush), hush);
+  ok('a seat that has gone quiet says how long', /4 Dk Sessiz|4 Min Quiet/.test(hush), hush);
   fs.rmSync(path.join(detail, 'd1.json'), { force: true });
   fs.rmSync(path.join(root, '.claude', 'relay', 'contracts', 'K4.md'), { force: true });
   for (const x of parked2) fs.renameSync(path.join(detail, x + '.parked'), path.join(detail, x));
@@ -1051,7 +1051,7 @@ function testTier(root) {
   ok('signal 2: round 2 does not', tier('builder', { profile: 'normal', round: 2 }).model === 'sonnet');
   ok('signal 2 applies to ui-builder too', tier('ui-builder', { profile: 'eco', round: 3 }).model === 'opus');
   ok('signal 3: round 4 requires the advisor', tier('builder', { profile: 'normal', round: 4 }).advisorRequired === true);
-  ok('signal 3: round 3 does not require it', tier('builder', { profile: 'normal', round: 3 }).advisorRequired === false);
+  ok('signal 3: round 3 requires the advisor after two attempts', tier('builder', { profile: 'normal', round: 3 }).advisorRequired === true);
 
   const irr = require(path.join(CORE, 'scripts', 'risk.js')).irreversible;
   ok('signal 4: a migration path is irreversible', irr(['db/migrations/003.sql'], []).hit);
@@ -1397,7 +1397,7 @@ function testLadder() {
 
   const advisorRec = path.join(root, '.claude', 'relay', 'live', 'a9.json');
   fs.mkdirSync(path.dirname(advisorRec), { recursive: true });
-  fs.writeFileSync(advisorRec, JSON.stringify({ id: 'a9', role: 'advisor', files: [] }));
+  fs.writeFileSync(advisorRec, JSON.stringify({ id: 'a9', role: 'advisor', model: 'claude-fable-5', contract: 'L7', round: '3', ended: new Date().toISOString(), files: [] }));
   const builderRec = path.join(root, '.claude', 'relay', 'live', 'b9.json');
   fs.writeFileSync(builderRec, JSON.stringify({ id: 'b9', role: 'builder', files: [] }));
   writeContract(root, 'L7', '# L7\nstatus: submitted\nround: 3\nowns: [src/ok.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
@@ -1419,6 +1419,7 @@ function testLadder() {
   const capped = contract(['reopen', '--id', 'L9', '--reason', 'this one will not converge', '--critical', 'the gate accepted a broken build'], root);
   ok('a sixth round is refused - the contract is wrong, not the agent', capped.status === 2, capped.stdout + capped.stderr);
   ok('and the refusal says to split it instead', /Split it/.test(capped.stdout + capped.stderr), capped.stdout);
+  fs.writeFileSync(advisorRec, JSON.stringify({ id: 'a9', role: 'advisor', model: 'claude-fable-5', contract: 'L9', round: '5', ended: new Date().toISOString(), files: [] }));
   const forced = contract(['reopen', '--id', 'L9', '--reason', 'this one will not converge', '--critical', 'the gate accepted a broken build', '--advisor', 'a9', '--force'], root);
   ok('the cap can still be overridden on purpose', forced.status === 0, forced.stdout + forced.stderr);
 
@@ -1822,7 +1823,8 @@ function testLifetime() {
   ok('work does not reach main around the gate', bash('git push origin main').status === 2, bash('git push origin main').stderr);
   ok('the block names the contract that is still open', /W1/.test(bash('git merge feature').stderr), bash('git merge feature').stderr);
   ok('an ordinary command is not touched', bash('git status').status === 0, bash('git status').stderr);
-  ok('the gate can be opened on purpose', bash('git push origin main', { TEKNESYUM_GATE_OPEN: '1' }).status === 0);
+  ok('an inherited variable cannot open the gate', bash('git push origin main', { TEKNESYUM_GATE_OPEN: '1' }).status === 2);
+  ok('the gate can be opened for one explicit invocation', bash('TEKNESYUM_GATE_OPEN=1 git push origin main').status === 0);
 
   if (process.platform === 'win32') {
     const { envPinned } = require(path.join(CORE, 'hooks', 'lib.js'));
@@ -1953,7 +1955,7 @@ function testWasteGates() {
   const empty = contract(['complete', '--id', 'W2'], root);
   ok(
     'a step that passes without running a test is refused',
-    empty.status === 2 && /without running anything/.test(empty.stdout),
+    empty.status === 2 && /no tests were collected or executed/.test(empty.stdout),
     empty.stdout
   );
 
@@ -2023,7 +2025,7 @@ function testBannerWakesOnAgents() {
     tool_name: 'Agent',
     cwd: root,
     agent_id: 'w1',
-    tool_input: { subagent_type: 'teknesyum-core:builder', prompt: 'Read roles/builder.md' },
+    tool_input: { model: 'sonnet', subagent_type: 'teknesyum-core:builder', prompt: 'Read roles/builder.md' },
   });
   const live = path.join(root, '.claude', 'relay', 'live');
   ok('an agent call wakes the relay folder', fs.existsSync(path.join(live, 'w1.json')));
@@ -2031,7 +2033,7 @@ function testBannerWakesOnAgents() {
 
   delete require.cache[require.resolve(path.join(CORE, 'scripts', 'statusline.js'))];
   const line = require(path.join(CORE, 'scripts', 'statusline.js')).banner(root, 'head');
-  ok('the banner speaks without a single contract', line.length > 0, JSON.stringify(line));
+  ok('the spawn is visible without assigning its role to the caller', JSON.parse(fs.readFileSync(path.join(live, '_calls.json')))[0].role === 'builder');
 
   const dirty = run('git', ['-C', root, 'status', '--porcelain']).stdout;
   ok('the woken folder leaves the tree clean', !/relay\/live/.test(dirty), dirty);
@@ -2221,6 +2223,7 @@ function main() {
   testCheapFirst();
   testOwed();
   testAdvice();
+  testRungs();
   testBannerWakesOnAgents();
   testBaseline();
   testMapGuards();
@@ -2384,13 +2387,13 @@ function testRoleFromPrompt() {
       tool_name: 'Task',
       agent_id: 'r1',
       agent_type: 'teknesyum-core:worker',
-      tool_input: { prompt: 'Read core/roles/auditor.md and do that job.' },
+      tool_input: { model: 'opus', prompt: 'Read core/roles/auditor.md and do that job.' },
       cwd: root,
     }),
   });
   const p = path.join(root, '.claude', 'relay', 'live', 'r1.json');
   const rec = fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, 'utf8')) : {};
-  ok('the role in the prompt outranks a generic agent type', rec.role === 'auditor', JSON.stringify(rec));
+  ok('the child role is resolved without granting the caller auditor identity', rec.role !== 'auditor' && rec.spawned.includes('auditor'), JSON.stringify(rec));
 
   try {
     fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
@@ -2573,6 +2576,58 @@ function testCheapFirst() {
   } catch {}
 }
 
+function testRungs() {
+  const root = fixture();
+  const relay = path.join(root, '.claude', 'relay');
+  const body = (id, extra) =>
+    ['---', 'id: ' + id, 'status: open', 'round: 1', 'owns: [src/ok.js]', 'verify:', '  - node -e ""']
+      .concat(extra || [])
+      .concat(['---', '', '## Goal', 'a thing', ''])
+      .join('\n');
+
+  writeContract(root, 'R1', body('R1', []));
+  const plain = contract(['tier', '--role', 'builder', '--id', 'R1', '--profile', 'premium'], root).stdout;
+  ok('with no signal a builder still starts cheap', /builder sonnet\/high/.test(plain), plain);
+
+  fs.writeFileSync(
+    path.join(relay, 'map.json'),
+    JSON.stringify({
+      _map: { schema: 2, files: 7, head: 'x' },
+      'src/ok.js': { lines: 3, to: [], ns: [], from: ['a.js', 'b.js', 'c.js', 'd.js', 'e.js', 'f.js'] },
+    })
+  );
+  const hub = contract(['tier', '--role', 'builder', '--id', 'R1', '--profile', 'premium'], root).stdout;
+  ok('a file six others import is not cheap-first work', /builder opus/.test(hub), hub);
+  ok('and the signal says so by name', /fan-in 6/.test(hub), hub);
+  ok('the reason names the file', /src\/ok\.js is imported by 6 files/.test(hub), hub);
+
+  fs.writeFileSync(
+    path.join(relay, 'map.json'),
+    JSON.stringify({
+      _map: { schema: 2, files: 7, head: 'x' },
+      'src/ok.js': { lines: 3, to: [], ns: [], from: ['a.js', 'b.js'] },
+    })
+  );
+  const low = contract(['tier', '--role', 'builder', '--id', 'R1', '--profile', 'premium'], root).stdout;
+  ok('two importers are not a hub', /builder sonnet\/high/.test(low), low);
+
+  writeContract(root, 'R2', body('R2', ['raise: opus']));
+  const bare = contract(['tier', '--role', 'builder', '--id', 'R2', '--profile', 'premium'], root).stdout;
+  ok('a raise with no reason behind it is not a signal', /builder sonnet\/high/.test(bare), bare);
+
+  writeContract(root, 'R3', body('R3', ['raise: opus', 'why: the acceptance picks a file format']));
+  const raised = contract(['tier', '--role', 'builder', '--id', 'R3', '--profile', 'premium'], root).stdout;
+  ok('the planner can raise before the first attempt', /builder opus/.test(raised), raised);
+  ok('and has to say why on the record', /the acceptance picks a file format/.test(raised), raised);
+
+  const capped = contract(['tier', '--role', 'builder', '--id', 'R3', '--profile', 'eco'], root).stdout;
+  ok('but the profile ceiling still caps the raise', !/builder opus/.test(capped), capped);
+
+  writeContract(root, 'R4', body('R4', ['raise: fable', 'why: hunch']));
+  const wild = contract(['tier', '--role', 'builder', '--id', 'R4', '--profile', 'premium'], root).stdout;
+  ok('a raise cannot climb past the ceiling either', !/builder fable/.test(wild), wild);
+}
+
 function testAdvice() {
   const root = fixture();
   const relay = path.join(root, '.claude', 'relay');
@@ -2593,6 +2648,7 @@ function testAdvice() {
         tool_name: 'Agent',
         cwd: root,
         model: 'opus',
+        tool_use_id: 'advice-call',
         tool_input: { model, prompt, description },
       }),
     });
@@ -2621,7 +2677,12 @@ function testAdvice() {
   );
   run(process.execPath, [WATCH], {
     cwd: root,
-    input: JSON.stringify({ hook_event_name: 'SubagentStop', cwd: root, agent_transcript_path: tr }),
+    input: JSON.stringify({ hook_event_name: 'PostToolUse', tool_name: 'Agent', cwd: root,
+      tool_use_id: 'advice-call', tool_response: { agentId: 'advice-agent' } }),
+  });
+  run(process.execPath, [WATCH], {
+    cwd: root,
+    input: JSON.stringify({ hook_event_name: 'SubagentStop', cwd: root, agent_id: 'advice-agent', agent_transcript_path: tr }),
   });
   const closed = fs.readFileSync(path.join(at, rows[0]), 'utf8');
   ok('the answer lands in the same file', /The direction is right, the reason is wrong\./.test(closed), closed.slice(-300));

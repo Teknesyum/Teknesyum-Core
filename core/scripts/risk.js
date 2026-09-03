@@ -7,7 +7,7 @@ const HIGH_PATHS = [
   /(^|\/)\.claude\/(hooks|settings)/i,
   /(^|\/)(hooks?|middleware|guard)s?\/[^/]+\.(js|ts|mjs|cjs|py|cs|go|rs)$/i,
   /(^|\/)(Dockerfile|docker-compose\.ya?ml|\.github\/workflows\/)/i,
-  /(^|\/)(package\.json|package-lock\.json|pnpm-lock\.yaml|yarn\.lock|Cargo\.toml|go\.mod|requirements\.txt|pyproject\.toml|\*\.csproj)$/i,
+  /(^|\/)(package\.json|package-lock\.json|pnpm-lock\.yaml|yarn\.lock|Cargo\.toml|go\.mod|requirements\.txt|pyproject\.toml|[^/]+\.csproj)$/i,
   /(^|\/)(settings|config|appsettings)[^/]*\.(json|ya?ml|toml)$/i,
 ];
 

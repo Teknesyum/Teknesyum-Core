@@ -292,10 +292,10 @@ denetim ajanın hangi kabuğu seçtiğine bağlıydı. Komutlarınızın gerisi 
 denetim v0.2.0'a kadar düz metin eşleşmesiydi, `cd` içinden geçip gidiyor, defteri okuyan
 meşru bir tek satır reddediliyordu — güvence kaydın kendisinde.
 
-`TEKNESYUM_GATE_OPEN=1` kapıyı tek bir komut için açıyor. Değişken ortamın kendisine kalıcı
-yazılmışsa yok sayılıyor — Windows kayıt defteri ya da bir kabuk profilindeki `export`.
-Açık bırakılmış bir kaçış kolu kaçış kolu değildir. Engel bunu
-söylüyor da; bir makine aylarca kapısı sessizce açık çalışmasın diye.
+İlgisiz bir push için tek Bash çağrısında açıkça
+`TEKNESYUM_GATE_OPEN=1 git push ...` yazılır. Üst süreçten devralınan ortam değişkeni,
+kayıt defterinden silinmiş olsa bile kapıyı açmaz. Birleşik komutlar bu istisnayı
+alamaz. Force push yine reddedilir.
 
 Relay'i olmayan bir projede kapı kapalı değil açık düşüyor. Birinin ilgisiz deposunu bozan
 bir kanca, kaçırılan bir denetimden daha kötü bir arıza.
@@ -330,6 +330,16 @@ Sinyaller hücreyi yükseltiyor, profil tavanı koyuyor, hiçbir şey aşağı �
 | Tur 3 | model yükseliyor |
 | Tur 4 | danışman önerilmiyor, zorunlu oluyor |
 | Değişiklik geri alınamaz bir yola dokunuyor | denetçi açılıyor |
+| Sözleşmenin sahiplendiği dosyayı beş ya da daha çok dosya içeri alıyor | ilk deneme ucuz olan değil |
+| Sözleşmede arkasında `why:` olan bir `raise:` satırı var | plancının modeli geçerli |
+
+Son iki basamak var, çünkü diğer bütün sinyaller gürültülü. Düşen bir doğrulama, üçüncü tur,
+`owns` altında bir silme — hepsi kendini duyuruyor. Kimsenin duymadığı hata makul görünen
+yanlış diff: küçük, yeşil ve kendinden emin biçimde yanlış. Onun adına iki şey konuşuyor.
+İçe aktarma haritası projenin hangi dosyaya yaslandığını zaten biliyor; beş dosyanın içeri
+aldığı bir dosya ucuz ilk denemenin yeri değil. Bir de plancı var: hedefi kimse tek satır
+yazmadan önce okuyan kişi sözleşmeye `raise: opus` yazabiliyor — ama aynı sayfada bir `why:`
+ile, çünkü gerekçesi sorulmayan bir yükseltme tavanın kendisinden başka bir şey değil.
 
 Üst üste hataları kanca ajan başına sayıyor; bir ajanın kötü günü başka bir ajanın bütçesini
 harcayamıyor. Üstelik ikinci hatada davranıyor, çünkü üçüncüyü beklemek bile bile lades
@@ -536,9 +546,13 @@ hangi görevin hangi koltuğa ait olduğu tahmindir ve satır bunu bildiği gibi
 Hiç açıklama taşımayan bir çağrı için yalnız `Atandı` yazıyor — uydurulmuş bir cevap hiç
 cevaptan kötü olurdu.
 
+Koltuk ayrıca kaç dosyaya dokunduğunu ve ne kadardır koştuğunu söylüyor; iş satırı da adımı
+sözleşmenin tavanına karşı sayıyor — `Adım 12/150`. Asıl kural burada: yalnızca büyüyen sayaç
+süstür, o yüzden bir sayı satıra ancak karşılaştıracağı bir şey bulduğunda çıkıyor. Adımın
+tavanı var, yerini hak ediyor; açık günlüğün hiç olmadı, o yüzden kesildi.
+
 Üst üste başarısız araç çağrısı her şeyin önüne geçiyor. Kapanış satırı biteni bildiriyor,
-çünkü mesajdan sonra hesaplanıyor ve daha fazlasını biliyor. Yalnızca büyüyen sayaçlar —
-atılan adım, açık günlük — kesildi: karşılaştıracak bir şeyi olmayan sayı süstür.
+çünkü mesajdan sonra hesaplanıyor ve daha fazlasını biliyor.
 
 ---
 
@@ -576,7 +590,7 @@ node test/all.js
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
 kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu, borç defteri, danışma
 kaydı ve hiçbir
-kancanın bağlama yazmadığı denetimi üzerine 2.596 sav. Aynı takımı CI Linux, Windows ve
+kancanın bağlama yazmadığı denetimi üzerine 2.607 sav. Aynı takımı CI Linux, Windows ve
 macOS'ta koşuyor; geliştirme Windows öncelikli.
 
 ---

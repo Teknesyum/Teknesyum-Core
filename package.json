@@ -5,7 +5,7 @@
   "description": "Contract gate for multi-agent work in Claude Code.",
   "license": "AGPL-3.0-or-later",
   "scripts": {
-    "test": "node test/all.js",
+    "test": "node test/run.js",
     "map": "node core/scripts/map.js .",
     "setup": "node core/scripts/setup.js"
   }

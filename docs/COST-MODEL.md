@@ -2,13 +2,21 @@
 
 Where tokens actually go in Claude Code. Every Core decision cites a row here.
 
+## Audited scope (2026-09-03)
+
+"Zero continuous tokens" means **no routine banner/status payload added to model
+context**, not zero total plugin cost. Agent/skill metadata, loaded instructions,
+tool results, actionable cues and blocked calls still contribute. Repeated work
+and model routing can dominate these savings. See the
+[VidShrink audit](raporlar/2026-09-03-vidshrink-denetim.md) for measured usage and limits.
+
 ## Classes
 
 | Class | Paid | Cached | Stays in transcript | Verdict |
 |---|---|---|---|---|
 | **S** setup | once per context | yes | n/a | cheap, accept |
-| **O** on demand | only when the feature runs | no | yes, that turn | accept if the turn earns it |
-| **C** continuous | every message | no | **yes, resent forever** | reject |
+| **O** on demand | when invoked and while retained in later context | may be cached | until compacted/removed | accept if worthwhile |
+| **C** continuous | recurring injection and retained context | may be cached | bounded by context management | avoid routine injection |
 | **Z** zero | never enters context | n/a | no | free, prefer |
 
 ## Mechanisms
@@ -22,19 +30,20 @@ Where tokens actually go in Claude Code. Every Core decision cites a row here.
 | Skill body (`SKILL.md`) | O | stays in transcript after load |
 | Skill `references/*` | O | loaded only when the body points there |
 | MCP tool schema | S | deferred schemas cost a name only |
-| Hook exit code / block reason | Z→O | blocking text is paid once, only on a real block |
+| Hook exit code / block reason | Z→O | exit code is not text; model-visible reasons can remain in later context |
 | Hook `additionalContext` | **C** | worst case: written per turn **and** resent in every later request |
-| Hook `systemMessage` on `SessionStart` / `UserPromptSubmit` | **C** | enters the model's context exactly like `additionalContext` |
-| Hook `systemMessage` on a closing event | **Z** | renders in the chat, never converted into context — measured, see D13 |
-| Model forced to print a banner | **C×5** | output tokens, ~5× input price, then resent as input forever |
+| Hook `systemMessage` | event/version dependent | do not equate it with `additionalContext` or assume it is always free |
+| Model forced to print a banner | **C** | output charge plus subsequent retained-input charge; model/cache dependent |
 | Statusline | **Z** | terminal only, never reaches the model |
 | File on disk the model may read | **Z** until read | |
 
 ## The compounding rule
 
-A 1,500-token injection is not 1,500 tokens. In an `n`-turn session it is
-`1500 × n` carried tokens, and every subagent repeats it in its own context.
-Base measured 20 agents in one turn — that is 20 repayments of the same text.
+A single 1,500-token insertion carried through `n` requests contributes up to
+`1500 × n` input tokens before compaction. A fresh 1,500-token insertion on every
+request contributes `1500 × n × (n+1) / 2` under the same retention assumption.
+Neither expression is a dollar bill: cache writes, cache reads and ordinary input
+have different prices. Subagent context composition must be measured separately.
 
 **Core law: no feature may write to `additionalContext`, and none may write
 `systemMessage` on an event that converts it into context** — `SessionStart`,
@@ -72,11 +81,15 @@ spends per turn across twenty tool calls.
 stream and never renders the Ink statusline component, so this channel does not exist for
 desktop users.
 
-**`systemMessage`** is free on every event — the attachment→API table maps
-`hook_system_message` to nothing, with no event gate, and the compaction summariser reads
-the same normalisation. But the CLI bakes `hookName + " says: "` into the content before it
-leaves, and the desktop client wraps it in a collapsed "Claude Code notice" chip that no
-hook input can open. Free, and nearly unreadable.
+**`systemMessage`** is not universally free. Current documentation describes
+event-specific routing, including asynchronous hook output delivered as context.
+The earlier binary observation supports only its tested build and event. It cannot
+prove a universal guarantee. `MessageDisplay` replacement is documented as
+display-only; node startup and hook execution still have wall-clock/CPU costs.
+
+Sources: [hook output and event reference](https://code.claude.com/docs/en/hooks),
+[current token/cache pricing](https://platform.claude.com/docs/en/about-claude/pricing),
+[subscription versus API cost](https://code.claude.com/docs/en/costs).
 
 Not channels, though they look like ones: `terminalSequence` (OSC only — a window title
 the desktop app does not have), `statusMessage` (Ink spinner only), `taskDecorations`

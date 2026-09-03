@@ -1,0 +1,1623 @@
+{
+  "capturedAt": "2026-09-03T19:44:51.345Z",
+  "parent": {
+    "file": "6f1bfe85-7b86-48a4-822d-65f08e432e7f.jsonl",
+    "bytes": 74069747,
+    "sha256": "de63afde0c02b8827b50094b7423c4ad0ab28d2cbb7692d6d07a3bb7343bde54",
+    "invalid": 0,
+    "models": {
+      "claude-opus-5": {
+        "requests": 5264,
+        "input": 10528,
+        "cacheCreate": 20567448,
+        "cacheRead": 904800050,
+        "output": 4491977,
+        "write5m": 0,
+        "write1h": 20567448
+      },
+      "<synthetic>": {
+        "requests": 18,
+        "input": 0,
+        "cacheCreate": 0,
+        "cacheRead": 0,
+        "output": 0,
+        "write5m": 0,
+        "write1h": 0
+      },
+      "claude-fable-5": {
+        "requests": 9,
+        "input": 18,
+        "cacheCreate": 173794,
+        "cacheRead": 1659945,
+        "output": 6394,
+        "write5m": 0,
+        "write1h": 173794
+      },
+      "claude-sonnet-5": {
+        "requests": 156,
+        "input": 312,
+        "cacheCreate": 669240,
+        "cacheRead": 23505656,
+        "output": 90711,
+        "write5m": 0,
+        "write1h": 669240
+      }
+    }
+  },
+  "childFiles": 411,
+  "childModels": {
+    "claude-opus-5": {
+      "requests": 24100,
+      "input": 48200,
+      "cacheCreate": 104420514,
+      "cacheRead": 2602891107,
+      "output": 17209471,
+      "write5m": 104420514,
+      "write1h": 0
+    },
+    "claude-fable-5": {
+      "requests": 201,
+      "input": 402,
+      "cacheCreate": 1042651,
+      "cacheRead": 18073897,
+      "output": 188200,
+      "write5m": 1042651,
+      "write1h": 0
+    },
+    "<synthetic>": {
+      "requests": 15,
+      "input": 0,
+      "cacheCreate": 0,
+      "cacheRead": 0,
+      "output": 0,
+      "write5m": 0,
+      "write1h": 0
+    },
+    "claude-sonnet-5": {
+      "requests": 1861,
+      "input": 3722,
+      "cacheCreate": 7970038,
+      "cacheRead": 211846777,
+      "output": 1139426,
+      "write5m": 7970038,
+      "write1h": 0
+    },
+    "claude-fable-5-1": {
+      "requests": 6,
+      "input": 3465,
+      "cacheCreate": 60677,
+      "cacheRead": 272592,
+      "output": 1895,
+      "write5m": 60677,
+      "write1h": 0
+    },
+    "claude-haiku-4-5-20251001": {
+      "requests": 8,
+      "input": 66,
+      "cacheCreate": 65535,
+      "cacheRead": 376294,
+      "output": 1797,
+      "write5m": 65535,
+      "write1h": 0
+    }
+  },
+  "duplicateRequestsAcrossFiles": 0,
+  "launches": {
+    "opus -> claude-opus-5": 199,
+    "(omitted) -> claude-opus-5": 179,
+    "(omitted) -> claude-fable-5": 4,
+    "fable -> claude-fable-5": 9,
+    "claude-fable-5 -> (unknown)": 1,
+    "opus -> (unknown)": 1,
+    "sonnet -> claude-sonnet-5": 10,
+    "(omitted) -> claude-sonnet-5": 2,
+    "haiku -> claude-haiku-4-5-20251001": 1,
+    "fable -> claude-fable-5-1": 1
+  },
+  "uniqueLaunchCalls": 407,
+  "legacyRoleLaunches": 150,
+  "responseKeys": [
+    "isAsync",
+    "status",
+    "agentId",
+    "description",
+    "resolvedModel",
+    "prompt",
+    "outputFile",
+    "canReadOutputFile"
+  ],
+  "contracts": {
+    "counts": {
+      "open/sonnet": 1,
+      "open/opus": 1,
+      "done/sonnet": 37,
+      "done/opus": 116,
+      "done/fable": 1,
+      "beklemede/sonnet": 1
+    },
+    "total": 157,
+    "cheapFirstCandidates": [
+      "T10",
+      "T101",
+      "T103",
+      "T104",
+      "T105",
+      "T107",
+      "T109",
+      "T11",
+      "T110",
+      "T112",
+      "T113",
+      "T114",
+      "T116",
+      "T117",
+      "T120",
+      "T122",
+      "T124",
+      "T134",
+      "T135",
+      "T15",
+      "T19",
+      "T2",
+      "T21",
+      "T24",
+      "T26",
+      "T27",
+      "T2b",
+      "T2c",
+      "T30",
+      "T32",
+      "T35",
+      "T37",
+      "T38",
+      "T39",
+      "T4",
+      "T45",
+      "T47",
+      "T49",
+      "T5",
+      "T51",
+      "T52",
+      "T53",
+      "T55",
+      "T59",
+      "T6",
+      "T60",
+      "T64",
+      "T66",
+      "T67",
+      "T68",
+      "T7",
+      "T70",
+      "T73",
+      "T74",
+      "T75",
+      "T77",
+      "T79",
+      "T81",
+      "T82",
+      "T83",
+      "T89",
+      "T9",
+      "T90",
+      "T91",
+      "T93",
+      "T97"
+    ],
+    "rows": [
+      {
+        "id": "T125",
+        "folder": "open",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "active"
+      },
+      {
+        "id": "T133",
+        "folder": "open",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "active"
+      },
+      {
+        "id": "T1",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "0",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T10",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T100",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T101",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T102",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "3",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T103",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T104",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T105",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T106",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T107",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T108",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T109",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T11",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T110",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T111",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T112",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T113",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T114",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T115",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "3",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T116",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T117",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T118",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "3",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T119",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T12",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T120",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T121",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T122",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T123",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T124",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T126",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "4",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T127",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T128",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T129",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T13",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T130",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T131",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T132",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "3",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T134",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T135",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T136",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T137",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T138",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T139",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T14",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T140",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T141",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T142",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T143",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T144",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T145",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T146",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T147",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T148",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T149",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T15",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "0",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T150",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T151",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T152",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T153",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T154",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T155",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T156",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T157",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T159",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T16",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "3",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T160",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T17",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T18",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T19",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T2",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "0",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T20",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T21",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T22",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T23",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "3",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T24",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T25",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T26",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T27",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T28",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "4",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T29",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T2b",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T2c",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "0",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T3",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "4",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T30",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T32",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T33",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T35",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T36",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T37",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "0",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T38",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "0",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T39",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T4",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "0",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T40",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "2",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T43",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "2",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T44",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T45",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T46",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T47",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T48",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T49",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T5",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T50",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "3",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T51",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T52",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T53",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T54",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T55",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T56",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T57",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T58",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T59",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T6",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T60",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T61",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T62",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T63",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "4",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T64",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T65",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T66",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T67",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T68",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T69",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T7",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "0",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T70",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T71",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T72",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T73",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T74",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T75",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T76",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T77",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T78",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "2",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T79",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T8",
+        "folder": "done",
+        "model": "sonnet",
+        "role": "ui-builder",
+        "round": "0",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T81",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T82",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "1",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T83",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T84",
+        "folder": "done",
+        "model": "opus",
+        "role": "ui-builder",
+        "round": "3",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T85",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T86",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T87",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "3",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T88",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "3",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T89",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T9",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "0",
+        "risk": "",
+        "status": "submitted"
+      },
+      {
+        "id": "T90",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T91",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T92",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T93",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T94",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T95",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T96",
+        "folder": "done",
+        "model": "fable",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T97",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T98",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "2",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T99",
+        "folder": "done",
+        "model": "opus",
+        "role": "builder",
+        "round": "3",
+        "risk": "",
+        "status": "done"
+      },
+      {
+        "id": "T158",
+        "folder": "beklemede",
+        "model": "sonnet",
+        "role": "builder",
+        "round": "1",
+        "risk": "",
+        "status": "open"
+      }
+    ]
+  }
+}

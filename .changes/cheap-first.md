@@ -26,3 +26,15 @@ agent opens on the ceiling model or in the `advisor` role, the dispatch hook wri
 prompt to `docs/danisma/NNN-<topic>.md` before it runs and fills the answer in from the
 agent's own transcript when it stops. Neither half passes through the model that asked, so
 neither can be trimmed to fit the conclusion. Ordinary work records nothing.
+
+Two signals now speak for the failure nobody hears. A plausible wrong diff is small and
+green, so no existing signal fires on it. The import map already knows the shape of the
+project: when a contract owns a file five or more others import, the first attempt is not
+the cheap one. And the planner can write `raise: opus` in the contract, taken only with a
+`why:` on the same page. Both stay under the profile ceiling, and the fan-in is read from
+`map.json` rather than a fresh scan, so dispatch costs nothing extra.
+
+The band tells you more about a running seat: how many files it has touched, how long it
+has been going, and its steps against the contract's step ceiling - `Adım 12/150` instead of
+a bare count. Every label in the band is Title Case now, not only the role and the cell.
+

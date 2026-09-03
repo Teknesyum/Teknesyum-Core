@@ -52,20 +52,18 @@ bu yüzden bir basamak aşağıda.
 54 sözleşmenin 4'ünde defterle uyuşmuyordu; o sözleşmelerde denetim kaydı yanlış adın
 altında aranıyor demektir.
 
-- [ ] **Ucuz-önce'nin sessiz açığı (Fable, 001).** Fable'ın bulgusu: "mevcut sinyaller
-      opus'a ulaşıyor" cümlesi yanlış. Sinyallerin hepsi gürültülü — risk, tur, araç
-      hatası. Q1'deki hata sessiz: küçük, makul ama yanlış bir diff `verify`'ı geçer,
-      risk `low` çıkar, denetçi hiç açılmaz. `risk: high` bu vakada geç kalmıyor, hiç
-      ateşlemiyor. Önerdiği iki basamak:
-      (a) **fan-in kuralı** — `owns` içinde import fan-in'i 5'i geçen dosya varsa ya da
-      `core/scripts/`, `core/hooks/` altına yazılıyorsa builder ucuz-önce'den muaf;
-      `map.js` bu veriyi zaten üretiyor, `selfRiskOpensAdvisor` sınıfı zaten tanıyor.
-      (b) **planner damgası** — planner her profilde opus; sözleşmeye zorunlu tek satırlık
-      `why:` ile `model: opus` damgalayabilsin, kapı bunu sinyal saysın, mühür deftere
-      yazsın. Damga oranı üçte biri geçerse ucuz-önce zaten kurgudur ve bu defterden
-      görülür.
-
 ## Bitenler
+
+- [x] **Ucuz-önce'nin sessiz açığı (Fable, 001).** Fable'ın bulgusu: "mevcut sinyaller
+      opus'a ulaşıyor" cümlesi yanlıştı. Sinyallerin hepsi gürültülü — risk, tur, araç
+      hatası. Sessiz hata ise şu: küçük, makul ama yanlış bir diff `verify`'ı geçer, risk
+      `low` çıkar, denetçi hiç açılmaz. Fable'ın iki basamağı da kuruldu.
+      (a) **fan-in** — `owns` içindeki bir dosyayı 5+ dosya içeri alıyorsa builder ve
+      ui-builder ucuz-önce'den muaf; veri `map.json`'dan okunuyor, taze tarama yok.
+      (b) **plancı damgası** — sözleşmedeki `raise:` satırı, aynı sayfada bir `why:`
+      varsa modeli yükseltiyor. `model:` alanı ne koştuğunu tutmaya devam ettiği için
+      ayrı bir alan seçildi. İkisi de profil tavanının altında kalıyor. 10 yeni sav.
+      Damga oranı üçte biri geçerse ucuz-önce kurgudur; defterden görülecek.
 
 - [x] **Danışma kaydı.** Fable'a ne sorulduğu ve ne döndüğü yalnızca sohbette kalıyordu;
       kullanıcı ikisini de tam metin görmek istedi, haklı olarak — gördüğü veri arttıkça
