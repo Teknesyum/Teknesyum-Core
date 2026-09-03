@@ -165,7 +165,7 @@ function play(field, event) {
 
 const WINDOW = { waiting: 60000, done: 10000, error: 10000 };
 
-const MIN_MS = { waiting: 0, done: 20000, error: 0 };
+const MIN_MS = { waiting: 0, done: 0, error: 0 };
 
 function stampFile() {
   return path.join(configRoot(), 'teknesyum-beep-last.json');

@@ -59,9 +59,9 @@ altında aranıyor demektir.
       iş varken — ding çalıyor, tur ise devam ediyordu. Şimdi sesi `watch.js` veriyor:
       yalnız kapı turu bırakırsa. İkincisi, sesin işi uzun işten sonra çağırmaktı ama
       üç saniyelik cevapta da çalıyordu; tek fren art arda gelen `Stop`ları yutan 10
-      saniyelik pencereydi. `cue.js` artık istemin saatini diske damgalıyor, tur 20
-      saniyeden kısaysa ses çalmıyor (`events.done.minMs` ile ayarlanabilir). Bekleme
-      ve hata sesleri gecikmesiz. 10 yeni sav.
+      saniyelik pencereydi. Kullanıcının kararı: eşik olmasın, ses sıra kullanıcıya
+      geçtiği an çalsın. `cue.js` istemin saatini yine de damgalıyor ve
+      `events.done.minMs` isteyene açık, ama varsayılan sıfır. 10 yeni sav.
 
 - [x] **Tur defterden sayılıyor, devir notu sıkıştırmadan önce tazeleniyor.**
       `round` alanı elle düzeltilebildiği için 54 yeniden açılan sözleşmenin 4'ünde

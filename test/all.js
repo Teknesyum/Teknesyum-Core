@@ -2465,15 +2465,15 @@ function testChime() {
 
   const n = require(notify);
   const settings = n.resolveSettings(root);
-  ok('a finished turn waits twenty seconds by default', settings.events.done.minMs === 20000);
-  ok('waiting and error are not delayed', !settings.events.waiting.minMs && !settings.events.error.minMs);
+  ok('no turn is too short to announce by default', !settings.events.done.minMs);
+  ok('waiting and error carry no delay either', !settings.events.waiting.minMs && !settings.events.error.minMs);
 
   const old = process.env.CLAUDE_CONFIG_DIR;
   process.env.CLAUDE_CONFIG_DIR = home;
   const now = Number(stamps().prompt) + 1000;
-  ok('a turn that took a second stays silent', n.tooQuick(settings.events.done, now));
-  ok('a turn that took a minute rings', !n.tooQuick(settings.events.done, now + 60000));
-  ok('an unset threshold never silences', !n.tooQuick({ minMs: 0 }, now));
+  ok('a default install never withholds the bell', !n.tooQuick(settings.events.done, now));
+  ok('a project that asks for one gets it', n.tooQuick({ minMs: 20000 }, now));
+  ok('and it lapses once the turn is long enough', !n.tooQuick({ minMs: 20000 }, now + 60000));
   if (old === undefined) delete process.env.CLAUDE_CONFIG_DIR;
   else process.env.CLAUDE_CONFIG_DIR = old;
 
