@@ -242,6 +242,16 @@ function testGate(root) {
   ok('audit record is consumed', fs.existsSync(path.join(audits, 'T3-1.used.json')));
   ok('audit record is gone', !fs.existsSync(path.join(audits, 'T3-1.json')));
 
+  const rows = fs
+    .readFileSync(path.join(root, '.claude', 'relay', 'audits', 'ledger.jsonl'), 'utf8')
+    .trim()
+    .split(String.fromCharCode(10))
+    .map((l) => JSON.parse(l));
+  const sealed = rows.filter((r) => r.id === 'T3').pop();
+  ok('the seal records what the ladder decided, not just that it closed', sealed && Array.isArray(sealed.signals), JSON.stringify(sealed));
+  ok('and the fan-in it was measured against', sealed && 'fanIn' in sealed && 'raise' in sealed, JSON.stringify(sealed));
+  ok('and whether the diff went anywhere near the acceptance', sealed && 'acceptanceMiss' in sealed, JSON.stringify(sealed));
+
   const ledger = contract(['ledger'], root);
   ok('ledger matches the finished directory', ledger.status === 0, ledger.stdout);
 
@@ -2224,6 +2234,8 @@ function main() {
   testOwed();
   testAdvice();
   testRungs();
+  testAcceptanceReach();
+  testWorktreeRoot();
   testBannerWakesOnAgents();
   testBaseline();
   testMapGuards();
@@ -2343,12 +2355,36 @@ function testGateTargets() {
   const prose = shell('grep -n "git push origin main" docs/notes.md');
   ok('writing about the gate is not passing through it', prose.status === 0, prose.stdout + prose.stderr);
 
+  const ancestor = shell('git merge-base --is-ancestor HEAD HEAD');
+  ok('a read only command that only starts like merge is not a merge', ancestor.status === 0, ancestor.stdout + ancestor.stderr);
+
   run('git', ['-C', root, 'checkout', '-q', home]);
   const other = shell('git push origin ' + home, 'PowerShell');
   ok('the other shell is held by the same gate', other.status === 2, other.stdout + other.stderr);
 
   const forced = shell('git push --force origin ' + home, 'Bash', { TEKNESYUM_GATE_OPEN: '1' });
   ok('a forced push to the trunk is refused even with the gate open', forced.status === 2, forced.stdout + forced.stderr);
+
+  const log = path.join(root, '.claude', 'relay', 'live', 'refused.log');
+  const lines = fs.existsSync(log) ? fs.readFileSync(log, 'utf8').trim().split('\n') : [];
+  ok('every refusal leaves a line behind to be counted', lines.length >= 3, String(lines.length));
+  ok('the line carries the tool and the command it refused', /\| Bash \|.*git push origin/.test(lines[0] || ''), lines[0] || '');
+
+  const writeContractAt = (id, body) =>
+    run(process.execPath, [GUARD], {
+      cwd: root,
+      input: JSON.stringify({
+        hook_event_name: 'PreToolUse',
+        tool_name: 'Write',
+        tool_input: { file_path: path.join(root, CONTRACTS, id + '.md'), content: body },
+        cwd: root,
+      }),
+    });
+  fs.mkdirSync(path.join(root, 'src', 'deep'), { recursive: true });
+  const dir = writeContractAt('D1', '# D1\nstatus: open\nowns: [src/deep]\nverify:\n  - node -e "process.exit(0)"\n');
+  ok('a directory in owns is refused where it is written, not at the seal', dir.status === 2, dir.stdout + dir.stderr);
+  const file = writeContractAt('D2', '# D2\nstatus: open\nowns: [src/ok.js]\nverify:\n  - node -e "process.exit(0)"\n');
+  ok('a file in owns is not what the gate objects to', !/owns contains/.test(file.stderr), file.stdout + file.stderr);
 
   try {
     fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
@@ -2576,6 +2612,61 @@ function testCheapFirst() {
   } catch {}
 }
 
+function testWorktreeRoot() {
+  const lib = require(path.join(CORE, 'hooks', 'lib.js'));
+  const norm = (x) => {
+    try { return lib.norm(fs.realpathSync.native(x)).toLowerCase(); } catch { return lib.norm(x).toLowerCase(); }
+  };
+  const root = fixture();
+  fs.mkdirSync(path.join(root, '.claude', 'relay', 'live'), { recursive: true });
+  const wt = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'tkw-')), 'T0');
+  const made = run('git', ['worktree', 'add', '-q', '-b', 'wt', wt], { cwd: root });
+  if (made.status !== 0) return;
+
+  const from = lib.relayRoot(wt, { git: false });
+  ok('a linked worktree resolves to the relay of the main tree', from && norm(from.relay) === norm(path.join(root, '.claude', 'relay')), JSON.stringify(from));
+  ok('and it says which worktree it was asked from', from && norm(from.worktree) === norm(wt), JSON.stringify(from));
+
+  fs.mkdirSync(path.join(wt, '.claude', 'relay', 'live'), { recursive: true });
+  const still = lib.relayRoot(wt, { git: false });
+  ok('a relay left inside the worktree does not become a second authority', still && norm(still.relay) === norm(path.join(root, '.claude', 'relay')), JSON.stringify(still));
+
+  const deep = path.join(wt, 'src', 'auth');
+  const below = lib.relayRoot(deep, { git: false });
+  ok('the same holds from a directory below the worktree root', below && norm(below.relay) === norm(path.join(root, '.claude', 'relay')), JSON.stringify(below));
+
+  const plain = lib.relayRoot(root, { git: false });
+  ok('the main tree keeps its own relay and reports no worktree', plain && norm(plain.relay) === norm(path.join(root, '.claude', 'relay')) && !plain.worktree, JSON.stringify(plain));
+
+  run('git', ['worktree', 'remove', '--force', wt], { cwd: root });
+}
+
+function testAcceptanceReach() {
+  const root = fixture();
+  const cm = require(path.join(REPO, 'core', 'scripts', 'contract.js')).acceptanceMiss;
+  const target = path.join(root, 'src', 'ok.js');
+  fs.writeFileSync(target, 'function alreadyThere() { return 1; }' + String.fromCharCode(10));
+  run('git', ['-C', root, 'add', '-A']);
+  run('git', ['-C', root, 'commit', '-qm', 'base']);
+  run('git', ['-C', root, 'checkout', '-qb', 'work/acc']);
+  fs.writeFileSync(target, 'function alreadyThere() { return 2; }' + String.fromCharCode(10));
+  run('git', ['-C', root, 'add', '-A']);
+  run('git', ['-C', root, 'commit', '-qm', 'work']);
+
+  const near = '## Acceptance' + String.fromCharCode(10) + '- `alreadyThere` returns two.' + String.fromCharCode(10);
+  ok('a diff that touches what the acceptance names is not a miss', cm(root, near, ['src/ok.js']) === false, 'near');
+
+  const far = '## Acceptance' + String.fromCharCode(10) + '- `neverMentioned` returns two.' + String.fromCharCode(10);
+  ok('a diff that never mentions it is worth recording', cm(root, far, ['src/ok.js']) === true, 'far');
+
+  const prose = '## Acceptance' + String.fromCharCode(10) + '- it works properly.' + String.fromCharCode(10);
+  ok('an acceptance with nothing to match against gets no verdict', cm(root, prose, ['src/ok.js']) === null, 'prose');
+
+  try {
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}
+
 function testRungs() {
   const root = fixture();
   const relay = path.join(root, '.claude', 'relay');
@@ -2585,14 +2676,30 @@ function testRungs() {
       .concat(['---', '', '## Goal', 'a thing', ''])
       .join('\n');
 
-  writeContract(root, 'R1', body('R1', []));
+  fs.mkdirSync(path.join(root, 'docs', 'scans'), { recursive: true });
+  const head = run('git', ['-C', root, 'rev-parse', 'HEAD']).stdout.trim();
+  const openContract = (id, extra) => {
+    const text = body(id, extra);
+    run(process.execPath, [GUARD], {
+      cwd: root,
+      input: JSON.stringify({
+        hook_event_name: 'PreToolUse',
+        tool_name: 'Write',
+        tool_input: { file_path: path.join(root, CONTRACTS, id + '.md'), content: text },
+        cwd: root,
+      }),
+    });
+    writeContract(root, id, text);
+  };
+
+  openContract('R1', []);
   const plain = contract(['tier', '--role', 'builder', '--id', 'R1', '--profile', 'premium'], root).stdout;
   ok('with no signal a builder still starts cheap', /builder sonnet\/high/.test(plain), plain);
 
   fs.writeFileSync(
     path.join(relay, 'map.json'),
     JSON.stringify({
-      _map: { schema: 2, files: 7, head: 'x' },
+      _map: { schema: 2, files: 7, head: head },
       'src/ok.js': { lines: 3, to: [], ns: [], from: ['a.js', 'b.js', 'c.js', 'd.js', 'e.js', 'f.js'] },
     })
   );
@@ -2604,21 +2711,35 @@ function testRungs() {
   fs.writeFileSync(
     path.join(relay, 'map.json'),
     JSON.stringify({
-      _map: { schema: 2, files: 7, head: 'x' },
+      _map: { schema: 2, files: 7, head: head },
       'src/ok.js': { lines: 3, to: [], ns: [], from: ['a.js', 'b.js'] },
     })
   );
   const low = contract(['tier', '--role', 'builder', '--id', 'R1', '--profile', 'premium'], root).stdout;
   ok('two importers are not a hub', /builder sonnet\/high/.test(low), low);
 
-  writeContract(root, 'R2', body('R2', ['raise: opus']));
+  openContract('R2', ['raise: opus']);
   const bare = contract(['tier', '--role', 'builder', '--id', 'R2', '--profile', 'premium'], root).stdout;
   ok('a raise with no reason behind it is not a signal', /builder sonnet\/high/.test(bare), bare);
 
-  writeContract(root, 'R3', body('R3', ['raise: opus', 'why: the acceptance picks a file format']));
+  openContract('R3', ['raise: opus - why: the acceptance picks a file format']);
   const raised = contract(['tier', '--role', 'builder', '--id', 'R3', '--profile', 'premium'], root).stdout;
   ok('the planner can raise before the first attempt', /builder opus/.test(raised), raised);
   ok('and has to say why on the record', /the acceptance picks a file format/.test(raised), raised);
+
+  writeContract(root, 'R1', body('R1', ['raise: opus - why: written after the fact']));
+  const late = contract(['tier', '--role', 'builder', '--id', 'R1', '--profile', 'premium'], root).stdout;
+  ok('a raise added after the contract opened is not the plan', /builder sonnet\/high/.test(late), late);
+
+  fs.writeFileSync(
+    path.join(relay, 'map.json'),
+    JSON.stringify({
+      _map: { schema: 2, files: 7, head: '0'.repeat(40) },
+      'src/ok.js': { lines: 3, to: [], ns: [], from: ['a.js', 'b.js', 'c.js', 'd.js', 'e.js', 'f.js'] },
+    })
+  );
+  const stale = contract(['tier', '--role', 'builder', '--id', 'R2', '--profile', 'premium'], root).stdout;
+  ok('a map that no longer matches HEAD does not get to raise anything', !/fan-in/.test(stale), stale);
 
   const capped = contract(['tier', '--role', 'builder', '--id', 'R3', '--profile', 'eco'], root).stdout;
   ok('but the profile ceiling still caps the raise', !/builder opus/.test(capped), capped);

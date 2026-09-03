@@ -330,9 +330,20 @@ function report(key, node, note) {
 
 function fanIn(root, owns) {
   const relay = path.join(root, '.claude', 'relay');
-  const dir = fs.existsSync(path.join(relay, 'map.json')) ? relay : path.join(root, '.claude');
-  const json = previous(dir);
-  if (!json || Number(json._map && json._map.schema) !== SCHEMA) return { max: 0, file: '', read: false };
+  const where = () => (fs.existsSync(path.join(relay, 'map.json')) ? relay : path.join(root, '.claude'));
+  let dir = where();
+  let json = previous(dir);
+  const usable = () => !!json && Number(json._map && json._map.schema) === SCHEMA;
+  if (usable() && staleness(root, dir).state === 'stale') {
+    try {
+      emit(root, build(root), {});
+    } catch {}
+    dir = where();
+    json = previous(dir);
+    if (!usable() || staleness(root, dir).state === 'stale')
+      return { max: 0, file: '', read: false, why: 'stale' };
+  }
+  if (!usable()) return { max: 0, file: '', read: false, why: 'missing' };
   let max = 0;
   let file = '';
   for (const own of owns || []) {

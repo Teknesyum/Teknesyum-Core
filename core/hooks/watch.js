@@ -287,10 +287,12 @@ function closeAll(live, now) {
   } catch {
     return;
   }
+  const currentSession = sessionId();
   for (const f of files) {
     const p = path.join(live, f);
     const a = read(p);
     if (!a || a.ended) continue;
+    if (currentSession && a.sessionId && a.sessionId !== currentSession) continue;
     a.ended = now;
     a.stop_reason = 'session_end';
     write(p, a);
@@ -444,7 +446,11 @@ function sweep(live) {
     if (f.startsWith('_')) continue;
     const p = path.join(live, f);
     try {
-      if (fs.statSync(p).mtimeMs < cutoff) fs.unlinkSync(p);
+      if (fs.statSync(p).mtimeMs < cutoff) {
+        const rec = read(p);
+        if (rec && rec.role === 'auditor') continue;
+        fs.unlinkSync(p);
+      }
     } catch {}
   }
 }

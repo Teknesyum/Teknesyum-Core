@@ -31,8 +31,29 @@ Two signals now speak for the failure nobody hears. A plausible wrong diff is sm
 green, so no existing signal fires on it. The import map already knows the shape of the
 project: when a contract owns a file five or more others import, the first attempt is not
 the cheap one. And the planner can write `raise: opus` in the contract, taken only with a
-`why:` on the same page. Both stay under the profile ceiling, and the fan-in is read from
-`map.json` rather than a fresh scan, so dispatch costs nothing extra.
+`why:` on the same page. Both stay under the profile ceiling.
+
+Neither rung reads a value that could be edited under it. The `raise:` line is sealed the
+first time the contract file is written and the ladder reads the seal, so a builder adding a
+raise to its own contract on round two raises nothing; the reason has to sit on the same line
+as the raise. The import map is checked against HEAD before it is believed, rebuilt if it is
+stale, and the fan-in signal is recorded as `unknown` rather than acted on when it cannot be.
+
+A seal records what the ladder decided, not only that it closed: the model that ran, the
+model that was asked for, the signals that fired, the fan-in and the file it was measured on,
+the sealed `raise:`, and whether the diff went anywhere near the identifiers the acceptance
+names. None of it changes a decision - it is there so the next question about the ladder is
+answered from a column.
+
+`git merge-base` is no longer read as `git merge`, so a read-only ancestry check is not held
+by the trunk gate. Every refusal the guard makes is appended to `live/refused.log` with the
+tool, the agent and the command: a gate whose false positives are not counted cannot be
+tuned. A directory in `owns` is refused where it is written rather than at the seal, when the
+whole round is already spent.
+
+A relay under a linked `git worktree` now resolves to the main tree's relay. Five separate
+field reports - a sealed contract read as `submitted`, work coming back `unassigned`, `live/`
+in two places, an audit record with nowhere to go - were one wrong root.
 
 The band tells you more about a running seat: how many files it has touched, how long it
 has been going, and its steps against the contract's step ceiling - `Adım 12/150` instead of

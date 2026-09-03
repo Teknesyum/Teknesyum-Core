@@ -274,6 +274,14 @@ Her kapanış, her karşılanmamış kapanış ve her geri alma `audits/ledger.j
 ekleniyor; `contract.js ledger` de `done/` altında oturan ama defterin hiç duymadığı
 sözleşmeyi bildiriyor. Kayıtlar birbirine zincirli değil; her biri kendi bağlarıyla ayakta.
 
+Mühür kademenin o anki kararını da yazıyor: koşan model, istenen model, ateşleyen sinyaller,
+karşısında ölçüldüğü fan-in, mühürlenmiş `raise:` ve diff'in kabul maddesinin adını andığı
+yere hiç değip değmediği. Hiçbiri bir kararı değiştirmiyor — kademeye dair bir sonraki soru
+tartışmayla değil sütunla cevaplansın diye orada.
+
+Kapının yaptığı her ret de `live/refused.log` dosyasına aracıyla, ajanıyla ve komutuyla
+ekleniyor; sebebi aynı: yanlış pozitifi sayılmayan bir kapı ayarlanamaz.
+
 ### Kapı kancası
 
 `guard.js`, `Write`, `Edit` ve `NotebookEdit` önünde çalışıyor. Mevcut sözleşmenin `owns`
@@ -338,8 +346,16 @@ Son iki basamak var, çünkü diğer bütün sinyaller gürültülü. Düşen bi
 yanlış diff: küçük, yeşil ve kendinden emin biçimde yanlış. Onun adına iki şey konuşuyor.
 İçe aktarma haritası projenin hangi dosyaya yaslandığını zaten biliyor; beş dosyanın içeri
 aldığı bir dosya ucuz ilk denemenin yeri değil. Bir de plancı var: hedefi kimse tek satır
-yazmadan önce okuyan kişi sözleşmeye `raise: opus` yazabiliyor — ama aynı sayfada bir `why:`
-ile, çünkü gerekçesi sorulmayan bir yükseltme tavanın kendisinden başka bir şey değil.
+yazmadan önce okuyan kişi sözleşmeye `raise: opus — why: ...` yazabiliyor — tek satırda,
+çünkü gerekçesi sorulmayan bir yükseltme tavanın kendisinden başka bir şey değil.
+
+İki basamak da altından değiştirilebilecek bir şeyi okuyor; bu yüzden ikisi de geç okumuyor.
+`raise:` satırı sözleşme dosyası ilk yazıldığı anda mühürleniyor ve kademe sayfayı değil
+mührü okuyor: ikinci turda kendi sözleşmesine yükseltme yazan bir builder hiçbir şey
+yükseltmiyor. İçe aktarma haritası da inanılmadan önce HEAD'e vuruluyor — bayatsa yeniden
+kuruluyor, kurulamıyorsa fan-in sinyali üzerine karar verilmiyor, `unknown` diye
+kaydediliyor. Kimsenin tazelemediği bir harita üzerine verilen yükseltme kademenin basamağı
+değil, etrafından dolanan yol.
 
 Üst üste hataları kanca ajan başına sayıyor; bir ajanın kötü günü başka bir ajanın bütçesini
 harcayamıyor. Üstelik ikinci hatada davranıyor, çünkü üçüncüyü beklemek bile bile lades
@@ -590,7 +606,7 @@ node test/all.js
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
 kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu, borç defteri, danışma
 kaydı ve hiçbir
-kancanın bağlama yazmadığı denetimi üzerine 2.607 sav. Aynı takımı CI Linux, Windows ve
+kancanın bağlama yazmadığı denetimi üzerine 2.625 sav. Aynı takımı CI Linux, Windows ve
 macOS'ta koşuyor; geliştirme Windows öncelikli.
 
 ---

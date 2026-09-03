@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 const { relayRoot, projectRoot, settings, liveDir, read, setNotice, t } = require('../hooks/lib.js');
-const { isContractName, field, list, owned, verifySteps, entries, scalar } = require('../hooks/schema.js');
+const { isContractName, field, list, owned, verifySteps, entries, scalar, section } = require('../hooks/schema.js');
 const seal = require('../hooks/seal.js');
 const risk = require('./risk.js');
 
@@ -99,10 +99,14 @@ function looseVerify(body) {
 const NO_TESTS = [
   /(^|[^a-z])no tests? (were )?(ran|run|found|to run|executed)/i,
   /Total tests: 0(?![0-9])/i,
-  /(^|[^0-9])0 tests? (ran|passed|executed)/i,
+  /(^|[^0-9])0 tests? (ran|passed|executed|found)/i,
   /collected 0 items/i,
   /(^|[^a-z])no test (matches|matched|files? found)/i,
   /tests? run: 0(?![0-9])/i,
+  /Ran 0 tests/i,
+  /Passed: 0/i,
+  /Tests:.* 0 passed/i,
+  /0 passing/i,
 ];
 
 function emptyRun(text) {
@@ -480,13 +484,20 @@ function tier(role, opt) {
   };
 }
 
-function tallyFails(relay, agent) {
+function tallyFails(relay, agent, contractId) {
   if (!relay) return 0;
   try {
     const t = JSON.parse(fs.readFileSync(path.join(liveDir(relay), '_tally.json'), 'utf8'));
     const by = t.byAgent || {};
     if (agent && by[agent]) return Number(by[agent].fails || 0);
     if (agent) return 0;
+    if (contractId) {
+      let worst = 0;
+      for (const k of Object.keys(by)) {
+        if (by[k].contract === contractId) worst = Math.max(worst, Number(by[k].fails || 0));
+      }
+      return worst;
+    }
     return Number(t.fails || 0);
   } catch {
     return 0;
@@ -549,8 +560,9 @@ function tierCmd() {
     level = risk.resolve(c.root, owns, field('risk', c.body));
     irrev = risk.irreversible(owns, verifySteps(c.body));
     reach = reachOf(c.relay, owns);
-    raise = field('raise', c.body);
-    raiseWhy = field('why', c.body);
+    const sealed = sealedRaise(c.relay, c.id);
+    raise = sealed.raise;
+    raiseWhy = sealed.why;
     if (!round) round = field('round', c.body);
   } else {
     const where = locate();
@@ -777,13 +789,61 @@ function prose(root, body, owns) {
   return ['node "' + MANSET + '" ' + docs.map((p) => '"' + p + '"').join(' ')];
 }
 
+function acceptanceMiss(root, body, owns) {
+  const sec = section('Acceptance', body);
+  if (!sec) return null;
+  const tokens = [...new Set((String(sec).match(/`[^`\n]{2,80}`/g) || []).map((x) => x.slice(1, -1).trim()))]
+    .map((x) => x.replace(/\(\s*\)$/, ''))
+    .filter((x) => /^[A-Za-z_][A-Za-z0-9_./-]*$/.test(x));
+  if (!tokens.length) return null;
+  const base = risk.baseRef(root);
+  const diff = git(root, ['diff', base, '--'].concat(owns));
+  if (diff === null) return null;
+  const hay = diff + '\n' + owns.join('\n');
+  return !tokens.some((tk) => hay.indexOf(tk) >= 0);
+}
+
 function reachOf(relay, owns) {
-  if (!owns || !owns.length) return { max: 0, file: '' };
+  if (!owns || !owns.length) return { max: 0, file: '', read: true };
   try {
     return require('./map.js').fanIn(projectRoot(relay), owns);
   } catch {
-    return { max: 0, file: '' };
+    return { max: 0, file: '', read: false, why: 'unreadable' };
   }
+}
+
+function sealedRaise(relay, id) {
+  const f = path.join(liveDir(relay), '_raise', String(id).replace(/[^A-Za-z0-9_.-]/g, '_') + '.json');
+  const rec = read(f);
+  return { raise: rec ? String(rec.raise || '') : '', why: rec ? String(rec.why || '') : '' };
+}
+
+function ledgerTier(c, level, round, owns) {
+  const reach = reachOf(c.relay, owns);
+  const sealed = sealedRaise(c.relay, c.id);
+  const out = {
+    signals: [],
+    fanIn: reach.read === false ? 'unknown' : reach.max,
+    fanInFile: reach.file || null,
+    raise: sealed.raise,
+  };
+  const role = String(field('role', c.body) || '').toLowerCase();
+  if (!roleRow(role)) return out;
+  try {
+    const agent = field('agent', c.body) || field('run-id', c.body);
+    const t = tier(role, {
+      risk: level ? level.level : null,
+      round,
+      repeatFail: agent ? tallyFails(c.relay, agent) : 0,
+      irreversible: risk.irreversible(owns, verifySteps(c.body)).hit,
+      fanIn: reach.read === false ? 0 : reach.max,
+      fanInFile: reach.file,
+      raise: sealed.raise,
+      raiseWhy: sealed.why,
+    });
+    if (t && t.signals) out.signals = t.signals;
+  } catch {}
+  return out;
 }
 
 function overModel(c, level, round) {
@@ -795,6 +855,7 @@ function overModel(c, level, round) {
 
   const owns = owned(c.body);
   const reach = reachOf(c.relay, owns);
+  const sealed = sealedRaise(c.relay, c.id);
   const t = tier(role, {
     risk: level ? level.level : null,
     round,
@@ -802,8 +863,8 @@ function overModel(c, level, round) {
     irreversible: risk.irreversible(owns, verifySteps(c.body)).hit,
     fanIn: reach.max,
     fanInFile: reach.file,
-    raise: field('raise', c.body),
-    raiseWhy: field('why', c.body),
+    raise: sealed.raise,
+    raiseWhy: sealed.why,
   });
   if (!t || MODEL_RANK[asked] <= MODEL_RANK[t.model]) return null;
 
@@ -850,7 +911,7 @@ function overDispatch(r, role, asked, prompt) {
   const t = tier(role, {
     risk: level ? level.level : null,
     round: body ? field('round', body) : 0,
-    repeatFail: tallyFails(relay, ''),
+    repeatFail: tallyFails(relay, '', id),
     irreversible: body ? risk.irreversible(owns, verifySteps(body)).hit : false,
     fanIn: reach.max,
     fanInFile: reach.file,
@@ -978,37 +1039,6 @@ function complete() {
       )
     );
 
-  const busy = takeLock(c.relay, c.id);
-  if (busy)
-    return stop([
-      c.id + ' cannot complete - ' + busy.id + ' is running its verify steps right now (pid ' + busy.pid + ').',
-      '',
-      'Two verify runs in one checkout share a build output and a test host, so whichever',
-      'finishes second measures the other one. Wait for it, or run this in a worktree.',
-    ]);
-  let results;
-  try {
-    results = runVerify(c.root, steps);
-  } finally {
-    dropLock(c.relay);
-  }
-  const failed = results.filter((r) => !r.ok);
-  if (failed.length)
-    return stop([c.id + ' cannot complete - verification failed.', ''].concat(reportVerify(results)));
-
-  const hollowRun = results.filter((r) => emptyRun(r.tail));
-  if (hollowRun.length)
-    return stop(
-      [c.id + ' cannot complete - a verify step passed without running anything:', ''].concat(
-        hollowRun.map((r) => '  ' + r.step),
-        [
-          '',
-          'Exit 0 on zero collected tests is not acceptance, it is a filter that matches',
-          'nothing. Fix the filter, or name a step that would fail if the work were undone.',
-        ]
-      )
-    );
-
   const level = risk.resolve(c.root, owns, field('risk', c.body));
 
   const headSha = git(c.root, ['rev-parse', 'HEAD']);
@@ -1062,6 +1092,37 @@ function complete() {
     if (who) return stop([c.id + ' cannot complete - ' + who]);
   }
 
+  const busy = takeLock(c.relay, c.id);
+  if (busy)
+    return stop([
+      c.id + ' cannot complete - ' + busy.id + ' is running its verify steps right now (pid ' + busy.pid + ').',
+      '',
+      'Two verify runs in one checkout share a build output and a test host, so whichever',
+      'finishes second measures the other one. Wait for it, or run this in a worktree.',
+    ]);
+  let results;
+  try {
+    results = runVerify(c.root, steps);
+  } finally {
+    dropLock(c.relay);
+  }
+  const failed = results.filter((r) => !r.ok);
+  if (failed.length)
+    return stop([c.id + ' cannot complete - verification failed.', ''].concat(reportVerify(results)));
+
+  const hollowRun = results.filter((r) => emptyRun(r.tail));
+  if (hollowRun.length)
+    return stop(
+      [c.id + ' cannot complete - a verify step passed without running anything:', ''].concat(
+        hollowRun.map((r) => '  ' + r.step),
+        [
+          '',
+          'Exit 0 on zero collected tests is not acceptance, it is a filter that matches',
+          'nothing. Fix the filter, or name a step that would fail if the work were undone.',
+        ]
+      )
+    );
+
   fs.mkdirSync(path.dirname(c.dst), { recursive: true });
   fs.writeFileSync(c.src, stampStatus(c.body, 'done'), 'utf8');
   fs.renameSync(c.src, c.dst);
@@ -1069,12 +1130,21 @@ function complete() {
   const dropped = dropSnapshot(c.root, c.id);
   if (recordFile) seal.consume(recordFile, headSha);
   seal.ledgerInit(c.relay);
+  const ran = read(path.join(liveDir(c.relay), String(field('agent', c.body) || field('run-id', c.body) || '').replace(/[^A-Za-z0-9_.-]/g, '_') + '.json'));
+  const rungs = ledgerTier(c, level, round, owns);
   seal.ledgerAppend(c.relay, {
     id: c.id,
     round,
     risk: level.level,
     verify: results.map((r) => ({ step: r.step, code: r.code })),
     auditorRunId: record ? record.auditorRunId : null,
+    model: (ran && ran.model) || field('model', c.body) || null,
+    requestedModel: (ran && ran.requestedModel) || null,
+    signals: rungs.signals,
+    fanIn: rungs.fanIn,
+    fanInFile: rungs.fanInFile,
+    raise: rungs.raise || null,
+    acceptanceMiss: acceptanceMiss(c.root, c.body, owns),
     headSha,
     at: new Date().toISOString(),
   });
@@ -1785,6 +1855,7 @@ function main() {
 
 if (require.main === module) main();
 module.exports = {
+  acceptanceMiss,
   blockers,
   overDispatch,
   overModel,

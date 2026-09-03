@@ -19,11 +19,17 @@ Aynı anda tek madde açık kalır.
 
 ## Açık maddeler
 
-- [ ] **VidShrink saha raporları (17 madde).** Tasnif ve fiyat:
-      [vidshrink-tasnif.md](raporlar/vidshrink-tasnif.md). Tek kök beş raporu birden
-      kapatıyor: `relayRoot` cwd'den tırmanıyor, `git rev-parse --git-common-dir`
-      sormalı. Sonra kapı ölçümü (reddedilen çağrı hiçbir yere yazılmıyor). Sıra ve
-      fiyat orada; kurulacak olanı kullanıcı seçer.
+- [ ] **VidShrink saha raporlarının kalanı.** Onaylanan 1-2-3 kuruldu (aşağıda). Geriye
+      [vidshrink-tasnif.md](raporlar/vidshrink-tasnif.md) içindeki 4. dalga kaldı: heredoc
+      dışı ayrıştırma, döngü içindeki yıkıcı komut, `orphans()` C# yanlış tavsiyesi, ekran
+      kapısı, `Stop` kapısının `depends`/`owns` kesişimi, `TEKNESYUM_GATE_OPEN` ajan içinden.
+      Kapı ölçümü artık `live/refused.log` ile toplanıyor; seçim o sayı gelince.
+
+- [ ] **Fable'ın üç ölçümü (002).** Okur ya da yeni bir tetik kurulmadan önce VidShrink
+      defterinden tek betikle, sıfır token: (1) `risk: low` mühürlenmiş 191 sözleşmenin
+      kaçı sonradan reopen/unmet aldı — eşik %3, (2) fan-in dağılımı — done sözleşmelerin
+      %35'inden çoğunun max fan-in'i 5+ ise eşik yanlış, (3) ilk 30 mühürde damga oranı —
+      üçte biri geçerse ucuz-önce kurgudur.
 
 - [ ] **Denetçi neden hiç açılmıyor.** Ölçüm ve fiyat:
       [denetci-maliyet-analizi.md](raporlar/denetci-maliyet-analizi.md). Bulgu: denetçi
@@ -67,6 +73,26 @@ bu yüzden bir basamak aşağıda.
 altında aranıyor demektir.
 
 ## Bitenler
+
+- [x] **Fable'ın iki basamağına gelen itiraz (002).** Danışma:
+      [002-denetci-ve-iki-basamak.md](danisma/002-denetci-ve-iki-basamak.md). Fable'ın
+      hükmü: basamaklar yanlış kurulmamış, kaynağı yanlış yerden okuyor. Kurulanlar,
+      verdiği sırayla: (1) defter sütunları — `model`, `requestedModel`, `signals`,
+      `fanIn`, `fanInFile`, `raise`; (2) `raise` mührü — sözleşme dosyası ilk yazıldığında
+      kapı `live/_raise/<ID>.json` yazıyor, kademe gövdeyi değil mührü okuyor, `why:`
+      `raise:` ile aynı satırda; (3) fan-in tazeliği — harita HEAD'e vuruluyor, bayatsa
+      yeniden kuruluyor, kurulamıyorsa `fanIn: unknown` ve yükseltme yok;
+      (4) `acceptanceMiss` sütunu — `## Acceptance` içindeki ters tırnaklı adların hiçbiri
+      diff'te geçmiyorsa işaretleniyor, tetik değil sütun. Kurulmayanlar da Fable'ın
+      kararı: haiku okur, `verify` dokunma kontrolü, kapıda `raise:` dondurma, bayat harita
+      üzerine yükseltme. 13 yeni sav.
+
+- [x] **VidShrink tasnifi 1-2-3 (kullanıcı onayı).** (1) `relayRoot` bağlı `git worktree`
+      altında ana ağacın relay'ini buluyor — `.git` dosyası okunuyor, alt süreç yok; beş
+      saha raporu birden kapandı. (2) `git merge-base` artık `git merge` sanılmıyor ve
+      kapının her reddi `live/refused.log` dosyasına yazılıyor. (3) `owns` içindeki dizin
+      yolu mühürde değil dosya yazılırken reddediliyor; `complete` mevcut denetim kaydını
+      düşük riskte de okuyordu, doğrulandı. 12 yeni sav.
 
 - [x] **Ucuz-önce'nin sessiz açığı (Fable, 001).** Fable'ın bulgusu: "mevcut sinyaller
       opus'a ulaşıyor" cümlesi yanlıştı. Sinyallerin hepsi gürültülü — risk, tur, araç

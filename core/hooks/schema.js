@@ -1,4 +1,4 @@
-const ID = /^[A-Z]{1,4}\d{1,4}\.md$/i;
+const ID = /^[A-Z]{1,4}\d{1,4}[A-Z]{0,3}\.md$/i;
 
 const RANK = { open: 0, active: 1, submitted: 2, accepted: 3, done: 3, sealed: 3 };
 
@@ -80,6 +80,14 @@ function verifySteps(text) {
   return entries('verify', text);
 }
 
+const RAISE = /^raise:[ 	]*([A-Za-z]+)[ 	]*(?:[-–—]{1,2}[ 	]*why:[ 	]*(\S.*?))?[ 	]*$/im;
+
+function raiseOf(text) {
+  const m = RAISE.exec(String(text || ''));
+  if (!m) return null;
+  return { raise: m[1].toLowerCase(), why: String(m[2] || '').trim() };
+}
+
 module.exports = {
   ID,
   RANK,
@@ -96,4 +104,5 @@ module.exports = {
   scalar,
   owned,
   verifySteps,
+  raiseOf,
 };

@@ -2,9 +2,10 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 const { read, write, merge, safe, norm, relayRoot, projectRoot, liveDir, logProblem, settings } = require('./lib.js');
-const { RANK, isContractName, status, isKnownStatus, field, list, owned } = require('./schema.js');
+const { RANK, isContractName, status, isKnownStatus, field, list, owned, raiseOf } = require('./schema.js');
 
 let raw = '';
+let call = null;
 process.stdin.on('data', (d) => (raw += d));
 process.stdin.on('end', () => {
   let j = {};
@@ -13,6 +14,7 @@ process.stdin.on('end', () => {
   } catch {
     return failClosed('hook input is not valid JSON');
   }
+  call = j;
   try {
     decide(j);
   } catch (e) {
@@ -198,13 +200,35 @@ function ownsSchema(target, content) {
   if (!/\/contracts\/[^/]+\.md$/i.test(n)) return;
   if (/\/done\//i.test(n)) return;
   if (!/^owns:/im.test(content)) return;
-  const bad = list('owns', content).filter((x) => /[\\/]$/.test(String(x)));
-  if (!bad.length) return;
+  const owns = list('owns', content);
+  let fault = owns.filter((x) => /[\\/]$/.test(String(x))).map((x) => 'owns contains a directory path: ' + x)[0] || '';
+  if (!fault) {
+    const r = relayRoot(path.dirname(path.resolve(target)), { git: false });
+    if (r) {
+      try {
+        fault = require('./seal.js').ownsFault(projectRoot(r.relay), owns);
+      } catch {}
+    }
+  }
+  if (!fault) return;
   return block(
-    'owns contains a directory path: ' + bad.join(', '),
+    fault,
     'A directory digest does not change when its contents do, so the seal would lie.',
     'List the files the contract touches, one by one.'
   );
+}
+
+function raiseSeal(target, content) {
+  const abs = path.resolve(target);
+  const n = norm(abs);
+  const m = /\/contracts\/([^/]+)\.md$/i.exec(n);
+  if (!m || /\/done\//i.test(n)) return;
+  const r = relayRoot(path.dirname(abs), { git: false });
+  if (!r) return;
+  const f = path.join(liveDir(r.relay), '_raise', safe(m[1]) + '.json');
+  if (fs.existsSync(f)) return;
+  const asked = raiseOf(content);
+  write(f, { raise: asked ? asked.raise : '', why: asked ? asked.why : '', at: Date.now() });
 }
 
 function verifySchema(target, content) {
@@ -327,7 +351,7 @@ function boundary(target, agentId) {
   );
 }
 
-const MERGING = /^git\s+(?:-[^\s]+\s+)*(merge|push)\b/i;
+const MERGING = /^git\s+(?:-[^\s]+\s+)*(merge|push)(?=\s|$)/i;
 
 const PROTECTED = /^(main|master)$/i;
 
@@ -455,6 +479,7 @@ function decide(j) {
       priorArt(target);
       router(target, t.content || '');
       ownsSchema(target, t.content || '');
+      raiseSeal(target, t.content || '');
       verifySchema(target, t.content || '');
     } else if (tool === 'Edit' && ROUTER.test(norm(path.resolve(target)))) {
       router(target, edited(target, t));
@@ -468,7 +493,31 @@ function decide(j) {
   }
 }
 
+function refused(why) {
+  const j = call;
+  if (!j) return;
+  try {
+    const r = relayRoot(j.cwd || process.cwd(), { git: false });
+    if (!r) return;
+    const t = j.tool_input || {};
+    const what = String(t.file_path || t.notebook_path || t.command || '').replace(/\s+/g, ' ').slice(0, 120);
+    const dir = liveDir(r.relay);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.appendFileSync(
+      path.join(dir, 'refused.log'),
+      [
+        new Date().toISOString().replace('T', ' ').slice(0, 19),
+        j.tool_name || '-',
+        j.agent_id || '-',
+        what || '-',
+        String(why || '').replace(/\s+/g, ' ').slice(0, 160),
+      ].join(' | ') + '\n'
+    );
+  } catch {}
+}
+
 function block(...lines) {
+  refused(lines[0]);
   process.stderr.write('BLOCKED: ' + lines.join('\n'));
   process.exit(2);
 }

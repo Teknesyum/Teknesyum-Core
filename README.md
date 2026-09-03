@@ -276,6 +276,16 @@ Every close, every unmet close and every reopen is appended to `audits/ledger.js
 `contract.js ledger` reports any contract sitting in `done/` that the ledger has never heard
 of. The records are not chained to each other; each stands on its own bindings.
 
+A seal also records what the ladder decided at the time: the model that ran, the model that
+was asked for, the signals that fired, the fan-in it was measured against, the sealed
+`raise:`, and whether the diff went anywhere near the identifiers the acceptance names. None
+of it changes a decision — it is there so the next question about the ladder is answered from
+a column rather than an argument.
+
+Every refusal the guard makes is appended to `live/refused.log` with the tool, the agent and
+the command, for the same reason: a gate whose false positives are not counted cannot be
+tuned.
+
 ### The guard
 
 `guard.js` runs in front of `Write`, `Edit` and `NotebookEdit`. It blocks a write to any
@@ -341,8 +351,15 @@ round, a delete under `owns` — all of them announce themselves. The failure no
 the plausible wrong diff: small, green, and confidently wrong. So two things speak for it.
 The import map already knows which files the project leans on, and a file five others import
 is not where a cheap first attempt belongs. And the planner, who read the goal before anyone
-wrote a line, can say `raise: opus` in the contract — but only with a `why:` on the same
-page, because a raise nobody has to justify is just the ceiling again.
+wrote a line, can say `raise: opus — why: ...` in the contract — one line, because a raise
+nobody has to justify is just the ceiling again.
+
+Both rungs read from something that could be edited under them, so neither reads it late.
+The `raise:` line is sealed the first time the contract file is written and the ladder reads
+the seal, not the page: a builder who adds a raise to its own contract on round two raises
+nothing. And the import map is checked against HEAD before it is believed — if it is stale it
+is rebuilt, and if it cannot be, the fan-in signal is recorded as unknown rather than acted
+on. A raise granted on a map nobody refreshed is a way around the ladder, not a rung on it.
 
 The run of failures is counted per agent by a hook, so one agent's bad afternoon cannot
 spend another agent's budget — and it acts on the second failure, because waiting for a
@@ -596,7 +613,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,607 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,625 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
 scaffold, the cue, the banner, the handoff note, the debt ledger, the consultation record, and
 one check that no hook writes into context. CI runs the same suite on Linux, Windows and macOS; development is Windows-first.

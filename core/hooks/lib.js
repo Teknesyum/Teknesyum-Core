@@ -75,6 +75,7 @@ function lock(f, fn) {
       nap(5);
     }
   }
+  if (!held) throw new Error('Lock timeout: ' + f);
   try {
     return fn();
   } finally {
@@ -144,9 +145,39 @@ function askGit(start) {
   }
 }
 
+function linkedRoot(d) {
+  let raw = '';
+  try {
+    const g = path.join(d, '.git');
+    if (!fs.statSync(g).isFile()) return null;
+    raw = fs.readFileSync(g, 'utf8');
+  } catch {
+    return null;
+  }
+  const m = /^gitdir:\s*(.+)$/m.exec(raw);
+  if (!m) return null;
+  let gitdir = path.resolve(d, m[1].trim());
+  try { gitdir = fs.realpathSync(gitdir); } catch {}
+  let common = path.dirname(path.dirname(gitdir));
+  try {
+    const marker = path.join(gitdir, 'commondir');
+    if (fs.existsSync(marker)) {
+      common = path.resolve(gitdir, fs.readFileSync(marker, 'utf8').trim());
+      try { common = fs.realpathSync(common); } catch {}
+    }
+  } catch {}
+  if (path.basename(common).toLowerCase() === '.git') common = path.dirname(common);
+  return common;
+}
+
 function relayRoot(start, opt) {
   let d = path.resolve(start || '.');
   for (;;) {
+    const main = linkedRoot(d);
+    if (main) {
+      const shared = path.join(main, '.claude', 'relay');
+      if (fs.existsSync(shared)) return { relay: shared, worktree: d };
+    }
     const c = path.join(d, '.claude', 'relay');
     if (fs.existsSync(c)) return { relay: c, worktree: null };
     const up = path.dirname(d);
