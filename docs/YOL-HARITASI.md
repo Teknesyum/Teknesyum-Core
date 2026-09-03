@@ -19,6 +19,20 @@ Aynı anda tek madde açık kalır.
 
 ## Açık maddeler
 
+- [ ] **VidShrink saha raporları (17 madde).** Tasnif ve fiyat:
+      [vidshrink-tasnif.md](raporlar/vidshrink-tasnif.md). Tek kök beş raporu birden
+      kapatıyor: `relayRoot` cwd'den tırmanıyor, `git rev-parse --git-common-dir`
+      sormalı. Sonra kapı ölçümü (reddedilen çağrı hiçbir yere yazılmıyor). Sıra ve
+      fiyat orada; kurulacak olanı kullanıcı seçer.
+
+- [ ] **Denetçi neden hiç açılmıyor.** Ölçüm ve fiyat:
+      [denetci-maliyet-analizi.md](raporlar/denetci-maliyet-analizi.md). Bulgu: denetçi
+      VidShrink'te 25/25 yüksek riskli sözleşmede açıldı ve gerçek KRİTİK yakaladı (T84,
+      T100, T102). Açılmadığı yer Core'un kendisi — bu depoda hiç sözleşme yok. Asıl
+      açık tetikte: `risk.js` diff'in şeklini ölçüyor, doğruluğunu değil. Önerilen sıra
+      önce deterministik kesişim kontrolü (sıfır token), sonra haiku "okur" (sözleşme
+      başı ~1 sent). İkisi de fan-in ve plancı damgası ölçülmeden kurulmayacak.
+
 - [ ] **teknesyum-ui deposu.** Arayüz standardı ayrı depoda ve kurulu değil; her arayüz
       işinde renk/ölçü kullanıcıya soruluyor.
 
