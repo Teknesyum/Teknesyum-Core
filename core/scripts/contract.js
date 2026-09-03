@@ -724,6 +724,35 @@ function prose(root, body, owns) {
   return ['node "' + MANSET + '" ' + docs.map((p) => '"' + p + '"').join(' ')];
 }
 
+function overModel(c, level, round) {
+  const asked = String(field('model', c.body) || '').toLowerCase();
+  if (MODEL_RANK[asked] === undefined) return null;
+  const role = String(field('role', c.body) || '').toLowerCase();
+  if (!roleRow(role)) return null;
+  const agent = field('agent', c.body) || field('run-id', c.body);
+
+  const t = tier(role, {
+    risk: level ? level.level : null,
+    round,
+    repeatFail: agent ? tallyFails(c.relay, agent) : 0,
+    irreversible: risk.irreversible(owned(c.body), verifySteps(c.body)).hit,
+  });
+  if (!t || MODEL_RANK[asked] <= MODEL_RANK[t.model]) return null;
+
+  return [
+    c.id + ' ran on ' + asked + '; ' + role + ' resolves to ' + t.model + '.',
+    '',
+    'Nothing here asked for the bigger model. Risk is ' + (level ? level.level : 'unset') +
+      ', the round is ' + round + ', no run of failures is on file.',
+    'The ladder exists so the price is paid when a cheaper model has already tried and',
+    'missed - not on the first attempt. Measured over 156 contracts in one project, 59 sat',
+    'on opus at round 1 with no risk field at all.',
+    '',
+    'Set model: ' + t.model + ' and let a signal raise it, or write down the signal that',
+    'justifies ' + asked + ' - risk: high, a round of 3, or an explicit request from the user.',
+  ];
+}
+
 function complete() {
   const c = load(arg('id'));
   if (c.error) return stop([c.error, '', 'Usage: contract.js complete --id T7']);
@@ -877,6 +906,9 @@ function complete() {
       'hand, and the audit record for the round was then looked for under the wrong name.',
       'Set round: ' + counted + ', or reopen the contract properly if a round is missing.',
     ]);
+
+  const overspend = overModel(c, level, round);
+  if (overspend) return stop(overspend);
   let record = null;
   let recordFile = null;
 

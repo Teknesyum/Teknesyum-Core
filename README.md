@@ -42,7 +42,7 @@ descriptions do not sit in your context — only the agent holding a role pays f
 | `t0` | the session itself — splits the work, opens contracts, spawns the rest |
 | `planner` | proposes the split: ids, owned files, verify commands. Writes no code |
 | `builder` · `ui-builder` | writes what a contract asks for, only inside its `owns` list |
-| `scout` | reads prior art before a project from scratch gets an architecture |
+| `scout` | reads what exists and reports a finding: prior art, or a measurement |
 | `scribe` | mechanical work that carries no decision: renames, wording, inventories |
 | `auditor` | verifies a high-risk contract independently, and may not write a single file |
 | `advisor` | one question, one opinion, from a model one rung above whoever asked |
@@ -314,7 +314,7 @@ and an effort.
 |---|---|---|---|
 | `t0` — the session itself | sonnet | opus | opus |
 | `planner` | sonnet/medium | opus/medium | opus/high |
-| `builder` · `ui-builder` | sonnet/low | sonnet/medium | opus/medium |
+| `builder` · `ui-builder` | sonnet/low | sonnet/medium | sonnet/high |
 | `scout` | haiku/low | sonnet/low | sonnet/medium |
 | `scribe` | haiku/low | haiku/low | sonnet/low |
 | `auditor` | opus/medium | opus/medium | opus/high |
@@ -335,6 +335,14 @@ third is knowing better and doing nothing about it.
 
 A project can pin its own profile in `.claude/relay/config.json`, so an `eco` repository
 stays `eco` on a `premium` machine.
+
+`premium` raises the ceiling, not the starting model. A builder still opens on sonnet — with
+the effort turned up — and reaches opus when a signal says the cheap attempt was not enough.
+Measured over 156 contracts in one project, 118 ran on opus and 59 of those were still on
+round 1 with no risk field at all: the first attempt was never allowed to be cheap.
+
+So the gate reads the contract's own `model:` at seal time. Above what the role resolves to,
+with no signal behind it, the seal is refused; below it is always free.
 
 The **advisor** runs one rung above whoever asked: sonnet asks, opus answers; opus asks,
 fable answers. A model cannot give itself a second opinion. There is no qualifying list —
@@ -539,7 +547,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,555 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,564 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
 scaffold, the cue, the banner, the handoff note, and one check that no hook writes into
 context. CI runs the same suite on Linux, Windows and macOS; development is Windows-first.

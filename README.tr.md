@@ -42,7 +42,7 @@ bağlamınızda oturmuyor — rolün bedelini yalnız o rolü taşıyan ajan öd
 | `t0` | oturumun kendisi — işi böler, sözleşmeleri açar, diğerlerini çağırır |
 | `planner` | bölünmeyi önerir: id'ler, sahiplenilen dosyalar, verify komutları. Kod yazmaz |
 | `builder` · `ui-builder` | sözleşmenin istediğini yazar, yalnız `owns` listesinin içinde |
-| `scout` | sıfırdan bir proje mimarisini almadan önce önceki işleri okur |
+| `scout` | var olanı okuyup bulguyla döner: önceki işler ya da bir ölçüm |
 | `scribe` | karar taşımayan mekanik iş: yeniden adlandırma, dil, envanter |
 | `auditor` | yüksek riskli sözleşmeyi bağımsız doğrular, tek dosyaya bile yazamaz |
 | `advisor` | tek soru, tek görüş; soranın bir üst basamağındaki modelden |
@@ -311,7 +311,7 @@ ve bir efor.
 |---|---|---|---|
 | `t0` — oturumun kendisi | sonnet | opus | opus |
 | `planner` | sonnet/medium | opus/medium | opus/high |
-| `builder` · `ui-builder` | sonnet/low | sonnet/medium | opus/medium |
+| `builder` · `ui-builder` | sonnet/low | sonnet/medium | sonnet/high |
 | `scout` | haiku/low | sonnet/low | sonnet/medium |
 | `scribe` | haiku/low | haiku/low | sonnet/low |
 | `auditor` | opus/medium | opus/medium | opus/high |
@@ -332,6 +332,14 @@ demek.
 
 Proje kendi profilini `.claude/relay/config.json` içinde tutabiliyor; `premium` bir makinede
 `eco` bir depo `eco` kalıyor.
+
+`premium` tavanı yükseltiyor, başlangıç modelini değil. Bir builder yine sonnet'le açılıyor —
+eforu artırılmış olarak — ve ucuz denemenin yetmediğini bir sinyal söylediğinde opus'a
+çıkıyor. Bir projede 156 sözleşme ölçüldü: 118'i opus'ta koşmuş, bunların 59'u hâlâ 1. turda
+ve risk alanı bile yokmuş. İlk denemenin ucuz olmasına hiç izin verilmemiş.
+
+Bu yüzden kapı, mühür anında sözleşmenin kendi `model:` alanını okuyor. Rolün çözdüğü modelin
+üstündeyse ve arkasında bir sinyal yoksa mühür reddediliyor; altına inmek her zaman serbest.
 
 **Danışman** soranın bir üst basamağında çalışıyor: sonnet soruyor, opus cevaplıyor; opus
 soruyor, fable cevaplıyor. Bir model kendine ikinci görüş veremiyor. Hak kazanma listesi yok
@@ -533,7 +541,7 @@ node test/all.js
 
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
 kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu ve hiçbir kancanın
-bağlama yazmadığı denetimi üzerine 2.555 sav. Aynı takımı CI Linux, Windows ve
+bağlama yazmadığı denetimi üzerine 2.564 sav. Aynı takımı CI Linux, Windows ve
 macOS'ta koşuyor; geliştirme Windows öncelikli.
 
 ---

@@ -35,12 +35,12 @@
     "builder": {
       "eco": "sonnet/low",
       "normal": "sonnet/medium",
-      "premium": "opus/medium"
+      "premium": "sonnet/high"
     },
     "ui-builder": {
       "eco": "sonnet/low",
       "normal": "sonnet/medium",
-      "premium": "opus/medium"
+      "premium": "sonnet/high"
     },
     "scribe": {
       "eco": "haiku/low",

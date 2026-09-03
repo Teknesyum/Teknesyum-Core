@@ -25,6 +25,7 @@ Report a broken rule; do not hide one.
 | Two or more files, or a real design choice | One contract, one builder |
 | Independent parts | One contract each, in parallel |
 | From scratch, nothing read yet | scout first — the gate blocks otherwise |
+| The answer is a number, not a change | scout — a measurement is not builder work |
 
 ## Contract
 
@@ -105,12 +106,11 @@ Read <P>/roles/builder.md and follow it.
 Contract: .claude/relay/contracts/T7.md
 ```
 
-`builder`, `ui-builder`, `auditor`, `planner`, `advisor`, `scout`, `scribe`.
-
-The role file names its row; row x profile picks the cell in `<P>/tiers.json`. Resolve it,
-never restate it: `node <P>/scripts/contract.js tier --role builder --id T7`. Signals raise
-a cell, the profile caps it, nothing lowers it. Pass the result as the `Agent` call's
-`model`, and write `model`/`effort` into the agent's `live/` record.
+`builder`, `ui-builder`, `auditor`, `planner`, `advisor`, `scout`, `scribe`. The role file
+names its row; row x profile picks the cell in `<P>/tiers.json`. Resolve it, never restate it:
+`node <P>/scripts/contract.js tier --role builder --id T7`. Signals raise a cell, the profile
+caps it, nothing lowers it. Pass it as the `Agent` call's `model`, write `model`/`effort` into
+`live/` and into the contract - the seal refuses a model above the cell that no signal earned.
 
 Open the advisor whenever a second mind would widen the view - no gate, no qualifying list. A
 plan that picks the product's direction or spans phases is one of those moments. Pass `--asker

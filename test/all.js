@@ -947,8 +947,8 @@ const EFFORTS = ['low', 'medium', 'high'];
 const TABLE = {
   t0: { eco: 'sonnet', normal: 'opus', premium: 'opus' },
   planner: { eco: 'sonnet/medium', normal: 'opus/medium', premium: 'opus/high' },
-  builder: { eco: 'sonnet/low', normal: 'sonnet/medium', premium: 'opus/medium' },
-  'ui-builder': { eco: 'sonnet/low', normal: 'sonnet/medium', premium: 'opus/medium' },
+  builder: { eco: 'sonnet/low', normal: 'sonnet/medium', premium: 'sonnet/high' },
+  'ui-builder': { eco: 'sonnet/low', normal: 'sonnet/medium', premium: 'sonnet/high' },
   scribe: { eco: 'haiku/low', normal: 'haiku/low', premium: 'sonnet/low' },
   scout: { eco: 'haiku/low', normal: 'sonnet/low', premium: 'sonnet/medium' },
   auditor: { eco: 'opus/medium', normal: 'opus/medium', premium: 'opus/high' },
@@ -1042,7 +1042,7 @@ function testTier(root) {
   }
 
   ok('ui-builder resolves without a role file in core', roleRow('ui-builder') === 'ui-builder');
-  ok('roleBase reports the cell it read', JSON.stringify(roleBase('builder', 'premium')) === JSON.stringify({ row: 'builder', profile: 'premium', model: 'opus', effort: 'medium' }));
+  ok('roleBase reports the cell it read', JSON.stringify(roleBase('builder', 'premium')) === JSON.stringify({ row: 'builder', profile: 'premium', model: 'sonnet', effort: 'high' }));
   ok('an unknown role resolves to nothing', tier('worker-lite', { profile: 'normal' }) === null);
 
   ok('signal 1: one failure changes nothing', cellOf(tier('builder', { profile: 'normal', repeatFail: 1 })) === 'sonnet/medium');
@@ -1077,7 +1077,7 @@ function testTier(root) {
   ok('a premium builder is told the advisor opens with it', tier('builder', { profile: 'premium' }).notes.join(' ').includes('opens the advisor alongside'));
   ok('a premium scribe is not', !tier('scribe', { profile: 'premium' }).notes.join(' ').includes('advisor'));
 
-  ok('xhigh is not granted automatically', tier('builder', { profile: 'premium', effort: 'xhigh' }).effort === 'medium');
+  ok('xhigh is not granted automatically', tier('builder', { profile: 'premium', effort: 'xhigh' }).effort === 'high');
   ok('xhigh is granted on an explicit user request', tier('builder', { profile: 'premium', effort: 'xhigh', userAsked: true }).effort === 'xhigh');
 
   for (const row of Object.keys(TABLE)) {
@@ -1155,7 +1155,7 @@ function testTier(root) {
   ok('acceptance 4: normal scribe is haiku/low', cliScribe.status === 0 && /^scribe haiku\/low$/m.test(cliScribe.stdout), cliScribe.stdout);
 
   const cliCell = contract(['tier', '--role', 'ui-builder', '--profile', 'premium'], root);
-  ok('the command names the cell it came from', /cell +ui-builder x premium = opus\/medium/.test(cliCell.stdout), cliCell.stdout);
+  ok('the command names the cell it came from', /cell +ui-builder x premium = sonnet\/high/.test(cliCell.stdout), cliCell.stdout);
 
   const cliLow = contract(['tier', '--role', 'advisor', '--profile', 'eco', '--model', 'haiku'], root);
   ok('the command refuses to lower a cell', /^advisor opus\/medium$/m.test(cliLow.stdout) && /below the cell/.test(cliLow.stdout), cliLow.stdout);
@@ -2207,6 +2207,7 @@ function main() {
   testRoundIsCounted();
   testPreCompact();
   testChime();
+  testCheapFirst();
   testBannerWakesOnAgents();
   testBaseline();
   testMapGuards();
@@ -2490,6 +2491,58 @@ function testChime() {
     input: JSON.stringify({ hook_event_name: 'Stop', cwd: root }),
   });
   ok('a turn held open by the gate is blocked', /decision/.test(held.stdout), held.stdout);
+
+  try {
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {}
+}
+
+function testCheapFirst() {
+  const { tier } = require(CONTRACT);
+
+  ok(
+    'no profile starts a builder on opus',
+    PROFILES.every((p) => tier('builder', { profile: p }).model !== 'opus'),
+    PROFILES.map((p) => p + '=' + tier('builder', { profile: p }).model).join(' ')
+  );
+  ok(
+    'premium spends its extra on effort, not on the model',
+    tier('builder', { profile: 'premium' }).model === 'sonnet' &&
+      tier('builder', { profile: 'premium' }).effort === 'high'
+  );
+  ok(
+    'a signal still reaches opus on premium',
+    tier('builder', { profile: 'premium', round: 3 }).model === 'opus' &&
+      tier('builder', { profile: 'premium', repeatFail: 2 }).model === 'opus' &&
+      tier('builder', { profile: 'premium', risk: 'high' }).model === 'opus'
+  );
+
+  const root = fixture();
+  fs.writeFileSync(
+    path.join(root, '.claude', 'relay', 'config.json'),
+    JSON.stringify({ profile: 'premium' })
+  );
+  const body = (model) =>
+    '# M1\nstatus: submitted\nrole: builder\nmodel: ' + model +
+    '\nround: 1\nowns: [src/ok.js]\nverify:\n  - node -e "process.exit(0)"\n';
+
+  const file = writeContract(root, 'M1', body('opus'));
+  const rich = contract(['complete', '--id', 'M1'], root);
+  ok('a first round on the big model does not seal', rich.status === 2, rich.stdout);
+  ok('and the gate names the model the role resolves to', /resolves to sonnet/.test(rich.stdout), rich.stdout);
+  ok('the refusal says what would have justified it', /risk: high/.test(rich.stdout), rich.stdout);
+
+  fs.writeFileSync(file, body('haiku'));
+  const lean = contract(['complete', '--id', 'M1'], root);
+  ok('below the cell is always free', lean.status === 0, lean.stdout);
+
+  writeContract(root, 'M3', body('sonnet').replace(/M1/g, 'M3'));
+  const even = contract(['complete', '--id', 'M3'], root);
+  ok('the cell itself seals', even.status === 0, even.stdout);
+
+  writeContract(root, 'M4', body('opus').replace(/M1/g, 'M4').replace(/^role:.*$/m, ''));
+  const quiet = contract(['complete', '--id', 'M4'], root);
+  ok('a contract that names no role is not second-guessed', quiet.status === 0, quiet.stdout);
 
   try {
     fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });

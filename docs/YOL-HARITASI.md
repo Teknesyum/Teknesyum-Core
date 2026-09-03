@@ -54,6 +54,17 @@ altında aranıyor demektir.
 
 ## Bitenler
 
+- [x] **Ucuz başlangıç.** VidShrink'te 156 sözleşme ölçüldü: 118'i opus'ta koşmuş, 59'u
+      1. turda ve `risk:` alanı bile yokmuş. Hepsi `builder` ya da `ui-builder` olarak
+      dağıtılmış; `scout` hiç kullanılmamış. Sebep iki katmanlıydı — premium'un builder
+      hücresi `opus/medium`'du, ve relay skill'inin boy tablosunda ölçüm işi için satır
+      yoktu, o yüzden her şey builder'a düşüyordu. Üçü de düzeltildi: premium farkı artık
+      modelde değil eforda (`sonnet/high`), `scout` ölçüm/bench/rapor işini de kapsıyor,
+      ve mühür sözleşmenin `model:` alanını okuyup hücrenin üstündeki modeli sinyalsiz
+      kabul etmiyor. Tırmanma yolları duruyor: tekrarlanan hata, 3. tur, risk high.
+      9 yeni sav. Fable'a beş kez soruldu, beşinde de 529 döndü; erişilebilir olunca
+      tasarım ona bir daha götürülecek.
+
 - [x] **Bitiş sesi.** İki kusur vardı. Ses `Stop` olayına doğrudan bağlıydı ve `async`
       çalışıyordu; kapı turu bloklasa bile — teslim edilmiş sözleşme ya da dağıtılmamış
       iş varken — ding çalıyor, tur ise devam ediyordu. Şimdi sesi `watch.js` veriyor:
