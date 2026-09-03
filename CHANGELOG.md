@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.8.0
+
+- The finish bell rings when the turn really ends, and not while the gate still holds it open.
+- Numbers in a document a contract owns are checked against that document's own tables; a fourth round does not open without a second mind; the auditor is recognised by the role it was given, not the type it was spawned as; the gate stops work that reaches main, on both shells, and no longer opens for the word "push" in prose
+- The round is counted from the ledger, not read from the contract body: a body that claims a round nobody opened does not seal.
+- The handoff note is refreshed before a compaction, not only when the session ends.
+- The gate refuses a plain-line verify, a step that collected no tests, and two verify runs at once; a round does not open without --critical; the banner's record is created by the first agent, not the first contract
+
 ## v0.7.4
 
 - Risk is measured from the merge-base, classifies adds/edits/deletes/renames, and names the changed hunks; the close refuses on a blocked dependency, an overlapping owner, or a dirty tree; the map guards its own freshness and size
