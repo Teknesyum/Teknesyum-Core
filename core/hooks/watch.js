@@ -107,10 +107,42 @@ function logCall(live, role, input) {
   write(f, list.slice(-12));
 }
 
+const COUNSEL = /^(fable|opus)$/;
+
+function counsel(j, r) {
+  const ev = j.hook_event_name || '';
+  let advice = null;
+  try {
+    advice = require('../scripts/advice.js');
+  } catch {
+    return;
+  }
+  if (ev === 'PreToolUse' && AGENT_TOOLS.test(j.tool_name || '')) {
+    const input = j.tool_input || {};
+    const model = String(input.model || '').toLowerCase();
+    const role = roleOf(j);
+    if (!COUNSEL.test(model) && role !== 'advisor') return;
+    advice.open(r.relay, {
+      topic: String(input.description || '').slice(0, 60),
+      asker: String(j.model || 'T0'),
+      model: model,
+      prompt: String(input.prompt || ''),
+    });
+    return;
+  }
+  if (ev === 'SubagentStop') {
+    const t = j.agent_transcript_path || j.transcript_path;
+    if (t) advice.close(r.relay, '', String(t));
+  }
+}
+
 function record(j) {
   const cwd = j.cwd || process.cwd();
   const r = relayRoot(cwd, { git: false }) || (AGENT_TOOLS.test(j.tool_name || '') ? ensureRelay(cwd) : null);
   if (!r) return;
+  try {
+    counsel(j, r);
+  } catch {}
   const live = liveDir(r.relay);
   try {
     fs.mkdirSync(live, { recursive: true });

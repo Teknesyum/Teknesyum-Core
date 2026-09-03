@@ -20,3 +20,9 @@ lines of sixty characters, written by `handoff.js owe --add` and closed by `owe 
 --because "..."`. Every prompt carries the list back inside the cue string that was already
 there, so an empty ledger still costs nothing. Nothing expires - an old debt is marked
 `stale`, not dropped - closing needs a reason, and the reason lands in `HANDOFF.md`.
+
+A consultation is now on the record without anyone remembering to write it down. When an
+agent opens on the ceiling model or in the `advisor` role, the dispatch hook writes the
+prompt to `docs/danisma/NNN-<topic>.md` before it runs and fills the answer in from the
+agent's own transcript when it stops. Neither half passes through the model that asked, so
+neither can be trimmed to fit the conclusion. Ordinary work records nothing.

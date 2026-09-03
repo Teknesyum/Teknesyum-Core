@@ -387,6 +387,7 @@ Araç çağrılarını izleyen kancalar artık matcher taşıyor, yani dosya oku
 | `contract.js snapshot` | izlenen ağacı `refs/teknesyum/<ID>` olarak sabitler |
 | `contract.js revert` | sahiplenilen dosyaları o sabite geri koyar |
 | `handoff.js` | `.claude/relay/HANDOFF.md` dosyasını, projenin durumunu yazıyor |
+| `advice.js list` | kayıttaki danışmalar, soru ve cevap tam metniyle |
 | `handoff.js owe` | söz verilip henüz yapılmayanların kısa listesi |
 | `doctor.js` | kurulum sağlam mı söylüyor |
 | `release.js` | sonraki sürümü `.changes/` içindeki notlardan belirliyor |
@@ -401,6 +402,13 @@ kapanışlar, dal, baş, ne kadarı commit edilmemiş, hangi ajan takılmış �
 kancasıyla ve sıkıştırmadan hemen önce tazeleniyor; bedeli yok ve hiç bayatlamıyor. Öteki
 yarısı makinenin yazamayacağı tek paragraf, yani niyet; tazeleme onu koruyor. Dosya düz
 markdown, yani projeyi sonra açan model Claude olmasa da okuyabiliyor.
+
+İkinci bir görüş, yalnızca soranın tekrarlamayı seçtiği cümleyi görüyorsanız hiçbir işe
+yaramaz. Bir ajan tavan modelde ya da `advisor` rolünde açıldığında, dağıtım kancası ona
+verilen istemi daha o çalışmadan `docs/danisma/NNN-<konu>.md` dosyasına yazıyor; ajan
+durduğunda da cevap yarısını kendi transkriptinden dolduruyor. İki yarı da soran modelin
+elinden geçmiyor, yani sonuca uydurulmak üzere kırpılamıyor; dosya da açıp okuyabileceğiniz
+düz markdown. Sıradan iş kayıt bırakmıyor: sonnet'teki bir builder oraya hiçbir şey yazmıyor.
 
 Turun ortasında verilen söz dünyanın en kolay kaybedilen şeyidir — model ikinci bir görüş
 soracağını söyler, tur işle dolar, söz de bağlamla birlikte gider. `.claude/relay/OWED.md`
@@ -566,8 +574,9 @@ node test/all.js
 ```
 
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
-kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu, borç defteri ve hiçbir
-kancanın bağlama yazmadığı denetimi üzerine 2.585 sav. Aynı takımı CI Linux, Windows ve
+kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu, borç defteri, danışma
+kaydı ve hiçbir
+kancanın bağlama yazmadığı denetimi üzerine 2.596 sav. Aynı takımı CI Linux, Windows ve
 macOS'ta koşuyor; geliştirme Windows öncelikli.
 
 ---

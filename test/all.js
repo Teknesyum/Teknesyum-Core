@@ -2220,6 +2220,7 @@ function main() {
   testChime();
   testCheapFirst();
   testOwed();
+  testAdvice();
   testBannerWakesOnAgents();
   testBaseline();
   testMapGuards();
@@ -2570,6 +2571,72 @@ function testCheapFirst() {
   try {
     fs.rmSync(root, { recursive: true, force: true, maxRetries: 3 });
   } catch {}
+}
+
+function testAdvice() {
+  const root = fixture();
+  const relay = path.join(root, '.claude', 'relay');
+  const WATCH = path.join(CORE, 'hooks', 'watch.js');
+  const at = path.join(root, 'docs', 'danisma');
+  const seen = () => {
+    try {
+      return fs.readdirSync(at).filter((n) => /^\d{3}-.*\.md$/.test(n));
+    } catch {
+      return [];
+    }
+  };
+  const dispatch = (model, prompt, description) =>
+    run(process.execPath, [WATCH], {
+      cwd: root,
+      input: JSON.stringify({
+        hook_event_name: 'PreToolUse',
+        tool_name: 'Agent',
+        cwd: root,
+        model: 'opus',
+        tool_input: { model, prompt, description },
+      }),
+    });
+
+  dispatch('sonnet', 'Read <P>/roles/builder.md and follow it.', 'build the thing');
+  ok('ordinary work leaves no consultation record', seen().length === 0, JSON.stringify(seen()));
+
+  dispatch('fable', 'Is cheap-first wrong? Read tiers.json first.', 'ask about the tier table');
+  const rows = seen();
+  ok('a consultation is recorded without being asked', rows.length === 1, JSON.stringify(rows));
+  ok('and the file is named after the question', /ask-about-the-tier-table/.test(rows[0] || ''), rows[0]);
+
+  const body = fs.readFileSync(path.join(at, rows[0]), 'utf8');
+  ok('the question is kept whole, not summarised', body.indexOf('Is cheap-first wrong?') > 0, body.slice(0, 200));
+  ok('who asked and who was asked are both on it', /soran: opus/.test(body) && /danisilan: fable/.test(body), body.slice(0, 200));
+  ok('the answer half waits to be filled', /_cevap bekleniyor_/.test(body), body.slice(0, 300));
+
+  const tr = path.join(root, 'agent.jsonl');
+  fs.writeFileSync(
+    tr,
+    [
+      JSON.stringify({ type: 'user', message: { content: 'go' } }),
+      JSON.stringify({ type: 'assistant', message: { content: [{ type: 'text', text: 'The direction is right, the reason is wrong.' }] } }),
+      '',
+    ].join('\n')
+  );
+  run(process.execPath, [WATCH], {
+    cwd: root,
+    input: JSON.stringify({ hook_event_name: 'SubagentStop', cwd: root, agent_transcript_path: tr }),
+  });
+  const closed = fs.readFileSync(path.join(at, rows[0]), 'utf8');
+  ok('the answer lands in the same file', /The direction is right, the reason is wrong\./.test(closed), closed.slice(-300));
+  ok('and the placeholder is gone', !/_cevap bekleniyor_/.test(closed), closed.slice(-300));
+
+  run(process.execPath, [WATCH], {
+    cwd: root,
+    input: JSON.stringify({ hook_event_name: 'SubagentStop', cwd: root, agent_transcript_path: tr }),
+  });
+  ok('a second stop does not invent a second record', seen().length === 1, JSON.stringify(seen()));
+
+  const advice = require(path.join(CORE, 'scripts', 'advice.js'));
+  ok('a transcript with no reply yields nothing', advice.lastReply(path.join(root, 'nope.jsonl')) === '');
+  ok('the slug never escapes its folder', advice.slugOf('../../etc/passwd').indexOf('..') < 0, advice.slugOf('../../etc/passwd'));
+
 }
 
 function testOwed() {

@@ -111,10 +111,11 @@ its row; row x profile picks the cell in `<P>/tiers.json`. Resolve it, never res
 nothing lowers it. Pass it as the `Agent` call's `model` and write it into the contract - a call
 above the cell that no signal earned is refused.
 
-Open the advisor whenever a second mind would widen the view - no gate, no qualifying list; a
-plan that picks the product's direction is one of those moments. Pass `--asker <your own
-model>`, since a model cannot second-guess itself. On premium it also opens beside every
-`builder`/`ui-builder` contract. It gets the goal and the evidence, never your draft answer.
+Open the advisor whenever a second mind would widen the view - no gate, no list; a plan that
+picks the product's direction is one of those moments. Pass `--asker <your own model>`, since a
+model cannot second-guess itself. On premium it opens beside every `builder`/`ui-builder`
+contract. It gets the goal and the evidence, never your draft answer; both halves land in
+`docs/danisma/` on their own - link that file when you report, never a summary of it.
 
 Repeated failures are counted for you: the `PostToolUseFailure` hook keeps the run in `live/_tally.json`, the resolver reads it unasked, the banner shows it from two upward.
 
@@ -136,9 +137,8 @@ line is `<contract> | <role> | <what was sought> | <what was missing> | <what wa
 
 ## Owed
 
-A promise you cannot keep this turn goes on the ledger, not into the conversation:
-`handoff.js owe --add "ask fable about the tier table"`. Every prompt carries it back until
-`owe --done <n> --because "..."` closes it. Three at a time; a fourth is a contract.
+A promise you cannot keep this turn goes on the ledger: `handoff.js owe --add "..."`. Every
+prompt carries it back until `owe --done <n> --because "..."` closes it. Three, then a contract.
 
 ## Reporting
 

@@ -391,6 +391,7 @@ The hooks that watch tool calls carry a matcher, so reading a file does not star
 | `contract.js revert` | puts the owned files back to that pin |
 | `handoff.js` | writes `.claude/relay/HANDOFF.md`, the state of the project |
 | `handoff.js owe` | the short list of what was promised and not yet done |
+| `advice.js list` | the consultations on record, question and answer in full |
 | `doctor.js` | says whether the install is sound |
 | `release.js` | decides the next version from notes left in `.changes/` |
 | `update.js` | says whether a newer release exists |
@@ -405,6 +406,13 @@ round, the last closes, the branch, the head, how much is uncommitted, which age
 and is never out of date. The other half is the one paragraph a machine cannot write, the
 intent, and a refresh preserves it. The file is plain markdown, so the next model to open the project can read it whether or
 not it is Claude.
+
+A second opinion is worth nothing if you only ever see the sentence the asker chose to repeat.
+When an agent is opened on the ceiling model, or in the `advisor` role, the dispatch hook writes
+the prompt it was given to `docs/danisma/NNN-<topic>.md` before it runs, and fills the answer
+half in from the agent's own transcript when it stops. Neither half passes through the model
+that asked, so neither can be trimmed to fit the conclusion, and the file is plain markdown you
+can open. Ordinary work leaves no record: a builder on sonnet writes nothing there.
 
 A promise made in the middle of a turn is the easiest thing in the world to lose — the model
 says it will ask a second opinion, the turn fills with work, and the promise leaves with the
@@ -574,10 +582,10 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,585 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,596 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
-scaffold, the cue, the banner, the handoff note, the debt ledger, and one check that no hook
-writes into context. CI runs the same suite on Linux, Windows and macOS; development is Windows-first.
+scaffold, the cue, the banner, the handoff note, the debt ledger, the consultation record, and
+one check that no hook writes into context. CI runs the same suite on Linux, Windows and macOS; development is Windows-first.
 
 ---
 

@@ -52,7 +52,28 @@ bu yüzden bir basamak aşağıda.
 54 sözleşmenin 4'ünde defterle uyuşmuyordu; o sözleşmelerde denetim kaydı yanlış adın
 altında aranıyor demektir.
 
+- [ ] **Ucuz-önce'nin sessiz açığı (Fable, 001).** Fable'ın bulgusu: "mevcut sinyaller
+      opus'a ulaşıyor" cümlesi yanlış. Sinyallerin hepsi gürültülü — risk, tur, araç
+      hatası. Q1'deki hata sessiz: küçük, makul ama yanlış bir diff `verify`'ı geçer,
+      risk `low` çıkar, denetçi hiç açılmaz. `risk: high` bu vakada geç kalmıyor, hiç
+      ateşlemiyor. Önerdiği iki basamak:
+      (a) **fan-in kuralı** — `owns` içinde import fan-in'i 5'i geçen dosya varsa ya da
+      `core/scripts/`, `core/hooks/` altına yazılıyorsa builder ucuz-önce'den muaf;
+      `map.js` bu veriyi zaten üretiyor, `selfRiskOpensAdvisor` sınıfı zaten tanıyor.
+      (b) **planner damgası** — planner her profilde opus; sözleşmeye zorunlu tek satırlık
+      `why:` ile `model: opus` damgalayabilsin, kapı bunu sinyal saysın, mühür deftere
+      yazsın. Damga oranı üçte biri geçerse ucuz-önce zaten kurgudur ve bu defterden
+      görülür.
+
 ## Bitenler
+
+- [x] **Danışma kaydı.** Fable'a ne sorulduğu ve ne döndüğü yalnızca sohbette kalıyordu;
+      kullanıcı ikisini de tam metin görmek istedi, haklı olarak — gördüğü veri arttıkça
+      yönlendirmesi isabetli oluyor. `advice.js` eklendi: `watch.js` dağıtım anında tavan
+      modele ya da `advisor` rolüne giden çağrının istemini `docs/danisma/NNN-konu.md`
+      dosyasına yazıyor, `SubagentStop` anında da cevabı ajanın kendi transkriptinden
+      dolduruyor. İki yarı da soran modelin elinden geçmiyor. Sıradan iş kayıt bırakmıyor.
+      Kural `RULES.md` içine de yazıldı. 11 yeni sav.
 
 - [x] **Borç defteri.** Turun ortasında verilen söz bağlamla birlikte gidiyordu; bir Fable
       danışması tam böyle düştü. `.claude/relay/OWED.md` açıldı: en fazla üç satır, her
@@ -71,7 +92,20 @@ altında aranıyor demektir.
       `live/problems.log`'a yazıyor. `envPinned()` ayrıca kabuk profillerine de bakıyor
       (`.bashrc`, `.zshrc`, `.profile`, `.bash_profile`) — Fable'ın gösterdiği açık.
       Fable'ın onaylamadığı tek şey kalmadı; `sonnet/high` seçimi ise ölçülmeden kalıcı
-      sayılmayacak.
+      sayılmayacak. Deneyin şekli de Fable'dan (001): 156'lık örnek kontrol değil, başka
+      bir rejim. Tek kollu 20-30 sözleşme yerine **sözleşme id'sinin tek/çiftine göre
+      alternatif** — tek opus/medium, çift sonnet/high, aynı projede aynı iki hafta.
+      Sözleşme başına kaydedilecek: dağıtılan model ve efor (rapordan değil kapıdan),
+      hücreyi belirleyen sinyal, `owns` sayısı, en yüksek fan-in, nihai diff satırı, tur,
+      araç hatası, denetçi açıldı mı, tur başına builder+denetçi bedeli ve bugün olmayan
+      bir sütun: **köken** — sonraki bir `reopen --critical` ya da `log.js` kaydı bu
+      sözleşmenin mühürlediği dosyayı adlandırırsa o tur buraya yazılır. Pencere, son
+      sözleşmeden 20 sözleşme sonra kapanır. **Geri dönme eşiği:** sonnet kolunun yeniden
+      açılma oranı opus kolunu 15 puandan fazla geçerse; sonnet kolunda üç ya da daha
+      fazla geri yüklenmiş geç kusur varken opus kolunda sıfır ya da bir varsa; ya da
+      mühürlenen sözleşme başına atfedilen bedel sonnet kolunda opus kolunun en az %25
+      altında değilse. Kol başına 15 ile yalnız büyük etkiler görülür; null sonuç
+      "doğru" değil, "bariz biçimde yanlış değil" demektir ve README'ye böyle yazılır.
 
 - [x] **Çivilenmiş kaçış kolu.** Makinede `TEKNESYUM_GATE_OPEN=1` kullanıcı ortam
       değişkeni olarak kalıcı duruyordu; ana dal kapısı bütün oturumlarda fiilen
