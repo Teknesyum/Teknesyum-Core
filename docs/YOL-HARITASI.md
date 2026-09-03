@@ -54,6 +54,13 @@ altında aranıyor demektir.
 
 ## Bitenler
 
+- [x] **Çivilenmiş kaçış kolu.** Makinede `TEKNESYUM_GATE_OPEN=1` kullanıcı ortam
+      değişkeni olarak kalıcı duruyordu; ana dal kapısı bütün oturumlarda fiilen
+      kapalıydı. Kol artık tek komutluk: `lib.js` içindeki `envPinned()` değişkenin
+      kayıt defterine yazılıp yazılmadığına bakıyor, yazılmışsa `guard.js` kolu yok
+      sayıyor ve engel metni sebebini söylüyor. Makinedeki değer silindi. 3 yeni sav.
+      Bulgu bir dış incelemeden geldi, ölçümle doğrulandı.
+
 - [x] **Ucuz başlangıç.** VidShrink'te 156 sözleşme ölçüldü: 118'i opus'ta koşmuş, 59'u
       1. turda ve `risk:` alanı bile yokmuş. Hepsi `builder` ya da `ui-builder` olarak
       dağıtılmış; `scout` hiç kullanılmamış. Sebep iki katmanlıydı — premium'un builder

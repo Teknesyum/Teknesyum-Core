@@ -313,7 +313,32 @@ function getNotice(relay) {
   return String(cur.text);
 }
 
+const PINNED = {
+  win32: [
+    'HKCU\\Environment',
+    'HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment',
+  ],
+};
+
+function envPinned(name) {
+  if (!/^[A-Z_][A-Z0-9_]*$/i.test(String(name || ''))) return false;
+  const keys = PINNED[process.platform];
+  if (!keys) return false;
+  for (const key of keys) {
+    try {
+      const out = execFileSync('reg', ['query', key, '/v', name], {
+        encoding: 'utf8',
+        windowsHide: true,
+        stdio: ['ignore', 'pipe', 'ignore'],
+      });
+      if (new RegExp('\\b' + name + '\\b', 'i').test(out || '')) return true;
+    } catch {}
+  }
+  return false;
+}
+
 module.exports = {
+  envPinned,
   home,
   configRoot,
   sessionId,

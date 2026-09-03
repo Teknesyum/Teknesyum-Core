@@ -292,6 +292,10 @@ denetim ajanın hangi kabuğu seçtiğine bağlıydı. Komutlarınızın gerisi 
 denetim v0.2.0'a kadar düz metin eşleşmesiydi, `cd` içinden geçip gidiyor, defteri okuyan
 meşru bir tek satır reddediliyordu — güvence kaydın kendisinde.
 
+`TEKNESYUM_GATE_OPEN=1` kapıyı tek bir komut için açıyor. Değişken ortamın kendisine kalıcı
+yazılmışsa yok sayılıyor: açık bırakılmış bir kaçış kolu kaçış kolu değildir. Engel bunu
+söylüyor da; bir makine aylarca kapısı sessizce açık çalışmasın diye.
+
 Relay'i olmayan bir projede kapı kapalı değil açık düşüyor. Birinin ilgisiz deposunu bozan
 bir kanca, kaçırılan bir denetimden daha kötü bir arıza.
 
@@ -541,7 +545,7 @@ node test/all.js
 
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
 kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu ve hiçbir kancanın
-bağlama yazmadığı denetimi üzerine 2.564 sav. Aynı takımı CI Linux, Windows ve
+bağlama yazmadığı denetimi üzerine 2.567 sav. Aynı takımı CI Linux, Windows ve
 macOS'ta koşuyor; geliştirme Windows öncelikli.
 
 ---

@@ -1824,6 +1824,17 @@ function testLifetime() {
   ok('an ordinary command is not touched', bash('git status').status === 0, bash('git status').stderr);
   ok('the gate can be opened on purpose', bash('git push origin main', { TEKNESYUM_GATE_OPEN: '1' }).status === 0);
 
+  if (process.platform === 'win32') {
+    const { envPinned } = require(path.join(CORE, 'hooks', 'lib.js'));
+    const name = 'TEKNESYUM_PIN_PROBE';
+    ok('a variable nobody pinned reads as loose', !envPinned(name));
+    run('reg', ['add', 'HKCU\\Environment', '/v', name, '/t', 'REG_SZ', '/d', '1', '/f'], { cwd: root });
+    const seen = envPinned(name);
+    run('reg', ['delete', 'HKCU\\Environment', '/v', name, '/f'], { cwd: root });
+    ok('a variable pinned in the environment is seen as pinned', seen);
+    ok('an escape hatch nobody pinned still opens the gate', !envPinned('TEKNESYUM_GATE_OPEN'));
+  }
+
   const stop = (extra) =>
     run(process.execPath, [WATCH], {
       cwd: root,

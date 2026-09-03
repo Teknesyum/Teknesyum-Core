@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { read, write, merge, safe, norm, relayRoot, projectRoot, liveDir, logProblem, settings } = require('./lib.js');
+const { read, write, merge, safe, norm, relayRoot, projectRoot, liveDir, logProblem, settings, envPinned } = require('./lib.js');
 const { RANK, isContractName, status, isKnownStatus, field, list, owned } = require('./schema.js');
 
 let raw = '';
@@ -21,8 +21,21 @@ process.stdin.on('end', () => {
   process.exit(0);
 });
 
+let _hatch = null;
+
+function hatchOpen() {
+  if (process.env.TEKNESYUM_GATE_OPEN !== '1') return false;
+  if (_hatch !== null) return _hatch;
+  _hatch = !envPinned('TEKNESYUM_GATE_OPEN');
+  return _hatch;
+}
+
+function hatchNailedOpen() {
+  return process.env.TEKNESYUM_GATE_OPEN === '1' && !hatchOpen();
+}
+
 function failClosed(why, cwd) {
-  if (process.env.TEKNESYUM_GATE_OPEN === '1') return process.exit(0);
+  if (hatchOpen()) return process.exit(0);
   try {
     if (!relayRoot(cwd || process.cwd(), { git: false })) return process.exit(0);
   } catch {
@@ -392,7 +405,7 @@ function merging(j) {
       'The gate does not carry this one, open or closed. Ask for it in one sentence and',
       'let the person who owns the branch answer.'
     );
-  if (process.env.TEKNESYUM_GATE_OPEN === '1') return;
+  if (hatchOpen()) return;
   const open = unfinished(j.cwd);
   if (!open.length) return;
   return block(
@@ -402,7 +415,15 @@ function merging(j) {
     'Work reaches main through the gate, not around it. Close it first:',
     '  node <plugin>/scripts/contract.js complete --id <ID>',
     '',
-    'If this push has nothing to do with that contract, run it with TEKNESYUM_GATE_OPEN=1.'
+    'If this push has nothing to do with that contract, run it with TEKNESYUM_GATE_OPEN=1.',
+    ...(hatchNailedOpen()
+      ? [
+          '',
+          'TEKNESYUM_GATE_OPEN is set permanently in your environment and is being ignored.',
+          'An escape hatch is per command; one left open is no gate at all. Clear it with',
+          '  [Environment]::SetEnvironmentVariable("TEKNESYUM_GATE_OPEN", $null, "User")',
+        ]
+      : [])
   );
 }
 
