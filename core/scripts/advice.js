@@ -125,8 +125,6 @@ function close(relay, model, transcript, runId) {
   const cur = read(pendingFile(relay));
   const list = Array.isArray(cur) ? cur : [];
   if (!list.length) return '';
-  // Completion order and model are not identities. An unrelated builder must
-  // never become the answer to a pending advisor question.
   if (!runId) return '';
   const matches = list.filter((x) => x.runId === String(runId));
   if (matches.length !== 1) return '';

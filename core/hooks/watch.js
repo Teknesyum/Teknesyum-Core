@@ -175,7 +175,6 @@ function record(j) {
   if (j.session_id) rec.sessionId = j.session_id;
 
   const role = roleOf(j);
-  // Agent tool input describes the CHILD; the hook's agent_id belongs to its caller.
   if (!AGENT_TOOLS.test(j.tool_name || '') && role && (!GENERIC.test(role) || !rec.role)) rec.role = role;
   rec.updated = now;
   rec.event = ev;
@@ -241,7 +240,6 @@ function record(j) {
         id: String(childId), files: [], steps: 0, started: now, ...cur,
         role: roleOf(j) || cur.role || '', contract: m ? m[1] : cur.contract || '',
         round: round || cur.round || '',
-        // Requested and resolved models are separate evidence; never invent resolution.
         requestedModel: String(input.model || ''),
         model: String(response.resolvedModel || response.model || cur.model || ''),
         parentId: key, sessionId: j.session_id || cur.sessionId || '', updated: now,
