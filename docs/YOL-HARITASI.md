@@ -19,6 +19,13 @@ Aynı anda tek madde açık kalır.
 
 ## Açık maddeler
 
+- [ ] **`problems.log`'un `shell` satırlarını oku (7 Eylül 2026'dan sonra).** `owns` dışına
+      yazan kabuk çağrıları 0.11.0'dan beri yalnız günlüğe düşüyor. 2-3 günlük kayıt
+      birikince bak: dışarı düşenlerin yüzde kaçı gerçek sızıntı, yüzde kaçı lock/snapshot/
+      build çıktısı. Tekrarlayan yollar bir `ignore` listesi verir. Sonuç ya kapıya dönüşür
+      ya çöpe gider — ölçmeden kapı yapma
+      ([003-kapinin-bash-koru-noktasi.md](danisma/003-kapinin-bash-koru-noktasi.md)).
+
 - [ ] **Sole tam incelemesinin 2. partisi.** 1. parti kapandı (aşağıda). Açık kalanlar,
       [2026-09-04-parti1-sonuc.md](raporlar/2026-09-04-parti1-sonuc.md) ile
       [2026-09-04-core-tam-inceleme.md](raporlar/2026-09-04-core-tam-inceleme.md)'de:
