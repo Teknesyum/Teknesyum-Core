@@ -628,6 +628,11 @@ function testBanner(root) {
   ok('the work line names the file last touched, bare', /statusline\.js/.test(deep) && !/core\/scripts\/statusline/.test(deep), deep);
   ok('a working seat is not flagged as quiet', !/sessiz|quiet/i.test(deep), deep);
 
+  writeContract(root, 'K5', '# K5 tavani yukseltilmis' + String.fromCharCode(10) + 'status: active' + String.fromCharCode(10) + 'ceiling: 250' + String.fromCharCode(10) + 'owns: [src/ok.js]' + String.fromCharCode(10) + 'verify:' + String.fromCharCode(10) + '  - node -e "process.exit(0)"' + String.fromCharCode(10) + '');
+  fs.writeFileSync(path.join(detail, 'd1.json'), JSON.stringify({ id: 'd1', role: 'builder', contract: 'K5', steps: 197, files: [], updated: new Date().toISOString() }));
+  const raised = plain(banner(root));
+  ok('a ceiling raised on purpose is shown as a decision, not as an overrun', /197\/250/.test(raised) && /(yukseltildi|y.kseltildi|raised)/.test(raised), raised);
+
   fs.writeFileSync(path.join(detail, 'd1.json'), JSON.stringify({ id: 'd1', role: 'builder', contract: 'K4', steps: 12, files: [], updated: new Date(Date.now() - 4 * 60 * 1000).toISOString() }));
   const hush = plain(banner(root));
   ok('a seat that has gone quiet says how long', /4 Dk Sessiz|4 Min Quiet/.test(hush), hush);
@@ -1906,6 +1911,50 @@ function testLifetime() {
   ok('once the ceiling is spent the contract stops being writable', spent.status === 2, spent.stdout + spent.stderr);
   ok('and the refusal names the ceiling', /ceiling/.test(spent.stderr), spent.stderr);
   ok('it points at the checkpoint rather than at a wider contract', /Checkpoint/.test(spent.stderr), spent.stderr);
+
+
+  const shell = (cmd, who) => ({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Bash',
+    agent_id: who,
+    cwd: root,
+    tool_input: { command: cmd },
+  });
+  const shellSpent = hook(shell('node tools/strip.js .', 'w-d'), root);
+  ok('a spent ceiling stops the shell too, not only the write tools', shellSpent.status === 2 && /ceiling/.test(shellSpent.stderr), shellSpent.stdout + shellSpent.stderr);
+  const shellClose = hook(shell('node core/scripts/contract.js complete --id W2', 'w-d'), root);
+  ok('but the command that closes the contract still gets through a spent ceiling', shellClose.status === 0, shellClose.stdout + shellClose.stderr);
+
+  writeContract(root, 'W4', '# W4\nstatus: active\nowns: [src/ok.js]\nverify:\n  - node -e "process.exit(0)"\n');
+  fs.writeFileSync(path.join(live, 'w-f.json'), JSON.stringify({ id: 'w-f', contract: 'W4', contractSteps: 1, files: [] }));
+  const nested = path.join(root, 'nested');
+  fs.mkdirSync(nested, { recursive: true });
+  fs.writeFileSync(path.join(nested, 'a.js'), 'module.exports = 1;\n');
+  run('git', ['init', '-q', '.'], { cwd: nested });
+  run('git', ['config', 'user.email', 't@t.t'], { cwd: nested });
+  run('git', ['config', 'user.name', 'T'], { cwd: nested });
+  run('git', ['add', '-A'], { cwd: nested });
+  run('git', ['commit', '-q', '-m', 'seed'], { cwd: nested });
+  const seen = hook(shell('node -e ""', 'w-f'), root);
+  ok('the first shell call under a contract only notes where the nested repositories are', seen.status === 0, seen.stdout + seen.stderr);
+  fs.writeFileSync(path.join(nested, 'a.js'), 'module.exports = 2;\n');
+  const spill = hook(shell('node -e ""', 'w-f'), root);
+  ok('a contract that changes a repository of its own is refused', spill.status === 2, spill.stdout + spill.stderr);
+  ok('and the refusal names the repository it walked into', /nested/.test(spill.stderr) && /repository of its own/.test(spill.stderr), spill.stderr);
+  let plog = '';
+  try { plog = fs.readFileSync(path.join(live, 'problems.log'), 'utf8'); } catch {}
+  ok('the spill is written to the problem log', /W4 spilled into nested/.test(plog), plog);
+  fs.writeFileSync(path.join(root, 'src', 'stray.js'), 'module.exports = 3;' + String.fromCharCode(10) + '');
+  run(process.execPath, [WATCH], {
+    cwd: root,
+    input: JSON.stringify({ hook_event_name: 'PostToolUse', tool_name: 'Bash', agent_id: 'w-f', cwd: root, tool_input: { command: 'node tools/strip.js .' } }),
+  });
+  let slog = '';
+  try { slog = fs.readFileSync(path.join(live, 'problems.log'), 'utf8'); } catch {}
+  ok('a shell call that writes outside owns is logged without stopping the agent', slog.includes('W4 | node tools/strip.js . |') && slog.includes('src/stray.js'), slog);
+
+  const again = hook(shell('node -e ""', 'w-f'), root);
+  ok('it refuses once, not for the rest of the contract', again.status === 0, again.stdout + again.stderr);
 
   writeContract(root, 'W3', '# W3\nstatus: active\nowns: [src/ok.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
   fs.writeFileSync(path.join(live, 'w-e.json'), JSON.stringify({ id: 'w-e', contract: 'W3', contractSteps: 40, files: [] }));

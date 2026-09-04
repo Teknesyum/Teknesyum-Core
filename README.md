@@ -253,8 +253,23 @@ and nothing had ever tied the two together — the single most repeated defect i
 document that summarises something no table holds can opt out with `manset: off`.
 
 A contract may carry `ceiling: <n>` — the number of tool steps it is worth. Past it the guard
-stops accepting writes under that contract, so a run that is not converging ends without
-anyone watching it. Contracts without the line get a generous default. When a session ends
+stops accepting work under that contract, so a run that is not converging ends without
+anyone watching it. The count covers every tool, the shell included; it used to cover only
+the writing tools, which meant a contract that did its work through `Bash` could pass its
+ceiling by fifty steps and the statusline would report the overrun without anything acting
+on it. The one command still let through is the one that closes the contract. Contracts
+without the line get a generous default.
+
+The guard also holds the boundary that is not a path list. A checkout can have independent
+git repositories sitting inside it; a script that walks the tree from the root will write
+into them, and neither `owns` nor the ceiling ever saw that, because both were read from
+the tool call and the tool call was `Bash`. The guard now notes where those repositories are
+and what they had uncommitted, and refuses the next shell call if one of them moved. There
+is no threshold to tune: a contract has no innocent reason to change a repository that is
+not its own. A shell call that dirties tracked files outside `owns` in the checkout itself
+is a different matter — that one is only written to `live/problems.log`, because a lock
+file or a snapshot is often the honest answer, and a gate without a measured false-positive
+rate is a guess. When a session ends
 with a contract still `active` and no agent holding it, the ledger gets a `stale` entry and
 the statusline says so. It is a record, not a refusal to exit — the session closes as usual
 and nothing is written into the model's context.
@@ -577,7 +592,9 @@ otherwise. A spawn that carried no description at all says `Assigned` and nothin
 invented answer would be worse than none.
 
 A seat also says how many files it has touched and how long it has been running, and the
-work line counts its steps against the contract's ceiling — `Adım 12/150`. That last part is
+work line counts its steps against the contract's ceiling — `Adım 12/150`, and
+`Adım 197/250 (yükseltildi)` when the ceiling was raised on purpose, so a large number reads
+as a decision rather than as an overrun. That last part is
 the whole rule: a counter that only ever grows is decoration, so a number goes on the line
 only once it has something to be measured against. Steps have a ceiling, so they earn a
 place; open logs never did, and were cut.
@@ -619,7 +636,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,630 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,639 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
 scaffold, the cue, the banner, the handoff note, the debt ledger, the consultation record, and
 one check that no hook writes into context. Alongside it, 17 audit regressions and 33

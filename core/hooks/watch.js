@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { read, write, merge, safe, relayRoot, ensureRelay, checkoutRoot, liveDir, sessionId, setNotice, t } = require('./lib.js');
+const { read, write, merge, safe, relayRoot, ensureRelay, checkoutRoot, liveDir, logProblem, sessionId, setNotice, t } = require('./lib.js');
 const { status, isContractName, field, owned, raiseOf } = require('./schema.js');
 const seal = require('./seal.js');
 
@@ -159,6 +159,31 @@ function counsel(j, r) {
   }
 }
 
+const SHELL_TOOLS = /^(Bash|PowerShell)$/;
+
+function outsideLog(r, rec, j) {
+  let owns = [];
+  try {
+    owns = owned(fs.readFileSync(path.join(r.relay, 'contracts', rec.contract + '.md'), 'utf8')) || [];
+  } catch {
+    return;
+  }
+  let out = [];
+  try {
+    out = seal.outsideChanges(checkoutRoot(r), owns);
+  } catch {
+    return;
+  }
+  const seen = new Set(rec.outsideSeen || []);
+  const fresh = out.filter((x) => !seen.has(x));
+  if (!fresh.length) return;
+  rec.outsideSeen = out.slice(0, 200);
+  const cmd = String((j.tool_input || {}).command || '')
+    .split(String.fromCharCode(10))[0]
+    .slice(0, 120);
+  logProblem(r.relay, 'shell', rec.contract + ' | ' + cmd + ' | ' + fresh.slice(0, 8).join(' '));
+}
+
 function record(j) {
   const cwd = j.cwd || process.cwd();
   const r = relayRoot(cwd, { git: false }) || (AGENT_TOOLS.test(j.tool_name || '') ? ensureRelay(cwd) : null);
@@ -211,6 +236,7 @@ function record(j) {
     rec.fails = 0;
     bumpTally(live, true, 0, key, rec.contract || '');
     rec.tool = j.tool_name || '';
+    if (rec.contract && SHELL_TOOLS.test(j.tool_name || '')) outsideLog(r, rec, j);
     if (WRITE_TOOLS.test(j.tool_name || '')) {
       const t = j.tool_input || {};
       const target = t.file_path || t.notebook_path || '';

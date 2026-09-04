@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { read, safe, norm, relayRoot, projectRoot, checkoutRoot, pathKey, inside, liveDir, logProblem, settings } = require('./lib.js');
+const { read, write, safe, norm, relayRoot, projectRoot, checkoutRoot, pathKey, inside, liveDir, logProblem, settings } = require('./lib.js');
 const { RANK, isContractName, status, isKnownStatus, field, owned, definitions, fault: schemaFault } = require('./schema.js');
 
 let raw = '';
@@ -290,10 +290,14 @@ function ceilingOf(body) {
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : CEILING;
 }
 
+const RELAY_CLI = /contract\.js["']?\s+(complete|close|submit|audit|check|precheck|tier)\b/i;
+
 function exhausted(target, agentId) {
   if (!agentId) return;
-  const abs = path.resolve(target);
-  if (/\/\.claude\/relay\//i.test(norm(abs))) return;
+  if (target) {
+    const abs = path.resolve(target);
+    if (/\/\.claude\/relay\//i.test(norm(abs))) return;
+  }
   const r = relayRoot((call && call.cwd) || process.cwd(), { git: false });
   if (!r) return;
   const rec = read(bindingFile(r.relay, agentId));
@@ -314,6 +318,85 @@ function exhausted(target, agentId) {
     'Record where you got to under ## Checkpoint and submit, or ask T0 for a',
     'smaller contract. To raise the bar on purpose, add a "ceiling: <n>" line.'
   );
+}
+
+const NESTED_TTL = 10 * 60 * 1000;
+
+function nestedRepos(root, depth) {
+  const out = [];
+  let entries = [];
+  try {
+    entries = fs.readdirSync(root, { withFileTypes: true });
+  } catch {
+    return out;
+  }
+  for (const e of entries) {
+    if (!e.isDirectory()) continue;
+    if (e.name === '.git') continue;
+    if (/^(node_modules|trash|bin|obj|dist|target|vendor|.claude|.vs|.venv)$/i.test(e.name)) continue;
+    const full = path.join(root, e.name);
+    if (fs.existsSync(path.join(full, '.git'))) out.push(full);
+    else if ((depth || 0) < 3) out.push(...nestedRepos(full, (depth || 0) + 1));
+  }
+  return out;
+}
+
+function dirtyOf(dir) {
+  const r = spawnSync('git', ['-C', dir, 'status', '--porcelain'], {
+    encoding: 'utf8',
+    windowsHide: true,
+    timeout: 5000,
+  });
+  if (r.status !== 0) return [];
+  return String(r.stdout || '')
+    .split(String.fromCharCode(10))
+    .map((x) => x.trim())
+    .filter(Boolean);
+}
+
+function spilled(agentId) {
+  if (!agentId) return;
+  const r = relayRoot((call && call.cwd) || process.cwd(), { git: false });
+  if (!r) return;
+  const rec = read(bindingFile(r.relay, agentId));
+  if (!rec || !rec.contract) return;
+  const root = checkoutRoot(r);
+  if (!root) return;
+  const f = path.join(liveDir(r.relay), '_nested.json');
+  let state = read(f);
+  const stale =
+    !state ||
+    !Array.isArray(state.repos) ||
+    state.contract !== rec.contract ||
+    Date.now() - Number(state.at || 0) > NESTED_TTL;
+  if (stale) {
+    const kept = (state && state.dirty) || {};
+    const fresh = { contract: rec.contract, at: Date.now(), repos: nestedRepos(root, 0), dirty: {} };
+    for (const d of fresh.repos) fresh.dirty[d] = Object.prototype.hasOwnProperty.call(kept, d) ? kept[d] : dirtyOf(d);
+    write(f, fresh);
+    if (!state || !Array.isArray(state.repos)) return;
+    state = fresh;
+  }
+  for (const d of state.repos) {
+    if (!fs.existsSync(path.join(d, '.git'))) continue;
+    const now = dirtyOf(d);
+    const before = state.dirty[d] || [];
+    const fresh = now.filter((x) => before.indexOf(x) < 0);
+    if (!fresh.length) continue;
+    state.dirty[d] = now;
+    write(f, state);
+    const where = path.relative(root, d).split(String.fromCharCode(92)).join('/');
+    logProblem(r.relay, 'guard', rec.contract + ' spilled into ' + where + ': ' + fresh.slice(0, 3).join(' | '));
+    return block(
+      rec.contract + ' has changed files inside ' + where + ', a repository of its own.',
+      '',
+      ...fresh.slice(0, 6).map((x) => '  ' + x),
+      fresh.length > 6 ? '  ... and ' + (fresh.length - 6) + ' more' : '',
+      '',
+      'A contract owns paths in its own checkout. A bulk rewrite that walks the tree must',
+      'skip nested repositories; revert them there before going on.'
+    );
+  }
 }
 
 function boundary(target, agentId) {
@@ -454,7 +537,12 @@ function decide(j) {
   const t = j.tool_input || {};
   const agentId = j.agent_id || null;
 
-  if (tool === 'Bash' || tool === 'PowerShell') return merging(j);
+  if (tool === 'Bash' || tool === 'PowerShell') {
+    const cmd = String(t.command || '');
+    if (!RELAY_CLI.test(cmd)) exhausted('', agentId);
+    spilled(agentId);
+    return merging(j);
+  }
 
   if (/^(Write|Edit|NotebookEdit)$/.test(tool)) {
     const target = t.file_path || t.notebook_path || '';

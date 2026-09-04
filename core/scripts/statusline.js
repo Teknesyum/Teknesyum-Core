@@ -186,10 +186,10 @@ function seatCell(row, c) {
 }
 
 function goalOf(relay, id, cache) {
-  const none = { title: '', round: 0, cap: 0 };
+  const none = { title: '', round: 0, cap: 0, raised: false };
   if (!id) return none;
   if (cache[id] !== undefined) return cache[id];
-  const got = { title: '', round: 0, cap: STEP_CEILING };
+  const got = { title: '', round: 0, cap: STEP_CEILING, raised: false };
   try {
     const head = fs.readFileSync(path.join(relay, 'contracts', id + '.md'), 'utf8').slice(0, 400);
     const m = /^#[ \t]+(.+)$/m.exec(head);
@@ -197,7 +197,10 @@ function goalOf(relay, id, cache) {
     const n = /^round:[ \t]*(\d+)/m.exec(head);
     if (n) got.round = Number(n[1]);
     const c = /^ceiling:[ \t]*(\d+)/m.exec(head);
-    if (c && Number(c[1]) > 0) got.cap = Number(c[1]);
+    if (c && Number(c[1]) > 0) {
+      got.cap = Number(c[1]);
+      got.raised = got.cap !== STEP_CEILING;
+    }
   } catch {}
   cache[id] = got;
   return got;
@@ -240,6 +243,7 @@ function seats(relay) {
       what: g.title || (c && c.task) || '',
       steps: Number(id ? row.contractSteps || row.steps || 0 : row.steps || 0),
       cap: id ? g.cap : 0,
+      raised: id ? g.raised : false,
       file: lastFile(row),
       files: Array.isArray(row.files) ? new Set(row.files).size : 0,
       age: ageOf(row, now),
@@ -295,7 +299,16 @@ function workLines(list) {
   const lines = [];
   for (const s of seen.slice(0, room)) {
     const bits = [s.what];
-    if (s.steps) bits.push(soft(titleCase(t('line.step')) + ' ' + s.steps + (s.cap ? '/' + s.cap : '')));
+    if (s.steps)
+      bits.push(
+        soft(
+          titleCase(t('line.step')) +
+            ' ' +
+            s.steps +
+            (s.cap ? '/' + s.cap : '') +
+            (s.raised ? ' ' + t('line.raised') : '')
+        )
+      );
     if (s.file) bits.push(soft(titleCase(t('line.last'))) + ' ' + s.file);
     lines.push('└ ' + fit(bits, BANNER_CAP - 2));
   }

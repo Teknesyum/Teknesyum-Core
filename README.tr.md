@@ -252,8 +252,21 @@ kusur buydu. Hiçbir tablonun tutmadığı bir şeyi özetleyen belge `manset: o
 muaf tutulabiliyor.
 
 Sözleşme `ceiling: <n>` taşıyabilir — kaç araç adımı ettiği. Tavanı geçince kapı kancası o
-sözleşme altındaki yazmaları kabul etmiyor; yakınsamayan bir koşu kimse başında beklemeden
-bitiyor. Satırı olmayan sözleşmeye cömert bir varsayılan veriliyor. Oturum, hâlâ `active`
+sözleşme altındaki işi kabul etmiyor; yakınsamayan bir koşu kimse başında beklemeden
+bitiyor. Sayım bütün araçları kapsıyor, kabuk dâhil; eskiden yalnız yazma araçlarını
+kapsıyordu, yani işini `Bash` üzerinden yapan bir sözleşme tavanı elli adım aşabiliyor ve
+statusline aşımı yazdığı hâlde kimse ona bakmıyordu. Geçmesine izin verilen tek komut,
+sözleşmeyi kapatan komut. Satırı olmayan sözleşmeye cömert bir varsayılan veriliyor.
+
+Kapı, yol listesi olmayan sınırı da tutuyor. Bir checkout'un içinde bağımsız git depoları
+durabiliyor; kökten ağacı gezen bir betik onlara da yazıyor ve bunu ne `owns` ne de tavan
+görüyordu, çünkü ikisi de araç çağrısından okunuyordu ve araç çağrısı `Bash`'ti. Kapı artık
+o depoların nerede olduğunu ve nelerinin işlenmemiş durduğunu not ediyor; biri kımıldarsa
+bir sonraki kabuk çağrısını reddediyor. Ayarlanacak eşik yok: bir sözleşmenin kendisine ait
+olmayan bir depoyu değiştirmek için masum bir sebebi olmuyor. Checkout'un kendi içinde
+`owns` dışındaki izlenen dosyaları kirleten kabuk çağrısı ayrı mesele — o yalnız
+`live/problems.log` dosyasına yazılıyor, çünkü bir lock dosyası ya da snapshot çoğu zaman
+dürüst cevaptır ve yanlış pozitif oranı ölçülmemiş bir kapı tahmindir. Oturum, hâlâ `active`
 olan ve hiçbir ajanın tutmadığı bir sözleşmeyle biterse deftere `stale` kaydı düşüyor ve
 statusline bunu söylüyor. Bu bir kayıt, çıkışın reddi değil — oturum her zamanki gibi
 kapanıyor ve modelin bağlamına tek kelime yazılmıyor.
@@ -570,7 +583,8 @@ Hiç açıklama taşımayan bir çağrı için yalnız `Atandı` yazıyor — uy
 cevaptan kötü olurdu.
 
 Koltuk ayrıca kaç dosyaya dokunduğunu ve ne kadardır koştuğunu söylüyor; iş satırı da adımı
-sözleşmenin tavanına karşı sayıyor — `Adım 12/150`. Asıl kural burada: yalnızca büyüyen sayaç
+sözleşmenin tavanına karşı sayıyor — `Adım 12/150`, tavan bilerek yükseltilmişse
+`Adım 197/250 (yükseltildi)`; büyük sayı aşım değil karar olarak okunuyor. Asıl kural burada: yalnızca büyüyen sayaç
 süstür, o yüzden bir sayı satıra ancak karşılaştıracağı bir şey bulduğunda çıkıyor. Adımın
 tavanı var, yerini hak ediyor; açık günlüğün hiç olmadı, o yüzden kesildi.
 
@@ -612,7 +626,7 @@ node test/all.js
 
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
 kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu, borç defteri, danışma
-kaydı ve hiçbir kancanın bağlama yazmadığı denetimi üzerine 2.630 sav. Yanında 17 denetim
+kaydı ve hiçbir kancanın bağlama yazmadığı denetimi üzerine 2.639 sav. Yanında 17 denetim
 regresyonu ve 33 kapanış senaryosu, gerçek kancaları yapay bir host üzerinden sürüyor:
 kendi kodunu doğrulayan worktree, turuna bağlı denetçi, doğrulama sırasında değişen diff,
 boş kabul maddesi, karşılanmamış bağımlılık ve ikinci bir defter satırı üretmeden kurtarılan
