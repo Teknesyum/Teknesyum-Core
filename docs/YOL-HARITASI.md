@@ -19,6 +19,13 @@ Aynı anda tek madde açık kalır.
 
 ## Açık maddeler
 
+- [ ] **Sole tam incelemesinin 2. partisi.** 1. parti kapandı (aşağıda). Açık kalanlar,
+      [2026-09-04-parti1-sonuc.md](raporlar/2026-09-04-parti1-sonuc.md) ile
+      [2026-09-04-core-tam-inceleme.md](raporlar/2026-09-04-core-tam-inceleme.md)'de:
+      Opus/Fable yönlendirmesi, kalan kayıt/graf/oturum kusurları, gerçek host üzerinde
+      uçtan uca doğrulama, güçlü kabuk izolasyonu. Eski 12 karşı örneğin 5'i hâlâ
+      üretilebiliyor. Tasarruf yüzdesi ölçülmedi.
+
 - [ ] **VidShrink saha raporlarının kalanı.** Onaylanan 1-2-3 kuruldu (aşağıda). Geriye
       [vidshrink-tasnif.md](raporlar/vidshrink-tasnif.md) içindeki 4. dalga kaldı: heredoc
       dışı ayrıştırma, döngü içindeki yıkıcı komut, `orphans()` C# yanlış tavsiyesi, ekran
@@ -73,6 +80,15 @@ bu yüzden bir basamak aşağıda.
 altında aranıyor demektir.
 
 ## Bitenler
+
+- [x] **Sole tam incelemesi, 1. parti.** Rapor:
+      [2026-09-04-parti1-sonuc.md](raporlar/2026-09-04-parti1-sonuc.md), kanıt
+      [2026-09-04-parti1-kanit.json](raporlar/2026-09-04-parti1-kanit.json). Mührü işin
+      kendisi olmadan veren beş yol kapandı: yanlış worktree'de doğrulama, eski ya da
+      ilgisiz denetçi, denetimden sonra değişen diff, çalıştırılabilir hiçbir şey içermeyen
+      kabul maddesi, karşılanmamış bağımlılık. Yarım kalan kapanış artık
+      `audits/closures/` günlüğünden ikinci bir defter satırı üretmeden kurtarılıyor.
+      Takım: 2.630 sav, 17 regresyon, 33 kapanış senaryosu, timeout probe. v0.10.0.
 
 - [x] **Fable'ın iki basamağına gelen itiraz (002).** Danışma:
       [002-denetci-ve-iki-basamak.md](danisma/002-denetci-ve-iki-basamak.md). Fable'ın
