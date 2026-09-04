@@ -624,7 +624,7 @@ function testBanner(root) {
   fs.writeFileSync(path.join(detail, 'd1.json'), JSON.stringify({ id: 'd1', role: 'builder', contract: 'K4', steps: 12, files: ['core/scripts/statusline.js'], updated: new Date().toISOString() }));
   const deep = plain(banner(root));
   ok('a second round is named on the seat line', / R2/.test(deep.split(String.fromCharCode(10))[0]), deep);
-  ok('the work line counts the steps that seat took against its ceiling', /12\/150/.test(deep), deep);
+  ok('the step a seat is on is not written on the banner', !/12/.test(deep), deep);
   ok('the work line names the file last touched, bare', /statusline\.js/.test(deep) && !/core\/scripts\/statusline/.test(deep), deep);
   ok('a working seat is not flagged as quiet', !/sessiz|quiet/i.test(deep), deep);
 
@@ -638,18 +638,27 @@ function testBanner(root) {
   fs.mkdirSync(danisma, { recursive: true });
   fs.writeFileSync(path.join(danisma, '_pending.json'), JSON.stringify([{ file: '001-x.md', model: 'fable', toolUseId: 'tu1', runId: '', at: Date.now() }]));
   const consulted = plain(banner(root));
-  ok('an open consultation is named on the banner while it is open', /Fable (Dan|Consult)/i.test(consulted), consulted);
+  ok('an open consultation is named on the banner while it is open', /Fable (önerisi soruluyor|is being asked)/i.test(consulted), consulted);
   fs.writeFileSync(path.join(danisma, '_pending.json'), '[]');
-  ok('and it leaves the banner once the answer is in', !/Fable (Dan|Consult)/i.test(plain(banner(root))), plain(banner(root)));
+
+  const CUE = path.join(CORE, 'hooks', 'cue.js');
+  const sharp = lib.liveDir(path.join(root, '.claude', 'relay'));
+  run(process.execPath, [CUE], { cwd: root, input: JSON.stringify({ hook_event_name: 'UserPromptSubmit', cwd: root, prompt: '?? kademe tasarimini netlestir' }) });
+  const marked = plain(banner(root));
+  ok('a marked turn says on the banner that the request is being sharpened', /netleştiriliyor|sharpening/i.test(marked), marked);
+  ok('and the mark itself costs the turn nothing', fs.existsSync(path.join(sharp, '_sharpen.json')), sharp);
+  run(process.execPath, [CUE], { cwd: root, input: JSON.stringify({ hook_event_name: 'UserPromptSubmit', cwd: root, prompt: 'siradan bir istek' }) });
+  ok('an unmarked turn clears it', !/netleştiriliyor|sharpening/i.test(plain(banner(root))), plain(banner(root)));
+  ok('and it leaves the banner once the answer is in', !/Fable (önerisi soruluyor|is being asked)/i.test(plain(banner(root))), plain(banner(root)));
 
   writeContract(root, 'K5', '# K5 tavani yukseltilmis' + String.fromCharCode(10) + 'status: active' + String.fromCharCode(10) + 'ceiling: 250' + String.fromCharCode(10) + 'owns: [src/ok.js]' + String.fromCharCode(10) + 'verify:' + String.fromCharCode(10) + '  - node -e "process.exit(0)"' + String.fromCharCode(10) + '');
   fs.writeFileSync(path.join(detail, 'd1.json'), JSON.stringify({ id: 'd1', role: 'builder', contract: 'K5', steps: 197, files: [], updated: new Date().toISOString() }));
   const raised = plain(banner(root));
-  ok('a ceiling raised on purpose is shown as a decision, not as an overrun', /197\/250/.test(raised) && /(yukseltildi|y.kseltildi|raised)/.test(raised), raised);
+  ok('and neither is the ceiling it was raised to', !/197/.test(raised) && !/250/.test(raised), raised);
 
   fs.writeFileSync(path.join(detail, 'd1.json'), JSON.stringify({ id: 'd1', role: 'builder', contract: 'K4', steps: 12, files: [], updated: new Date(Date.now() - 4 * 60 * 1000).toISOString() }));
   const hush = plain(banner(root));
-  ok('a seat that has gone quiet says how long', /4 Dk Sessiz|4 Min Quiet/.test(hush), hush);
+  ok('a seat that has gone quiet says how long', /4 dk sessiz|4 min quiet/.test(hush), hush);
   fs.rmSync(path.join(detail, 'd1.json'), { force: true });
   fs.rmSync(path.join(root, '.claude', 'relay', 'contracts', 'K4.md'), { force: true });
   for (const x of parked2) fs.renameSync(path.join(detail, x + '.parked'), path.join(detail, x));

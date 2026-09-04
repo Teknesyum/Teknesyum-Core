@@ -70,7 +70,11 @@ veriyor, [tablo](#ajanlar) aşağıda.
   kayıt gerçekten koşmuş bir ajanı adıyla göstermek zorunda.
 - **Rol dosyaları** — Yapıcı, planlayıcı, denetçi, danışman. Rol metnini yalnızca o rolü
   taşıyan ajan ödüyor, sizin oturumunuz değil.
-- **Banner ve statusline** — O an ne olduğunu tek satırda söyler. Pano değil.
+- **Banner ve statusline** — O an ne olduğunu tek satırda söyler. Pano değil. Koltuğu ve
+  koştuğu maliyet gözünü yazar — `Fable-Medium Danışman`, yani merdivenin hangi basamağını
+  ödediğiniz görünür — işin adını, en son dokunduğu dosyayı ve `??` işaretli bir turda iş
+  başlamadan isteğin netleştirildiğini. Kimsenin bakmadığı sayılar yok: adım sayacı yok,
+  dosya sayacı yok, geçen dakika yok.
 - **Devir notu** — `.claude/relay/HANDOFF.md` projenin nerede olduğunu yazar: ne açık, en
   son ne kapandı, hangi dal. Oturum biterken ve sıkıştırmadan önce bir kanca tazeler, yani
   bedeli yok; Claude
@@ -675,7 +679,7 @@ node test/all.js
 
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
 kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu, borç defteri, danışma
-kaydı ve hiçbir kancanın bağlama yazmadığı denetimi üzerine 2.669 sav. Yanında 17 denetim
+kaydı ve hiçbir kancanın bağlama yazmadığı denetimi üzerine 2.672 sav. Yanında 17 denetim
 regresyonu ve 33 kapanış senaryosu, gerçek kancaları yapay bir host üzerinden sürüyor:
 kendi kodunu doğrulayan worktree, turuna bağlı denetçi, doğrulama sırasında değişen diff,
 boş kabul maddesi, karşılanmamış bağımlılık ve ikinci bir defter satırı üretmeden kurtarılan

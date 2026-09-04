@@ -73,6 +73,10 @@ decide it together, and [the table](#the-agents) is below.
 - **Role files** — Builder, planner, auditor, advisor. The role text is paid for by the
   agent holding it, not by your session.
 - **Banner and statusline** — One line for what is happening right now. Not a dashboard.
+  It names the seat and the cost cell it is running in — `Fable-Medium Advisor`, so you can
+  see which rung of the ladder is being paid for — what the job is, the file last touched,
+  and, on a `??` turn, that the request is being sharpened before any work starts. Counts
+  nobody acts on are not there: no step tally, no file tally, no minutes elapsed.
 - **A handoff note** — `.claude/relay/HANDOFF.md` says where the project stands: what is
   open, what closed last, which branch. A hook refreshes it when the session ends and again
   before a compaction, so it costs nothing, and any model can read it — not only Claude.
@@ -690,7 +694,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,669 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,672 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
 scaffold, the cue, the banner, the handoff note, the debt ledger, the consultation record, and
 one check that no hook writes into context. Alongside it, 17 audit regressions and 33

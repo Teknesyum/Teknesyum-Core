@@ -23,6 +23,7 @@ function cue(j) {
     try {
       require('./notify.js').stamp('prompt', Date.now(), j.cwd);
     } catch {}
+    markSharpen(j);
     return join(owedCue(j), logCue(j));
   }
   if (ev === 'SessionStart') {
@@ -32,6 +33,20 @@ function cue(j) {
     return join(owedCue(j), relayCue(j));
   }
   return '';
+}
+
+const MARK = /^\s*\?\?/;
+
+function markSharpen(j) {
+  const r = relayRoot(j.cwd || process.cwd(), { git: false });
+  if (!r) return;
+  const f = path.join(liveDir(r.relay), '_sharpen.json');
+  try {
+    if (MARK.test(String(j.prompt || ''))) {
+      fs.mkdirSync(path.dirname(f), { recursive: true });
+      fs.writeFileSync(f, JSON.stringify({ at: Date.now() }) + '\n', 'utf8');
+    } else fs.rmSync(f, { force: true });
+  } catch {}
 }
 
 function join(a, b) {

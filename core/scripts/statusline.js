@@ -222,12 +222,6 @@ function quietFor(row, now) {
   return gap >= QUIET_MS ? Math.floor(gap / 60000) : 0;
 }
 
-function ageOf(row, now) {
-  const at = Date.parse(row.started || '');
-  if (!at) return 0;
-  return Math.floor((now - at) / 60000);
-}
-
 function lastFile(row) {
   const list = Array.isArray(row.files) ? row.files : [];
   if (!list.length) return '';
@@ -243,9 +237,15 @@ function consulting(relay) {
     const live = rows.filter((x) => now - Number(x.at || 0) < CONSULT_MS);
     if (!live.length) return '';
     const who = familyOf(live[live.length - 1].model);
-    return titleCase(who ? who + ' ' + t('line.consulting') : t('line.consulting'));
+    return who ? titleCase(who) + ' ' + t('line.consulting') : t('line.consulting');
   } catch {}
   return '';
+}
+
+function sharpening(relay) {
+  const r = read(path.join(liveDir(relay), '_sharpen.json'));
+  if (!r || !r.at) return '';
+  return Date.now() - Number(r.at) < CONSULT_MS ? t('line.sharpening') : '';
 }
 
 function seats(relay) {
@@ -264,12 +264,7 @@ function seats(relay) {
       id,
       round: g.round,
       what: titleCase(g.title || (c && c.task) || ''),
-      steps: Number(id ? row.contractSteps || row.steps || 0 : row.steps || 0),
-      cap: id ? g.cap : 0,
-      raised: id ? g.raised : false,
       file: lastFile(row),
-      files: Array.isArray(row.files) ? new Set(row.files).size : 0,
-      age: ageOf(row, now),
       quiet: quietFor(row, now),
     };
   });
@@ -283,13 +278,8 @@ function group(list) {
     if (hit) {
       hit.n += 1;
       hit.quiet = Math.max(hit.quiet, s.quiet);
-      hit.age = Math.max(hit.age, s.age);
-      hit.files += s.files;
     } else
-      out.push({
-        key, n: 1, role: s.role, cell: s.cell, id: s.id, round: s.round,
-        quiet: s.quiet, age: s.age, files: s.files,
-      });
+      out.push({ key, n: 1, role: s.role, cell: s.cell, id: s.id, round: s.round, quiet: s.quiet });
   }
   return out;
 }
@@ -305,14 +295,12 @@ function seatLine(list) {
     const seat = (g.n > 1 ? g.n + '× ' : '') + [g.cell, g.role].filter(Boolean).join(' ');
     parts.push(bold(seat));
     if (g.id) parts.push(g.id + (g.round > 1 ? ' R' + g.round : ''));
-    if (g.files) parts.push(soft(g.files + ' ' + titleCase(t('line.files'))));
-    if (g.age) parts.push(soft(g.age + ' ' + titleCase(t('line.age'))));
-    if (g.quiet) parts.push(chip(g.quiet + ' ' + titleCase(t('line.quiet'))));
+    if (g.quiet) parts.push(chip(g.quiet + ' ' + t('line.quiet')));
   }
   return parts;
 }
 
-function workLines(list) {
+function workLines(list, asked) {
   const seen = [];
   for (const s of list) {
     if (!s.what || seen.some((x) => x.what === s.what)) continue;
@@ -322,21 +310,12 @@ function workLines(list) {
   const lines = [];
   for (const s of seen.slice(0, room)) {
     const bits = [s.what];
-    if (s.steps)
-      bits.push(
-        soft(
-          titleCase(t('line.step')) +
-            ' ' +
-            s.steps +
-            (s.cap ? '/' + s.cap : '') +
-            (s.raised ? ' ' + titleCase(t('line.raised')) : '')
-        )
-      );
-    if (s.file) bits.push(soft(titleCase(t('line.last'))) + ' ' + s.file);
+    if (s.file) bits.push(soft((asked ? asked + ':' : t('line.last')) + ' ') + s.file);
+    else if (asked) bits.push(chip(asked));
     lines.push('└ ' + fit(bits, BANNER_CAP - 2));
   }
   const rest = seen.length - lines.length;
-  if (rest > 0) lines.push('└ ' + soft('+' + rest + ' ' + titleCase(t('line.more'))));
+  if (rest > 0) lines.push('└ ' + soft('+' + rest + ' ' + t('line.more')));
   return lines;
 }
 
@@ -398,14 +377,16 @@ function draw(cwd, phase) {
   }
 
   const asked = consulting(r.relay);
+  const mark = sharpening(r.relay);
   const list = seats(r.relay);
   if (list.length) {
     const head = seatLine(list);
-    if (asked) head.push(chip(asked));
-    return [headLine(head)].concat(workLines(list)).join('\n');
+    if (mark) head.unshift(chip(titleCase(mark)));
+    return [headLine(head)].concat(workLines(list, asked)).join('\n');
   }
 
   const bits = [];
+  if (mark) bits.push(mark);
   const k = contracts(r.relay);
   if (k && k.total) {
     const sub = [];

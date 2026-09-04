@@ -247,29 +247,17 @@
     "en": "agent",
     "tr": "ajan"
   },
-  "line.files": {
-    "en": "files",
-    "tr": "dosya"
-  },
-  "line.age": {
-    "en": "min running",
-    "tr": "dk sürüyor"
-  },
   "line.quiet": {
     "en": "min quiet",
     "tr": "dk sessiz"
   },
-  "line.step": {
-    "en": "step",
-    "tr": "adım"
-  },
   "line.consulting": {
-    "en": "consulted",
-    "tr": "danışılıyor"
+    "en": "is being asked",
+    "tr": "önerisi soruluyor"
   },
-  "line.raised": {
-    "en": "(raised)",
-    "tr": "(yükseltildi)"
+  "line.sharpening": {
+    "en": "sharpening the request",
+    "tr": "iş netleştiriliyor"
   },
   "line.last": {
     "en": "last:",
