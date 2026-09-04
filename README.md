@@ -442,9 +442,12 @@ single tool leaves no step behind, so nothing on the band moved while it ran; th
 consultation is now read from the consultation record itself, and the band says who is
 being asked until the answer is in.
 
-The bell rings when the run actually stops. A waiting notice raised while an agent is still
-working is silence, because the thing it announces has not happened yet: the band is still
-blinking, and a sound there is noise about nothing.
+The bell rings when the run actually stops, and it tells a stop from a nudge by the name the
+notice carries rather than by how long ago something moved. A permission prompt, an agent
+that needs an answer and a dialog an MCP server put up are the user being called, and they
+ring. An idle reminder, a sign-in, a quota notice, a subagent finishing under a turn that
+goes on — none of those are a stop, and none of them ring. A build that sends no name at all
+falls back to the old reading: silence while a seat is still working.
 
 The bell belongs to the project that rang it. There is one stamp file, but the last bell is
 filed under the checkout it came from, so three projects finishing near each other each get
@@ -660,7 +663,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,653 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,660 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
 scaffold, the cue, the banner, the handoff note, the debt ledger, the consultation record, and
 one check that no hook writes into context. Alongside it, 17 audit regressions and 33

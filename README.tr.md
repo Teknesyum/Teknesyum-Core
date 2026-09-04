@@ -434,9 +434,12 @@ Danışman turu da bandda. Tek aracı çağırmadan cevap veren bir danışma ar
 bırakmıyor, dolayısıyla koşarken bandda hiçbir şey kımıldamıyordu; açık danışma artık danışma
 kaydının kendisinden okunuyor ve band, cevap gelene kadar kime sorulduğunu yazıyor.
 
-Zil, koşu gerçekten durduğunda çalıyor. Ajan hâlâ çalışırken kalkan bekleme bildirimi sessiz,
-çünkü duyurduğu şey henüz olmadı: band hâlâ yanıp sönüyor, oradaki ses hiçbir şeyin
-gürültüsü.
+Zil, koşu gerçekten durduğunda çalıyor; duraklamayla dürtmeyi, bir şey en son ne zaman
+kımıldadığına göre değil bildirimin taşıdığı ada göre ayırıyor. İzin sorusu, cevap bekleyen
+ajan ve bir MCP sunucusunun açtığı pencere kullanıcıyı çağırıyor; bunlar çalıyor. Boşta
+kalma hatırlatması, oturum açma, kota bildirimi, süren bir turun altında biten alt ajan —
+hiçbiri duraklama değil, hiçbiri çalmıyor. Hiç ad göndermeyen bir sürümde eski okuma
+devreye giriyor: koltuk hâlâ çalışıyorsa sessizlik.
 
 Zil, onu çaldıran projenin. Damga dosyası tek, ama son zil geldiği checkout'un altına
 yazılıyor; yani birbirine yakın biten üç proje kendi sesini duyuyor, ilki diğerlerini
@@ -647,7 +650,7 @@ node test/all.js
 
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
 kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu, borç defteri, danışma
-kaydı ve hiçbir kancanın bağlama yazmadığı denetimi üzerine 2.653 sav. Yanında 17 denetim
+kaydı ve hiçbir kancanın bağlama yazmadığı denetimi üzerine 2.660 sav. Yanında 17 denetim
 regresyonu ve 33 kapanış senaryosu, gerçek kancaları yapay bir host üzerinden sürüyor:
 kendi kodunu doğrulayan worktree, turuna bağlı denetçi, doğrulama sırasında değişen diff,
 boş kabul maddesi, karşılanmamış bağımlılık ve ikinci bir defter satırı üretmeden kurtarılan

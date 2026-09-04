@@ -2640,9 +2640,18 @@ function testChime() {
   const beat = require(path.join(CORE, 'hooks', 'lib.js')).liveDir(path.join(root, '.claude', 'relay'));
   fs.mkdirSync(beat, { recursive: true });
   fs.writeFileSync(path.join(beat, 'busy1.json'), JSON.stringify({ id: 'busy1', role: 'builder', updated: new Date().toISOString() }));
+  const asks = (kind) => n.wanted({ notification_type: kind, cwd: root });
+  ok('a permission prompt is the user being called', asks('permission_prompt'));
+  ok('so is an agent that needs an answer', asks('agent_needs_input'));
+  ok('and a dialog an MCP server put up', asks('elicitation_dialog') && asks('elicitation_url_dialog'));
+  ok('an idle nudge is not', !asks('idle_prompt'));
+  ok('neither is a subagent finishing under a turn that goes on', !asks('agent_completed'));
+  ok('nor a sign-in, a quota notice or an elicitation closing', !asks('auth_success') && !asks('quota_auto_resume_fired') && !asks('elicitation_complete'));
+
   ok('the waiting bell holds its tongue while a seat is still working', n.busy(root), fs.readdirSync(beat).join(' '));
   fs.writeFileSync(path.join(beat, 'busy1.json'), JSON.stringify({ id: 'busy1', role: 'builder', updated: new Date(Date.now() - 5 * 60 * 1000).toISOString() }));
   ok('and rings once the work has actually gone quiet', !n.busy(root));
+  ok('a build that names no type falls back to that reading', n.wanted({ cwd: root }));
   fs.rmSync(path.join(beat, 'busy1.json'), { force: true });
 
   const hooks = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8'));

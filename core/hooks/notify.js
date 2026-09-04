@@ -163,6 +163,14 @@ function play(field, event) {
   }
 }
 
+const CALLS_YOU = /^(permission_prompt|agent_needs_input|elicitation_dialog|elicitation_url_dialog)$/;
+
+function wanted(j) {
+  const kind = String((j && j.notification_type) || '');
+  if (kind) return CALLS_YOU.test(kind);
+  return !busy(j && j.cwd);
+}
+
 const BUSY_MS = 45000;
 
 function busy(cwd) {
@@ -244,7 +252,7 @@ function run(j) {
   if (!field || field.muted) return;
   const now = Date.now();
   if (event === 'done' && tooQuick(field, now, j.cwd)) return;
-  if (event === 'waiting' && busy(j.cwd)) return;
+  if (event === 'waiting' && !wanted(j)) return;
   if (recently(event, now, j.cwd)) return;
   if (play(field, event)) stamp(event, now, j.cwd);
 }
@@ -265,6 +273,8 @@ module.exports = {
   MIN_MS,
   BUSY_MS,
   busy,
+  CALLS_YOU,
+  wanted,
   tooQuick,
   stampFile,
   scope,
