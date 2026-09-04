@@ -11,3 +11,4 @@ logs/openlogs/
 .claude/relay/audits/
 .claude/relay/map.json
 .claude/relay/map.md
+.claude/settings.local.json
