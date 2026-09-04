@@ -2597,20 +2597,22 @@ function testChime() {
   const cue = path.join(CORE, 'hooks', 'cue.js');
   const watch = path.join(CORE, 'hooks', 'watch.js');
   const env = (extra) => ({ ...process.env, CLAUDE_CONFIG_DIR: home, TEKNESYUM_BEEP_SESSIZ: '1', ...extra });
-  const stamps = () => {
+  const stampsRaw = () => {
     try {
       return JSON.parse(fs.readFileSync(path.join(home, 'teknesyum-beep-last.json'), 'utf8'));
     } catch {
       return {};
     }
   };
+  const stamps = (where) => stampsRaw()[path.resolve(where || root).toLowerCase()] || {};
 
   run(process.execPath, [cue], {
     cwd: root,
     env: env(),
     input: JSON.stringify({ hook_event_name: 'UserPromptSubmit', prompt: 'merhaba', cwd: root }),
   });
-  ok('the prompt leaves a timestamp', Number(stamps().prompt) > 0, JSON.stringify(stamps()));
+  ok('the prompt leaves a timestamp', Number(stamps().prompt) > 0, JSON.stringify(stampsRaw()));
+  ok('the timestamp is filed under the project it came from', Object.keys(stampsRaw()).indexOf(path.resolve(root).toLowerCase()) >= 0, Object.keys(stampsRaw()).join(' '));
 
   const n = require(notify);
   const settings = n.resolveSettings(root);
@@ -2620,9 +2622,18 @@ function testChime() {
   const old = process.env.CLAUDE_CONFIG_DIR;
   process.env.CLAUDE_CONFIG_DIR = home;
   const now = Number(stamps().prompt) + 1000;
-  ok('a default install never withholds the bell', !n.tooQuick(settings.events.done, now));
-  ok('a project that asks for one gets it', n.tooQuick({ minMs: 20000 }, now));
-  ok('and it lapses once the turn is long enough', !n.tooQuick({ minMs: 20000 }, now + 60000));
+  ok('a default install never withholds the bell', !n.tooQuick(settings.events.done, now, root));
+  ok('a project that asks for one gets it', n.tooQuick({ minMs: 20000 }, now, root));
+  ok('and it lapses once the turn is long enough', !n.tooQuick({ minMs: 20000 }, now + 60000, root));
+  ok('another project is not held back by this one', !n.tooQuick({ minMs: 20000 }, now, path.join(root, 'baska-proje')));
+
+  const iki = path.join(root, 'ikinci-proje');
+  const beep = Date.now();
+  n.stamp('done', beep, root);
+  ok('a bell just rung here is not rung again', n.recently('done', beep + 1000, root));
+  ok('but the next project still gets its own', !n.recently('done', beep + 1000, iki));
+  n.stamp('done', beep + 1000, iki);
+  ok('and each project keeps its own last bell', n.recently('done', beep + 2000, iki) && Number(stamps(iki).done) === beep + 1000, JSON.stringify(stampsRaw()));
   if (old === undefined) delete process.env.CLAUDE_CONFIG_DIR;
   else process.env.CLAUDE_CONFIG_DIR = old;
 

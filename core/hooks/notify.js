@@ -191,32 +191,47 @@ function stampFile() {
   return path.join(configRoot(), 'teknesyum-beep-last.json');
 }
 
-function recently(event, simdi) {
+function scope(cwd) {
+  try {
+    return path.resolve(cwd || process.cwd()).toLowerCase();
+  } catch {
+    return '.';
+  }
+}
+
+function slot(cwd) {
   const d = read(stampFile()) || {};
-  const last = Number(d[event]) || 0;
+  const v = d[scope(cwd)];
+  return v && typeof v === 'object' ? v : {};
+}
+
+function recently(event, simdi, cwd) {
+  const last = Number(slot(cwd)[event]) || 0;
   return !!last && simdi - last < (WINDOW[event] || 0);
 }
 
-function stamp(event, simdi) {
+function stamp(event, simdi, cwd) {
   const f = stampFile();
   const d = read(f) || {};
-  d[event] = simdi;
+  const k = scope(cwd);
+  if (!d[k] || typeof d[k] !== 'object') d[k] = {};
+  d[k][event] = simdi;
   try {
     fs.mkdirSync(path.dirname(f), { recursive: true });
     fs.writeFileSync(f, JSON.stringify(d));
   } catch {}
 }
 
-function playedRecently(event, simdi) {
-  if (recently(event, simdi)) return true;
-  stamp(event, simdi);
+function playedRecently(event, simdi, cwd) {
+  if (recently(event, simdi, cwd)) return true;
+  stamp(event, simdi, cwd);
   return false;
 }
 
-function tooQuick(field, now) {
+function tooQuick(field, now, cwd) {
   const min = Number(field.minMs) || 0;
   if (min <= 0) return false;
-  const at = Number((read(stampFile()) || {}).prompt) || 0;
+  const at = Number(slot(cwd).prompt) || 0;
   return !!at && now - at < min;
 }
 
@@ -228,10 +243,10 @@ function run(j) {
   const field = cfg.events[event];
   if (!field || field.muted) return;
   const now = Date.now();
-  if (event === 'done' && tooQuick(field, now)) return;
+  if (event === 'done' && tooQuick(field, now, j.cwd)) return;
   if (event === 'waiting' && busy(j.cwd)) return;
-  if (recently(event, now)) return;
-  if (play(field, event)) stamp(event, now);
+  if (recently(event, now, j.cwd)) return;
+  if (play(field, event)) stamp(event, now, j.cwd);
 }
 
 module.exports = {
@@ -252,6 +267,7 @@ module.exports = {
   busy,
   tooQuick,
   stampFile,
+  scope,
   playedRecently,
   recently,
   stamp,

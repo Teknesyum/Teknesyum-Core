@@ -438,6 +438,10 @@ Zil, koşu gerçekten durduğunda çalıyor. Ajan hâlâ çalışırken kalkan b
 çünkü duyurduğu şey henüz olmadı: band hâlâ yanıp sönüyor, oradaki ses hiçbir şeyin
 gürültüsü.
 
+Zil, onu çaldıran projenin. Damga dosyası tek, ama son zil geldiği checkout'un altına
+yazılıyor; yani birbirine yakın biten üç proje kendi sesini duyuyor, ilki diğerlerini
+yutmuyor.
+
 Araç çağrılarını izleyen kancalar artık matcher taşıyor, yani dosya okumak süreç açtırmıyor.
 
 ### Yalnız çağrılınca çalışan araçlar
@@ -643,7 +647,7 @@ node test/all.js
 
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
 kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu, borç defteri, danışma
-kaydı ve hiçbir kancanın bağlama yazmadığı denetimi üzerine 2.648 sav. Yanında 17 denetim
+kaydı ve hiçbir kancanın bağlama yazmadığı denetimi üzerine 2.653 sav. Yanında 17 denetim
 regresyonu ve 33 kapanış senaryosu, gerçek kancaları yapay bir host üzerinden sürüyor:
 kendi kodunu doğrulayan worktree, turuna bağlı denetçi, doğrulama sırasında değişen diff,
 boş kabul maddesi, karşılanmamış bağımlılık ve ikinci bir defter satırı üretmeden kurtarılan

@@ -446,6 +446,10 @@ The bell rings when the run actually stops. A waiting notice raised while an age
 working is silence, because the thing it announces has not happened yet: the band is still
 blinking, and a sound there is noise about nothing.
 
+The bell belongs to the project that rang it. There is one stamp file, but the last bell is
+filed under the checkout it came from, so three projects finishing near each other each get
+their own sound instead of the first one swallowing the rest.
+
 The hooks that watch tool calls carry a matcher, so reading a file does not start a process.
 
 ### Tools that only run when called
@@ -656,7 +660,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,648 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,653 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
 scaffold, the cue, the banner, the handoff note, the debt ledger, the consultation record, and
 one check that no hook writes into context. Alongside it, 17 audit regressions and 33

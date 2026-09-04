@@ -21,7 +21,7 @@ function cue(j) {
   const ev = j.hook_event_name || '';
   if (ev === 'UserPromptSubmit') {
     try {
-      require('./notify.js').stamp('prompt', Date.now());
+      require('./notify.js').stamp('prompt', Date.now(), j.cwd);
     } catch {}
     return join(owedCue(j), logCue(j));
   }
