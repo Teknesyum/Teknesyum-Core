@@ -46,14 +46,16 @@ bağlamınızda oturmuyor — rolün bedelini yalnız o rolü taşıyan ajan öd
 | `scribe` | karar taşımayan mekanik iş: yeniden adlandırma, dil, envanter |
 | `auditor` | yüksek riskli sözleşmeyi bağımsız doğrular, tek dosyaya bile yazamaz |
 | `advisor` | tek soru, tek görüş; soranın bir üst basamağındaki modelden |
-| `clarifier` | kullanıcının işaretlediği isteği netleştirir, cümleyi asla yeniden yazmaz |
 
-`??` ile başlayan prompt, iş başlamadan netleştiriciyi açıyor. Kullanıcının cümlesi üstte
-yazıldığı gibi duruyor ve ilk okunan şey o; rol yalnız ekliyor, ek ile cümle çelişirse
-cümle kazanıyor ve soran tek soruyla geri dönüyor. Netleştirici kendi başına dosya
+`??` ile başlayan prompt, iş başlamadan danışmanı açıyor ve ondan görüş değil netleştirme
+istiyor. Aynı rol, aynı dosya: işaretli tur yalnız iki şeyi değiştiriyor — kullanıcının
+cümlesi girdinin ilk satırı oluyor, ve dönüş bir hüküm yerine bir soru, bir olgu ve bir
+yol oluyor.
+
+Cümle üstte yazıldığı gibi duruyor ve ilk okunan şey o; rol yalnız ekliyor, ek ile cümle
+çelişirse cümle kazanıyor ve soran tek soruyla geri dönüyor. Danışman kendi başına dosya
 okumuyor — soranın zaten topladığı şey eline veriliyor — ve plan değil bir sıra ile bir
-yasak döndürüyor. Danışmanın basamağında koşuyor, yani işaret danışmanla aynı modeli
-satın alıyor ve işaretsiz turda hiçbir şey koşmuyor.
+yasak döndürüyor. İşaretsiz turda hiçbir şey koşmuyor.
 
 Hangisine hangi modelin gideceği ajan ajan sizin seçiminiz değil — modla rol birlikte karar
 veriyor, [tablo](#ajanlar) aşağıda.
@@ -658,7 +660,7 @@ node test/all.js
 
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
 kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu, borç defteri, danışma
-kaydı ve hiçbir kancanın bağlama yazmadığı denetimi üzerine 2.674 sav. Yanında 17 denetim
+kaydı ve hiçbir kancanın bağlama yazmadığı denetimi üzerine 2.664 sav. Yanında 17 denetim
 regresyonu ve 33 kapanış senaryosu, gerçek kancaları yapay bir host üzerinden sürüyor:
 kendi kodunu doğrulayan worktree, turuna bağlı denetçi, doğrulama sırasında değişen diff,
 boş kabul maddesi, karşılanmamış bağımlılık ve ikinci bir defter satırı üretmeden kurtarılan
