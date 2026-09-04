@@ -251,6 +251,10 @@
     "en": "step",
     "tr": "adım"
   },
+  "line.consulting": {
+    "en": "consulted",
+    "tr": "danışılıyor"
+  },
   "line.raised": {
     "en": "(raised)",
     "tr": "(yükseltildi)"

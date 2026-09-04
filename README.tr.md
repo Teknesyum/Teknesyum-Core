@@ -156,6 +156,10 @@ node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js
 Kurulum `~/.claude/teknesyum/config.json` dosyasını yazıyor ve statusline'ı bağlıyor. Bir
 sonraki oturum başında geçerli oluyor.
 
+Bağlantı kendini onarıyor. Eski bir kurulumdan kalan statusline komutu artık var olmayan bir
+dosyayı gösterebiliyor ve satır sessizce hiç görünmüyor — ayar duruyor gibi görünüyor ama
+hiçbir şey yapmıyor. Betiği yerinde olmayan komut artık saygı görmüyor, değiştiriliyor.
+
 ---
 
 ## Nasıl çalışıyor
@@ -421,6 +425,19 @@ ne değiştiğini ya da şimdi seni neyin beklediğini taşıyor, ikisi de yoksa
 Okuduğu kayıt, oturum ilk ajanını başlattığı anda doğuyor; sözleşme açılması gerekmiyor.
 Yani hiç sözleşme yazmayan bir oturum da bandını görüyor.
 
+Bandın yazdığı şey, eklentinin geri kalanının yazdığı gibi yazılıyor: iş satırı da
+eklentinin bastığı her başlık gibi Her Kelimenin İlk Harfi Büyük; koltuk, çözümlenen kimliği
+değil modelin ailesini taşıyor, yani satır bir modelle açılıp başkasıyla bitmiyor. Çözümlenen
+kimliği kayıt ve mühür saklamayı sürdürüyor; kısaltma yalnız çizim anında oluyor.
+
+Danışman turu da bandda. Tek aracı çağırmadan cevap veren bir danışma arkasında adım
+bırakmıyor, dolayısıyla koşarken bandda hiçbir şey kımıldamıyordu; açık danışma artık danışma
+kaydının kendisinden okunuyor ve band, cevap gelene kadar kime sorulduğunu yazıyor.
+
+Zil, koşu gerçekten durduğunda çalıyor. Ajan hâlâ çalışırken kalkan bekleme bildirimi sessiz,
+çünkü duyurduğu şey henüz olmadı: band hâlâ yanıp sönüyor, oradaki ses hiçbir şeyin
+gürültüsü.
+
 Araç çağrılarını izleyen kancalar artık matcher taşıyor, yani dosya okumak süreç açtırmıyor.
 
 ### Yalnız çağrılınca çalışan araçlar
@@ -626,7 +643,7 @@ node test/all.js
 
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
 kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu, borç defteri, danışma
-kaydı ve hiçbir kancanın bağlama yazmadığı denetimi üzerine 2.639 sav. Yanında 17 denetim
+kaydı ve hiçbir kancanın bağlama yazmadığı denetimi üzerine 2.648 sav. Yanında 17 denetim
 regresyonu ve 33 kapanış senaryosu, gerçek kancaları yapay bir host üzerinden sürüyor:
 kendi kodunu doğrulayan worktree, turuna bağlı denetçi, doğrulama sırasında değişen diff,
 boş kabul maddesi, karşılanmamış bağımlılık ve ikinci bir defter satırı üretmeden kurtarılan

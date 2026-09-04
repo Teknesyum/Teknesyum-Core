@@ -319,7 +319,11 @@ function rewire() {
   if (!s || !s.statusLine || typeof s.statusLine.command !== 'string') return false;
   const cur = s.statusLine.command;
   if (cur.indexOf('bridge.js') < 0 || cur.indexOf(bridge) >= 0) return false;
-  if (!/teknesyum[\\/-]/i.test(cur)) return false;
+  const at = /"([^"]+bridge\.js)"/.exec(cur);
+  const dead = at ? !fs.existsSync(at[1]) : false;
+  if (!/teknesyum[\\/-]/i.test(cur)){
+    if (!dead) return false;
+  }
   if (!fs.existsSync(bridge)) return false;
   s.statusLine = { type: 'command', command: 'node "' + bridge + '"', padding: 0 };
   if (!write(p, s)) return false;

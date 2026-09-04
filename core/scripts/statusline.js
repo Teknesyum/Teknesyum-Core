@@ -154,12 +154,21 @@ function roleName(role) {
   return name === key ? String(role) : name;
 }
 
+const FAMILY = /(haiku|sonnet|opus|fable)/i;
+
+function familyOf(model) {
+  const m = FAMILY.exec(String(model || ''));
+  return m ? m[1].toLowerCase() : String(model || '');
+}
+
 function cellName(model, effort) {
   if (!model) return '';
-  return model + (effort ? '-' + effort : '');
+  return familyOf(model) + (effort ? '-' + effort : '');
 }
 
 const CELLS = {};
+
+const CONSULT_MS = 30 * 60 * 1000;
 
 function tierCell(role) {
   if (!role) return null;
@@ -225,6 +234,20 @@ function lastFile(row) {
   return String(list[list.length - 1]).split('/').pop();
 }
 
+function consulting(relay) {
+  try {
+    const f = path.join(path.dirname(path.dirname(relay)), 'docs', 'danisma', '_pending.json');
+    const rows = JSON.parse(fs.readFileSync(f, 'utf8'));
+    if (!Array.isArray(rows)) return '';
+    const now = Date.now();
+    const live = rows.filter((x) => now - Number(x.at || 0) < CONSULT_MS);
+    if (!live.length) return '';
+    const who = familyOf(live[live.length - 1].model);
+    return titleCase(who ? who + ' ' + t('line.consulting') : t('line.consulting'));
+  } catch {}
+  return '';
+}
+
 function seats(relay) {
   const a = agents(relay);
   if (!a.running) return [];
@@ -240,7 +263,7 @@ function seats(relay) {
       cell: titleCase(seatCell(row, c)),
       id,
       round: g.round,
-      what: g.title || (c && c.task) || '',
+      what: titleCase(g.title || (c && c.task) || ''),
       steps: Number(id ? row.contractSteps || row.steps || 0 : row.steps || 0),
       cap: id ? g.cap : 0,
       raised: id ? g.raised : false,
@@ -306,7 +329,7 @@ function workLines(list) {
             ' ' +
             s.steps +
             (s.cap ? '/' + s.cap : '') +
-            (s.raised ? ' ' + t('line.raised') : '')
+            (s.raised ? ' ' + titleCase(t('line.raised')) : '')
         )
       );
     if (s.file) bits.push(soft(titleCase(t('line.last'))) + ' ' + s.file);
@@ -374,8 +397,13 @@ function draw(cwd, phase) {
     return '';
   }
 
+  const asked = consulting(r.relay);
   const list = seats(r.relay);
-  if (list.length) return [headLine(seatLine(list))].concat(workLines(list)).join('\n');
+  if (list.length) {
+    const head = seatLine(list);
+    if (asked) head.push(chip(asked));
+    return [headLine(head)].concat(workLines(list)).join('\n');
+  }
 
   const bits = [];
   const k = contracts(r.relay);
@@ -387,6 +415,7 @@ function draw(cwd, phase) {
     if (k.count.open) sub.push(k.count.open + ' ' + t('line.contract') + ' ' + t('line.open'));
     bits.push(sub.length ? sub.join(' · ') : k.total + ' ' + t('line.contracts'));
   }
+  if (asked) bits.push(asked);
   const p = problems(r.relay);
   if (p) bits.push(p + ' ' + t('line.problems'));
   if (!gateOn()) bits.push(t('line.gateOff'));

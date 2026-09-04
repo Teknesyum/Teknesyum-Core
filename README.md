@@ -156,6 +156,11 @@ node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js
 Setup writes `~/.claude/teknesyum/config.json` and wires the statusline. It applies at the
 next session start.
 
+The wiring repairs itself. A statusline command left over from an older install can point
+at a file that is no longer there, and the line simply stops appearing — the setting looks
+present and does nothing. A command whose script is missing is now replaced rather than
+respected.
+
 ---
 
 ## How it works
@@ -426,6 +431,21 @@ waiting on you, and stays empty when there is neither. The record it reads from 
 the moment a session spawns its first agent, not only when a contract is opened, so a
 session that never writes a contract still gets its band.
 
+What the band names, it names the way the rest of the plugin writes: the work line is
+title-cased like every other heading the plugin prints, and a seat carries the model's
+family rather than the resolved id, so a row reads `Opus-Medium Worker` instead of opening
+with one model and ending with another. The resolved id is still what the record and the
+seal keep; the shortening happens at the moment of drawing and nowhere else.
+
+An advisor consultation is on the band too. A consult that answers without touching a
+single tool leaves no step behind, so nothing on the band moved while it ran; the open
+consultation is now read from the consultation record itself, and the band says who is
+being asked until the answer is in.
+
+The bell rings when the run actually stops. A waiting notice raised while an agent is still
+working is silence, because the thing it announces has not happened yet: the band is still
+blinking, and a sound there is noise about nothing.
+
 The hooks that watch tool calls carry a matcher, so reading a file does not start a process.
 
 ### Tools that only run when called
@@ -636,7 +656,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,639 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,648 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
 scaffold, the cue, the banner, the handoff note, the debt ledger, the consultation record, and
 one check that no hook writes into context. Alongside it, 17 audit regressions and 33

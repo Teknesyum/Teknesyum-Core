@@ -535,9 +535,9 @@ function testBanner(root) {
   ok('the banner names the role in the user language', /Dan\u0131\u015fman|Advisor/.test(crewLine), crewLine);
   ok('no English role name survives', !/Worker|Builder|Auditor|Scout|Scribe/.test(crewLine), crewLine);
   ok('the banner names the model and effort', /Fable-Medium/.test(crewLine), crewLine);
-  ok('the banner says what the agent was asked, in its own words', /banner tasarimi soruldu/.test(crewLine), crewLine);
+  ok('the banner says what the agent was asked, in its own words', /Banner Tasarimi Soruldu/.test(crewLine), crewLine);
   ok('a working agent pushes the profile off the line', !/Premium|Normal|Eco/.test(crewLine), crewLine);
-  ok('the work reads on a line of its own', /└ banner tasarimi soruldu/.test(crewLine), crewLine);
+  ok('the work reads on a line of its own', /└ Banner Tasarimi Soruldu/.test(crewLine), crewLine);
 
   fs.writeFileSync(path.join(liveB, '_duyuru.json'), JSON.stringify({ text: 'T7 kapandi', at: Date.now() }));
   ok('the closing band reports what finished', /T7 Kapandi/.test(plain(banner(root, 'foot'))), plain(banner(root, 'foot')));
@@ -565,10 +565,10 @@ function testBanner(root) {
     { role: 'Explore', model: '', task: 'rozet metni arandi', at: Date.now() },
   ]));
   const busy = plain(banner(root));
-  ok('with several seats the banner still says what for', /rozet metni arandi/.test(busy), busy);
-  ok('each distinct task is named once', /lisans dosyalari tarandi/.test(busy), busy);
+  ok('with several seats the banner still says what for', /Rozet Metni Arandi/.test(busy), busy);
+  ok('each distinct task is named once', /Lisans Dosyalari Tarandi/.test(busy), busy);
   ok('every job gets a branch line of its own', busy.split(String.fromCharCode(10)).filter((l) => l.startsWith('└')).length === 2, busy);
-  ok('the seat is named before the work, in that order', busy.indexOf(String.fromCharCode(10)) < busy.indexOf('rozet metni arandi'), busy);
+  ok('the seat is named before the work, in that order', busy.indexOf(String.fromCharCode(10)) < busy.indexOf('Rozet Metni Arandi'), busy);
   ok('the seat line carries the mark, the work lines do not', busy.split(String.fromCharCode(10))[0].startsWith('**Teknesyum** ▸ '), busy);
   fs.writeFileSync(path.join(liveB, '_calls.json'), JSON.stringify([{ role: 'scout', model: 'sonnet', task: 'tier effort probe', at: Date.now() }]));
   fs.writeFileSync(path.join(liveB, 'a6.json'), JSON.stringify({ id: 'a6', role: 'scout', updated: new Date().toISOString(), files: [] }));
@@ -584,7 +584,7 @@ function testBanner(root) {
   fs.rmSync(path.join(liveB, 'a8.json'), { force: true });
   fs.writeFileSync(path.join(liveB, 'a9.json'), JSON.stringify({ id: 'a9', role: 'scout', contract: 'K3', updated: new Date().toISOString(), files: [] }));
   const bound = plain(banner(root));
-  ok('a contract-bound seat answers with the contract goal', /K3 rozet metni duzeni/.test(bound), bound);
+  ok('a contract-bound seat answers with the contract goal', /K3 Rozet Metni Duzeni/.test(bound), bound);
   ok('the contract goal outranks the spawn description', !/lisans dosyalari/.test(bound), bound);
   ok('the seat line names the contract it is bound to', bound.split(String.fromCharCode(10))[0].indexOf('K3') > 0, bound);
 
@@ -599,7 +599,7 @@ function testBanner(root) {
   ok('the spawn log carries the contract named in the prompt', logged.some((c) => c.contract === 'K3'), JSON.stringify(logged));
   fs.writeFileSync(path.join(liveB, 'a9.json'), JSON.stringify({ id: 'a9', role: 'scout', updated: new Date().toISOString(), files: [] }));
   const viaCall = plain(banner(root));
-  ok('an unbound seat still gets the goal through the spawn log', /K3 rozet metni duzeni/.test(viaCall), viaCall);
+  ok('an unbound seat still gets the goal through the spawn log', /K3 Rozet Metni Duzeni/.test(viaCall), viaCall);
   fs.rmSync(path.join(liveB, 'spawner.json'), { force: true });
   fs.rmSync(path.join(root, '.claude', 'relay', 'contracts', 'K3.md'), { force: true });
 
@@ -627,6 +627,20 @@ function testBanner(root) {
   ok('the work line counts the steps that seat took against its ceiling', /12\/150/.test(deep), deep);
   ok('the work line names the file last touched, bare', /statusline\.js/.test(deep) && !/core\/scripts\/statusline/.test(deep), deep);
   ok('a working seat is not flagged as quiet', !/sessiz|quiet/i.test(deep), deep);
+
+  writeContract(root, 'K6', '# K6 kodek olcum matrisi' + String.fromCharCode(10) + 'status: active' + String.fromCharCode(10) + 'owns: [src/ok.js]' + String.fromCharCode(10) + 'verify:' + String.fromCharCode(10) + '  - node -e "process.exit(0)"' + String.fromCharCode(10) + '');
+  fs.writeFileSync(path.join(detail, 'd1.json'), JSON.stringify({ id: 'd1', role: 'builder', contract: 'K6', model: 'claude-sonnet-5', steps: 4, files: [], updated: new Date().toISOString() }));
+  const named = plain(banner(root));
+  ok('a resolved model id is shown as its family, not as a hyphenated product name', /Sonnet/.test(named) && !/Claude-Sonnet-5/i.test(named), named);
+  ok('the work a seat is doing is written the way the banner writes everything else', /K6 Kodek Olcum Matrisi/.test(named), named);
+
+  const danisma = path.join(root, 'docs', 'danisma');
+  fs.mkdirSync(danisma, { recursive: true });
+  fs.writeFileSync(path.join(danisma, '_pending.json'), JSON.stringify([{ file: '001-x.md', model: 'fable', toolUseId: 'tu1', runId: '', at: Date.now() }]));
+  const consulted = plain(banner(root));
+  ok('an open consultation is named on the banner while it is open', /Fable (Dan|Consult)/i.test(consulted), consulted);
+  fs.writeFileSync(path.join(danisma, '_pending.json'), '[]');
+  ok('and it leaves the banner once the answer is in', !/Fable (Dan|Consult)/i.test(plain(banner(root))), plain(banner(root)));
 
   writeContract(root, 'K5', '# K5 tavani yukseltilmis' + String.fromCharCode(10) + 'status: active' + String.fromCharCode(10) + 'ceiling: 250' + String.fromCharCode(10) + 'owns: [src/ok.js]' + String.fromCharCode(10) + 'verify:' + String.fromCharCode(10) + '  - node -e "process.exit(0)"' + String.fromCharCode(10) + '');
   fs.writeFileSync(path.join(detail, 'd1.json'), JSON.stringify({ id: 'd1', role: 'builder', contract: 'K5', steps: 197, files: [], updated: new Date().toISOString() }));
@@ -1593,6 +1607,10 @@ function testRaces() {
   const twice = fs.readFileSync(wired, 'utf8');
   run(process.execPath, ['-e', "require(process.argv[1]).rewire()", path.join(CORE, 'hooks', 'lib.js').split(String.fromCharCode(92)).join('/')], { cwd: root, env: Object.assign({}, process.env, { CLAUDE_CONFIG_DIR: cfgHome }) });
   ok('a statusline already on this copy is left alone', fs.readFileSync(wired, 'utf8') === twice);
+  fs.writeFileSync(wired, JSON.stringify({ statusLine: { type: 'command', command: 'node "C:/nowhere/rel/core/scripts/bridge.js"' } }));
+  run(process.execPath, ['-e', "require(process.argv[1]).rewire()", path.join(CORE, 'hooks', 'lib.js').split(String.fromCharCode(92)).join('/')], { cwd: root, env: Object.assign({}, process.env, { CLAUDE_CONFIG_DIR: cfgHome }) });
+  const revived = JSON.parse(fs.readFileSync(wired, 'utf8')).statusLine.command;
+  ok('a statusline pointing at a file that is gone is repointed even without our name in the path', revived.indexOf('nowhere') < 0 && revived.indexOf('bridge.js') > 0, revived);
 
 
 
@@ -1920,10 +1938,17 @@ function testLifetime() {
     cwd: root,
     tool_input: { command: cmd },
   });
+  const w2body = fs.readFileSync(path.join(root, CONTRACTS, 'W2.md'), 'utf8');
+  const parked = hook({ ...edit('x'), tool_input: { file_path: path.join(root, CONTRACTS, 'W2.md'), content: w2body + String.fromCharCode(10) + '## Checkpoint' + String.fromCharCode(10) + String.fromCharCode(10) + 'yarida kaldi' + String.fromCharCode(10) } }, root);
+  ok('a spent contract can still be written to inside the relay, so the run can be handed over', parked.status === 0, parked.stdout + parked.stderr);
   const shellSpent = hook(shell('node tools/strip.js .', 'w-d'), root);
   ok('a spent ceiling stops the shell too, not only the write tools', shellSpent.status === 2 && /ceiling/.test(shellSpent.stderr), shellSpent.stdout + shellSpent.stderr);
   const shellClose = hook(shell('node core/scripts/contract.js complete --id W2', 'w-d'), root);
   ok('but the command that closes the contract still gets through a spent ceiling', shellClose.status === 0, shellClose.stdout + shellClose.stderr);
+
+  writeContract(root, 'W2', '# W2' + String.fromCharCode(10) + 'status: active' + String.fromCharCode(10) + 'ceiling: 400' + String.fromCharCode(10) + 'owns: [src/ok.js]' + String.fromCharCode(10) + 'verify:' + String.fromCharCode(10) + '  - node -e "process.exit(0)"' + String.fromCharCode(10) + '');
+  const lifted = hook(edit('src/ok.js'), root);
+  ok('raising the ceiling on purpose lets the same contract go on', lifted.status === 0, lifted.stdout + lifted.stderr);
 
   writeContract(root, 'W4', '# W4\nstatus: active\nowns: [src/ok.js]\nverify:\n  - node -e "process.exit(0)"\n');
   fs.writeFileSync(path.join(live, 'w-f.json'), JSON.stringify({ id: 'w-f', contract: 'W4', contractSteps: 1, files: [] }));
@@ -2600,6 +2625,14 @@ function testChime() {
   ok('and it lapses once the turn is long enough', !n.tooQuick({ minMs: 20000 }, now + 60000));
   if (old === undefined) delete process.env.CLAUDE_CONFIG_DIR;
   else process.env.CLAUDE_CONFIG_DIR = old;
+
+  const beat = require(path.join(CORE, 'hooks', 'lib.js')).liveDir(path.join(root, '.claude', 'relay'));
+  fs.mkdirSync(beat, { recursive: true });
+  fs.writeFileSync(path.join(beat, 'busy1.json'), JSON.stringify({ id: 'busy1', role: 'builder', updated: new Date().toISOString() }));
+  ok('the waiting bell holds its tongue while a seat is still working', n.busy(root), fs.readdirSync(beat).join(' '));
+  fs.writeFileSync(path.join(beat, 'busy1.json'), JSON.stringify({ id: 'busy1', role: 'builder', updated: new Date(Date.now() - 5 * 60 * 1000).toISOString() }));
+  ok('and rings once the work has actually gone quiet', !n.busy(root));
+  fs.rmSync(path.join(beat, 'busy1.json'), { force: true });
 
   const hooks = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8'));
   const stop = JSON.stringify((hooks.hooks || hooks).Stop);

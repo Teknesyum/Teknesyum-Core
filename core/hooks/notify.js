@@ -163,6 +163,26 @@ function play(field, event) {
   }
 }
 
+const BUSY_MS = 45000;
+
+function busy(cwd) {
+  try {
+    const { relayRoot, liveDir, read: readJson } = require('./lib.js');
+    const r = relayRoot(cwd || process.cwd(), { git: false });
+    if (!r) return false;
+    const dir = liveDir(r.relay);
+    const now = Date.now();
+    for (const f of fs.readdirSync(dir)) {
+      if (!/\.json$/.test(f) || f[0] === '_') continue;
+      const rec = readJson(path.join(dir, f));
+      if (!rec || rec.ended) continue;
+      const at = Date.parse(rec.updated || rec.started || '') || 0;
+      if (at && now - at < BUSY_MS) return true;
+    }
+  } catch {}
+  return false;
+}
+
 const WINDOW = { waiting: 60000, done: 10000, error: 10000 };
 
 const MIN_MS = { waiting: 0, done: 0, error: 0 };
@@ -209,6 +229,7 @@ function run(j) {
   if (!field || field.muted) return;
   const now = Date.now();
   if (event === 'done' && tooQuick(field, now)) return;
+  if (event === 'waiting' && busy(j.cwd)) return;
   if (recently(event, now)) return;
   if (play(field, event)) stamp(event, now);
 }
@@ -227,6 +248,8 @@ module.exports = {
   soundPath,
   WINDOW,
   MIN_MS,
+  BUSY_MS,
+  busy,
   tooQuick,
   stampFile,
   playedRecently,
