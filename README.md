@@ -278,9 +278,12 @@ of. The records are not chained to each other; each stands on its own bindings.
 
 A seal also records what the ladder decided at the time: the model that ran, the model that
 was asked for, the signals that fired, the fan-in it was measured against, the sealed
-`raise:`, and whether the diff went anywhere near the identifiers the acceptance names. None
-of it changes a decision — it is there so the next question about the ladder is answered from
-a column rather than an argument.
+`raise:`, the role and the Core version that produced it, and whether the diff went anywhere
+near the identifiers the acceptance names. None of it changes a decision — it is there so the
+next question about the ladder is answered from a column rather than an argument.
+
+`complete` and `audit` also refuse while tracked source files outside `owns` are modified: a
+contract that closes over a working tree it does not own is sealing someone else's diff.
 
 Every refusal the guard makes is appended to `live/refused.log` with the tool, the agent and
 the command, for the same reason: a gate whose false positives are not counted cannot be
@@ -613,7 +616,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,625 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,626 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
 scaffold, the cue, the banner, the handoff note, the debt ledger, the consultation record, and
 one check that no hook writes into context. CI runs the same suite on Linux, Windows and macOS; development is Windows-first.

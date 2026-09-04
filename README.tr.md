@@ -275,9 +275,12 @@ ekleniyor; `contract.js ledger` de `done/` altında oturan ama defterin hiç duy
 sözleşmeyi bildiriyor. Kayıtlar birbirine zincirli değil; her biri kendi bağlarıyla ayakta.
 
 Mühür kademenin o anki kararını da yazıyor: koşan model, istenen model, ateşleyen sinyaller,
-karşısında ölçüldüğü fan-in, mühürlenmiş `raise:` ve diff'in kabul maddesinin adını andığı
-yere hiç değip değmediği. Hiçbiri bir kararı değiştirmiyor — kademeye dair bir sonraki soru
+karşısında ölçüldüğü fan-in, mühürlenmiş `raise:`, onu üreten rol ile Core sürümü ve diff'in
+kabul maddesinin adını andığı yere hiç değip değmediği. Hiçbiri bir kararı değiştirmiyor — kademeye dair bir sonraki soru
 tartışmayla değil sütunla cevaplansın diye orada.
+
+`complete` ve `audit`, `owns` dışındaki izlenen kaynak dosyalar değişikken de reddediyor:
+sahip olmadığı bir çalışma ağacını kapatan sözleşme başkasının diff'ini mühürlüyor demektir.
 
 Kapının yaptığı her ret de `live/refused.log` dosyasına aracıyla, ajanıyla ve komutuyla
 ekleniyor; sebebi aynı: yanlış pozitifi sayılmayan bir kapı ayarlanamaz.
@@ -606,7 +609,7 @@ node test/all.js
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
 kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu, borç defteri, danışma
 kaydı ve hiçbir
-kancanın bağlama yazmadığı denetimi üzerine 2.625 sav. Aynı takımı CI Linux, Windows ve
+kancanın bağlama yazmadığı denetimi üzerine 2.626 sav. Aynı takımı CI Linux, Windows ve
 macOS'ta koşuyor; geliştirme Windows öncelikli.
 
 ---

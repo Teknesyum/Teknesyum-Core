@@ -103,10 +103,10 @@ const NO_TESTS = [
   /collected 0 items/i,
   /(^|[^a-z])no test (matches|matched|files? found)/i,
   /tests? run: 0(?![0-9])/i,
-  /Ran 0 tests/i,
-  /Passed: 0/i,
-  /Tests:.* 0 passed/i,
-  /0 passing/i,
+  /(^|[^0-9])Ran 0 tests(?![0-9])/i,
+  /(^|[^0-9])Passed: 0(?![0-9])/i,
+  /Tests:.*[^0-9]0 passed(?![0-9])/i,
+  /(^|[^0-9])0 passing(?![0-9])/i,
 ];
 
 function emptyRun(text) {
@@ -1039,6 +1039,18 @@ function complete() {
       )
     );
 
+  const outside = dirtyOutside(c.root, owns);
+  if (outside.length) {
+    return stop([
+      c.id + ' cannot complete - tracked files outside owns are modified:',
+      '',
+      ...outside.slice(0, 8).map((f) => '  ' + f),
+      outside.length > 8 ? '  ... and ' + (outside.length - 8) + ' more' : '',
+      '',
+      'A contract cannot commit changes it does not own. Revert them or add them to owns.',
+    ]);
+  }
+
   const level = risk.resolve(c.root, owns, field('risk', c.body));
 
   const headSha = git(c.root, ['rev-parse', 'HEAD']);
@@ -1132,6 +1144,10 @@ function complete() {
   seal.ledgerInit(c.relay);
   const ran = read(path.join(liveDir(c.relay), String(field('agent', c.body) || field('run-id', c.body) || '').replace(/[^A-Za-z0-9_.-]/g, '_') + '.json'));
   const rungs = ledgerTier(c, level, round, owns);
+  let coreVersion = 'unknown';
+  try {
+    coreVersion = require('../../package.json').version;
+  } catch {}
   seal.ledgerAppend(c.relay, {
     id: c.id,
     round,
@@ -1140,6 +1156,8 @@ function complete() {
     auditorRunId: record ? record.auditorRunId : null,
     model: (ran && ran.model) || field('model', c.body) || null,
     requestedModel: (ran && ran.requestedModel) || null,
+    builderRole: (ran && ran.role) || null,
+    coreVersion,
     signals: rungs.signals,
     fanIn: rungs.fanIn,
     fanInFile: rungs.fanInFile,
@@ -1766,6 +1784,18 @@ function audit() {
     diffHash = seal.ownsDigest(c.root, owns);
   } catch (e) {
     return stop(['Refused - ' + String((e && e.message) || e)]);
+  }
+
+  const outside = dirtyOutside(c.root, owns);
+  if (outside.length) {
+    return stop([
+      'Refused - tracked files outside owns are modified:',
+      '',
+      ...outside.slice(0, 8).map((f) => '  ' + f),
+      outside.length > 8 ? '  ... and ' + (outside.length - 8) + ' more' : '',
+      '',
+      'The audit is meaningless if changes spill outside the owns block.',
+    ]);
   }
 
   const file = seal.recordPath(c.relay, c.id, field('round', c.body) || '1');

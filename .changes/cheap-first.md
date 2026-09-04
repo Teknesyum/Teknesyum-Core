@@ -59,3 +59,6 @@ The band tells you more about a running seat: how many files it has touched, how
 has been going, and its steps against the contract's step ceiling - `Adım 12/150` instead of
 a bare count. Every label in the band is Title Case now, not only the role and the cell.
 
+`complete` and `audit` now refuse while tracked source files outside `owns` are modified, the
+seal carries the role and the Core version that produced it, and the hollow-run patterns count
+digits: `10 passing` is no longer read as `0 passing`.

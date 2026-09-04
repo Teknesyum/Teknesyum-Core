@@ -200,6 +200,15 @@ function testGate(root) {
   ok('a file the tree still names is left alone', !/notes\/kept[.]md/.test(t8dead), t8.stdout);
   ok('a heuristic requires reachability checks before moving files', /dynamic loading and build configuration/.test(t8.stdout) && !/move them under trash/.test(t8.stdout), t8.stdout);
 
+  const spill = path.join(root, 'src', 'spill.js');
+  fs.writeFileSync(spill, 'module.exports = 1;');
+  run('git', ['add', '-A'], { cwd: root });
+  run('git', ['commit', '-m', 'spill'], { cwd: root });
+  fs.writeFileSync(spill, 'module.exports = 2;');
+  const t3spill = contract(['complete', '--id', 'T3'], root);
+  ok('a contract cannot close over changes it does not own', t3spill.status === 2 && /outside owns are modified/.test(t3spill.stdout), t3spill.stdout);
+  fs.writeFileSync(spill, 'module.exports = 1;');
+
   const t3a = contract(['complete', '--id', 'T3'], root);
   ok('high risk without a record is blocked', t3a.status === 2 && /audit record/.test(t3a.stdout), t3a.stdout);
 
