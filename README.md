@@ -167,6 +167,22 @@ node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js
 Setup writes `~/.claude/teknesyum/config.json` and wires the statusline. It applies at the
 next session start.
 
+## Reaching a sibling project
+
+A session can only write under the folder it was opened in, so a job that spans two of your
+projects stops at the boundary. Setup can widen that, and it will not do so quietly: with no
+answer it writes nothing and prints the command you would run to allow it.
+
+```bash
+node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js --apply --projectsRoot "<the folder that holds your projects>"
+```
+
+The folder goes into this repository's own `.claude/settings.local.json`, never the global
+settings file, so the reach belongs to one project and undoing it is deleting one file. The
+file is added to `.gitignore` in the same step, because the path is yours and not the
+team's. Your home directory, the filesystem root, a folder that does not exist and anything
+inside `~/.claude` are refused.
+
 The wiring repairs itself. A statusline command left over from an older install can point
 at a file that is no longer there, and the line simply stops appearing — the setting looks
 present and does nothing. A command whose script is missing is now replaced rather than
@@ -674,7 +690,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,664 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,669 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
 scaffold, the cue, the banner, the handoff note, the debt ledger, the consultation record, and
 one check that no hook writes into context. Alongside it, 17 audit regressions and 33

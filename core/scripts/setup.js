@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const { spawnSync } = require('child_process');
 const { configRoot, stateFile, read, write, t } = require('../hooks/lib.js');
 
@@ -54,6 +55,12 @@ const QUESTIONS = [
     fallback: true,
   },
   {
+    key: 'projectsRoot',
+    ask: 'ask.projectsRoot',
+    parse: (v) => (String(v).trim() ? String(v).trim() : null),
+    fallback: null,
+  },
+  {
     key: 'privateRepo',
     ask: 'ask.privateRepo',
     parse: (v) => (String(v).trim() ? String(v).trim() : null),
@@ -92,6 +99,79 @@ function findCore() {
   return null;
 }
 
+function repoRoot() {
+  let d = process.cwd();
+  for (;;) {
+    if (fs.existsSync(path.join(d, '.git'))) return d.replace(/\\/g, '/');
+    const up = path.dirname(d);
+    if (up === d) return null;
+    d = up;
+  }
+}
+
+function normalize(p) {
+  return path.resolve(String(p).replace(/^~(?=$|[\\/])/, os.homedir())).replace(/\\/g, '/');
+}
+
+function unsafeScope(dir) {
+  const home = normalize(os.homedir());
+  const abs = normalize(dir);
+  if (abs === home) return 'it is the home directory itself';
+  if (abs === normalize(path.parse(abs).root)) return 'it is the filesystem root';
+  if (abs.includes('/.claude/')|| abs.endsWith('/.claude')) return 'it is inside the Claude configuration tree';
+  if (!fs.existsSync(abs)) return 'it does not exist';
+  return null;
+}
+
+function suggestScope() {
+  const root = repoRoot();
+  if (!root) return null;
+  const up = normalize(path.dirname(root));
+  return unsafeScope(up) ? null : up;
+}
+
+function wireProjectScope(dir) {
+  const root = repoRoot();
+  if (!root) throw new Error('not inside a git repository, so there is no project to scope');
+  const why = unsafeScope(dir);
+  if (why) throw new Error('refusing to open ' + dir + ' - ' + why + '. Nothing was written.');
+  const abs = normalize(dir);
+  const p = path.join(root, '.claude', 'settings.local.json');
+  let s = {};
+  let had = false;
+  try {
+    const raw = fs.readFileSync(p, 'utf8');
+    had = true;
+    s = JSON.parse(raw);
+    if (!s || typeof s !== 'object' || Array.isArray(s)) throw new Error('not an object');
+    fs.writeFileSync(p + '.bak', raw, 'utf8');
+  } catch (e) {
+    if (had)
+      throw new Error(
+        'refusing to touch ' +
+          p +
+          ' - it is there but cannot be read as JSON (' +
+          String((e && e.message) || e) +
+          '). Fix or move it, then run setup again. Nothing was written.'
+      );
+    s = {};
+  }
+  if (!s.permissions || typeof s.permissions !== 'object' || Array.isArray(s.permissions)) s.permissions = {};
+  const list = Array.isArray(s.permissions.additionalDirectories) ? s.permissions.additionalDirectories : [];
+  if (!list.some((d) => normalize(d) === abs)) list.push(abs);
+  s.permissions.additionalDirectories = list;
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+  fs.writeFileSync(p, JSON.stringify(s, null, 2) + '\n', 'utf8');
+  const gi = path.join(root, '.gitignore');
+  let lines = [];
+  try {
+    lines = fs.readFileSync(gi, 'utf8').split(/\r?\n/);
+  } catch {}
+  if (!lines.some((l) => l.trim() === '.claude/settings.local.json'))
+    fs.appendFileSync(gi, (lines.length && lines[lines.length - 1] !== '' ? '\n' : '') + '.claude/settings.local.json\n', 'utf8');
+  return { file: p.replace(/\\/g, '/'), dir: abs };
+}
+
 function inspect() {
   const cfg = read(stateFile('config')) || {};
   const s = read(settingsPath()) || {};
@@ -106,6 +186,8 @@ function inspect() {
     settingsFile: settingsPath(),
     statuslineWired: !!wired,
     bridge,
+    repoRoot: repoRoot(),
+    suggestedProjectsRoot: suggestScope(),
     answered: QUESTIONS.filter((q) => cfg[q.key] !== undefined).map((q) => q.key),
     missing: QUESTIONS.filter((q) => cfg[q.key] === undefined).map((q) => ({
       flag: '--' + q.key,
@@ -165,7 +247,13 @@ function apply(answers) {
   fs.writeFileSync(beep, JSON.stringify(current, null, 2) + '\n', 'utf8');
 
   const bridge = wireStatusline();
-  const labels = ['setup.config', 'setup.statusline', 'setup.contractLang', 'setup.profile', 'setup.sound', 'setup.research', 'setup.private', 'setup.core'];
+
+  let scope = null;
+  let offer = null;
+  if (cfg.projectsRoot) scope = wireProjectScope(cfg.projectsRoot);
+  else offer = suggestScope();
+
+  const labels = ['setup.config', 'setup.statusline', 'setup.contractLang', 'setup.profile', 'setup.sound', 'setup.research', 'setup.private', 'setup.core', 'setup.scope'];
   const width = Math.max(...labels.map((k) => t(k).length)) + 2;
   const row = (k, v) => '  ' + t(k).padEnd(width) + v;
 
@@ -180,8 +268,10 @@ function apply(answers) {
     row('setup.research', t(cfg.research ? 'setup.gated' : 'setup.off')),
     row('setup.private', cfg.privateRepo || t('setup.none')),
     row('setup.core', cfg.coreRepo || t('setup.none')),
+    row('setup.scope', scope ? scope.dir + '  (' + scope.file + ')' : t('setup.none')),
     '',
     t('setup.applies'),
+    ...(offer ? ['', t('setup.scopeOffer'), '  node setup.js --apply --projectsRoot "' + offer + '"'] : []),
   ].join('\n');
 }
 
@@ -238,4 +328,4 @@ function main() {
 }
 
 if (require.main === module) main();
-module.exports = { inspect, apply, QUESTIONS };
+module.exports = { inspect, apply, QUESTIONS, wireProjectScope, suggestScope, unsafeScope, repoRoot };

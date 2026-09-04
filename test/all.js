@@ -824,7 +824,8 @@ function testLanguage(root) {
 
   setLang('tr');
   const applied = run(process.execPath, [path.join(CORE, 'scripts', 'setup.js'), '--apply', '--lang', 'tr', '--notify', 'no', '--research', 'no'], { cwd: root, env: env() }).stdout;
-  const rows = applied.split(String.fromCharCode(10)).filter((l) => l.startsWith('  ') && l.trim());
+  const block = applied.split(String.fromCharCode(10) + String.fromCharCode(10))[1] || '';
+  const rows = block.split(String.fromCharCode(10)).filter((l) => l.startsWith('  ') && l.trim());
   ok('every summary label is padded clear of its value', rows.every((l) => /^ {2}\S.*\s{2,}\S/.test(l)), JSON.stringify(rows));
   ok('the summary is translated', /kuruldu/.test(applied), applied);
 
@@ -1515,6 +1516,44 @@ function testSafety() {
   ok('the settings it did not come for survive', after.model === 'opus' && after.env && after.env.A === '1', JSON.stringify(after));
   ok('the statusline is wired', !!(after.statusLine && after.statusLine.command), JSON.stringify(after.statusLine));
   ok('and the previous file is kept as a backup', fs.existsSync(settings + '.bak'));
+
+  const projects = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-projects-'));
+  const one = path.join(projects, 'one');
+  fs.mkdirSync(path.join(one, '.git'), { recursive: true });
+  const scopeEnv = { ...process.env, CLAUDE_CONFIG_DIR: home };
+
+  const silent = run(process.execPath, [SETUP, '--apply', '--lang', 'tr'], { cwd: one, env: scopeEnv });
+  ok(
+    'setup writes no reach of its own and offers the folder instead',
+    silent.status === 0 &&
+      !fs.existsSync(path.join(one, '.claude', 'settings.local.json')) &&
+      /--projectsRoot/.test(silent.stdout),
+    silent.stdout
+  );
+
+  const asked = run(process.execPath, [SETUP, '--apply', '--projectsRoot', projects], { cwd: one, env: scopeEnv });
+  const local = path.join(one, '.claude', 'settings.local.json');
+  const scoped = fs.existsSync(local) ? JSON.parse(fs.readFileSync(local, 'utf8')) : {};
+  ok(
+    'a named folder is opened in the project file, not the global one',
+    asked.status === 0 &&
+      scoped.permissions.additionalDirectories.length === 1 &&
+      scoped.permissions.additionalDirectories[0] === projects.replace(/\\/g, '/') &&
+      !JSON.parse(fs.readFileSync(settings, 'utf8')).permissions,
+    JSON.stringify(scoped)
+  );
+
+  run(process.execPath, [SETUP, '--apply', '--projectsRoot', projects], { cwd: one, env: scopeEnv });
+  const twice = JSON.parse(fs.readFileSync(local, 'utf8'));
+  ok('running it twice does not open the same folder twice', twice.permissions.additionalDirectories.length === 1, JSON.stringify(twice));
+  ok(
+    'and the personal file is kept out of git',
+    /^\.claude\/settings\.local\.json$/m.test(fs.readFileSync(path.join(one, '.gitignore'), 'utf8')),
+    fs.readFileSync(path.join(one, '.gitignore'), 'utf8')
+  );
+
+  const wild = run(process.execPath, [SETUP, '--apply', '--projectsRoot', os.homedir()], { cwd: one, env: scopeEnv });
+  ok('the home directory itself is refused as a reach', wild.status !== 0, wild.stdout + wild.stderr);
 
   const plain = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-plain-'));
   const thrown = run(process.execPath, [GUARD], { cwd: plain, input: 'not json at all' });

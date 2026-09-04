@@ -166,6 +166,21 @@ node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js
 Kurulum `~/.claude/teknesyum/config.json` dosyasını yazıyor ve statusline'ı bağlıyor. Bir
 sonraki oturum başında geçerli oluyor.
 
+## Kardes projeye uzanmak
+
+Bir oturum yalnız açıldığı klasörün altına yazabiliyor; iki projeni birden ilgilendiren bir iş
+o sınırda duruyor. Kurulum bunu genişletebilir ve sessizce yapmaz: cevap verilmezse hiçbir
+şey yazmaz, izin vermek için çalıştıracağın komutu basar.
+
+```bash
+node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js --apply --projectsRoot "<projelerinin durduğu klasör>"
+```
+
+Klasör küresel ayar dosyasına değil, bu deponun kendi `.claude/settings.local.json`
+dosyasına yazılıyor; kapsam tek projeye ait kalıyor ve geri almak tek dosyayı silmek oluyor.
+Dosya aynı adımda `.gitignore`'a giriyor, çünkü yol seninkidir, takımın değil. Ev dizinin,
+dosya sisteminin kökü, var olmayan bir klasör ve `~/.claude` içindeki her şey reddediliyor.
+
 Bağlantı kendini onarıyor. Eski bir kurulumdan kalan statusline komutu artık var olmayan bir
 dosyayı gösterebiliyor ve satır sessizce hiç görünmüyor — ayar duruyor gibi görünüyor ama
 hiçbir şey yapmıyor. Betiği yerinde olmayan komut artık saygı görmüyor, değiştiriliyor.
@@ -660,7 +675,7 @@ node test/all.js
 
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
 kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu, borç defteri, danışma
-kaydı ve hiçbir kancanın bağlama yazmadığı denetimi üzerine 2.664 sav. Yanında 17 denetim
+kaydı ve hiçbir kancanın bağlama yazmadığı denetimi üzerine 2.669 sav. Yanında 17 denetim
 regresyonu ve 33 kapanış senaryosu, gerçek kancaları yapay bir host üzerinden sürüyor:
 kendi kodunu doğrulayan worktree, turuna bağlı denetçi, doğrulama sırasında değişen diff,
 boş kabul maddesi, karşılanmamış bağımlılık ve ikinci bir defter satırı üretmeden kurtarılan

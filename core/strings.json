@@ -19,6 +19,10 @@
     "en": "Private mirror repository for untouchable files, if any (git URL, or blank)",
     "tr": "Dışarı çıkmayacak dosyalar için özel ayna deposu, varsa (git adresi, yoksa boş bırak)"
   },
+  "ask.projectsRoot": {
+    "en": "Folder that holds your projects, so a session here can reach a sibling (path, or blank to skip)",
+    "tr": "Projelerinin durduğu klasör; buradaki oturum kardeş projeye uzanabilsin diye (yol, atlamak için boş bırak)"
+  },
   "setup.done": {
     "en": "Teknesyum Core is set up.",
     "tr": "Teknesyum Core kuruldu."
@@ -62,6 +66,14 @@
   "setup.none": {
     "en": "none",
     "tr": "yok"
+  },
+  "setup.scope": {
+    "en": "reach",
+    "tr": "kapsam"
+  },
+  "setup.scopeOffer": {
+    "en": "Nothing was written. To let a session here reach that folder, run setup again with:",
+    "tr": "Hiçbir şey yazılmadı. Buradaki oturumun o klasöre uzanması için kurulumu şu bayrakla yeniden çalıştır:"
   },
   "setup.applies": {
     "en": "The statusline applies at the next session start.",
