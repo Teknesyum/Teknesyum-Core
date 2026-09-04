@@ -1,5 +1,3 @@
-// Synchronous callers delegate supervision here so the timeout can kill the
-// process tree BEFORE its shell disappears. This process never invokes an LLM.
 const { spawn, spawnSync } = require('child_process');
 let input = '';
 process.stdin.on('data', (s) => { input += s; });

@@ -52,8 +52,6 @@ function write(f, data) {
   return false;
 }
 
-const LOCK_MS = 2000;
-
 function nap(ms) {
   try {
     Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
@@ -63,14 +61,24 @@ function nap(ms) {
 function lock(f, fn) {
   const dir = f + '.lock';
   let held = false;
+  fs.mkdirSync(path.dirname(f), { recursive: true });
   for (let i = 0; i < 40; i += 1) {
     try {
       fs.mkdirSync(dir);
+      fs.writeFileSync(path.join(dir, 'owner.json'), JSON.stringify({ pid: process.pid }));
       held = true;
       break;
     } catch {
       try {
-        if (Date.now() - fs.statSync(dir).mtimeMs > LOCK_MS) fs.rmdirSync(dir);
+        const owner = read(path.join(dir, 'owner.json'));
+        if (owner && Number.isInteger(owner.pid) && owner.pid > 0) {
+          let alive = true;
+          try { process.kill(owner.pid, 0); } catch (e) { if (e.code === 'ESRCH') alive = false; }
+          if (!alive) {
+            fs.unlinkSync(path.join(dir, 'owner.json'));
+            fs.rmdirSync(dir);
+          }
+        }
       } catch {}
       nap(5);
     }
@@ -81,6 +89,7 @@ function lock(f, fn) {
   } finally {
     if (held) {
       try {
+        fs.unlinkSync(path.join(dir, 'owner.json'));
         fs.rmdirSync(dir);
       } catch {}
     }
@@ -92,7 +101,7 @@ function merge(f, patch) {
     const now = read(f);
     const base = now && typeof now === 'object' && !Array.isArray(now) ? now : {};
     const next = typeof patch === 'function' ? patch(base) : Object.assign({}, base, patch);
-    write(f, next);
+    if (!write(f, next)) throw new Error('State write failed: ' + f);
     return next;
   });
 }
@@ -180,6 +189,7 @@ function relayRoot(start, opt) {
     }
     const c = path.join(d, '.claude', 'relay');
     if (fs.existsSync(c)) return { relay: c, worktree: null };
+    if (fs.existsSync(path.join(d, '.git'))) break;
     const up = path.dirname(d);
     if (up === d) break;
     d = up;
@@ -216,6 +226,35 @@ function liveDir(relay) {
 
 function projectRoot(relay) {
   return path.dirname(path.dirname(relay));
+}
+
+function checkoutRoot(context) {
+  return path.resolve(context.worktree || projectRoot(context.relay));
+}
+
+function realPath(target) {
+  let at = path.resolve(target);
+  const tail = [];
+  for (;;) {
+    try { return path.join(fs.realpathSync(at), ...tail.reverse()); }
+    catch (e) {
+      if (e.code !== 'ENOENT') throw e;
+      const up = path.dirname(at);
+      if (up === at) throw e;
+      tail.push(path.basename(at));
+      at = up;
+    }
+  }
+}
+
+function pathKey(target) {
+  const value = norm(realPath(target));
+  return process.platform === 'win32' ? value.toLowerCase() : value;
+}
+
+function inside(root, target) {
+  const rel = path.relative(pathKey(root), pathKey(target));
+  return rel !== '..' && !rel.startsWith('..' + path.sep) && !path.isAbsolute(rel);
 }
 
 function logProblem(relay, source, line) {
@@ -365,14 +404,14 @@ function pinnedInShell(name) {
   return false;
 }
 
-function envPinned(name) {
+function envPinned(name, probe = {}) {
   if (!/^[A-Z_][A-Z0-9_]*$/i.test(String(name || ''))) return false;
-  if (pinnedInShell(name)) return true;
-  const keys = PINNED[process.platform];
+  if ((probe.pinnedInShell || pinnedInShell)(name)) return true;
+  const keys = PINNED[probe.platform || process.platform];
   if (!keys) return false;
   for (const key of keys) {
     try {
-      const out = execFileSync('reg', ['query', key, '/v', name], {
+      const out = (probe.execFileSync || execFileSync)('reg', ['query', key, '/v', name], {
         encoding: 'utf8',
         windowsHide: true,
         stdio: ['ignore', 'pipe', 'ignore'],
@@ -391,6 +430,7 @@ module.exports = {
   stateFile,
   read,
   write,
+  lock,
   merge,
   norm,
   safe,
@@ -400,6 +440,10 @@ module.exports = {
   ensureRelay,
   liveDir,
   projectRoot,
+  checkoutRoot,
+  realPath,
+  pathKey,
+  inside,
   logProblem,
   pluginRoot,
   settings,

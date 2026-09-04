@@ -1,0 +1,3540 @@
+{
+  "schemaVersion": 1,
+  "reportDate": "2026-09-04",
+  "timezone": "Europe/Istanbul",
+  "sourceCommit": "61b91c829e11ec0bd9b95f218c4583b0f6e54a7d",
+  "scope": {
+    "files": 135,
+    "lines": 26923,
+    "baselineLines": 26720,
+    "lateAddedLines": 30,
+    "notAllDiskFiles": true,
+    "excluded": [
+      "Ignored historical Teknesyum-Base archive (~1074 files)",
+      "Git object databases",
+      "Ignored generated maps",
+      "Ignored historical trash except two tracked files"
+    ],
+    "coverageGaps": []
+  },
+  "originalSnapshot": "C:/Users/Administrator/AppData/Local/Temp/tkc-full-review-bbdfb20903984d02bd5c4b5908ce685e",
+  "suiteSnapshot": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\tkc-current-review-GhiSUJ",
+  "sourceFiles": [
+    {
+      "file": "install.ps1",
+      "hash": "6c5eb2ecbfc6f66d72ff13c086224fc830ad64496a84ca159f4a65cf0cd50bdf",
+      "total": 50,
+      "baseline": {
+        "hash": "6c5eb2ecbfc6f66d72ff13c086224fc830ad64496a84ca159f4a65cf0cd50bdf",
+        "total": 50,
+        "ranges": [
+          [
+            1,
+            50
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "install.sh",
+      "hash": "47678d5b6976f341a2868278c7545f91161213924ebb2837af174537381e9fb0",
+      "total": 46,
+      "baseline": {
+        "hash": "47678d5b6976f341a2868278c7545f91161213924ebb2837af174537381e9fb0",
+        "total": 46,
+        "ranges": [
+          [
+            1,
+            46
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "package.json",
+      "hash": "aac755af1ef40a5d34ffc0b55e0f722819a5ff06a5468e851ab0a9ad50d7d025",
+      "total": 13,
+      "baseline": {
+        "hash": "aac755af1ef40a5d34ffc0b55e0f722819a5ff06a5468e851ab0a9ad50d7d025",
+        "total": 13,
+        "ranges": [
+          [
+            1,
+            13
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": ".claude-plugin/marketplace.json",
+      "hash": "e21848bcf2a78349b017f4d53159fb8f5860d564fed4889cd5b7a1ae178ead9b",
+      "total": 26,
+      "baseline": {
+        "hash": "e21848bcf2a78349b017f4d53159fb8f5860d564fed4889cd5b7a1ae178ead9b",
+        "total": 26,
+        "ranges": [
+          [
+            1,
+            26
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/.claude-plugin/plugin.json",
+      "hash": "48df6cec73271a6d033a6e870eea0edba6deacb2e27cd5080331712b721ea995",
+      "total": 12,
+      "baseline": {
+        "hash": "48df6cec73271a6d033a6e870eea0edba6deacb2e27cd5080331712b721ea995",
+        "total": 12,
+        "ranges": [
+          [
+            1,
+            12
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": ".gitignore",
+      "hash": "70d0dc10b6d41f48cd123c395ee309e43623f8547c334fbf2a0dda82033d0ef8",
+      "total": 14,
+      "baseline": {
+        "hash": "70d0dc10b6d41f48cd123c395ee309e43623f8547c334fbf2a0dda82033d0ef8",
+        "total": 14,
+        "ranges": [
+          [
+            1,
+            14
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": ".github/workflows/test.yml",
+      "hash": "c297c491febdbafcae5a22717f342f68348571a106acc5d15fa6feb9c402e45e",
+      "total": 26,
+      "baseline": {
+        "hash": "c297c491febdbafcae5a22717f342f68348571a106acc5d15fa6feb9c402e45e",
+        "total": 26,
+        "ranges": [
+          [
+            1,
+            26
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/hooks/hooks.json",
+      "hash": "a9e841ff7efa4a990442fa0b4163ebaa58d18b40e85ae0be656a1bd5d858c694",
+      "total": 159,
+      "baseline": {
+        "hash": "a9e841ff7efa4a990442fa0b4163ebaa58d18b40e85ae0be656a1bd5d858c694",
+        "total": 159,
+        "ranges": [
+          [
+            1,
+            159
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/agents/worker.md",
+      "hash": "71a3ddb3e45ac8c60a91d58e91e3983882e91864378c80efe7d593a769783894",
+      "total": 11,
+      "baseline": {
+        "hash": "71a3ddb3e45ac8c60a91d58e91e3983882e91864378c80efe7d593a769783894",
+        "total": 11,
+        "ranges": [
+          [
+            1,
+            11
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/skills/relay/SKILL.md",
+      "hash": "5731fa64cbb82ef84930770a28f1e6609d76a63586a63916c6706b5cb15ac453",
+      "total": 148,
+      "baseline": {
+        "hash": "5731fa64cbb82ef84930770a28f1e6609d76a63586a63916c6706b5cb15ac453",
+        "total": 148,
+        "ranges": [
+          [
+            1,
+            148
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/hooks/lib.js",
+      "hash": "64b8cb38910864faa5bece86165eaf2c1303f2838d901a320a124891bef500a4",
+      "total": 415,
+      "baseline": {
+        "hash": "64b8cb38910864faa5bece86165eaf2c1303f2838d901a320a124891bef500a4",
+        "total": 415,
+        "ranges": [
+          [
+            1,
+            415
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/hooks/schema.js",
+      "hash": "dd173fb0974b35926b06d3c9ef177cbbb46cf06bbdd917b5bdb8ccf472a3e135",
+      "total": 109,
+      "baseline": {
+        "hash": "dd173fb0974b35926b06d3c9ef177cbbb46cf06bbdd917b5bdb8ccf472a3e135",
+        "total": 109,
+        "ranges": [
+          [
+            1,
+            109
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/hooks/guard.js",
+      "hash": "172250509911eab06e07e89bba9580a5e19e239be347543dff4537c27e143776",
+      "total": 524,
+      "baseline": {
+        "hash": "172250509911eab06e07e89bba9580a5e19e239be347543dff4537c27e143776",
+        "total": 524,
+        "ranges": [
+          [
+            1,
+            524
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/hooks/watch.js",
+      "hash": "675415c10d9e3ba814750c344f243cff5d9add15b232d16d37c01931a51b505b",
+      "total": 457,
+      "baseline": {
+        "hash": "675415c10d9e3ba814750c344f243cff5d9add15b232d16d37c01931a51b505b",
+        "total": 457,
+        "ranges": [
+          [
+            1,
+            457
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/hooks/seal.js",
+      "hash": "adeb009f859f5fab53bc6cb847b30ea19317479fe2ed04d7acde895d36868588",
+      "total": 232,
+      "baseline": {
+        "hash": "adeb009f859f5fab53bc6cb847b30ea19317479fe2ed04d7acde895d36868588",
+        "total": 232,
+        "ranges": [
+          [
+            1,
+            232
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/hooks/cue.js",
+      "hash": "d76b6b8853d11a3e75f28914b871483388dc2db15959da05c190b27f849b63d2",
+      "total": 90,
+      "baseline": {
+        "hash": "d76b6b8853d11a3e75f28914b871483388dc2db15959da05c190b27f849b63d2",
+        "total": 90,
+        "ranges": [
+          [
+            1,
+            90
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/hooks/prefs.js",
+      "hash": "62204d389797cf550152389d9b01dbed3fe0e3664fcf32424a6b3090d57f0f97",
+      "total": 98,
+      "baseline": {
+        "hash": "62204d389797cf550152389d9b01dbed3fe0e3664fcf32424a6b3090d57f0f97",
+        "total": 98,
+        "ranges": [
+          [
+            1,
+            98
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/hooks/notice.js",
+      "hash": "8165230c0ae85a8b3432cd47be4a15866858ede1e10be6c44036ded9e4ab6fc0",
+      "total": 43,
+      "baseline": {
+        "hash": "8165230c0ae85a8b3432cd47be4a15866858ede1e10be6c44036ded9e4ab6fc0",
+        "total": 43,
+        "ranges": [
+          [
+            1,
+            43
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/hooks/notify.js",
+      "hash": "12205ebaff3c5d855fb595e6876522ac6f6d0fb6d6ad735064a51f46117a5ae8",
+      "total": 258,
+      "baseline": {
+        "hash": "12205ebaff3c5d855fb595e6876522ac6f6d0fb6d6ad735064a51f46117a5ae8",
+        "total": 258,
+        "ranges": [
+          [
+            1,
+            258
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/tiers.json",
+      "hash": "b6f026a06016dc238758878109e52e76821d196a4c6e0500a4b9034c204df6e1",
+      "total": 119,
+      "baseline": {
+        "hash": "b6f026a06016dc238758878109e52e76821d196a4c6e0500a4b9034c204df6e1",
+        "total": 119,
+        "ranges": [
+          [
+            1,
+            119
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/roles/advisor.md",
+      "hash": "fa69d0d348c88fc154b961b7fd520e09df8cf37882c55c8d662482036663810f",
+      "total": 44,
+      "baseline": {
+        "hash": "fa69d0d348c88fc154b961b7fd520e09df8cf37882c55c8d662482036663810f",
+        "total": 44,
+        "ranges": [
+          [
+            1,
+            44
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/roles/auditor.md",
+      "hash": "c8b3b98631caa7f264b59bd0834c96e3797260cb00bd8553833367ce7e58eedb",
+      "total": 53,
+      "baseline": {
+        "hash": "c8b3b98631caa7f264b59bd0834c96e3797260cb00bd8553833367ce7e58eedb",
+        "total": 53,
+        "ranges": [
+          [
+            1,
+            53
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/roles/builder.md",
+      "hash": "477d25478109eedbd9f8732eb5c3f54b2341024f4a510c3aa63de8fa36de4519",
+      "total": 34,
+      "baseline": {
+        "hash": "477d25478109eedbd9f8732eb5c3f54b2341024f4a510c3aa63de8fa36de4519",
+        "total": 34,
+        "ranges": [
+          [
+            1,
+            34
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/roles/planner.md",
+      "hash": "d8ee480fe94084934707182ee099e3d4dcae00ddda580223ecc9cd9b8e0b681a",
+      "total": 31,
+      "baseline": {
+        "hash": "d8ee480fe94084934707182ee099e3d4dcae00ddda580223ecc9cd9b8e0b681a",
+        "total": 31,
+        "ranges": [
+          [
+            1,
+            31
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/roles/scout.md",
+      "hash": "72dce162795e802ab99a2acf6205a5d56040566b89b6f70412b438823b6647c6",
+      "total": 57,
+      "baseline": {
+        "hash": "72dce162795e802ab99a2acf6205a5d56040566b89b6f70412b438823b6647c6",
+        "total": 57,
+        "ranges": [
+          [
+            1,
+            57
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/roles/scribe.md",
+      "hash": "563284cdb1cae3efed4073e5f27a4bb8494795fb9ea622f00000e384de0a1479",
+      "total": 39,
+      "baseline": {
+        "hash": "563284cdb1cae3efed4073e5f27a4bb8494795fb9ea622f00000e384de0a1479",
+        "total": 39,
+        "ranges": [
+          [
+            1,
+            39
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/scripts/advice.js",
+      "hash": "c792b49f800ca026a304f155037ed30823dcaba14950321e3c4fec03cf73ead4",
+      "total": 183,
+      "baseline": {
+        "hash": "c792b49f800ca026a304f155037ed30823dcaba14950321e3c4fec03cf73ead4",
+        "total": 183,
+        "ranges": [
+          [
+            1,
+            183
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/scripts/bridge.js",
+      "hash": "78d74b813b39f2e8cf422d529e190cf7848413bcaa825b87a4a734a5e95e0a05",
+      "total": 43,
+      "baseline": {
+        "hash": "78d74b813b39f2e8cf422d529e190cf7848413bcaa825b87a4a734a5e95e0a05",
+        "total": 43,
+        "ranges": [
+          [
+            1,
+            43
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/scripts/verify-runner.js",
+      "hash": "85e722a1b2243b83e62e6faea63e6b4949e6fc40330e7cfc67e434239ac192af",
+      "total": 37,
+      "baseline": {
+        "hash": "85e722a1b2243b83e62e6faea63e6b4949e6fc40330e7cfc67e434239ac192af",
+        "total": 37,
+        "ranges": [
+          [
+            1,
+            37
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/scripts/contract.js",
+      "hash": "beec4b2499b8d5bd3128e57abc25c784b3e11679f74688f59a79467bea21f9e4",
+      "total": 1891,
+      "baseline": {
+        "hash": "13a8397adcfcaafeb9ecf2792d57adf548fb0a6d19c9d362fbf8f0df8c0e5235",
+        "total": 1835,
+        "ranges": [
+          [
+            1,
+            450
+          ],
+          [
+            451,
+            900
+          ],
+          [
+            901,
+            1360
+          ],
+          [
+            1361,
+            1835
+          ]
+        ]
+      },
+      "changedSinceBaseline": true
+    },
+    {
+      "file": "core/scripts/risk.js",
+      "hash": "39e291d0fd44928312917b0a438f1861be648c72b93c774db6456b1b1f171186",
+      "total": 178,
+      "baseline": {
+        "hash": "39e291d0fd44928312917b0a438f1861be648c72b93c774db6456b1b1f171186",
+        "total": 178,
+        "ranges": [
+          [
+            1,
+            178
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/scripts/handoff.js",
+      "hash": "be68509caa70bd894b150801180634426e9db11214a6009e13c1ba50203f4ebd",
+      "total": 339,
+      "baseline": {
+        "hash": "be68509caa70bd894b150801180634426e9db11214a6009e13c1ba50203f4ebd",
+        "total": 339,
+        "ranges": [
+          [
+            1,
+            339
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/scripts/log.js",
+      "hash": "9bac7f4520991c5359fd5cae316c0c46ad5100074b9c13331abaeb199e2f8d08",
+      "total": 123,
+      "baseline": {
+        "hash": "9bac7f4520991c5359fd5cae316c0c46ad5100074b9c13331abaeb199e2f8d08",
+        "total": 123,
+        "ranges": [
+          [
+            1,
+            123
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/scripts/doctor.js",
+      "hash": "91e2074c308f18395635082aa5e6e4b782de10246985581a0bfbf95ada40285c",
+      "total": 228,
+      "baseline": {
+        "hash": "91e2074c308f18395635082aa5e6e4b782de10246985581a0bfbf95ada40285c",
+        "total": 228,
+        "ranges": [
+          [
+            1,
+            228
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/scripts/setup.js",
+      "hash": "0ec387787aed469ff6577fd7f50f11d5a1888e391ce94dc9d6601376571dce01",
+      "total": 242,
+      "baseline": {
+        "hash": "0ec387787aed469ff6577fd7f50f11d5a1888e391ce94dc9d6601376571dce01",
+        "total": 242,
+        "ranges": [
+          [
+            1,
+            242
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/scripts/update.js",
+      "hash": "8e863126c8f50a7b7b25317068a4efec27f2dc0b0479ec96a558c00f5b538010",
+      "total": 135,
+      "baseline": {
+        "hash": "8e863126c8f50a7b7b25317068a4efec27f2dc0b0479ec96a558c00f5b538010",
+        "total": 135,
+        "ranges": [
+          [
+            1,
+            135
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/scripts/release.js",
+      "hash": "c22ee41ba11685cbad553fc85bb7ed821135270d58883ea16ba4b38467394659",
+      "total": 199,
+      "baseline": {
+        "hash": "c22ee41ba11685cbad553fc85bb7ed821135270d58883ea16ba4b38467394659",
+        "total": 199,
+        "ranges": [
+          [
+            1,
+            199
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/scripts/map.js",
+      "hash": "a3581b245a47cfed79c2eb58353f1588483e499a0a06a82e9010a72e5713882b",
+      "total": 408,
+      "baseline": {
+        "hash": "a3581b245a47cfed79c2eb58353f1588483e499a0a06a82e9010a72e5713882b",
+        "total": 408,
+        "ranges": [
+          [
+            1,
+            408
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/scripts/manset.js",
+      "hash": "97362bd7888053da2c0aeb06e2c988dc9ada70aa4933e12faeb1f68491e300a7",
+      "total": 231,
+      "baseline": {
+        "hash": "97362bd7888053da2c0aeb06e2c988dc9ada70aa4933e12faeb1f68491e300a7",
+        "total": 231,
+        "ranges": [
+          [
+            1,
+            231
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/scripts/scaffold.js",
+      "hash": "99eeb526951120cf265240568f9d495cd749c80e188e0603064c9848a4cadf7d",
+      "total": 193,
+      "baseline": {
+        "hash": "99eeb526951120cf265240568f9d495cd749c80e188e0603064c9848a4cadf7d",
+        "total": 193,
+        "ranges": [
+          [
+            1,
+            193
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/scripts/statusline.js",
+      "hash": "22c30ce42d482493b4495343d35a89c3db36a3ea74b6be0e9442511b00689020",
+      "total": 495,
+      "baseline": {
+        "hash": "22c30ce42d482493b4495343d35a89c3db36a3ea74b6be0e9442511b00689020",
+        "total": 495,
+        "ranges": [
+          [
+            1,
+            495
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/strings.json",
+      "hash": "01d5c57deb79900e956707d13ddd52fe107ce22edf43df2c41551266b0e886fb",
+      "total": 263,
+      "baseline": {
+        "hash": "01d5c57deb79900e956707d13ddd52fe107ce22edf43df2c41551266b0e886fb",
+        "total": 263,
+        "ranges": [
+          [
+            1,
+            263
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "test/run.js",
+      "hash": "31c8e9721e730732165ef12f94d38443320160c397c32db36c2742d8920dc638",
+      "total": 7,
+      "baseline": {
+        "hash": "31c8e9721e730732165ef12f94d38443320160c397c32db36c2742d8920dc638",
+        "total": 7,
+        "ranges": [
+          [
+            1,
+            7
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "test/audit-regressions.js",
+      "hash": "f2ebfd7813cd6f6f9eb75ca0164006575130211a6e21087e3e686f0c38289c2f",
+      "total": 152,
+      "baseline": {
+        "hash": "f2ebfd7813cd6f6f9eb75ca0164006575130211a6e21087e3e686f0c38289c2f",
+        "total": 152,
+        "ranges": [
+          [
+            1,
+            152
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "test/verify-timeout.js",
+      "hash": "2f41331a856f950fc3f1d19a7f1c67df17452ec795b0677990496f77f473de80",
+      "total": 29,
+      "baseline": {
+        "hash": "2f41331a856f950fc3f1d19a7f1c67df17452ec795b0677990496f77f473de80",
+        "total": 29,
+        "ranges": [
+          [
+            1,
+            29
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "tools/audit-evidence.js",
+      "hash": "7db3d25d82bfe8ba1bd2a742e74e40cad5d676f8c285bbfef79cce85f255f964",
+      "total": 101,
+      "baseline": {
+        "hash": "7db3d25d82bfe8ba1bd2a742e74e40cad5d676f8c285bbfef79cce85f255f964",
+        "total": 101,
+        "ranges": [
+          [
+            1,
+            101
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": ".changes/cheap-first.md",
+      "hash": "28919eb4627c7c68676bb0c87753dbf478cd4b3a108159a457232cca8a321f32",
+      "total": 62,
+      "baseline": {
+        "hash": "00386730ca8c60836e7447dfad9c60cafd8de6c1bb03238cfffe848964579de0",
+        "total": 41,
+        "ranges": [
+          [
+            1,
+            41
+          ]
+        ]
+      },
+      "changedSinceBaseline": true
+    },
+    {
+      "file": "docs/danisma/001-ucuz-once-tier.md",
+      "hash": "526fe974cfad5b5da097e3c6eea62e5a90b8bbead30639e8e32116612c36d3f4",
+      "total": 105,
+      "baseline": {
+        "hash": "526fe974cfad5b5da097e3c6eea62e5a90b8bbead30639e8e32116612c36d3f4",
+        "total": 105,
+        "ranges": [
+          [
+            1,
+            105
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/danisma/002-denetci-ve-iki-basamak.md",
+      "hash": "169797e074a55e1cd3cf25c5017f8cec8360e31cde5b57ebc53a7580fd332389",
+      "total": 134,
+      "baseline": {
+        "hash": "169797e074a55e1cd3cf25c5017f8cec8360e31cde5b57ebc53a7580fd332389",
+        "total": 134,
+        "ranges": [
+          [
+            1,
+            134
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "test/all.js",
+      "hash": "fd880b2e6e0c0feff17a72e1e44dfb21b0f5bd53338ce48357f8c6672ceea56b",
+      "total": 2877,
+      "baseline": {
+        "hash": "0d6757dada47d29b020d95a9a3409e7260023e5c231dc17b4f8e44ff484726ca",
+        "total": 2810,
+        "ranges": [
+          [
+            1,
+            500
+          ],
+          [
+            501,
+            1000
+          ],
+          [
+            1001,
+            1500
+          ],
+          [
+            1501,
+            2050
+          ],
+          [
+            2051,
+            2810
+          ]
+        ]
+      },
+      "changedSinceBaseline": true
+    },
+    {
+      "file": "README.md",
+      "hash": "dad220e6fd63288da39489aaacb0cff958d28059a17f4c77c8c647371555564e",
+      "total": 660,
+      "baseline": {
+        "hash": "94aa37505d6e7c93b0b74b7eb93305462d5151282432e9bac036add80f984c83",
+        "total": 643,
+        "ranges": [
+          [
+            1,
+            353
+          ],
+          [
+            354,
+            643
+          ]
+        ]
+      },
+      "changedSinceBaseline": true
+    },
+    {
+      "file": "README.tr.md",
+      "hash": "556944ab9a74788d87136d880f21b4f2d3b1750e60e95a5817e87873cc446b50",
+      "total": 652,
+      "baseline": {
+        "hash": "2a02fa4a15df209ed350fdef37613600dc15f0bf0633fc694173aa72260195ea",
+        "total": 636,
+        "ranges": [
+          [
+            500,
+            636
+          ],
+          [
+            1,
+            300
+          ],
+          [
+            301,
+            500
+          ]
+        ]
+      },
+      "changedSinceBaseline": true
+    },
+    {
+      "file": "CHANGELOG.md",
+      "hash": "7a622794f91817b76929be8bf05a5c45903d6b9bb3099981163903ceafe7293f",
+      "total": 80,
+      "baseline": {
+        "hash": "7a622794f91817b76929be8bf05a5c45903d6b9bb3099981163903ceafe7293f",
+        "total": 80,
+        "ranges": [
+          [
+            1,
+            80
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/COST-MODEL.md",
+      "hash": "348435f84e13ce1bb899d4f530dc3eec8244f58b7025cb5905c9f4f32a62aa1e",
+      "total": 99,
+      "baseline": {
+        "hash": "348435f84e13ce1bb899d4f530dc3eec8244f58b7025cb5905c9f4f32a62aa1e",
+        "total": 99,
+        "ranges": [
+          [
+            1,
+            99
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/BENCH.md",
+      "hash": "640f75f6c66aed727d5344249f152cc3c7cd3b24fa9d0c14f50d0ea504881505",
+      "total": 91,
+      "baseline": {
+        "hash": "640f75f6c66aed727d5344249f152cc3c7cd3b24fa9d0c14f50d0ea504881505",
+        "total": 91,
+        "ranges": [
+          [
+            1,
+            91
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/DECISIONS.md",
+      "hash": "318a28b4f19c41f0947db411891e5fb28cef4315e2e812df00059c6a004d666e",
+      "total": 600,
+      "baseline": {
+        "hash": "318a28b4f19c41f0947db411891e5fb28cef4315e2e812df00059c6a004d666e",
+        "total": 600,
+        "ranges": [
+          [
+            1,
+            300
+          ],
+          [
+            301,
+            600
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "logs/openlogs/.gitkeep",
+      "hash": "8d2f41e3b19bffac60f05545c56779b91060f028d2e1468e7194af9de7c8afeb",
+      "total": 2,
+      "baseline": {
+        "hash": "8d2f41e3b19bffac60f05545c56779b91060f028d2e1468e7194af9de7c8afeb",
+        "total": 2,
+        "ranges": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "logs/openlogs/closed/BUG-contract-js-verify-adimi-testhost-exe-yi-oldurmuyor.md",
+      "hash": "be055c404a7a25223f3c5d8b67bb3af7f30735b6a6ae98d5764f3245f3d4b1b3",
+      "total": 59,
+      "baseline": {
+        "hash": "be055c404a7a25223f3c5d8b67bb3af7f30735b6a6ae98d5764f3245f3d4b1b3",
+        "total": 59,
+        "ranges": [
+          [
+            1,
+            59
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "logs/openlogs/closed/BUG-core-eklenti-olarak-kuruluyken-kendi-deposunu-bulamiyor-gunlukler-maka.md",
+      "hash": "7e88a855f2325b28c5d9ed8ed0127a198708ceea0766c7d708a38b53b44a4b3f",
+      "total": 106,
+      "baseline": {
+        "hash": "7e88a855f2325b28c5d9ed8ed0127a198708ceea0766c7d708a38b53b44a4b3f",
+        "total": 106,
+        "ranges": [
+          [
+            1,
+            106
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "logs/openlogs/closed/BUG-plan-konseyi-dosya-adina-bagli-kararin-agirligina-degil.md",
+      "hash": "ffcdf0dd6c0a730919b63a8d06150a8f93b4fc112ab8acfc05f7b56a3ef179bc",
+      "total": 66,
+      "baseline": {
+        "hash": "ffcdf0dd6c0a730919b63a8d06150a8f93b4fc112ab8acfc05f7b56a3ef179bc",
+        "total": 66,
+        "ranges": [
+          [
+            1,
+            66
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "logs/openlogs/closed/BUG-spawnsync-timeout-surec-agacini-oldurmuyor.md",
+      "hash": "8164c4c20b53de7447bc5e1374589aaceec9b3ac6fa6356c29fd6ec39a934ebc",
+      "total": 63,
+      "baseline": {
+        "hash": "8164c4c20b53de7447bc5e1374589aaceec9b3ac6fa6356c29fd6ec39a934ebc",
+        "total": 63,
+        "ranges": [
+          [
+            1,
+            63
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "logs/openlogs/closed/BUG-suit-basssiz-avalonia-testlerinde-konak-sureci-cokerek-kosumu-yarida-k.md",
+      "hash": "da953351f986fd3f1f7f793daf3c80c895b7a9952b98eace8b56824a6ca0e3f6",
+      "total": 134,
+      "baseline": {
+        "hash": "da953351f986fd3f1f7f793daf3c80c895b7a9952b98eace8b56824a6ca0e3f6",
+        "total": 134,
+        "ranges": [
+          [
+            1,
+            134
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "logs/openlogs/closed/BUG-t0-dogrulamasi-sabit-uzerine-kurulu-ve-kendini-dolduran-testi-goremiyo.md",
+      "hash": "4099c04175836cdc210329357255d72be6792ffab29778c79c557999bd191018",
+      "total": 83,
+      "baseline": {
+        "hash": "4099c04175836cdc210329357255d72be6792ffab29778c79c557999bd191018",
+        "total": 83,
+        "ranges": [
+          [
+            1,
+            83
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "logs/openlogs/closed/BUG-t0-is-dagitmak-yerine-soru-sorup-projeyi-durdurdu.md",
+      "hash": "98a9eca0a580d074cfd4fd9644d587675f917fd628c8eee9a838efcce79fc665",
+      "total": 105,
+      "baseline": {
+        "hash": "98a9eca0a580d074cfd4fd9644d587675f917fd628c8eee9a838efcce79fc665",
+        "total": 105,
+        "ranges": [
+          [
+            1,
+            105
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "logs/openlogs/closed/BUG-t0-turu-siradaki-direktifi-vermeden-kapatiyor-ajan-bosta-bekliyor.md",
+      "hash": "c8af7aeb318c88c7b0158238b731dfcecfde26ee9449d21dd66c019155a78ed2",
+      "total": 91,
+      "baseline": {
+        "hash": "c8af7aeb318c88c7b0158238b731dfcecfde26ee9449d21dd66c019155a78ed2",
+        "total": 91,
+        "ranges": [
+          [
+            1,
+            91
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "logs/openlogs/closed/BUG-trash-disiplini-yazili-ama-hicbir-yerde-olculmuyor.md",
+      "hash": "ca1ba3ad786aa575d6ca3411863d960f075d3d1a925ef131e12e75ccc9a166ec",
+      "total": 78,
+      "baseline": {
+        "hash": "ca1ba3ad786aa575d6ca3411863d960f075d3d1a925ef131e12e75ccc9a166ec",
+        "total": 78,
+        "ranges": [
+          [
+            1,
+            78
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "logs/openlogs/closed/BUG-zaman-asan-verify-zombi-testhost-birakiyor.md",
+      "hash": "ced0a82038af7e1f694693018b4ff5197335325f55f89e4a03cbe7a015d58291",
+      "total": 51,
+      "baseline": {
+        "hash": "ced0a82038af7e1f694693018b4ff5197335325f55f89e4a03cbe7a015d58291",
+        "total": 51,
+        "ranges": [
+          [
+            1,
+            51
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "logs/openlogs/closed/HATA-contract-guard-komut-metnine-takiliyor-hedef-yola-degil.md",
+      "hash": "4f54dbb16babc29645e8dd4e57f2799d2e78e39a9254ba54b0d905df5d65468b",
+      "total": 18,
+      "baseline": {
+        "hash": "4f54dbb16babc29645e8dd4e57f2799d2e78e39a9254ba54b0d905df5d65468b",
+        "total": 18,
+        "ranges": [
+          [
+            1,
+            18
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "logs/openlogs/closed/HATA-imza-blogu-yeni-projelere-kendiliginden-gelmiyor.md",
+      "hash": "97fabbcc346489755cb3ff2aff7375afaa35d1bd39d6e58370b3ed267a5f112c",
+      "total": 113,
+      "baseline": {
+        "hash": "97fabbcc346489755cb3ff2aff7375afaa35d1bd39d6e58370b3ed267a5f112c",
+        "total": 113,
+        "ranges": [
+          [
+            1,
+            113
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "logs/openlogs/closed/HATA-kullaniciya-verilen-silme-komutu-dogrulanmamis-yollardan-kuruldu.md",
+      "hash": "72ae3b440c510972ca12f53d291d37dcebd5fdbbc758d7c1f42e48812789e9d2",
+      "total": 157,
+      "baseline": {
+        "hash": "72ae3b440c510972ca12f53d291d37dcebd5fdbbc758d7c1f42e48812789e9d2",
+        "total": 157,
+        "ranges": [
+          [
+            1,
+            157
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "logs/openlogs/closed/HATA-paralel-ajanlar-ayni-git-indeksini-paylasti.md",
+      "hash": "81bf1ee1b1f22252f893b15f371260a652eedfcb0f25fce74629b8388349d07b",
+      "total": 143,
+      "baseline": {
+        "hash": "81bf1ee1b1f22252f893b15f371260a652eedfcb0f25fce74629b8388349d07b",
+        "total": 143,
+        "ranges": [
+          [
+            1,
+            143
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "logs/openlogs/closed/HATA-shields-rozetinde-okunmayan-beyaz-yazi.md",
+      "hash": "1dce1ed64613da8c57d39ff72de371e96cd946f6ca42e4b82c3058372e686e02",
+      "total": 84,
+      "baseline": {
+        "hash": "1dce1ed64613da8c57d39ff72de371e96cd946f6ca42e4b82c3058372e686e02",
+        "total": 84,
+        "ranges": [
+          [
+            1,
+            84
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "logs/openlogs/closed/YONTEM-cift-dilli-readme.md",
+      "hash": "d8de9a2ef21865f503c2406a9a2c88b8697b044f39b2ad262ac79c71c445e12f",
+      "total": 112,
+      "baseline": {
+        "hash": "d8de9a2ef21865f503c2406a9a2c88b8697b044f39b2ad262ac79c71c445e12f",
+        "total": 112,
+        "ranges": [
+          [
+            1,
+            112
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/CLAUDE-HANDOFF.md",
+      "hash": "fd28d08196a34eef60aea1864b9ad8bc235c1b075a025cb2de9405e720603398",
+      "total": 237,
+      "baseline": {
+        "hash": "fd28d08196a34eef60aea1864b9ad8bc235c1b075a025cb2de9405e720603398",
+        "total": 237,
+        "ranges": [
+          [
+            1,
+            237
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/TRIAGE.md",
+      "hash": "7f486466cf06b51c564c50f337545f1fd053623fef66e9928fabce46275fb6e7",
+      "total": 82,
+      "baseline": {
+        "hash": "7f486466cf06b51c564c50f337545f1fd053623fef66e9928fabce46275fb6e7",
+        "total": 82,
+        "ranges": [
+          [
+            1,
+            82
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/EKOSISTEM.md",
+      "hash": "94cc9429d72134cf405a224f2c1ab5e5f435afc8011976918088ecdb0944b23c",
+      "total": 72,
+      "baseline": {
+        "hash": "94cc9429d72134cf405a224f2c1ab5e5f435afc8011976918088ecdb0944b23c",
+        "total": 72,
+        "ranges": [
+          [
+            1,
+            72
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/GRAPHIFY.md",
+      "hash": "0d80eb91328ccca67c14dcffcb6af3fb5d46e596cc8cda7316491e1ad51bd8f9",
+      "total": 48,
+      "baseline": {
+        "hash": "0d80eb91328ccca67c14dcffcb6af3fb5d46e596cc8cda7316491e1ad51bd8f9",
+        "total": 48,
+        "ranges": [
+          [
+            1,
+            48
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/diagram.md",
+      "hash": "96197118955c18305918e8a5f6aa3cd2947633bf15f80fe1c7c0ed0cfec97d3f",
+      "total": 47,
+      "baseline": {
+        "hash": "96197118955c18305918e8a5f6aa3cd2947633bf15f80fe1c7c0ed0cfec97d3f",
+        "total": 47,
+        "ranges": [
+          [
+            1,
+            47
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/YOL-HARITASI.md",
+      "hash": "74eca2e7b0ffdb11de368329c48802f5c462c81761d40138b327c23503f31ed0",
+      "total": 288,
+      "baseline": {
+        "hash": "81808e01dc9e7696fbf07cde1ea99d747635d48179275c142c63cf744f0bf5d1",
+        "total": 262,
+        "ranges": [
+          [
+            1,
+            262
+          ]
+        ]
+      },
+      "changedSinceBaseline": true
+    },
+    {
+      "file": "docs/contracts/GORUS-dil-2.md",
+      "hash": "997647ed86480e4a676b01eea868319e0f54456cdbb00e69d6910f357df56d65",
+      "total": 49,
+      "baseline": {
+        "hash": "997647ed86480e4a676b01eea868319e0f54456cdbb00e69d6910f357df56d65",
+        "total": 49,
+        "ranges": [
+          [
+            1,
+            49
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/contracts/GORUS-model-kademesi.md",
+      "hash": "2dfc1385f53d8607c3a09ae2f739006926d2b2f632f108367999a035e057c945",
+      "total": 2,
+      "baseline": {
+        "hash": "2dfc1385f53d8607c3a09ae2f739006926d2b2f632f108367999a035e057c945",
+        "total": 2,
+        "ranges": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/contracts/LOG.md",
+      "hash": "3f0260e4908194f974eddd967f5cdbf03b44189cce3ac3f440a3f54018523b1c",
+      "total": 9,
+      "baseline": {
+        "hash": "3f0260e4908194f974eddd967f5cdbf03b44189cce3ac3f440a3f54018523b1c",
+        "total": 9,
+        "ranges": [
+          [
+            1,
+            9
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/contracts/N-model-kademesi.md",
+      "hash": "e52fa2bad7375e4688f4219f46e62a0a7394466db2c315b5c7fc36178b9283da",
+      "total": 91,
+      "baseline": {
+        "hash": "e52fa2bad7375e4688f4219f46e62a0a7394466db2c315b5c7fc36178b9283da",
+        "total": 91,
+        "ranges": [
+          [
+            1,
+            91
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/contracts/O-kademe-tablosu.md",
+      "hash": "605c1622cdb764828de204d57c19a8b61cbaed1f72d3552d1db4c2eb814661fa",
+      "total": 139,
+      "baseline": {
+        "hash": "605c1622cdb764828de204d57c19a8b61cbaed1f72d3552d1db4c2eb814661fa",
+        "total": 139,
+        "ranges": [
+          [
+            1,
+            139
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/contracts/P-danisma-mimarisi.md",
+      "hash": "069aec09bb59bc93dbdecc3c38e8026fd5159b21b2ef6907344aebb567a58927",
+      "total": 107,
+      "baseline": {
+        "hash": "069aec09bb59bc93dbdecc3c38e8026fd5159b21b2ef6907344aebb567a58927",
+        "total": 107,
+        "ranges": [
+          [
+            1,
+            107
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/contracts/R-ajan-dili.md",
+      "hash": "4b48062e9ef786b72f9f11dd67c2ff6d96871536e93f57c2ceeaf76a0c00d678",
+      "total": 84,
+      "baseline": {
+        "hash": "4b48062e9ef786b72f9f11dd67c2ff6d96871536e93f57c2ceeaf76a0c00d678",
+        "total": 84,
+        "ranges": [
+          [
+            1,
+            84
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "trash/S-isaretci-denetimi.md",
+      "hash": "f3e3f2c823cdca093aa6006a05680b6069a0c7c73e77bda84fa623d6b3624941",
+      "total": 51,
+      "baseline": {
+        "hash": "f3e3f2c823cdca093aa6006a05680b6069a0c7c73e77bda84fa623d6b3624941",
+        "total": 51,
+        "ranges": [
+          [
+            1,
+            51
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "trash/title.js",
+      "hash": "4731327c8ace00fb5335a39c7a0fb7ea5fed247e213ff64d881ba7a7a117b0bf",
+      "total": 29,
+      "baseline": {
+        "hash": "4731327c8ace00fb5335a39c7a0fb7ea5fed247e213ff64d881ba7a7a117b0bf",
+        "total": 29,
+        "ranges": [
+          [
+            1,
+            29
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/contracts/T-evrim-plani.md",
+      "hash": "c44789bdd172e1ecd67bfb2ba9efae752d9e74bef881ddc146641f448e55028b",
+      "total": 455,
+      "baseline": {
+        "hash": "c44789bdd172e1ecd67bfb2ba9efae752d9e74bef881ddc146641f448e55028b",
+        "total": 455,
+        "ranges": [
+          [
+            1,
+            455
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/inceleme/_SABLON.md",
+      "hash": "241f033019db6755167f129cc7366000a4df4700e7fe297183bc747a655002c7",
+      "total": 41,
+      "baseline": {
+        "hash": "241f033019db6755167f129cc7366000a4df4700e7fe297183bc747a655002c7",
+        "total": 41,
+        "ranges": [
+          [
+            1,
+            41
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/inceleme/adr.md",
+      "hash": "ec42b4c245ecbdf7d94cdba78d3bca9540882bd128ed841d90a66213340c07b6",
+      "total": 151,
+      "baseline": {
+        "hash": "ec42b4c245ecbdf7d94cdba78d3bca9540882bd128ed841d90a66213340c07b6",
+        "total": 151,
+        "ranges": [
+          [
+            1,
+            151
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/inceleme/aider-repomap.md",
+      "hash": "2fd75c17cbdcf91e524f4a4c5eb573cbaba9dbc2dfb25e2c9fb2ab055cf95682",
+      "total": 139,
+      "baseline": {
+        "hash": "2fd75c17cbdcf91e524f4a4c5eb573cbaba9dbc2dfb25e2c9fb2ab055cf95682",
+        "total": 139,
+        "ranges": [
+          [
+            1,
+            139
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/inceleme/ast-grep.md",
+      "hash": "e7deeda1e4218d1d23dff8fae572a87541cac575ba8028ee58a77c9accc7794f",
+      "total": 142,
+      "baseline": {
+        "hash": "e7deeda1e4218d1d23dff8fae572a87541cac575ba8028ee58a77c9accc7794f",
+        "total": 142,
+        "ranges": [
+          [
+            1,
+            142
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/inceleme/baglam-enjeksiyonu.md",
+      "hash": "588fec6bae982d45d1fed111dd2537bcfb92fa1df82d87219046fe197eaa53a7",
+      "total": 137,
+      "baseline": {
+        "hash": "588fec6bae982d45d1fed111dd2537bcfb92fa1df82d87219046fe197eaa53a7",
+        "total": 137,
+        "ranges": [
+          [
+            1,
+            137
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/inceleme/beads.md",
+      "hash": "5d94f7c1d55c9600649c62861a14e4738b8f528e90b34f9f67a0fe3688cf17d9",
+      "total": 150,
+      "baseline": {
+        "hash": "5d94f7c1d55c9600649c62861a14e4738b8f528e90b34f9f67a0fe3688cf17d9",
+        "total": 150,
+        "ranges": [
+          [
+            1,
+            150
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/inceleme/git-native.md",
+      "hash": "756ba1ef63841b17d8f8baa0ffc614333a798f9b4ccd5cf068857b1a6d8b9804",
+      "total": 171,
+      "baseline": {
+        "hash": "756ba1ef63841b17d8f8baa0ffc614333a798f9b4ccd5cf068857b1a6d8b9804",
+        "total": 171,
+        "ranges": [
+          [
+            1,
+            171
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/inceleme/mem0.md",
+      "hash": "1fb01976d81306e1d4d2ffcf8bbdacab6f6c22dc29f3c6595b1419bf58d17756",
+      "total": 150,
+      "baseline": {
+        "hash": "1fb01976d81306e1d4d2ffcf8bbdacab6f6c22dc29f3c6595b1419bf58d17756",
+        "total": 150,
+        "ranges": [
+          [
+            1,
+            150
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/inceleme/repomix.md",
+      "hash": "5bd0f678ecc7052156ab6226df64b7344e0ac9b195ce304247884d2c3a897006",
+      "total": 120,
+      "baseline": {
+        "hash": "5bd0f678ecc7052156ab6226df64b7344e0ac9b195ce304247884d2c3a897006",
+        "total": 120,
+        "ranges": [
+          [
+            1,
+            120
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/inceleme/serena.md",
+      "hash": "f47a269af03ad7ec43dc14b0b69880aa078c064c1840818ff3bd92b5bdeba2e3",
+      "total": 143,
+      "baseline": {
+        "hash": "f47a269af03ad7ec43dc14b0b69880aa078c064c1840818ff3bd92b5bdeba2e3",
+        "total": 143,
+        "ranges": [
+          [
+            1,
+            143
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/inceleme/spec-kit.md",
+      "hash": "c38f94fe9cfa80b29d6311e019587ff9a779feb67dc98714589226944b042c70",
+      "total": 149,
+      "baseline": {
+        "hash": "c38f94fe9cfa80b29d6311e019587ff9a779feb67dc98714589226944b042c70",
+        "total": 149,
+        "ranges": [
+          [
+            1,
+            149
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/inceleme/openspec-taskmaster.md",
+      "hash": "4d5ab60411158f523562aa7ae2115f206e69964f796918018f9cb7e09c1f94a3",
+      "total": 194,
+      "baseline": {
+        "hash": "4d5ab60411158f523562aa7ae2115f206e69964f796918018f9cb7e09c1f94a3",
+        "total": 194,
+        "ranges": [
+          [
+            1,
+            194
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/inceleme/ccusage-ccstatusline.md",
+      "hash": "37e7b05846dcfad4bb192dea70dd27853d427d4c08eefd4185a2e9fa8c21006a",
+      "total": 313,
+      "baseline": {
+        "hash": "37e7b05846dcfad4bb192dea70dd27853d427d4c08eefd4185a2e9fa8c21006a",
+        "total": 313,
+        "ranges": [
+          [
+            1,
+            313
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/inceleme/claude-flow.md",
+      "hash": "e6f703e68b1400df5ff8fb8d8d90eddbdcc704e79c53b1d38336d3c03492824b",
+      "total": 291,
+      "baseline": {
+        "hash": "e6f703e68b1400df5ff8fb8d8d90eddbdcc704e79c53b1d38336d3c03492824b",
+        "total": 291,
+        "ranges": [
+          [
+            1,
+            291
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/inceleme/semgrep-codeql.md",
+      "hash": "22fadfa84f31781f18d48394dd713a839e5521fe7bfef3f5421cdb69e71106ea",
+      "total": 249,
+      "baseline": {
+        "hash": "22fadfa84f31781f18d48394dd713a839e5521fe7bfef3f5421cdb69e71106ea",
+        "total": 249,
+        "ranges": [
+          [
+            1,
+            249
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/inceleme/graphify.md",
+      "hash": "a1a66ccea600d71a6933cdea616f1a2b94f4dd4a6095565b109658b182ae7664",
+      "total": 387,
+      "baseline": {
+        "hash": "a1a66ccea600d71a6933cdea616f1a2b94f4dd4a6095565b109658b182ae7664",
+        "total": 387,
+        "ranges": [
+          [
+            1,
+            387
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/inceleme/obsidian.md",
+      "hash": "429f133df7b00c7885ad446aa10444772ba33e5a8b7d356f0207238cd0b0557f",
+      "total": 213,
+      "baseline": {
+        "hash": "429f133df7b00c7885ad446aa10444772ba33e5a8b7d356f0207238cd0b0557f",
+        "total": 213,
+        "ranges": [
+          [
+            1,
+            213
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/inceleme/_OLCUM-graphify.md",
+      "hash": "efb349600cd2275c92161638d10a26526be85bf359f37d4d16fab04b01d404c0",
+      "total": 166,
+      "baseline": {
+        "hash": "efb349600cd2275c92161638d10a26526be85bf359f37d4d16fab04b01d404c0",
+        "total": 166,
+        "ranges": [
+          [
+            1,
+            166
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/inceleme/_OLCUM-obsidian.md",
+      "hash": "baba9baf8f6b9602616baa5effb77a35ad3a1c60fd393cfd9b11f26b8d8996a3",
+      "total": 171,
+      "baseline": {
+        "hash": "baba9baf8f6b9602616baa5effb77a35ad3a1c60fd393cfd9b11f26b8d8996a3",
+        "total": 171,
+        "ranges": [
+          [
+            1,
+            171
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/inceleme/_SENTEZ.md",
+      "hash": "d36f40156be347b22c23fa1265d1ae251c67059fd2e75563e038177716560ae0",
+      "total": 507,
+      "baseline": {
+        "hash": "d36f40156be347b22c23fa1265d1ae251c67059fd2e75563e038177716560ae0",
+        "total": 507,
+        "ranges": [
+          [
+            1,
+            260
+          ],
+          [
+            261,
+            507
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/raporlar/2026-09-03-claude-vidshrink-prompt.md",
+      "hash": "1151995120fd0561aaa43a3063198e6be9d96381160052f4ad25b6ed2142dfe5",
+      "total": 63,
+      "baseline": {
+        "hash": "1151995120fd0561aaa43a3063198e6be9d96381160052f4ad25b6ed2142dfe5",
+        "total": 63,
+        "ranges": [
+          [
+            1,
+            63
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/raporlar/2026-09-03-vidshrink-denetim.md",
+      "hash": "9ada510245aad99943d89ff64dea7b3d9154305d51b781ab624c644a34bf2021",
+      "total": 265,
+      "baseline": {
+        "hash": "9ada510245aad99943d89ff64dea7b3d9154305d51b781ab624c644a34bf2021",
+        "total": 265,
+        "ranges": [
+          [
+            1,
+            265
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/raporlar/denetci-maliyet-analizi.md",
+      "hash": "965d935fad6ca6325ccd7ac6ccb813a99f57aae87877ad147712165f92893358",
+      "total": 118,
+      "baseline": {
+        "hash": "965d935fad6ca6325ccd7ac6ccb813a99f57aae87877ad147712165f92893358",
+        "total": 118,
+        "ranges": [
+          [
+            1,
+            118
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/raporlar/ek-72-ek-tur-sinif-atamasi.md",
+      "hash": "267a732aed59f8281f1f1f3d2e952012c89606e5ab690f4a9e4f22093be8b38d",
+      "total": 98,
+      "baseline": {
+        "hash": "267a732aed59f8281f1f1f3d2e952012c89606e5ab690f4a9e4f22093be8b38d",
+        "total": 98,
+        "ranges": [
+          [
+            1,
+            98
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/raporlar/rele-israfi-124-sozlesmelik-olcum.md",
+      "hash": "73b7db34d99d5de3d9d594f71da433a891d61b658355103ae9d714f3e0b42729",
+      "total": 336,
+      "baseline": {
+        "hash": "73b7db34d99d5de3d9d594f71da433a891d61b658355103ae9d714f3e0b42729",
+        "total": 336,
+        "ranges": [
+          [
+            1,
+            336
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/raporlar/rele-surec-kusurlari-127-sozlesmelik-olcum.md",
+      "hash": "4525cbf3849c464f2576db3d886799ed1697564c86706e4cb0d1960cd36f60d5",
+      "total": 612,
+      "baseline": {
+        "hash": "4525cbf3849c464f2576db3d886799ed1697564c86706e4cb0d1960cd36f60d5",
+        "total": 612,
+        "ranges": [
+          [
+            1,
+            310
+          ],
+          [
+            311,
+            612
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/raporlar/vidshrink-core-onerileri.md",
+      "hash": "6b559b5dd721d915bd5d83a7a2e811d058b10a855b02c7f6b853c3572bf0f85c",
+      "total": 677,
+      "baseline": {
+        "hash": "6b559b5dd721d915bd5d83a7a2e811d058b10a855b02c7f6b853c3572bf0f85c",
+        "total": 677,
+        "ranges": [
+          [
+            1,
+            260
+          ],
+          [
+            261,
+            485
+          ],
+          [
+            486,
+            677
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/raporlar/vidshrink-tasnif.md",
+      "hash": "661e180a0c355da6756795976faa2ebd05cd768cfbe3be1aee1c2a907c6cce95",
+      "total": 76,
+      "baseline": {
+        "hash": "661e180a0c355da6756795976faa2ebd05cd768cfbe3be1aee1c2a907c6cce95",
+        "total": 76,
+        "ranges": [
+          [
+            1,
+            76
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/raporlar/yetki-bosluklari.md",
+      "hash": "76d6830572ee0cbe8be13da21605f3931f5b4609e42d22c15b114f32a80cccd7",
+      "total": 120,
+      "baseline": {
+        "hash": "76d6830572ee0cbe8be13da21605f3931f5b4609e42d22c15b114f32a80cccd7",
+        "total": 120,
+        "ranges": [
+          [
+            1,
+            120
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "docs/raporlar/2026-09-03-vidshrink-kanit.json",
+      "hash": "3f9e350b1cb4cbca07e24a810e03949ca882ff4e47b6cc18c7d81a09644f5845",
+      "total": 1624,
+      "baseline": {
+        "hash": "3f9e350b1cb4cbca07e24a810e03949ca882ff4e47b6cc18c7d81a09644f5845",
+        "total": 1624,
+        "ranges": [
+          [
+            1,
+            450
+          ],
+          [
+            451,
+            1050
+          ],
+          [
+            1051,
+            1624
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "assets/badge-lang.svg",
+      "hash": "dc2c10b97e374dba09bbc39e0fee4a1fa0685f10d28f66aa0eda562b17a28d43",
+      "total": 15,
+      "baseline": {
+        "hash": "dc2c10b97e374dba09bbc39e0fee4a1fa0685f10d28f66aa0eda562b17a28d43",
+        "total": 15,
+        "ranges": [
+          [
+            1,
+            15
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "assets/badge-lang.tr.svg",
+      "hash": "bc2acfff3dfda3b031976552fe9b400d893bc6ec37ecd08e436df6290c485a73",
+      "total": 15,
+      "baseline": {
+        "hash": "bc2acfff3dfda3b031976552fe9b400d893bc6ec37ecd08e436df6290c485a73",
+        "total": 15,
+        "ranges": [
+          [
+            1,
+            15
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "assets/badge-license.svg",
+      "hash": "facc6533e770601d1ccb3f6ed744cacc928f6b0789cb2e8e350857dbc57b98dd",
+      "total": 21,
+      "baseline": {
+        "hash": "facc6533e770601d1ccb3f6ed744cacc928f6b0789cb2e8e350857dbc57b98dd",
+        "total": 21,
+        "ranges": [
+          [
+            1,
+            21
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "assets/badge-sponsor.svg",
+      "hash": "1862e7d90f75e5526dc2e8d02de0d0afa7afef5779b8da36e10b22a5483a6ea9",
+      "total": 21,
+      "baseline": {
+        "hash": "1862e7d90f75e5526dc2e8d02de0d0afa7afef5779b8da36e10b22a5483a6ea9",
+        "total": 21,
+        "ranges": [
+          [
+            1,
+            21
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "assets/banner.svg",
+      "hash": "b0e17def1cfd3021357b441e648aaf38fb1582cebae2085c5835d1eec53df3a5",
+      "total": 37,
+      "baseline": {
+        "hash": "b0e17def1cfd3021357b441e648aaf38fb1582cebae2085c5835d1eec53df3a5",
+        "total": 37,
+        "ranges": [
+          [
+            1,
+            37
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "assets/banner.tr.svg",
+      "hash": "f553f43a024395411e54f589d13542c76a1b735175fd096d407c3760ce8c0082",
+      "total": 37,
+      "baseline": {
+        "hash": "f553f43a024395411e54f589d13542c76a1b735175fd096d407c3760ce8c0082",
+        "total": 37,
+        "ranges": [
+          [
+            1,
+            37
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "assets/flow-agents.svg",
+      "hash": "8c874fd49b4f86921065e33e6a5398b39409cab8bdd006aaa9cd1a46361075ff",
+      "total": 41,
+      "baseline": {
+        "hash": "8c874fd49b4f86921065e33e6a5398b39409cab8bdd006aaa9cd1a46361075ff",
+        "total": 41,
+        "ranges": [
+          [
+            1,
+            41
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "assets/flow-agents.tr.svg",
+      "hash": "9e79a3aada3ab2bd5315deb0680675549ee4a35f232cf1962b01a49dca90b564",
+      "total": 41,
+      "baseline": {
+        "hash": "9e79a3aada3ab2bd5315deb0680675549ee4a35f232cf1962b01a49dca90b564",
+        "total": 41,
+        "ranges": [
+          [
+            1,
+            41
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "assets/flow-contract.svg",
+      "hash": "6fb908f1ad9312fd7191f5663a3854a0a34282a0a59b47e4968b7c81357e086c",
+      "total": 43,
+      "baseline": {
+        "hash": "6fb908f1ad9312fd7191f5663a3854a0a34282a0a59b47e4968b7c81357e086c",
+        "total": 43,
+        "ranges": [
+          [
+            1,
+            43
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "assets/flow-contract.tr.svg",
+      "hash": "50b9383c7a5b4eddff0e6974497181d70b8aa878add88f6c2656910c98a9918d",
+      "total": 43,
+      "baseline": {
+        "hash": "50b9383c7a5b4eddff0e6974497181d70b8aa878add88f6c2656910c98a9918d",
+        "total": 43,
+        "ranges": [
+          [
+            1,
+            43
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "assets/flow-cost.svg",
+      "hash": "a8fb135e20edb7161f87934f8c2b3fec240fb8b2761b2d1a11eb674208851526",
+      "total": 41,
+      "baseline": {
+        "hash": "a8fb135e20edb7161f87934f8c2b3fec240fb8b2761b2d1a11eb674208851526",
+        "total": 41,
+        "ranges": [
+          [
+            1,
+            41
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "assets/flow-cost.tr.svg",
+      "hash": "fac492af30118e18750c3456a7043e4fb48ee22d9c49d26996ddec578a966baa",
+      "total": 41,
+      "baseline": {
+        "hash": "fac492af30118e18750c3456a7043e4fb48ee22d9c49d26996ddec578a966baa",
+        "total": 41,
+        "ranges": [
+          [
+            1,
+            41
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/assets/badge-lang.svg",
+      "hash": "dc2c10b97e374dba09bbc39e0fee4a1fa0685f10d28f66aa0eda562b17a28d43",
+      "total": 15,
+      "baseline": {
+        "hash": "dc2c10b97e374dba09bbc39e0fee4a1fa0685f10d28f66aa0eda562b17a28d43",
+        "total": 15,
+        "ranges": [
+          [
+            1,
+            15
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/assets/badge-lang.tr.svg",
+      "hash": "bc2acfff3dfda3b031976552fe9b400d893bc6ec37ecd08e436df6290c485a73",
+      "total": 15,
+      "baseline": {
+        "hash": "bc2acfff3dfda3b031976552fe9b400d893bc6ec37ecd08e436df6290c485a73",
+        "total": 15,
+        "ranges": [
+          [
+            1,
+            15
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "LICENSE",
+      "hash": "e0eedba615d5cd1b986afb6c5b3a4b1ae33713e7e9dc74d19daec5e3221f9d2e",
+      "total": 662,
+      "baseline": {
+        "hash": "e0eedba615d5cd1b986afb6c5b3a4b1ae33713e7e9dc74d19daec5e3221f9d2e",
+        "total": 662,
+        "ranges": [
+          [
+            1,
+            662
+          ]
+        ]
+      },
+      "changedSinceBaseline": false
+    },
+    {
+      "file": "core/assets/licenses/AGPL-3.0-or-later.txt",
+      "hash": "e0eedba615d5cd1b986afb6c5b3a4b1ae33713e7e9dc74d19daec5e3221f9d2e",
+      "total": 662,
+      "baseline": {
+        "hash": "e0eedba615d5cd1b986afb6c5b3a4b1ae33713e7e9dc74d19daec5e3221f9d2e",
+        "total": 662,
+        "ranges": [
+          [
+            1,
+            662
+          ]
+        ],
+        "equivalentTo": "LICENSE"
+      },
+      "changedSinceBaseline": false
+    }
+  ],
+  "lateDelta": {
+    "file": "core/scripts/contract.js",
+    "hash": "e9dc404509e5c21fb1ce548d71160fb5b75d7c5a06977e56c84ab68429dc9bf1",
+    "total": 1921,
+    "readEntireDiff": true,
+    "mainSuiteRerun": false,
+    "syntaxPassed": true,
+    "notes": "External uncommitted change: duplicate complete dirtyOutside check, audit dirtyOutside check, builderRole/coreVersion fields. Full probes rerun; all 12 persist."
+  },
+  "tests": {
+    "initialSuite": {
+      "passed": 2608,
+      "failed": 6,
+      "omitted": 3,
+      "reasonOmitted": "Registry-mutating envPinned probes",
+      "config": "empty isolated CLAUDE_CONFIG_DIR",
+      "failures": [
+        "a model with no effort beside it borrows the effort its own row says",
+        "a file six others import is not cheap-first work",
+        "and the signal says so by name",
+        "the reason names the file",
+        "the planner can raise before the first attempt",
+        "and has to say why on the record"
+      ]
+    },
+    "suite": {
+      "passed": 2621,
+      "failed": 1,
+      "omitted": 3,
+      "reasonOmitted": "Three envPinned assertions modify HKCU Environment; removed only in temporary copy.",
+      "config": "Empty isolated CLAUDE_CONFIG_DIR",
+      "failure": "a model with no effort beside it borrows the effort its own row says",
+      "fixture": "C:/Users/ADMINI~1/AppData/Local/Temp/tkc-sQlbdh",
+      "exitCode": 1
+    },
+    "regressions": {
+      "passed": 17,
+      "failed": 0,
+      "repeatedOnSuiteSnapshot": true
+    },
+    "timeout": {
+      "passed": true,
+      "childAliveAfterTimeout": false,
+      "legacyChildAliveAfterCleanup": true,
+      "timedOut": true,
+      "swept": true,
+      "repeatedOnSuiteSnapshot": true
+    },
+    "static": {
+      "checked": 30,
+      "failures": []
+    },
+    "baselineProbes": {
+      "at": "2026-09-03T21:16:52.902Z",
+      "snapshot": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\tkc-current-review-GhiSUJ",
+      "fixture": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\tkc-review-probes-2tbxYm",
+      "results": [
+        {
+          "name": "worktree verifier runs main checkout",
+          "issueReproduced": true,
+          "mainValue": 1,
+          "worktreeValue": 999,
+          "status": 0,
+          "out": "W1 complete -> contracts/done/W1.md\n\n  pass  node -e \"if(require('./src/value.js')!==1) process.exit(4)\"\n\nrisk low\nledger written at HEAD 80390b7d\n\nSealed with no audit record: independent review is not evidenced by this seal.\n\nNo filename/import reference was found for these files (heuristic only):\n  src/value.js\n\nCheck entry points, dynamic loading and build configuration before moving anything.\n",
+          "err": ""
+        },
+        {
+          "name": "unrelated historical auditor can sign",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "Audit record written: .claude\\relay\\audits\\A1-1.json\nheadSha and diffHash were computed here, not supplied.\n",
+          "err": ""
+        },
+        {
+          "name": "audited files change during verification yet seal passes",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "S1 complete -> contracts/done/S1.md\n\n  pass  node -e \"require('fs').writeFileSync('src/value.js','module.exports=999;')\"\n\nrisk high (declared high by the contract author)\nledger written at HEAD 80390b7d, audit record consumed\n\nNo filename/import reference was found for these files (heuristic only):\n  src/value.js\n\nCheck entry points, dynamic loading and build configuration before moving anything.\n",
+          "err": ""
+        },
+        {
+          "name": "empty verify without acceptance reason closes",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "E1 complete -> contracts/done/E1.md\n\n\nrisk low\nledger written at HEAD 24a0e379\n\nSealed with no audit record: independent review is not evidenced by this seal.\n\nNo filename/import reference was found for these files (heuristic only):\n  src/value.js\n\nCheck entry points, dynamic loading and build configuration before moving anything.\n",
+          "err": ""
+        },
+        {
+          "name": "unmet dependency is treated as satisfied",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "D2 complete -> contracts/done/D2.md\n\n  pass  node -e \"if(require('./src/value.js')!==1) process.exit(4)\"\n\nrisk low\nledger written at HEAD a5890485\n\nSealed with no audit record: independent review is not evidenced by this seal.\n\nNo filename/import reference was found for these files (heuristic only):\n  src/value.js\n\nCheck entry points, dynamic loading and build configuration before moving anything.\n",
+          "err": ""
+        },
+        {
+          "name": "closed debt evidence disappears on handoff refresh",
+          "issueReproduced": true,
+          "before": "\n\n## Closed debts\n\n- 2026-09-03 closed: ask the advisor - the advisor answered\n",
+          "after": "<!-- teknesyum:handoff -->\n# Handoff\n\nWhere this project stands. The facts below are written by a hook and cost\nnothing; the intent under them is written by hand, once, when it changes.\n\n## Intent\n\n_not written yet - one paragraph on what is being attempted and why._\n\n## Contracts open\n\nNone.\n\n## Closed last\n\nNothing in the ledger yet.\n\n## Tree\n\n- branch: `main`\n- head: `b7465f1 fixture`\n- uncommitted files: 0\n"
+        },
+        {
+          "name": "dirty import graph still called fresh",
+          "issueReproduced": true,
+          "state": {
+            "state": "fresh",
+            "at": "b7465f148c33d61762639873938edbd1835bfc35"
+          },
+          "fanIn": {
+            "max": 0,
+            "file": "",
+            "read": true
+          },
+          "actualImporters": 1
+        },
+        {
+          "name": "session end closes another session when only payload has session id",
+          "issueReproduced": true,
+          "record": {
+            "id": "other",
+            "sessionId": "other-session",
+            "role": "builder",
+            "files": [],
+            "ended": "2026-09-03T21:16:51.640Z",
+            "stop_reason": "session_end"
+          },
+          "status": 0,
+          "out": "",
+          "err": ""
+        },
+        {
+          "name": "bound agent can write outside repository through Write",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "",
+          "err": ""
+        },
+        {
+          "name": "first known-role dispatch inherits model without existing relay",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "",
+          "err": ""
+        },
+        {
+          "name": "suffix contract is invisible in statusline count",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "Teknesyum ▸ suffix \u001b[2m·\u001b[0m normal",
+          "err": ""
+        },
+        {
+          "name": "forged complete audit and live record are accepted",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "F1 complete -> contracts/done/F1.md\n\n  pass  node -e \"if(require('./src/value.js')!==1) process.exit(4)\"\n\nrisk high (declared high by the contract author)\nledger written at HEAD d4e02ea5, audit record consumed\n\nNo filename/import reference was found for these files (heuristic only):\n  src/value.js\n\nCheck entry points, dynamic loading and build configuration before moving anything.\n",
+          "err": ""
+        }
+      ]
+    },
+    "deliveredProbes": {
+      "at": "2026-09-03T21:20:20.561Z",
+      "snapshot": "C:\\Users\\Administrator\\Desktop\\Projeler\\Teknesyum-Core",
+      "fixture": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\tkc-review-probes-SHkPu4",
+      "results": [
+        {
+          "name": "worktree verifier runs main checkout",
+          "issueReproduced": true,
+          "mainValue": 1,
+          "worktreeValue": 999,
+          "status": 0,
+          "out": "W1 complete -> contracts/done/W1.md\n\n  pass  node -e \"if(require('./src/value.js')!==1) process.exit(4)\"\n\nrisk low\nledger written at HEAD 8fb02288\n\nSealed with no audit record: independent review is not evidenced by this seal.\n\nNo filename/import reference was found for these files (heuristic only):\n  src/value.js\n\nCheck entry points, dynamic loading and build configuration before moving anything.\n",
+          "err": ""
+        },
+        {
+          "name": "unrelated historical auditor can sign",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "Audit record written: .claude\\relay\\audits\\A1-1.json\nheadSha and diffHash were computed here, not supplied.\n",
+          "err": ""
+        },
+        {
+          "name": "audited files change during verification yet seal passes",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "S1 complete -> contracts/done/S1.md\n\n  pass  node -e \"require('fs').writeFileSync('src/value.js','module.exports=999;')\"\n\nrisk high (declared high by the contract author)\nledger written at HEAD 49fe291a, audit record consumed\n\nNo filename/import reference was found for these files (heuristic only):\n  src/value.js\n\nCheck entry points, dynamic loading and build configuration before moving anything.\n",
+          "err": ""
+        },
+        {
+          "name": "empty verify without acceptance reason closes",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "E1 complete -> contracts/done/E1.md\n\n\nrisk low\nledger written at HEAD 4b787fa9\n\nSealed with no audit record: independent review is not evidenced by this seal.\n\nNo filename/import reference was found for these files (heuristic only):\n  src/value.js\n\nCheck entry points, dynamic loading and build configuration before moving anything.\n",
+          "err": ""
+        },
+        {
+          "name": "unmet dependency is treated as satisfied",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "D2 complete -> contracts/done/D2.md\n\n  pass  node -e \"if(require('./src/value.js')!==1) process.exit(4)\"\n\nrisk low\nledger written at HEAD b4a12e64\n\nSealed with no audit record: independent review is not evidenced by this seal.\n\nNo filename/import reference was found for these files (heuristic only):\n  src/value.js\n\nCheck entry points, dynamic loading and build configuration before moving anything.\n",
+          "err": ""
+        },
+        {
+          "name": "closed debt evidence disappears on handoff refresh",
+          "issueReproduced": true,
+          "before": "\n\n## Closed debts\n\n- 2026-09-03 closed: ask the advisor - the advisor answered\n",
+          "after": "<!-- teknesyum:handoff -->\n# Handoff\n\nWhere this project stands. The facts below are written by a hook and cost\nnothing; the intent under them is written by hand, once, when it changes.\n\n## Intent\n\n_not written yet - one paragraph on what is being attempted and why._\n\n## Contracts open\n\nNone.\n\n## Closed last\n\nNothing in the ledger yet.\n\n## Tree\n\n- branch: `main`\n- head: `b4a12e6 fixture`\n- uncommitted files: 0\n"
+        },
+        {
+          "name": "dirty import graph still called fresh",
+          "issueReproduced": true,
+          "state": {
+            "state": "fresh",
+            "at": "b054a24252da744f231c68305408401f4dce9b70"
+          },
+          "fanIn": {
+            "max": 0,
+            "file": "",
+            "read": true
+          },
+          "actualImporters": 1
+        },
+        {
+          "name": "session end closes another session when only payload has session id",
+          "issueReproduced": true,
+          "record": {
+            "id": "other",
+            "sessionId": "other-session",
+            "role": "builder",
+            "files": [],
+            "ended": "2026-09-03T21:20:19.350Z",
+            "stop_reason": "session_end"
+          },
+          "status": 0,
+          "out": "",
+          "err": ""
+        },
+        {
+          "name": "bound agent can write outside repository through Write",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "",
+          "err": ""
+        },
+        {
+          "name": "first known-role dispatch inherits model without existing relay",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "",
+          "err": ""
+        },
+        {
+          "name": "suffix contract is invisible in statusline count",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "Teknesyum ▸ suffix \u001b[2m·\u001b[0m normal",
+          "err": ""
+        },
+        {
+          "name": "forged complete audit and live record are accepted",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "F1 complete -> contracts/done/F1.md\n\n  pass  node -e \"if(require('./src/value.js')!==1) process.exit(4)\"\n\nrisk high (declared high by the contract author)\nledger written at HEAD 48a1721b, audit record consumed\n\nNo filename/import reference was found for these files (heuristic only):\n  src/value.js\n\nCheck entry points, dynamic loading and build configuration before moving anything.\n",
+          "err": ""
+        }
+      ]
+    },
+    "lateDeltaProbes": {
+      "at": "2026-09-04T14:20:32.607Z",
+      "snapshot": "C:\\Users\\Administrator\\Desktop\\Projeler\\Teknesyum-Core",
+      "fixture": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\tkc-review-probes-SpOc9B",
+      "results": [
+        {
+          "name": "worktree verifier runs main checkout",
+          "issueReproduced": true,
+          "mainValue": 1,
+          "worktreeValue": 999,
+          "status": 0,
+          "out": "W1 complete -> contracts/done/W1.md\n\n  pass  node -e \"if(require('./src/value.js')!==1) process.exit(4)\"\n\nrisk low\nledger written at HEAD a8ea0b22\n\nSealed with no audit record: independent review is not evidenced by this seal.\n\nNo filename/import reference was found for these files (heuristic only):\n  src/value.js\n\nCheck entry points, dynamic loading and build configuration before moving anything.\n",
+          "err": ""
+        },
+        {
+          "name": "unrelated historical auditor can sign",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "Audit record written: .claude\\relay\\audits\\A1-1.json\nheadSha and diffHash were computed here, not supplied.\n",
+          "err": ""
+        },
+        {
+          "name": "audited files change during verification yet seal passes",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "S1 complete -> contracts/done/S1.md\n\n  pass  node -e \"require('fs').writeFileSync('src/value.js','module.exports=999;')\"\n\nrisk high (declared high by the contract author)\nledger written at HEAD b66d7b3e, audit record consumed\n\nNo filename/import reference was found for these files (heuristic only):\n  src/value.js\n\nCheck entry points, dynamic loading and build configuration before moving anything.\n",
+          "err": ""
+        },
+        {
+          "name": "empty verify without acceptance reason closes",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "E1 complete -> contracts/done/E1.md\n\n\nrisk low\nledger written at HEAD 04367059\n\nSealed with no audit record: independent review is not evidenced by this seal.\n\nNo filename/import reference was found for these files (heuristic only):\n  src/value.js\n\nCheck entry points, dynamic loading and build configuration before moving anything.\n",
+          "err": ""
+        },
+        {
+          "name": "unmet dependency is treated as satisfied",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "D2 complete -> contracts/done/D2.md\n\n  pass  node -e \"if(require('./src/value.js')!==1) process.exit(4)\"\n\nrisk low\nledger written at HEAD 04367059\n\nSealed with no audit record: independent review is not evidenced by this seal.\n\nNo filename/import reference was found for these files (heuristic only):\n  src/value.js\n\nCheck entry points, dynamic loading and build configuration before moving anything.\n",
+          "err": ""
+        },
+        {
+          "name": "closed debt evidence disappears on handoff refresh",
+          "issueReproduced": true,
+          "before": "\n\n## Closed debts\n\n- 2026-09-04 closed: ask the advisor - the advisor answered\n",
+          "after": "<!-- teknesyum:handoff -->\n# Handoff\n\nWhere this project stands. The facts below are written by a hook and cost\nnothing; the intent under them is written by hand, once, when it changes.\n\n## Intent\n\n_not written yet - one paragraph on what is being attempted and why._\n\n## Contracts open\n\nNone.\n\n## Closed last\n\nNothing in the ledger yet.\n\n## Tree\n\n- branch: `main`\n- head: `5cdbc0d fixture`\n- uncommitted files: 0\n"
+        },
+        {
+          "name": "dirty import graph still called fresh",
+          "issueReproduced": true,
+          "state": {
+            "state": "fresh",
+            "at": "5cdbc0db4250b12abc4765149fb5513fc62e38a0"
+          },
+          "fanIn": {
+            "max": 0,
+            "file": "",
+            "read": true
+          },
+          "actualImporters": 1
+        },
+        {
+          "name": "session end closes another session when only payload has session id",
+          "issueReproduced": true,
+          "record": {
+            "id": "other",
+            "sessionId": "other-session",
+            "role": "builder",
+            "files": [],
+            "ended": "2026-09-04T14:20:31.147Z",
+            "stop_reason": "session_end"
+          },
+          "status": 0,
+          "out": "",
+          "err": ""
+        },
+        {
+          "name": "bound agent can write outside repository through Write",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "",
+          "err": ""
+        },
+        {
+          "name": "first known-role dispatch inherits model without existing relay",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "",
+          "err": ""
+        },
+        {
+          "name": "suffix contract is invisible in statusline count",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "Teknesyum ▸ suffix \u001b[2m·\u001b[0m normal",
+          "err": ""
+        },
+        {
+          "name": "forged complete audit and live record are accepted",
+          "issueReproduced": true,
+          "status": 0,
+          "out": "F1 complete -> contracts/done/F1.md\n\n  pass  node -e \"if(require('./src/value.js')!==1) process.exit(4)\"\n\nrisk high (declared high by the contract author)\nledger written at HEAD a11a430f, audit record consumed\n\nNo filename/import reference was found for these files (heuristic only):\n  src/value.js\n\nCheck entry points, dynamic loading and build configuration before moving anything.\n",
+          "err": ""
+        }
+      ]
+    }
+  },
+  "cost": {
+    "usageSource": "2026-09-03-vidshrink-kanit.json",
+    "usageCapturedAt": "2026-09-03T19:44:51.345Z",
+    "ratesVerifiedOn": "2026-09-04",
+    "rateSource": "https://platform.claude.com/docs/en/about-claude/pricing",
+    "unit": "USD per million tokens",
+    "rateOrder": [
+      "input",
+      "write5m",
+      "write1h",
+      "cacheRead",
+      "output"
+    ],
+    "formula": "sum(input*rateInput+write5m*rate5m+write1h*rate1h+cacheRead*rateRead+output*rateOutput)/1e6",
+    "rates": {
+      "claude-opus-5": [
+        5,
+        6.25,
+        10,
+        0.5,
+        25
+      ],
+      "claude-sonnet-5": [
+        2,
+        2.5,
+        4,
+        0.2,
+        10
+      ],
+      "claude-fable-5": [
+        10,
+        12.5,
+        20,
+        1,
+        50
+      ],
+      "claude-fable-5-1": [
+        10,
+        12.5,
+        20,
+        0.25,
+        50
+      ],
+      "claude-haiku-4-5-20251001": [
+        1,
+        1.25,
+        2,
+        0.1,
+        5
+      ]
+    },
+    "byModel": {
+      "claude-opus-5": 3154.978111,
+      "claude-fable-5": 45.9767595,
+      "claude-sonnet-5": 81.98197960000002,
+      "claude-fable-5-1": 0.9560105,
+      "claude-haiku-4-5-20251001": 0.12859915
+    },
+    "total": 3284.02145975,
+    "doneSubmitted": 66,
+    "onlyParentFamily": true,
+    "notAnActualMaxBill": true
+  },
+  "findings": [
+    {
+      "id": "G01",
+      "p": "P1",
+      "file": "core/scripts/contract.js",
+      "line": 43,
+      "title": "Paylaşılan relay kökü ile doğrulamanın çalışma ağacı karıştırılıyor",
+      "why": "locate(), worktree bilgisini bırakıp projectRoot(relay) kullanıyor. Ana checkout değeri 1, worktree değeri 999 iken worktree içinden complete başarılı oldu; ana kopya test edildi. reachOf ve guard.boundary de aynı kök varsayımını taşıyor.",
+      "fix": "ExecutionContext içinde relayRoot, checkoutRoot, gitCommonDir ve worktreeId ayrı tutulsun. Test, hash, risk, sahiplik ve snapshot checkoutRoot kullanmalı; ortak relay yalnız koordinasyon deposu olmalı.",
+      "test": "Ana/bağlı worktree içerikleri farklı olan fixture’da doğru kopya test edilmeli; farklı HEAD, untracked dosya ve iki eşzamanlı worktree ayrıca sınanmalı.",
+      "type": "R"
+    },
+    {
+      "id": "G02",
+      "p": "P1",
+      "file": "core/scripts/contract.js",
+      "line": 1084,
+      "title": "Denetimden sonra değişen dosya mühürlenebiliyor",
+      "why": "Denetim hash’i verify öncesinde kontrol ediliyor. Verify dosyayı 1’den 999’a değiştirse de complete geçiyor. Lock, doğrulama bitince bırakılıyor; kapanış öncesi HEAD/hash/kontrat tekrar karşılaştırılmıyor.",
+      "fix": "Kapanışı doğrulanan içerik ve kontrat sürümüne bağla. Verify sonrası içerik değişirse yeniden denetim iste; son commit/kayıt geçişini karşılaştırmalı ve atomik yap.",
+      "test": "Verify’nin kaynak/kontrat/HEAD değiştirdiği üç negatif test; doğrulama sonrası eşzamanlı değişiklik kapanışı reddetmeli.",
+      "type": "R"
+    },
+    {
+      "id": "G03",
+      "p": "P1",
+      "file": "core/hooks/seal.js",
+      "line": 110,
+      "title": "Denetçi kimliği iş ve turla bağlanmıyor",
+      "why": "checkAuditor sadece rolü ve kaydedilmiş yazı listesini inceliyor. Z999/8 turu, 2020 tarihli denetçi A1 için imza verebildi. verification dizisi gerçekten çalıştırılan komutların kanıtı değil.",
+      "fix": "Sözleşme, tur, checkout, dispatch/tool-use kimliği, tamamlanma zamanı, kaynak hash’i ve sonuç artefaktını birlikte doğrula. Denetçi yazarın kendisi olmamalı; gerçek rol olayı kayda bağlanmalı.",
+      "test": "Yanlış sözleşme/tur, bitmemiş, eski, başka worktree ve kimliği eşleşmeyen kayıtların tümü reddedilmeli.",
+      "type": "R"
+    },
+    {
+      "id": "G04",
+      "p": "P1",
+      "file": "core/hooks/seal.js",
+      "line": 92,
+      "title": "Mühür, kendi yazarından bağımsız güven sınırına sahip değil",
+      "why": "Ajanın yazabildiği live ve audit JSON dosyalarını biçimce doğru üretmek yüksek riskli işi kapatmaya yetti. Hash hesaplamak içeriğin kim tarafından incelendiğini kanıtlamaz. Bu, aynı kullanıcı yetkisine karşı kriptografik güvenlik sağlandığı anlamına gelmez.",
+      "fix": "Tehdit modelini açıkla: kazara atlama mı, güvenilmeyen ajan mı? Güvenilir host/supervisor olaylarından kanıt üret; ajanın yazabildiği alandaki ortak sır veya ikinci hash’i güvenlik çözümü diye sunma. Güçlü sınır yoksa iddiayı süreç kontrolüyle sınırla.",
+      "test": "Sahte audit+live fixture’ı kapanamamalı; yetki ayrımı varsa gerçek host uçtan uca negatif testle gösterilmeli.",
+      "type": "R"
+    },
+    {
+      "id": "G05",
+      "p": "P1",
+      "file": "core/scripts/contract.js",
+      "line": 1126,
+      "title": "Kapanış çok dosyalı, kısmen başarısız olabilen bir işlem",
+      "why": "Kontrat taşınıyor, snapshot siliniyor, denetim tüketiliyor, ledger sonra yazılıyor. Ortadaki bir I/O hatası done dosyasıyla eksik ledger veya kaybolmuş geri dönüş noktası bırakabilir. Önceden alınmış c.body eşzamanlı değişikliği ezebilir.",
+      "fix": "Tek işlem kimlikli journal ve kurtarılabilir aşamalar kullan; kontrat sürümünü karşılaştır, audit tüketimini ve ledger eklemeyi idempotent yap. Snapshot yalnız tamamlanan commit sonrası temizlensin.",
+      "test": "Her I/O sınırına hata enjekte et; yeniden çalıştırma tek kapanış üretmeli, kaydı kaybetmemeli.",
+      "type": "K"
+    },
+    {
+      "id": "G06",
+      "p": "P1",
+      "file": "core/scripts/contract.js",
+      "line": 1012,
+      "title": "verify: [] gerekçesiz kabul ediliyor",
+      "why": "Mesaj Acceptance altında yazılı gerekçe istiyor; gerçek koşul sadece boş listeyi görüyor. Gerekçesiz ve kabul maddesiz E1 kapandı. Otomatik prose kontrolü eklenmesi de ürün kabulünün yerine geçmemeli.",
+      "fix": "İş türü ve kabul şeması tanımla. Çalıştırılabilir kabul veya açıkça yetkilendirilmiş manuel kanıt istisnası zorunlu olsun; doküman lint’i ayrı kontrol sınıfı olsun.",
+      "test": "Boş gerekçe, anlamsız gerekçe ve sadece prose lint’li kod işi reddedilsin; gerçek doküman/araştırma işi uygun manuel kanıtla kapanabilsin.",
+      "type": "R"
+    },
+    {
+      "id": "G07",
+      "p": "P1",
+      "file": "core/scripts/contract.js",
+      "line": 732,
+      "title": "unmet ile kapanan önkoşul, başarıyla bitmiş sayılıyor",
+      "why": "blockers(), done dosyasının varlığını yeterli görüyor. Uygulanmadığı gerekçesiyle close edilen D1, D2’nin bağımlılığını karşılamış oldu.",
+      "fix": "Terminal durum ile kabul sonucu ayrı alanlar olsun: closed/passed, closed/unmet, cancelled. Bağımlılık yalnız gerekli kabul sonucu ve revizyonla sağlansın.",
+      "test": "unmet/cancelled/missing önkoşullar bloke etmeli; passed olan geçmeli; sonradan reopened önkoşul bağımlıları etkileyebilmeli.",
+      "type": "R"
+    },
+    {
+      "id": "G08",
+      "p": "P1",
+      "file": "core/hooks/guard.js",
+      "line": 332,
+      "title": "Sahiplik sınırı hedef dosyadan relay aradığı için repo dışına açılıyor",
+      "why": "Bağlı builder’ın repo dışındaki Write isteği izin aldı. Hedefte relay bulunmayınca guard dönüyor. Relay metadata muafiyeti ve bağsız ajanlar ayrıca geniş bir kontrol dışı alan bırakıyor.",
+      "fix": "Yetki bağlamını hedef yoldan değil doğrulanmış çağıran ajan/checkout bağından kur. Hedefi realpath/izinli kök içinde çöz; meşru geçici çıktıları açık yetki listesiyle tanımla.",
+      "test": "Repo dışı, kardeş repo, symlink/junction, Windows büyük-küçük harf ve meşru worktree yolları için olumlu/olumsuz testler.",
+      "type": "R"
+    },
+    {
+      "id": "G09",
+      "p": "P1",
+      "file": "core/hooks/guard.js",
+      "line": 463,
+      "title": "Kabuk yazıları için dosya koruması yok",
+      "why": "Bash ve PowerShell yolları sadece merging() kontrolüne gidiyor; dosya yazma, audit üretme ve sahiplik denetimi uygulanmıyor. Metin tabanlı Git ayrıştırıcısı wrapper, -C, alıntı ve çoklu refspec durumlarını da tam temsil etmiyor.",
+      "fix": "Bunu sandbox diye tanımlama. Gerçek yazı izolasyonu/host izinleri veya kontrollü yürütücü kullan; Git hedefini güvenilir argüman çözümlemesiyle değerlendir. FileChanged sonradan tespit için yararlıdır, yazıyı önceden engellemez.",
+      "test": "Aynı değişikliği Write, Edit, Bash, PowerShell ve alternatif araçla yapmayı deneyen tek uyumluluk matrisi; dış kapsam değişiklik kapanışta da yakalanmalı.",
+      "type": "K"
+    },
+    {
+      "id": "G10",
+      "p": "P1",
+      "file": "core/hooks/guard.js",
+      "line": 167,
+      "title": "Edit, Write ve durum geçişleri aynı tam belge doğrulamasından geçmiyor",
+      "why": "regression() çoğu Edit için yalnız new_string görüyor; owns/verify/raise kontrolleri Write ağırlıklı. Alan silme, parçalı değiştirme, yeniden bağlanma ve blocked→done yolları tam durum makinesi olarak modellenmemiş.",
+      "fix": "Önce mevcut içerikten beklenen tam yeni belgeyi oluştur, sonra tek parser ve geçiş tablosuyla denetle. Ajan-sözleşme bağını ilk başarılı işlemden sonra sabitle; sahiplik genişletmeyi açık yetkiye bağla.",
+      "test": "Her yasak geçişi Write ve parçalı Edit ile ayrı ayrı dene; failed tool olayından sonra durum/bağ değişmemeli.",
+      "type": "K"
+    },
+    {
+      "id": "G11",
+      "p": "P1",
+      "file": "core/hooks/schema.js",
+      "line": 22,
+      "title": "Regex alan okuyucusu bir sözleşme şeması değil",
+      "why": "Alanlar tüm metinde aranıyor; yinelenen veya code fence içindeki başlıklar etkili olabilir. Virgüllü inline liste, boş liste/başlık fallback’i ve eksik sayısal alanlar belirsiz. ID düzeltmesi diğer regex tüketicilere yayılmamış.",
+      "fix": "Sınırlı ve açık metadata bölümü, tekil alanlar, tipler, pozitif round ve schemaVersion kullan. Karmaşık YAML gerekmiyorsa JSON metadata + Markdown gövde yeterli; tüm tüketiciler aynı parser’dan geçsin.",
+      "test": "Duplicate/fenced alan, virgüllü komut, bozuk round, suffix ID ve eski sürüm göç testleri; belirsiz girdi fail-closed olmalı.",
+      "type": "K"
+    },
+    {
+      "id": "G12",
+      "p": "P1",
+      "file": "core/scripts/contract.js",
+      "line": 1454,
+      "title": "İki başarısızlıktan sonra Fable kuralı bütün denemeleri kapsamıyor",
+      "why": "reopen yolu artık ilgili önceki turda bitmiş Fable arıyor; bu gerçek bir iyileştirme. Ancak round düzenlenebilir kontrat gövdesinden geliyor. Aynı açık kontratta yinelenen verify/iş denemeleri reopening değildir; iki başarısızlık sayacıyla eş anlamlı değildir.",
+      "fix": "Attempt kimliğini kontrat+checkout+girdi sürümü+hata imzasına bağla; immutable olaylardan say. Kullanıcının kuralını tam olarak 'aynı problemin iki başarısız denemesinden sonra, üçüncüden önce danışma' şeklinde uygula. Danışma gelmezse üçüncü denemeyi beklet.",
+      "test": "Aynı aktif kontrat üzerinde 3 tekrar, round sıfırlama, close/reopen, farklı hata ve manuel --force durumları test edilsin. Açık kullanıcı istisnası kaydı olmadan limit aşılmamalı.",
+      "type": "K"
+    },
+    {
+      "id": "G13",
+      "p": "P1",
+      "file": "core/scripts/contract.js",
+      "line": 1430,
+      "title": "Fable kaydının varlığı görüşün soruya cevap verdiğini kanıtlamıyor",
+      "why": "Model, kontrat, önceki tur ve ended kontrolü var; soru/cevap artefaktı, danışılan kod revizyonu ve görüşün yeni denemeye uygulanması birlikte doğrulanmıyor. Aynı kayıt uygun görünen durumlarda tekrar kullanılabilir.",
+      "fix": "Danışmayı consultationId ile soru, failure signature, input hash ve tamamlanmış yanıt hash’ine bağla. Uygulandı/reddedildi kararını gerekçeyle kaydet; salt model farkını denetim bağımsızlığının garantisi sayma.",
+      "test": "Yanıtsız, yanlış revizyonlu, eski failure signature’lı görüş reddedilsin; gerçek kayıt üçüncü denemeyi bir kez açabilsin.",
+      "type": "K"
+    },
+    {
+      "id": "G14",
+      "p": "P1",
+      "file": "core/hooks/watch.js",
+      "line": 26,
+      "title": "İlk dispatch model belirtmeden pahalı modeli miras alabiliyor",
+      "why": "relayRoot yoksa model zorunluluğundan önce return oluyor. Bilinen builder rolü ve modelsiz ilk Agent çağrısı izin aldı. Tanınmayan rol veya dispatch içindeki exception da sessizce kontrol dışına çıkıyor.",
+      "fix": "Yönlendirme için gerekli bağlamı dispatch öncesi oluştur veya bağlamsız iş için ucuz-açık varsayılan tanımla. Core tarafından yönetilen dispatch’te rol/model doğrulaması relay varlığına bağlı olmasın.",
+      "test": "Yeni repo/relay’siz ilk çağrı, bilinmeyen rol, eksik config ve eski rol yolu için kayıtlı host payload testleri.",
+      "type": "R"
+    },
+    {
+      "id": "G15",
+      "p": "P1",
+      "file": "core/scripts/contract.js",
+      "line": 885,
+      "title": "Son raise düzeltmesi dispatch yoluna uygulanmamış",
+      "why": "tier/overModel sealedRaise okurken overDispatch hâlâ kontrat gövdesindeki raise ve why alanlarını kullanıyor (918–919). Böylece çalıştırmaya izin verilen kademe ile kapanışta kabul edilen kademe ayrışıyor; pahalı çağrı önce yapılıp sonra reddedilebilir.",
+      "fix": "Tek, yan etkisiz routing decision fonksiyonu oluştur; CLI, dispatch, ledger ve statusline aynı karar nesnesini kullansın. Kararı çağrı öncesi kalıcılaştır.",
+      "test": "Aynı girdinin tier/dispatch/complete sonuçları eşleşmeli; yalnız gövdeye eklenen mühürsüz raise pahalı çağrı açmamalı.",
+      "type": "K"
+    },
+    {
+      "id": "G16",
+      "p": "P1",
+      "file": "core/scripts/contract.js",
+      "line": 309,
+      "title": "Kademe, bütçe ve güvenlik politikaları birbirine karışıyor",
+      "why": "overDispatch yalnız fazla pahalı modeli reddediyor; kritik iş için asgari yetkinlik bir garanti değil. Advisor kota kontrolü CLI yolunda kalabiliyor; eco cap bazı yükseltme sinyallerini kırpabiliyor. Ücretli tekrar bütçesi kontrat bazında yürütme sınırı değil.",
+      "fix": "Maliyet tavanı, rol tabanı, zorunlu danışma ve kullanıcı bütçesini ayrı kurallar olarak çöz. Ölçüm/rapor işleri cheap-first; başarısızlık ve yüksek etki yükseltmesi gerekçeli olsun. Otomatik Fable istisnası bütçe görünürlüğünü kaldırmasın.",
+      "test": "Profiller×roller×sinyaller için yalnız çıktı matrisi değil gerçek dispatch izin/red testi; kota tükenince yeni çağrı oluşmamalı.",
+      "type": "K"
+    },
+    {
+      "id": "G17",
+      "p": "P1",
+      "file": "core/hooks/watch.js",
+      "line": 88,
+      "title": "Tekrar hatası sayacı aynı problemin tekrarını ölçmüyor",
+      "why": "Her araç başarısızlığı aynı tür sinyale dönüşebiliyor; başarı sayacı sıfırlayabiliyor. Tool-use hatası, kabul başarısızlığı ve ürünün aynı kusuru ayrı sınıflar değil. tierCmd bazı yollarında kontrata özel olmayan tally kullanıyor.",
+      "fix": "Komut/girdi/checkout/test sonucu üzerinden normalize failure signature ve attempt outcome kaydet. Alakasız araç hataları ile aynı kabulün tekrarını ayrı tut.",
+      "test": "İki farklı hatayı tek hata sayma; aradaki başarılı Read, iki başarısız verify geçmişini silmemeli.",
+      "type": "K"
+    },
+    {
+      "id": "G18",
+      "p": "P2",
+      "file": "core/scripts/contract.js",
+      "line": 821,
+      "title": "Yeni ledger alanları dispatch zamanındaki gerçek kararı kesin kaydetmiyor",
+      "why": "ledgerTier kapanış anında sinyalleri yeniden hesaplıyor. Arada profil, map ve sayaç değişebilir. model alanı gerçek run kaydı yoksa kontratın istenen modeline düşüyor; requested ile observed karışıyor. Snapshot silindikten sonra bazı analizler yeniden yapılıyor.",
+      "fix": "dispatchDecisionId, policyVersion, profile, inputSignals, requestedModel, resolvedModel ve kaynağı ayrı kaydet; bilinmeyeni null bırak. Kapanış bu kararı referanslasın, yeniden üretip 'o anki karar' demesin.",
+      "test": "Çağrıdan sonra profil/map değiştir; ledger ilk kararı korumalı. Run kaydı yokken observedModel üretilmemeli.",
+      "type": "K"
+    },
+    {
+      "id": "G19",
+      "p": "P2",
+      "file": "core/scripts/contract.js",
+      "line": 792,
+      "title": "acceptanceMiss yararlı ipucu; kabul kapsamı ölçümü değil",
+      "why": "Tek bir backtick belirtecinin diff veya owns yolunda geçmesi miss=false üretiyor. Dosya adının zaten owns içinde olması, diğer kabul maddelerinin uygulanmadığını örtebilir. Prose-only kabul null. Bu veriyle semantik hata oranı çıkarılamaz.",
+      "fix": "Adını lexicalAcceptanceHint gibi daralt; madde başına kanıt/test eşlemesi ayrı olsun. null/unknown ile passed ayrışsın. Heuristiği sert kapı veya kalite yüzdesi yapma.",
+      "test": "İki kabul maddesinden yalnız biri, sadece dosya adı, yorumda geçen ad ve davranışsal regresyon örnekleriyle sınırlarını göster.",
+      "type": "K"
+    },
+    {
+      "id": "G20",
+      "p": "P1",
+      "file": "core/hooks/lib.js",
+      "line": 63,
+      "title": "Kilit ve durum yazma hataları güvenilir biçimde taşınmıyor",
+      "why": "Kısa stale süresi canlı ama yavaş kilit sahibinden kilit çalmaya yol açabilir; merge yazımın false sonucunu yutabilir. Eski 'kilit bulunamazsa fn çalıştır' kusuru düzeltilmiş; onu hâlâ açık diye saymıyorum.",
+      "fix": "Kilit sahibi PID+başlangıç kimliği, lease/heartbeat ve atomik sahiplik kontrolü kullan; bütün write hatalarını işlemin başarısızlığına taşı. Koordinasyon kilidi ile uzun verify kilidini ayır.",
+      "test": "Yavaş canlı sahip, çökmüş sahip, disk-full ve iki süreç yarışını sınayan testler; çift ledger yazımı ve sessiz veri kaybı olmamalı.",
+      "type": "K"
+    },
+    {
+      "id": "G21",
+      "p": "P1",
+      "file": "core/hooks/watch.js",
+      "line": 257,
+      "title": "Bir oturumun bitişi başka oturumu kapatabiliyor",
+      "why": "session_id payload’da var ama ortamda yokken SessionEnd başka oturumdaki canlı kaydı ended yaptı. Ortam değişkeni olayın kimliğinin yerine kullanılıyor.",
+      "fix": "Host payload kimliğini esas al; kaydı o sessionId ile filtrele. Kimlik yoksa bütün kayıtları kapatmak yerine belirsiz olayı kaydet ve güvenli dar kapsam uygula.",
+      "test": "Aynı relay’de iki oturum, eksik env, farklı payload ve tekrar gelen SessionEnd senaryoları.",
+      "type": "R"
+    },
+    {
+      "id": "G22",
+      "p": "P2",
+      "file": "core/hooks/watch.js",
+      "line": 156,
+      "title": "Canlı kayıt, saklama süresi ve sessiz hata yönetimi kanıt kaybedebilir",
+      "why": "Role prompt metninden çıkarılıyor; yaşam döngüsü/resume olayları eski ended durumunu taşıyabilir. sweep bazı rol kayıtlarını 24 saatte silebilir; görüş kotası/kanıt buna bağımlı kalır. Üst catch hatayı görünmez yapıyor.",
+      "fix": "Host kimlikli olayları kalıcı event journal’a yaz; live yalnız türetilmiş görünüm olsun. Hatalar kullanıcıya kısa sağlık durumu versin, tekrar injection yapmasın. Saklama politikasını kanıt ömründen ayır.",
+      "test": "Restart/resume, gecikmiş Stop, 24 saat sınırı, bozuk JSON ve disk hatası replay testleri.",
+      "type": "K"
+    },
+    {
+      "id": "G23",
+      "p": "P1",
+      "file": "core/scripts/advice.js",
+      "line": 75,
+      "title": "Danışma açma/eşleme eşzamanlılıkta kayıp üretebilir",
+      "why": "Sıra numarası ve pending dosyası kilitsiz read-modify-write. Pending listesinin 8 kayda kırpılması devam eden danışmayı düşürebilir; close olayı bind’den önce gelebilir. 3 haneli numara taraması uzun ömür sınırı yaratıyor.",
+      "fix": "Benzersiz consultationId, atomik ekleme ve olay sırasından bağımsız eşleme kullan; bind öncesi sonucu beklet. Ham prompt kaydını gizli veri ve saklama açısından sınırla.",
+      "test": "Eşzamanlı 10 danışma, Stop→bind ters sırası, 999→1000 ve tekrar teslimde hiçbir yanıt yanlış işe bağlanmamalı.",
+      "type": "K"
+    },
+    {
+      "id": "G24",
+      "p": "P1",
+      "file": "core/scripts/handoff.js",
+      "line": 134,
+      "title": "Yenilenen handoff kapatılmış borcun kanıtını siliyor",
+      "why": "owe --done, Closed debts bölümüne kayıt ekliyor; writeAt/render yalnız intent ve güncel olguları yeniden oluşturuyor. Bir sonraki handoff write kapanmış borcu kaybettirdi.",
+      "fix": "Borç olaylarını ayrı kalıcı journal’da tut, handoff’u bu kaynaktan üret. Elle yazılmış kalıcı bölümlerin koruma kuralları açık olsun.",
+      "test": "owe add→done→write→show→restart zincirinde gerekçe ve geçmiş korunmalı.",
+      "type": "R"
+    },
+    {
+      "id": "G25",
+      "p": "P2",
+      "file": "core/scripts/handoff.js",
+      "line": 247,
+      "title": "Handoff CLI giriş/çıkış sözleşmesi gevşek",
+      "why": "Ondalıklı indeks splice davranışıyla yanlış borcu kapatabilir; bazı hatalarda çıkış kodu başarı kalır. show komutu yazıyor; intent komutunda flag metni niyete karışabilir.",
+      "fix": "İndeks için pozitif integer doğrula, ID tabanlı işlemi tercih et. Read-only show ve mutating refresh ayır; başarısız işlemler nonzero dönsün.",
+      "test": "1.5, 0, negatif, eksik gerekçe, boş liste ve bilinmeyen flag testleri; show dosya hash’ini değiştirmemeli.",
+      "type": "K"
+    },
+    {
+      "id": "G26",
+      "p": "P1",
+      "file": "core/scripts/log.js",
+      "line": 83,
+      "title": "Log close varsayılanı kanıt toplamadan silme",
+      "why": "close kalıcı silmeye, archive kontrolsüz taşımaya dayanıyor. .md ile biten id için ../ gibi yol geçişi normalleştirme sınırı yok; isim belirsizliği veya hedef çakışması yanlış dosyaya etki edebilir. Yol geçişini gerçek kullanıcı dosyasında denemedim.",
+      "fix": "ID’yi liste kaydından çöz ve realpath’in log kökü içinde olduğunu doğrula; default kapanış arşiv+manifest olsun. Üzerine yazmayı reddet; silme ancak açık kullanıcı tercihi ve kurtarma planıyla.",
+      "test": "Traversal/junction/çakışma fixture’ları, atomik arşiv, kapanış kanıtı eksikliği testi; gerçek loglar testte silinmemeli.",
+      "type": "K"
+    },
+    {
+      "id": "G27",
+      "p": "P1",
+      "file": "core/scripts/map.js",
+      "line": 144,
+      "title": "HEAD eşitliği değişen çalışma ağacında tazelik kanıtı değil",
+      "why": "Yeni untracked importer ekledim; map fresh ve fanIn=0/read=true kaldı. Bu sadece arama kalitesini değil cheap-first kararını da yanlış etkiliyor.",
+      "fix": "HEAD yanında ilgili tracked+untracked içerik manifesti veya dirty invalidation kullan; ölçülmeyen grafı unknown göster. Büyük depoda güvenli artımlı ve bütçeli yenileme tasarla.",
+      "test": "Commit olmadan ekleme/değiştirme/silme, rename, worktree ve config değişikliğinde graf bayat veya yeniden hesaplanmış olmalı.",
+      "type": "R"
+    },
+    {
+      "id": "G28",
+      "p": "P2",
+      "file": "core/scripts/map.js",
+      "line": 18,
+      "title": "Graf taramasının kapsamı ve doğruluk iddiası fazla geniş",
+      "why": "Ignored Base/trash gibi tarihsel kopyalar taranabilir; regex import yorum/string ve çözülmeyen alias/dil durumlarında gerçek ilişkiyi temsil etmiyor. C# namespace ilişkisi sembol çağrısı değil; bulunamayan kenar sıfır etki diye yorumlanmamalı.",
+      "fix": "Git-aware envanter, açık include/exclude ve dil yetenek tablosu kullan. file-import, namespace-reference ve symbol-call kenarlarını türle; confidence/unknown taşı. Gerekirse opsiyonel gerçek parser adaptörü ekle.",
+      "test": "Ignored tarihsel kopya, alias, dinamik yükleme, yorum ve C# iki sınıf örnekleri; false-positive/false-negative ayrı raporlansın.",
+      "type": "K"
+    },
+    {
+      "id": "G29",
+      "p": "P2",
+      "file": "core/scripts/map.js",
+      "line": 189,
+      "title": "Graf bütçesi ve yazımı atomik/ölçülebilir değil",
+      "why": "String length byte veya model tokeni değil. Başlık ve uzun tek satır bütçeyi aşabilir; recursive cycle taraması derin grafı yığından taşırabilir. MD ve JSON ayrı yazıldığından farklı sürümler görülebilir.",
+      "fix": "Bütçenin birimini açıkla ve gerçek byte ölç; token için tokenizer/usage kullan. İteratif graf algoritması ve manifest+atomik publish uygula.",
+      "test": "Uzun Unicode yollar, çok derin graf, büyük tek satır, yarım yazım ve bütçeden küçük/üst sınırlar testleri.",
+      "type": "K"
+    },
+    {
+      "id": "G30",
+      "p": "P1",
+      "file": "core/scripts/risk.js",
+      "line": 29,
+      "title": "Riskin düşük çıkması kapsamlı biçimde düşük etki demek değil",
+      "why": "Tracked numstat ve baseRef yaklaşımı untracked/binary veya main’de commit edilmiş işi eksik görebilir. Dosya adı sinyalleri küçük config işini pahalılaştırırken küçük ama kritik iş mantığını kaçırabilir. ownsMissing meşru silmeyi de engelleyebilir.",
+      "fix": "Başlangıç revizyonu+tam değişiklik manifesti kullan; create/modify/delete ayrı olsun. Semantik risk soruları, geri alınabilirlik ve kullanıcı etkisi açık metadata olsun; belirsizi low’a yuvarlama.",
+      "test": "Küçük ödeme/kimlik kontrolü, silme, untracked kaynak, binary/config etkisi ve main commit’i örnekleri; risk açıklaması karar kanıtıyla eşleşsin.",
+      "type": "K"
+    },
+    {
+      "id": "G31",
+      "p": "P1",
+      "file": "core/scripts/contract.js",
+      "line": 186,
+      "title": "Çalıştırıcı başarılı çıkışı kabul doğruluğuyla karıştırabiliyor",
+      "why": "0-test ifadelerinin yakalanması iyileşti; ama process.exit(0) veya sahte '10 passed' gerçek kabul kanıtı değil. Adım başına uzun timeout var, toplam sözleşme bütçesi yok; hata sonrası kalan adımlar çalışıyor. precheck/check --run aynı güvenlik kapılarını bütünüyle paylaşmıyor.",
+      "fix": "Tek yürütme planı ve yapılandırılmış test sonucu kullan; gereken assertion/test sayısını ve kabul bağını kaydet. Fail-fast varsayılanı, toplam süre/tekrar bütçesi ve açık continue-on-failure seçeneği olsun.",
+      "test": "Sahte yeşil, kısmi suite, beklenenden az test, hiç test, timeout ve ilk adım hatası testleri. Başarılı komut ile başarılı kabul ayrı alanlar olsun.",
+      "type": "K"
+    },
+    {
+      "id": "G32",
+      "p": "P2",
+      "file": "core/scripts/contract.js",
+      "line": 1223,
+      "title": "Geri alma tam ve risksiz bir işlem değil",
+      "why": "Snapshot tracked içerik odaklı; yeni dosyaları kapsamayabilir. git checkout tabanlı geri alma index’i de değiştirir; pathspec ve kısmi hata durumları dikkat istiyor. unmet kapanışı rollback referansını düşürüyor.",
+      "fix": "Başlangıç index/worktree/untracked manifestini sakla; restore işlemini açık kapsam ve literal paths ile yap. Kullanıcı değişikliği varsa otomatik ezme yerine çatışma bildir.",
+      "test": "Tracked staged/unstaged, yeni/silinmiş dosya, glob benzeri ad ve sonradan kullanıcı değişikliği örnekleri.",
+      "type": "K"
+    },
+    {
+      "id": "G33",
+      "p": "P2",
+      "file": "core/scripts/statusline.js",
+      "line": 54,
+      "title": "Gösterge görünümü kabul edilen sözleşmeleri eksik sayıyor",
+      "why": "T2b.md schema tarafından geçerli; statusline bekleyen sözleşme olarak göstermedi. 5 dakika sessiz kalan çalışan görünümden düşebilir. Model/effort varsayımı gerçek gözlem gibi, profil ise bazı yollarda proje yerine genel ayar gibi sunuluyor.",
+      "fix": "Ortak parser ve olay kaynağı kullan; running/quiet/unknown ayrı görünsün. Planlanan ve gözlenen model farklı etiketlensin; proje profilini çöz.",
+      "test": "Suffix kontrat, 20 dakika çalışan sessiz ajan, eksik resolved model ve proje/global profil çatışması görsel metin testleri.",
+      "type": "R"
+    },
+    {
+      "id": "G34",
+      "p": "P2",
+      "file": "core/scripts/doctor.js",
+      "line": 139,
+      "title": "doctor yeşili aktif entegrasyonun çalıştığını kanıtlamıyor",
+      "why": "Hook dosyası/regex varlığı, hostun doğru sürümü yüklediğini ve payload’ların işlendiğini göstermiyor. Bazı sağlık kontrolleri ledger başlatma/adoption gibi yazı yan etkileri taşıyor; CI’daki toleranslı adımlar da kesin onay değil.",
+      "fix": "Salt okunur doctor ile repair ayır. Kurulu plugin yolu/sürümü, enabled hooks ve küçük kaydedilmiş host-event roundtrip’ini ayrıca denetle; unknown sağlık durumu olsun.",
+      "test": "Dosyalar var ama hooks kapalı/yanlış cache/bozuk payload durumunda yeşil vermemeli; doctor dosya hash’lerini değiştirmemeli.",
+      "type": "K"
+    },
+    {
+      "id": "G35",
+      "p": "P1",
+      "file": "install.ps1",
+      "line": 1,
+      "title": "Kurulum başarı sinyali ve sabitleme iddiası zayıf",
+      "why": "PowerShell native komutların LASTEXITCODE sonucunu her adımda kontrol etmiyor. install.sh Node yokken başarıyla çıkabiliyor. Sabit bootstrap sürümü, mutable marketplace’den kurulan ürünün de sabit olduğunu garanti etmiyor.",
+      "fix": "Her adımı hata koduyla doğrula; gerekli Node/Git/Claude sürümlerini açık prerequisite yap. Kurulan paket commit/hash’ini kaydet; bootstrap ve plugin pin’ini ayrı belirt.",
+      "test": "Node yok, Claude komutu başarısız, ağ kesik, eski cache ve sürüm uyuşmazlığı fixture’ları; başarısız kurulum nonzero dönmeli.",
+      "type": "K"
+    },
+    {
+      "id": "G36",
+      "p": "P2",
+      "file": "core/scripts/setup.js",
+      "line": 77,
+      "title": "Kurulum aktif plugin yerine en yeni cache’i seçebilir; kullanıcı ayarını ezebilir",
+      "why": "findCore cache semver seçimini gerçek etkin kurulumla karıştırabiliyor. Varsayılan cevaplar mevcut tercihleri resetleyebilir; statusline ve tek backup üzerine yazılır. write başarısızlığı her yerde başarıya yansımıyor; interactive ask anahtarının çevirisi eksik.",
+      "fix": "Etkin kurulum manifestini ve scope’u esas al; kurulum planı/diff göster, mevcut değerleri varsayılan yap. Backup benzersiz ve geri yüklenebilir olsun; atomik ayar güncellemesi kullan.",
+      "test": "Birden çok plugin sürümü/scope, özel statusline, bozuk JSON ve ikinci kez setup senaryoları.",
+      "type": "K"
+    },
+    {
+      "id": "G37",
+      "p": "P2",
+      "file": "core/scripts/update.js",
+      "line": 1,
+      "title": "Sürüm kontrolü ağsız veya otomatik güncelleme değildir",
+      "why": "Kod sürüm kontrolü yapıyor; otomatik plugin kurulumu yaptığı iddia edilmemeli. Ağ isteği bulunduğu için 'network yok' da mutlak doğru değil. Başarısız kontrolün checkedAt yazması yeniden denemeyi uzatabilir; eşzamanlı tetikler çoğalabilir.",
+      "fix": "Update-check'i opt-out, tek-flight ve başarı/başarısızlık için ayrı backoff ile tanımla. Ağ, disk ve model token maliyetlerini ayrı belirt.",
+      "test": "Offline, bozuk cevap, ilk kurulum ve eşzamanlı kontrol testleri; başarısızlık bir haftalık sahte güncellik üretmemeli.",
+      "type": "K"
+    },
+    {
+      "id": "G38",
+      "p": "P1",
+      "file": "core/scripts/release.js",
+      "line": 143,
+      "title": "release --dry gerçekten kuru çalışma değil",
+      "why": "cut içinde stamp/changelog/not silme işlemleri dry ayrımından önce yapılabiliyor. git add -A başka çalışanın değişikliklerini de kapsar. Test, paket kapsamı ve dağıtılan checksum zorunlu release kapısı değil.",
+      "fix": "Önce salt okunur release planı oluştur; --dry hiçbir byte değiştirmesin. Açık dosya listesiyle stage, temiz kaynak sürümü, test/manifest ve checksum artefaktı üret; yarım işlem kurtarılabilir olsun.",
+      "test": "Dry öncesi/sonrası bütün dosya hash’leri eşit; ilgisiz dirty dosya stage edilmemeli; test başarısızsa release durmalı.",
+      "type": "K"
+    },
+    {
+      "id": "G39",
+      "p": "P2",
+      "file": "core/scripts/scaffold.js",
+      "line": 1,
+      "title": "İmza/asset üretimi kullanıcı içeriğini genişçe değiştirebilir",
+      "why": "İmza işaretinden sonraki içerik yeniden yazılabiliyor; asset kopyası üzerine yazıyor, ikinci dil README’si yokken bağlantı kurulabiliyor. Lisans dosyası seçimi path sınırı istemeli. AGPL varsayılanı teknik zorunluluk değil ürün tercihi.",
+      "fix": "Başlangıç/bitiş işaretli dar blokları değiştir; diff/overwrite seçeneği ve idempotent çıktı kullan. SPDX seçimini allowlist’le sınırla; lisans tercihini kullanıcıya açık göster.",
+      "test": "İmzadan sonra kullanıcı metni, mevcut özel SVG, tek dilli proje, geçersiz SPDX ve ikinci çalıştırma testleri.",
+      "type": "K"
+    },
+    {
+      "id": "G40",
+      "p": "P2",
+      "file": "core/hooks/cue.js",
+      "line": 20,
+      "title": "Sıfır sürekli token iddiasının OWED istisnası var",
+      "why": "UserPromptSubmit dalı açık borç için stdout üretiyor. Bu host olayında stdout bağlama eklenir. CAP=200 karakter token üst sınırı değildir; uyarı her promptta yinelenebilir.",
+      "fix": "İddiayı 'yerel hook yürütmesi model çağırmaz; sessiz yollar ek bağlam üretmez' diye sınırla. Borç mesajını değişiklik/ilk teslim bazlı ve ölçülmüş bütçeli yap; görünür UI ile model bağlamını ayır.",
+      "test": "Açık borç yok/var/değişti durumlarında tüm hook stdout/stderr/JSON ve gerçek kullanım farkı kaydedilsin; yalnız additionalContext aramak yeterli değil.",
+      "type": "K"
+    },
+    {
+      "id": "G41",
+      "p": "P2",
+      "file": "core/hooks/notify.js",
+      "line": 1,
+      "title": "Bildirimler proje ve platformlar arasında tutarlı değil",
+      "why": "Global cooldown bir projenin uyarısının diğerini susturmasına yol açabilir; proje config’i tam cwd varsayımına bağlı. Linux WAV bulunmadığında terminal fallback’ine ulaşmayan yollar var. Statusline renk/escape ve NO_COLOR ayrıntıları da taşınabilirlik sorunu.",
+      "fix": "Cooldown’u session/project/event anahtarına bağla; kök config çözümlemesini paylaş. Ses, terminal ve sessiz modu ayrı adaptörler yap; güvenilmeyen başlıkları terminal kontrol karakterlerinden arındır.",
+      "test": "İki proje, alt dizin cwd, ses dosyası yok ve NO_COLOR testleri. Bu tur gerçek ses çıkışı/GUI doğrulanmadı.",
+      "type": "K"
+    },
+    {
+      "id": "G42",
+      "p": "P1",
+      "file": "core/scripts/manset.js",
+      "line": 80,
+      "title": "Manşet denetimi sayının anlamını doğrulamıyor",
+      "why": "Bir sayının kaynakta veya yakın tabloda geçmesi, doğru satır/payda/birimle kullanıldığını göstermez. source bag başka sayıya dayanak olabilir. 1,3 saniye→1,3 ms gibi hata bu tasarımın kör noktasını somutlaştırıyor.",
+      "fix": "Hesaplanan iddiaları kaynak hücre/alan, formül, birim ve yuvarlama ile yapılandırılmış veri olarak üret. Prose heuristiğini ipucu olarak tut; her metni anlayan kesin denetçi diye sunma.",
+      "test": "Aynı sayı yanlış model satırında, yüzde yerine puan, saniye/ms, toplam/altküme ve çift sayılmış tur örnekleri negatif olmalı.",
+      "type": "K"
+    },
+    {
+      "id": "G43",
+      "p": "P1",
+      "file": "test/all.js",
+      "line": 1083,
+      "title": "Binlerce assertion, binlerce bağımsız davranış testi değil",
+      "why": "Geniş model kombinasyon matrisi sayıyı büyütüyor; aynı fonksiyonun çok girdili kontrolü host uçtan uca test yerine geçmez. Elle yazılmış audit/live ve sentetik passed çıktıları kimi önemli açıkları görünmez bırakmış.",
+      "fix": "Raporu birim/özellik/entegrasyon/host replay/negatif kabul olarak ayır. Önce gerçek hata fixture’ı kırmızı olsun; sonra düzeltme. Sayı yerine invariant ve risk kapsamını raporla.",
+      "test": "Bu rapordaki 12 karşı örnek kalıcı regresyon olmalı; ayrıca dispatch→bind→tool→stop→audit→complete zinciri gerçek payload fixture’ıyla sınanmalı.",
+      "type": "K"
+    },
+    {
+      "id": "G44",
+      "p": "P2",
+      "file": "test/all.js",
+      "line": 1839,
+      "title": "Testler makine ayarına ve yan etkilere tam yalıtılmış değil",
+      "why": "Üç assertion HKCU Environment anahtarı ekleyip siliyor; önceden var olan kullanıcı değerini korumuyor. Bazı testler kaynak .changes dizinine yazıyor; profil varsayımı yüzünden boş config koşusunda tek test kaldı. Keskin süre beklentisi yavaş makinede oynak.",
+      "fix": "Her test kendi temp repo/config’ini kursun; registry bağımlılığını adaptörle fake et. Aktif profil fixture’da açık olsun; kaynak repo write ve zaman limitlerini ayrı test sınıfına al.",
+      "test": "Boş ve dolu kullanıcı ayarında aynı sonuç; suite öncesi/sonrası kaynak ve registry aynı. Kalan failure’ı gizleme, fixture beklentisini düzelt.",
+      "type": "K"
+    },
+    {
+      "id": "G45",
+      "p": "P1",
+      "file": "test/all.js",
+      "line": 1779,
+      "title": "Totoloji kabulü kapatılmış sayılacak düzeyde sınanmamış",
+      "why": "'Komut hata verebilir' ölçütü tek başına ürün kabulünü test ettiğini göstermez. process.exit(0) ve sahte test sayısı gibi fixture’lar var. Logdaki üç olumsuz örnek için bağımsız yakalama kanıtı yerine denetçi rolüne talimat yazılmış.",
+      "fix": "Her kabul maddesi için değişikliği geri alınca veya davranışı bozunca kırılan test iste; araştırma işinde kaynak/veri uyuşmazlığı negatif kontrolü kullan. Denetçi talimatı mekanik kanıtın yerine geçmesin.",
+      "test": "Özgün logdaki üç karşı örnek yeniden oynatılsın; mutation/revert deneyi ilgili kabul testini gerçekten düşürsün.",
+      "type": "K"
+    },
+    {
+      "id": "G46",
+      "p": "P2",
+      "file": "tools/audit-evidence.js",
+      "line": 1,
+      "title": "Maliyet toplama aracı kapsam ve bilinmeyenleri daha açık taşımalı",
+      "why": "Büyük JSONL tek seferde belleğe alınıyor; dosyalar arası duplicate için ilk kayıt seçimi farklı stream usage sürümlerinde eksik sayabilir. Request ID’siz usage dışarıda kalıyor; bilinmeyen model/başlatma oranı açık hata bütçesi değil.",
+      "fix": "Akışlı parse, request ID bazlı en güncel/tam kullanım seçimi, unknown/dropped sayacı ve kaynak hash manifesti ekle. Fiyat tablosu tarihli veri olsun; API senaryosu Max kota ölçümü diye sunulmasın.",
+      "test": "Duplicate varyant, bozuk son satır, ID’siz usage ve cache süreleri fixture’ları; toplamlar iki bağımsız yöntemle uzlaştırılsın.",
+      "type": "K"
+    },
+    {
+      "id": "G47",
+      "p": "P1",
+      "file": "docs/inceleme/_OLCUM-graphify.md",
+      "line": 114,
+      "title": "Ölçüm yorumunda bin katlık birim hatası var",
+      "why": "10.657 ms indeksleme / 8 soru ≈1.332 ms ≈1,3 saniye; metin 1,3 ms yazıyor. Map payı yaklaşık 18 ms. Bu sadece imla değil, göreli maliyet algısını ters yönlendiriyor.",
+      "fix": "Birimli ham veriden tablo ve cümleyi birlikte üret; indeksleme payı, sorgu gecikmesi ve model maliyetini ayrı göster.",
+      "test": "10.657/8 hesabını birim dönüşümüyle sabitle; rapordaki bütün türetilmiş sayıların formülü çalıştırılabilir olsun.",
+      "type": "K"
+    },
+    {
+      "id": "G48",
+      "p": "P2",
+      "file": "docs/inceleme/_SABLON.md",
+      "line": 1,
+      "title": "Araştırma şablonu sonucu önceden yönlendiriyor",
+      "why": "Son cümlenin 'neden bunu kurmana gerek yok' eksenine bağlanması, karşılaştırmayı açık araştırmadan Core lehine savunmaya çekiyor. Bağımlılıksız küçük kodun doğruluk ve bakım maliyetiyle eşdeğerliği ayrıca kanıtlanmalı.",
+      "fix": "Her araç için 'ne zaman kullan, ne zaman kullanma, Core neyi karşılamıyor' bölümleri zorunlu olsun. Hipotez, karşı kanıt ve başarısız deney de kaydedilsin.",
+      "test": "Bir rakibin açıkça üstün çıktığı senaryo rapor şablonunda kayıpsız yer bulmalı; sonuç kaynak seviyesinden daha güçlü olmamalı.",
+      "type": "K"
+    },
+    {
+      "id": "G49",
+      "p": "P2",
+      "file": "docs/inceleme/_OLCUM-obsidian.md",
+      "line": 1,
+      "title": "Benchmark sonuçlarının genellenebilirliği sınırlı",
+      "why": "Az soru/ajan ve tek koşu; reasoning, model, cache, çıktı paketleme ve veri kapsamı etkileri tam ayrıştırılmıyor. Graphify/Core indekslerinin dosya ve kenar semantiği de birebir aynı değil.",
+      "fix": "Eşlenmiş görevler, aynı girdi sürümü, rastgele sıra, cold/warm cache, kalite kör puanlaması ve maliyet limiti kullan. İndeksleme, model düşünme ve tekrar maliyetini ayrı ölç.",
+      "test": "Önce ucuz offline pilot; geniş model bench’i ancak kırmızı güven kapıları kapandıktan ve kullanıcı bütçesi belirlendikten sonra. Bu tur yeni ücretli benchmark yapılmadı.",
+      "type": "K"
+    },
+    {
+      "id": "G50",
+      "p": "P1",
+      "file": "docs/raporlar/denetci-maliyet-analizi.md",
+      "line": 14,
+      "title": "audit alanı dolu olması denetimin yapıldığını kanıtlamıyor",
+      "why": "25/25 auditorRunId üzerinden denetim boşluğu olmadığına yakın sonuç çıkarılıyor; G03/G04 bunu çürütüyor. 216 ledger olayı, 154 ayrı done dosyasıyla aynı payda değil. Opus 15/75 fiyatı bu oturumun Opus 5 fiyatı değil.",
+      "fix": "Audit coverage = iş/tur/hash/host kimliği doğrulanmış bağımsız denetim olarak yeniden hesapla. Olay, kontrat, tur ve run sayısını ayrı tut; fiyatları sürümle.",
+      "test": "25 kaydın her birini kaynağa eşleştir; eşleşmeyeni unknown say. Fiyatlı tablo resmi modele/cache türüne göre yeniden üret.",
+      "type": "K"
+    },
+    {
+      "id": "G51",
+      "p": "P1",
+      "file": "docs/raporlar/rele-surec-kusurlari-127-sozlesmelik-olcum.md",
+      "line": 1,
+      "title": "Tekrar sayıları aynı birimde toplanmıyor",
+      "why": "18 kuyruk turu aynı sözleşmenin 18 çalışması değil. 127/131 envanter revizyonları ve 12 reopen +16 sözcüksel vaka −6 örtüşme gibi kümeler aynı veri sürümünde tutulmalı. Sonradan geçen suite, önceki hatanın kesinlikle yalnız paralellik olduğunu göstermez.",
+      "fix": "Kontrat-attempt-event ilişki tablosu, set üyeleri ve kaynak zamanını yayımla. Nedensel atama için aynı girdinin kontrollü seri/paralel tekrarı gerekir; tahmine güven aralığı görünümü verme.",
+      "test": "Her özet sayısı listeyle uzlaşmalı; başlık/tablolar aynı veri sürümünden üretilmeli. Sınıflandırılamayan kayıt ayrı sütun olsun.",
+      "type": "K"
+    },
+    {
+      "id": "G52",
+      "p": "P1",
+      "file": "docs/raporlar/vidshrink-tasnif.md",
+      "line": 1,
+      "title": "Bir yardımcı fonksiyon düzeldi diye birden çok log kapatılmış sayılıyor",
+      "why": "'Tek fonksiyon/beş rapor kapandı' yaklaşımı relay keşfi ile gerçek worktree yürütmesini aynı sorun kabul ediyor. G01 güncel sürümde hâlâ tekrarlandı. Düzeltme niyeti, çağrı zinciri ve özgün kabul kanıtı arasında boşluk var.",
+      "fix": "Her logu özgün kabul maddesine ve regresyon testine bağla. shared root bulunması alt koşul; doğru checkout’ta doğrulama ayrı zorunlu koşul olsun.",
+      "test": "Her kapalı log için önceki başarısız fixture, düzeltme commit’i, sonra geçen çıktı ve sınanmayan kapsam yazılsın.",
+      "type": "K"
+    },
+    {
+      "id": "G53",
+      "p": "P2",
+      "file": "docs/raporlar/vidshrink-core-onerileri.md",
+      "line": 1,
+      "title": "Bazı öneriler güvenliği kanıtlamak yerine kapıyı gevşetiyor",
+      "why": "unverified_runner veya kanıt yokken tekrar audit önerileri ya güvenceyi azaltır ya tekrar maliyetini büyütür. Host permission reddi ile Core guard reddi kaynak gösterilmeden aynı sepete atılabiliyor; Base/Core rol yolları da karışıyor.",
+      "fix": "Her engelin kaynağını host permission/Core guard/uygulama/araç hatası olarak kaydet. Kanıt kurtarma yolunu otomatik yeni pahalı run’dan önce dene; yetkiyi genişleterek yanlış pozitif çözme.",
+      "test": "Aynı reddin kural kaynağı ve intended action’ı görülsün; farklı araçla izin aşmak çözüm kabul edilmesin.",
+      "type": "K"
+    },
+    {
+      "id": "G54",
+      "p": "P2",
+      "file": "docs/raporlar/yetki-bosluklari.md",
+      "line": 1,
+      "title": "İzinlerin faydasız olduğu ve temizliğin güvenli olduğu genellenemez",
+      "why": "Yalnız engellenmiş örneklerden bütün izinlerin değersizliği çıkarılamaz. Ignored dosya veya done/unmet worktree güvenle silinebilir demek değildir; dirty/untracked ve kullanıcı çıktısı kaybolabilir.",
+      "fix": "Temizlik önerisi önce gerçek yol/iş sahipliği/değişiklik manifesti ve kurtarılabilir karantinaya dayanmalı. Yetki gevşetme yerine dar, gözlenebilir onaylı işlemler tasarla.",
+      "test": "Dirty, untracked, symlink, unmet ve başka işin kullandığı worktree fixture’ları; izin etkisi karşı olgusal veriyle değerlendirilmeden yüzde iddiası verilmesin.",
+      "type": "K"
+    },
+    {
+      "id": "G55",
+      "p": "P2",
+      "file": "README.md",
+      "line": 1,
+      "title": "README, rol dosyaları ve karar kayıtları aynı politikayı anlatmıyor",
+      "why": "Premium model, 3/4. tur danışma, tur tavanı, Node zorunluluğu, sıfır maliyet ve bütün komutların korunması konusunda eski/yeni ifadeler yan yana. advisor.md advisorPair adına gönderme yaparken uygulama başka şema kullanıyor. Örnek kontratın eksik alanları kullanıcıya yanlış kalıp veriyor.",
+      "fix": "Politika tablosu ve örnekleri tiers/schema’dan üret; tarihsel ADR’leri superseded/version etiketiyle koru. Rol dosyası, README ve uygulama için tutarlılık testi ekle.",
+      "test": "İki README, roller, tiers ve çalışan kontrat örneği aynı çıktıyı vermeli; tüm iddialar ölçülen kapsamı ve istisnasını söylemeli.",
+      "type": "K"
+    },
+    {
+      "id": "G56",
+      "p": "P2",
+      "file": "docs/COST-MODEL.md",
+      "line": 1,
+      "title": "Sürekli token tasarrufu toplam ekonomik sonuçla karıştırılmamalı",
+      "why": "Yerel otomasyon avantajı gerçek; ancak talimat okumaları, CLI çıktıları, blok gerekçeleri, OWED ve yeniden denemeler bağlam/maliyet üretir. 'MCP bütün şemaları her zaman taşır' güncel deferred tool search ile evrensel doğru değil.",
+      "fix": "Idle overhead, çağrı başına context, cache yaz/oku, model output ve yeniden iş maliyetini ayrı ölç. Rakipte eager/deferred modları aynı koşulda karşılaştır.",
+      "test": "No-op, ilk görev, borçlu prompt, red, tekrar ve danışma için token ledger; toplam $/başarılı kabul ve gecikmiş hata maliyeti raporlansın.",
+      "type": "K"
+    },
+    {
+      "id": "G57",
+      "p": "P2",
+      "file": "docs/BENCH.md",
+      "line": 1,
+      "title": "Bench planının güvenilirlik ve bütçe önkoşulları eksik",
+      "why": "Sayıca geniş koşu planı tek başına gerçek kullanıcı olayını kapsamaz; .NET/Avalonia kısmi-suite vakası kritik. Farklı model token adetleri doğrudan maliyet ölçüsü değildir; gecikmiş kusur ve yanlış kapatma maliyeti gözden kaçabilir.",
+      "fix": "Önce bu raporun offline negatif testlerini kapat. Sonra sınırlandırılmış pilotta kalite eşitliği, false-pass/false-block, token türü, API eşdeğeri ve kullanıcı kota göstergesini ayrı izle. Durdurma kuralı koy.",
+      "test": "Pilot için kullanıcı bütçesi, en fazla tekrar, başarısızlıkta duruş ve gerçek testhost vaka seçimi yazılı olmalı; şu an üretim bench’ine hazır onayı verilmedi.",
+      "type": "K"
+    },
+    {
+      "id": "G58",
+      "p": "P2",
+      "file": "docs/contracts/T-evrim-plani.md",
+      "line": 1,
+      "title": "Plan tamamlanması gerçek garantiye dönüştürülmüş",
+      "why": "Önceki handoff zaten birçok kök sorunu tarif etmiş. 'Kod eklendi/test sayısı arttı' ile invariant sağlandı aynı şey değil. N/O/P/R kayıtlarında submitted durumları, boş görüş ve CLI-seviyesi kabuller uygulama kanıtının yerini tutmuyor.",
+      "fix": "Amaç→kontrol noktası→negatif test→kanıt→sınır eşlemesi tut; plan maddesi implemented ile verified ayrı durum olsun. Skorlar ölçülmediyse değerlendirme olarak etiketlensin.",
+      "test": "Boş GORUS-model kaydı kanıt sayılmamalı; danışma ve sonraki işi verme kabulleri gerçek çok turlu replay ile doğrulanmalı.",
+      "type": "K"
+    },
+    {
+      "id": "G59",
+      "p": "P2",
+      "file": "assets/flow-cost.svg",
+      "line": 1,
+      "title": "Diyagramlar eski/absolut iddiaları yeniden yayıyor",
+      "why": "Cost akışında sıfır bağlam genellemesi, contract akışında gerçek doğrulama/risk sırası ve hata durumuyla uyuşmayan anlatım var. Dil rozetinde iki alan ayrı düğme gibi görünse de bütün SVG tek link; lisans etiketi manifestle daha tutarlı olabilir.",
+      "fix": "Diyagramları çalışan süreç ve dar maliyet tanımına göre güncelle. İki dil linkini ayrı erişilebilir bağlantı yap; başlık/aria/kontrastı gerçek render ile kontrol et.",
+      "test": "SVG metni incelendi; bu tur piksel/render erişilebilirlik onayı verilmedi. Sonraki UI değişikliğinde iki tema/dil ve gerçek tıklama hedefi test edilsin.",
+      "type": "K"
+    },
+    {
+      "id": "G60",
+      "p": "P2",
+      "file": "logs/openlogs/closed/HATA-contract-guard-komut-metnine-takiliyor-hedef-yola-degil.md",
+      "line": 1,
+      "title": "Closed klasörü çözüm doğruluğunun tek kaynağı olmuş",
+      "why": "Bazı kayıtların başında Durum AÇIK veya doldurulmamış çözüm bölümü kalmış; bazılarında özgün kabul yerine daha dar bir test verilmiş. Yöntem notu, başka projeye devredilmiş sorun ve düzeltilmiş bug aynı klasörde.",
+      "fix": "Kapanış şeması: resolved/partially-verified/transferred/duplicate/documented + özgün kabul + kanıt + kalan sınırlar. Arşivleme bu alanları doğrulasın; geçmiş iddia silinmesin.",
+      "test": "Aşağıdaki 16 log matrisi esas alınarak yeniden sınıflandır; yalnız metin eklemek yerine özgün hata negatif fixture’ı geçsin.",
+      "type": "K"
+    }
+  ],
+  "closedLogAssessment": [
+    {
+      "file": "logs/openlogs/closed/BUG-contract-js-verify-adimi-testhost-exe-yi-oldurmuyor.md",
+      "state": "Kısmen doğrulandı",
+      "evidence": "Timeout çocuk-süreç fixture’ı geçiyor; özgün .NET testhost olayı yeniden oynatılmadı.",
+      "next": "Windows .NET/Avalonia süreç ağacı ve timeout sonrası süreç yokluğu."
+    },
+    {
+      "file": "logs/openlogs/closed/BUG-core-eklenti-olarak-kuruluyken-kendi-deposunu-bulamiyor-gunlukler-maka.md",
+      "state": "Kısmi düzeltme",
+      "evidence": "Kurulum/root keşfi iyileşse de aktif cache seçimi ve G01 worktree yürütmesi açık.",
+      "next": "Eklenti olarak kurulu, kaynak repo yok, birden fazla cache ve worktree uçtan uca."
+    },
+    {
+      "file": "logs/openlogs/closed/BUG-plan-konseyi-dosya-adina-bagli-kararin-agirligina-degil.md",
+      "state": "Talimat iyileşmesi; tam kanıt yok",
+      "evidence": "Karar ağırlığına göre danışma mekanik olarak her yoldan garanti değil.",
+      "next": "Dosya adı değişse de aynı yüksek etkili karar aynı danışma kuralını tetiklemeli."
+    },
+    {
+      "file": "logs/openlogs/closed/BUG-spawnsync-timeout-surec-agacini-oldurmuyor.md",
+      "state": "Aynı kökün mükerrer kaydı; kısmen doğrulandı",
+      "evidence": "Yeni küçük timeout testi geçti; üç timeout kaydı üç bağımsız düzeltme sayılmamalı.",
+      "next": "Tek ana olay altında platform/runner kabul matrisi."
+    },
+    {
+      "file": "logs/openlogs/closed/BUG-suit-basssiz-avalonia-testlerinde-konak-sureci-cokerek-kosumu-yarida-k.md",
+      "state": "Devredilmiş/kısmen araştırılmış",
+      "evidence": "958 beklenirken kısmi sayılar ve exit 0 önemli; seri geçiş paralelliğin kesin neden olduğunu kanıtlamaz.",
+      "next": "Beklenen test sayısı + kontrollü seri/paralel .NET testhost deneyi."
+    },
+    {
+      "file": "logs/openlogs/closed/BUG-t0-dogrulamasi-sabit-uzerine-kurulu-ve-kendini-dolduran-testi-goremiyo.md",
+      "state": "Çözülmüş saymak için yetersiz",
+      "evidence": "Üç totoloji örneğini denetçisiz yakalama kabulü, auditor talimatına çevrilmiş.",
+      "next": "Özgün üç negatif test ve davranışı bozunca kırılma."
+    },
+    {
+      "file": "logs/openlogs/closed/BUG-t0-is-dagitmak-yerine-soru-sorup-projeyi-durdurdu.md",
+      "state": "Kabul daraltılmış",
+      "evidence": "10 turluk davranış/format beklentisi yerine tek Stop bloklaması kanıtlanmış.",
+      "next": "On turlu host replay; gereken iş dağıtımı ve kullanıcı taleplerinin doğru bölümü."
+    },
+    {
+      "file": "logs/openlogs/closed/BUG-t0-turu-siradaki-direktifi-vermeden-kapatiyor-ajan-bosta-bekliyor.md",
+      "state": "Kabul daraltılmış",
+      "evidence": "Stop’un bir kez engellenmesi sıradaki ajanın gerçekten başlatıldığını göstermiyor.",
+      "next": "Stop→sonraki dispatch→başlatma onayı; tıkanmış işte gereksiz dispatch olmamalı."
+    },
+    {
+      "file": "logs/openlogs/closed/BUG-trash-disiplini-yazili-ama-hicbir-yerde-olculmuyor.md",
+      "state": "Heuristik iyileşme",
+      "evidence": "Orphan taraması gerçek temizlik veya bütün artıkların bulunması değil.",
+      "next": "Özgün kapsam/dışlamalar, meşru dinamik yükleme ve yanlış silme negatifleri."
+    },
+    {
+      "file": "logs/openlogs/closed/BUG-zaman-asan-verify-zombi-testhost-birakiyor.md",
+      "state": "Aynı timeout kökü; kısmen doğrulandı",
+      "evidence": "Küçük süreç ağacı testi olumlu; özgün zombi testhost tam tekrarı yok.",
+      "next": "Diğer timeout kayıtlarıyla tek kanıt zinciri."
+    },
+    {
+      "file": "logs/openlogs/closed/HATA-contract-guard-komut-metnine-takiliyor-hedef-yola-degil.md",
+      "state": "Kapanış kanıtı yok",
+      "evidence": "Closed içinde Durum AÇIK ve eksik çözüm alanları; kabuk hedef ayrıştırma hâlâ sınırlı.",
+      "next": "G09 komut/hedef matrisi; önce açık durum ve eksik kanıt düzeltilmeli."
+    },
+    {
+      "file": "logs/openlogs/closed/HATA-imza-blogu-yeni-projelere-kendiliginden-gelmiyor.md",
+      "state": "Kapsamı eksik doğrulanmış",
+      "evidence": "Beş proje beklentisi yalnız Core yardımcı fonksiyonuyla karşılanmış sayılamaz; açık başlık kalmış.",
+      "next": "Beş ayrı yeni proje ve kullanıcı metnini koruyan idempotent scaffold."
+    },
+    {
+      "file": "logs/openlogs/closed/HATA-kullaniciya-verilen-silme-komutu-dogrulanmamis-yollardan-kuruldu.md",
+      "state": "Süreç düzeltmesi; güvence yok",
+      "evidence": "Özgün güvenli silme kabulünün tümü iki talimatla ikame edilmiş; açık başlık ve yeni vakalar var.",
+      "next": "Yol, kapsam, kullanıcı verisi, kurtarma ve açık yetki için altı kabulün her biri."
+    },
+    {
+      "file": "logs/openlogs/closed/HATA-paralel-ajanlar-ayni-git-indeksini-paylasti.md",
+      "state": "Yalnız yönerge yeterli değil",
+      "evidence": "T44/T45 ortak index olayı için worktree talimatı var; gerçek yürütme kökü G01 hâlâ yanlış.",
+      "next": "İki ajan/index/checkout izolasyonu ve commit’e yabancı dosya girmemesi."
+    },
+    {
+      "file": "logs/openlogs/closed/HATA-shields-rozetinde-okunmayan-beyaz-yazi.md",
+      "state": "Tasarım değişmiş; görsel QA eksik",
+      "evidence": "Kaynak SVG değişikliği okunmuş, gerçek görüntü ve kontrast doğrulaması bu tur yapılmadı.",
+      "next": "İki tema/ölçek/dil için render ve erişilebilirlik."
+    },
+    {
+      "file": "logs/openlogs/closed/YONTEM-cift-dilli-readme.md",
+      "state": "Bug değil, yöntem kaydı",
+      "evidence": "İki dil amaç olarak doğru; sözü edilen başlık/semantik CI güvencesi mevcut workflow ile aynı değil.",
+      "next": "Yöntem arşivi olarak etiketle; gerçek link/politika/başlık tutarlılık testi."
+    }
+  ],
+  "researchAssessment": [
+    [
+      "adr.md",
+      "Karar gerekçesi (ADR), işin kapanış ledger’ıyla eşdeğer değil.",
+      "Neyi neden seçtik kaydı korunmalı; completion tarihçesi tamamlayıcıdır."
+    ],
+    [
+      "aider-repomap.md",
+      "HEAD tabanlı tazelik dirty değişiklikleri yakalamıyor; file-import ile symbol graph aynı değil.",
+      "G27 fixture’ını araştırmanın kendi önerisine uygula; kalite/yenileme ölçümünü ayrı ver."
+    ],
+    [
+      "ast-grep.md",
+      "AST kullanımı sıfır yanlış pozitif garantisi değil; CLI kontrolü yalnız Core’a özgü avantaj değil.",
+      "Gerçek pattern false-positive/negative örnekleri ve opsiyonel CLI entegrasyon maliyeti."
+    ],
+    [
+      "baglam-enjeksiyonu.md",
+      "Tüm PostToolUse işlemlerini async yapmak kanıt/bind sırası için yarış yaratabilir.",
+      "Güven kapısı ile UI/log görevini ayır; byte/4 tahminini gerçek usage diye etiketleme."
+    ],
+    [
+      "beads.md",
+      "Dört hex karakterli ID çakışmasız değildir; deps yok karşılaştırması güncel Core’la eskimiş.",
+      "ID alanı 65.536 olasılıktır; yaklaşık 301 üretimde çakışma olasılığı yarıya ulaşır (uniform varsayım). UUID/ULID veya çakışma kontrolü."
+    ],
+    [
+      "git-native.md",
+      "112 ms örnek varken bütün ölçüler <100 ms denemez; byte ile token aynı değil.",
+      "Birimli çıktı ve açık baseline; git-native araç ile semantik analiz kapsamını ayır."
+    ],
+    [
+      "mem0.md",
+      "Her hafıza işlemi zorunlu iki bulut LLM çağrısıdır genellemesi kendi ADD/local ayrımlarıyla uyuşmuyor.",
+      "İşlem/provider bazlı maliyet; hash bütünlüğünü bilgi doğruluğu veya denetçi güveni diye sunma."
+    ],
+    [
+      "repomix.md",
+      "Bağımlılık listesinde chokidar bulunması ilgili modun davranış kanıtı değil; sabit token bütçesi tahmini aşırı güçlü.",
+      "Komut/mod/sürümle davranış testi ve gerçek çıktı/context ölçümü."
+    ],
+    [
+      "serena.md",
+      "ToolSearch kabul edilip kalıcı şema vergisi genelleniyor; Core’un shell yazı açığı karşılaştırmada görünmüyor.",
+      "Eager/deferred koşulları ve iki ürünün aynı yazı sınırı testi."
+    ],
+    [
+      "spec-kit.md",
+      "Niyet/spec katmanı test kapısının rakibi olmak zorunda değil.",
+      "Core’un kendi amaç-kabul boşluğunda neyi tamamladığını da ölç; kurulum bağımlılığından değersizlik sonucu çıkarma."
+    ],
+    [
+      "openspec-taskmaster.md",
+      "İş planlama/spec ve bitiş kapısı farklı işler; hepsini yerel küçük kod eşdeğeri saymak iddialı.",
+      "Gereksinim→görev→kabul→kanıt eşlemesini eşdeğer görevlerde karşılaştır."
+    ],
+    [
+      "ccusage-ccstatusline.md",
+      "Son istekte output’un context hesabından ayrılması çıktı hiçbir zaman sonraki input olmaz demek değil; otomatik compaction oranları evrensel değil.",
+      "Host/model sürümünü ve stdin alanlarını sabitle; maliyet/bağlam/abonelik ölçülerini ayır."
+    ],
+    [
+      "claude-flow.md",
+      "358 tanım ve 270.118 byte üst sınırı gerçek startup payload’ı veya her isteğin faturası değil; stdio deneyi başarısız.",
+      "Üst sınır etiketini README’ye taşırken koru; gerçek keşif sonrası payload ölç."
+    ],
+    [
+      "semgrep-codeql.md",
+      "git diff semantik analiz eşdeğeri değil; özel CodeQL deposu için mutlak kullanılamaz genellemesi yanlış.",
+      "Lisanslı özel repo durumunu ayır; gereken güvenlik analizini opsiyonel adaptörle karşılaştır."
+    ],
+    [
+      "graphify.md",
+      "İndeksleme ve ajan sorgusu ayrı; 74× kurulum süresi token tasarrufu değildir. Farklı dosya/kenar kapsamları tam eşdeğer değil.",
+      "G47 birim düzeltmesi, eş kapsam, aynı soru, cold/warm ayrımı ve sembol doğruluğu."
+    ],
+    [
+      "obsidian.md",
+      "Eksik from[]/backlink gibi bazı karşılaştırmalar aynı raporun diğer bölümleri veya güncel Core ile çelişiyor.",
+      "Backlink query ile dev indeksin tamamını okutmayı ayır; yararlı/yararsız kullanım koşullarını ikisini de yaz."
+    ]
+  ],
+  "limitations": [
+    "No paid LLM benchmark",
+    "No real host end-to-end launch replay",
+    "No original .NET/Avalonia failure reproduction",
+    "No rendered SVG or actual audio QA",
+    "No product code fix in this turn"
+  ]
+}
+

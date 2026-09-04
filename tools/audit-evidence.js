@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// Read-only evidence extraction. No prompts, replies, credentials or raw logs in output.
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -25,8 +24,6 @@ function usage(file) {
       if (key) {
         const next = { model: m.model, ...m.usage };
         const old = requests.get(key);
-        // Transcript fragments may repeat a request with partial usage; retain
-        // the largest reported counter rather than summing fragments.
         if (old) for (const [k, v] of Object.entries(old)) {
           if (typeof v === 'number') next[k] = Math.max(v, Number(next[k]) || 0);
           if (k === 'cache_creation') next[k] = Object.fromEntries(

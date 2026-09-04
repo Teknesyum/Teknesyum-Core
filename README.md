@@ -192,7 +192,7 @@ rather than invent a checkbox.
 
 ### The gate
 
-`contract.js complete` is the only thing that can close a contract. It runs the verify
+`contract.js complete` is the successful-closure path. (`close` archives unmet work.) It runs the verify
 commands itself instead of believing the report, and it works risk out from the diff rather
 than from anyone's description of the change.
 
@@ -202,10 +202,10 @@ in progress.
 
 Three things also have to be true about the tree around it. Nothing else that is still open
 may own a file this contract changed — otherwise whoever closes first seals work it never
-did. No source file outside `owns` may be sitting modified, because the verify steps run
-against the whole tree and would be testing changes the contract never claimed; documents do
-not count, since they cannot change what a command returns. And a contract that names
-`blocked-by: [T4]` does not close until `T4` is done. `contract.js list --ready` shows only
+did. No Git-visible dirty or untracked file outside `owns` may remain, including documents:
+commands can read those too. Relay metadata and generated `.claude/map.md` / `.claude/map.json`
+are excluded. A contract naming `blocked-by: [T4]` needs a committed successful closure of
+`T4`, not an unmet/adopted archive. `contract.js list --ready` shows only
 the contracts nothing is waiting on.
 
 `contract.js reopen --reason "..."` takes a wrongly closed contract back with its round
@@ -222,7 +222,8 @@ when the contract closes; an abandoned contract keeps its pin, which is the poin
 
 A `verify` block whose every step is `true`, `:`, `exit 0`, `ls`, `echo` or a comment cannot
 fail, and something that cannot fail is not acceptance. The gate refuses to close on it and
-names the step. One command that can fail is enough; the rest may be noise.
+names the step. This is a heuristic, not proof that a test measures acceptance. Empty verify
+requires an explicit manual exception and independent audit; see [closure integrity](docs/SEAL-INTEGRITY.md).
 
 Three quieter ways a seal could pass without measuring anything are closed too. A `verify`
 written as one plain line instead of a list parses to zero steps, and zero steps always
@@ -260,21 +261,22 @@ and nothing is written into the model's context.
 
 ### The audit record
 
-At high risk the close is refused until a record exists, and the record is bound four ways:
+At high risk (and for a manual-acceptance exception), closure requires a version-2 record:
 
 - to the **contents** of the files the contract owns, so a tree that moved after the audit
   no longer matches
 - to **HEAD**, so a record written for another commit does not apply here
-- to a **run-id that actually ran** — a live record on disk, whose role is auditor, and
-  which wrote no files during the audit. The role is the one the agent was given in its
-  prompt, not the type it was spawned as; every agent here is spawned as `worker`, so
-  reading the type alone rejected auditors that had done the work. `audit --dry-run`
-  answers whether an id can sign before the audit is paid for.
+- to an **observed completed auditor dispatch**, its parent, contract, round, checkout,
+  initial revision and final transcript; a historical unrelated auditor is insufficient.
+  The coordinator issues `audit` after the child finishes with `verdict: passed` and
+  `findings: none`. `audit --dry-run` checks eligibility after the run, not before dispatch.
 - to **one use**: the record is spent when the contract closes and cannot be replayed
 
 Every close, every unmet close and every reopen is appended to `audits/ledger.jsonl`, and
 `contract.js ledger` reports any contract sitting in `done/` that the ledger has never heard
-of. The records are not chained to each other; each stands on its own bindings.
+of. Closure journals make interrupted ledger/archive operations retryable without duplicate
+transactions. They do not provide a security boundary against same-user filesystem writes.
+See [the threat model and recovery limits](docs/SEAL-INTEGRITY.md).
 
 A seal also records what the ladder decided at the time: the model that ran, the model that
 was asked for, the signals that fired, the fan-in it was measured against, the sealed
@@ -282,7 +284,7 @@ was asked for, the signals that fired, the fan-in it was measured against, the s
 near the identifiers the acceptance names. None of it changes a decision — it is there so the
 next question about the ladder is answered from a column rather than an argument.
 
-`complete` and `audit` also refuse while tracked source files outside `owns` are modified: a
+`complete` and `audit` also refuse while Git-visible files outside `owns` are dirty/untracked: a
 contract that closes over a working tree it does not own is sealing someone else's diff.
 
 Every refusal the guard makes is appended to `live/refused.log` with the tool, the agent and
@@ -293,7 +295,7 @@ tuned.
 
 `guard.js` runs in front of `Write`, `Edit` and `NotebookEdit`. It blocks a write to any
 file outside the current contract's `owns` set — an agent binds itself to a contract by
-touching it — keeps `audits/` and `live/` for the gate alone, and holds `contracts/done/`
+successfully writing it — protects `audits/` and `live/` from these tools, and holds `contracts/done/`
 read-only. `prefs.js` blocks a README or LICENSE missing its required markers, and exits
 immediately when the author's preference file is absent, so for everyone else it does
 nothing at all.
@@ -306,7 +308,8 @@ branch is refused even when the gate is deliberately open. `Bash` and `PowerShel
 in front of it; for a while only one of them was, which meant the check depended on which
 shell the agent happened to pick. Nothing else about your commands is guessed at: that check
 existed until v0.2.0 as plain-text matching, `cd` walked through it while a legitimate
-one-liner reading the ledger was refused, and the guarantee lives in the record instead.
+one-liner reading the ledger was refused. A record detects ordinary workflow mismatches;
+it cannot prevent forgery by a shell process with the same filesystem permissions.
 
 For an unrelated push, the explicit single Bash invocation
 `TEKNESYUM_GATE_OPEN=1 git push ...` opens the gate for that command only. Inherited
@@ -616,10 +619,14 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,626 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,630 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
 scaffold, the cue, the banner, the handoff note, the debt ledger, the consultation record, and
-one check that no hook writes into context. CI runs the same suite on Linux, Windows and macOS; development is Windows-first.
+one check that no hook writes into context. Alongside it, 17 audit regressions and 33
+closure scenarios drive the real hooks through a synthetic host: a worktree that verifies its
+own code, an auditor bound to its round, a diff mutated mid-verify, an empty acceptance, an
+unmet prerequisite, and a half-finished closure recovered without a second ledger row. CI
+runs the same suite on Linux, Windows and macOS; development is Windows-first.
 
 ---
 

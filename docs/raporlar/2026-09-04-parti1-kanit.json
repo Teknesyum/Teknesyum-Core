@@ -1,0 +1,718 @@
+{
+  "schemaVersion": 1,
+  "reportDate": "2026-09-04",
+  "timezone": "Europe/Istanbul",
+  "scope": "Parti 1 — G01–G11 source corrections and isolated verification; not a release or full-backlog closure",
+  "historicalReviewHead": "61b91c829e11ec0bd9b95f218c4583b0f6e54a7d",
+  "testedHead": "5f7cd4da5d5c840008ca370262381764756f514d",
+  "workingTreeUncommitted": true,
+  "originalWorkingCopyBackup": "C:/Users/ADMINI~1/AppData/Local/Temp/tkc-batch1-before-8q0bHz",
+  "suites": {
+    "command": "rtk node test/run.js",
+    "exitCode": 0,
+    "sandbox": "C:/Users/ADMINI~1/AppData/Local/Temp/tkc-suite-5Af35H",
+    "all": {
+      "assertionsPassed": 2630,
+      "failed": 0,
+      "registryTests": "3 fake-adapter checks; no live registry mutation"
+    },
+    "priorRegressions": {
+      "scenariosPassed": 17,
+      "failed": 0
+    },
+    "closureIntegrity": {
+      "scenariosPassed": 33,
+      "failed": 0,
+      "host": "synthetic, no model/API invocation"
+    },
+    "timeout": {
+      "passed": true,
+      "childAliveAfterTimeout": false,
+      "legacyChildAliveAfterCleanup": true
+    }
+  },
+  "sourceStability": {
+    "files": 51,
+    "paths": [
+      "README.md",
+      "README.tr.md",
+      ".changes",
+      "package.json",
+      "core",
+      "test",
+      "tools"
+    ],
+    "beforeAndAfterSHA256": "3667613ef101d039b49046f00b53b27e44a07a0e662ad133cd9c626410a0aa29",
+    "algorithm": "SHA256(JSON.stringify(sorted traversal [relativePath, SHA256(bytes)] pairs))"
+  },
+  "sourceFiles": [
+    {
+      "path": "README.md",
+      "lines": 666,
+      "sha256": "1d6defa97afa75a7ad1994874765a63c50be1434cec5567493038d493e2438d9"
+    },
+    {
+      "path": "README.tr.md",
+      "lines": 659,
+      "sha256": "21fcb7078610596e0a84d707fcc7b863cce868f2ce3340ada3e690cea4f19444"
+    },
+    {
+      "path": "package.json",
+      "lines": 13,
+      "sha256": "7c7c79f75b009ddc0b181576ff38a41627df01249a21c099425d0727ecfe8a05"
+    },
+    {
+      "path": "core/.claude-plugin/plugin.json",
+      "lines": 12,
+      "sha256": "1d0b57f4bc1c6ce4357d1e5b3274c17421870fca9f0e642eb8bcba9febd04a30"
+    },
+    {
+      "path": "core/agents/worker.md",
+      "lines": 11,
+      "sha256": "71a3ddb3e45ac8c60a91d58e91e3983882e91864378c80efe7d593a769783894"
+    },
+    {
+      "path": "core/assets/badge-lang.svg",
+      "lines": 15,
+      "sha256": "dc2c10b97e374dba09bbc39e0fee4a1fa0685f10d28f66aa0eda562b17a28d43"
+    },
+    {
+      "path": "core/assets/badge-lang.tr.svg",
+      "lines": 15,
+      "sha256": "bc2acfff3dfda3b031976552fe9b400d893bc6ec37ecd08e436df6290c485a73"
+    },
+    {
+      "path": "core/assets/licenses/AGPL-3.0-or-later.txt",
+      "lines": 662,
+      "sha256": "e0eedba615d5cd1b986afb6c5b3a4b1ae33713e7e9dc74d19daec5e3221f9d2e"
+    },
+    {
+      "path": "core/hooks/closure.js",
+      "lines": 115,
+      "sha256": "50edd7ce9961d7b76ab9219815f8e74af1b52009b6313031689418738f8ca3a8"
+    },
+    {
+      "path": "core/hooks/cue.js",
+      "lines": 90,
+      "sha256": "d76b6b8853d11a3e75f28914b871483388dc2db15959da05c190b27f849b63d2"
+    },
+    {
+      "path": "core/hooks/guard.js",
+      "lines": 529,
+      "sha256": "b250b49185776be3d00d6d0592121d91cbb1d82edff3bfb327434dd6b1dea6bf"
+    },
+    {
+      "path": "core/hooks/hooks.json",
+      "lines": 159,
+      "sha256": "a9e841ff7efa4a990442fa0b4163ebaa58d18b40e85ae0be656a1bd5d858c694"
+    },
+    {
+      "path": "core/hooks/lib.js",
+      "lines": 461,
+      "sha256": "224d28a5f0e1d3c1988e9522c4d3177ed59652381e05589b3ab8d993a2b69081"
+    },
+    {
+      "path": "core/hooks/notice.js",
+      "lines": 43,
+      "sha256": "8165230c0ae85a8b3432cd47be4a15866858ede1e10be6c44036ded9e4ab6fc0"
+    },
+    {
+      "path": "core/hooks/notify.js",
+      "lines": 258,
+      "sha256": "12205ebaff3c5d855fb595e6876522ac6f6d0fb6d6ad735064a51f46117a5ae8"
+    },
+    {
+      "path": "core/hooks/prefs.js",
+      "lines": 98,
+      "sha256": "62204d389797cf550152389d9b01dbed3fe0e3664fcf32424a6b3090d57f0f97"
+    },
+    {
+      "path": "core/hooks/schema.js",
+      "lines": 132,
+      "sha256": "6ba5e3983684e839febeb4a57d476150bea3c9beff2c8061ada20dfb6ff223a8"
+    },
+    {
+      "path": "core/hooks/seal.js",
+      "lines": 307,
+      "sha256": "c1f3c8cdc261ad2203816b9c8e4e598d35de6280b06837e8c0a2f1c2875cc8cc"
+    },
+    {
+      "path": "core/hooks/watch.js",
+      "lines": 494,
+      "sha256": "79d088a2066f9a16820498ede026f6ae962c233c8cdea2e58dc7123827f1df74"
+    },
+    {
+      "path": "core/roles/advisor.md",
+      "lines": 44,
+      "sha256": "fa69d0d348c88fc154b961b7fd520e09df8cf37882c55c8d662482036663810f"
+    },
+    {
+      "path": "core/roles/auditor.md",
+      "lines": 61,
+      "sha256": "e39aa9d7a07b3e562eb0151cc9944037e14e9fe455a6f08ea67d9d3a6db10ef2"
+    },
+    {
+      "path": "core/roles/builder.md",
+      "lines": 34,
+      "sha256": "477d25478109eedbd9f8732eb5c3f54b2341024f4a510c3aa63de8fa36de4519"
+    },
+    {
+      "path": "core/roles/planner.md",
+      "lines": 31,
+      "sha256": "d8ee480fe94084934707182ee099e3d4dcae00ddda580223ecc9cd9b8e0b681a"
+    },
+    {
+      "path": "core/roles/scout.md",
+      "lines": 57,
+      "sha256": "72dce162795e802ab99a2acf6205a5d56040566b89b6f70412b438823b6647c6"
+    },
+    {
+      "path": "core/roles/scribe.md",
+      "lines": 39,
+      "sha256": "563284cdb1cae3efed4073e5f27a4bb8494795fb9ea622f00000e384de0a1479"
+    },
+    {
+      "path": "core/scripts/advice.js",
+      "lines": 183,
+      "sha256": "c792b49f800ca026a304f155037ed30823dcaba14950321e3c4fec03cf73ead4"
+    },
+    {
+      "path": "core/scripts/bridge.js",
+      "lines": 43,
+      "sha256": "78d74b813b39f2e8cf422d529e190cf7848413bcaa825b87a4a734a5e95e0a05"
+    },
+    {
+      "path": "core/scripts/contract.js",
+      "lines": 1927,
+      "sha256": "8ae0ed9d0df72b68d2e7ac7c919f1dc53320ee2ac0dd67733a6aa41878a5efa6"
+    },
+    {
+      "path": "core/scripts/doctor.js",
+      "lines": 228,
+      "sha256": "91e2074c308f18395635082aa5e6e4b782de10246985581a0bfbf95ada40285c"
+    },
+    {
+      "path": "core/scripts/handoff.js",
+      "lines": 339,
+      "sha256": "be68509caa70bd894b150801180634426e9db11214a6009e13c1ba50203f4ebd"
+    },
+    {
+      "path": "core/scripts/log.js",
+      "lines": 123,
+      "sha256": "9bac7f4520991c5359fd5cae316c0c46ad5100074b9c13331abaeb199e2f8d08"
+    },
+    {
+      "path": "core/scripts/manset.js",
+      "lines": 231,
+      "sha256": "97362bd7888053da2c0aeb06e2c988dc9ada70aa4933e12faeb1f68491e300a7"
+    },
+    {
+      "path": "core/scripts/map.js",
+      "lines": 408,
+      "sha256": "a3581b245a47cfed79c2eb58353f1588483e499a0a06a82e9010a72e5713882b"
+    },
+    {
+      "path": "core/scripts/release.js",
+      "lines": 199,
+      "sha256": "c22ee41ba11685cbad553fc85bb7ed821135270d58883ea16ba4b38467394659"
+    },
+    {
+      "path": "core/scripts/risk.js",
+      "lines": 178,
+      "sha256": "39e291d0fd44928312917b0a438f1861be648c72b93c774db6456b1b1f171186"
+    },
+    {
+      "path": "core/scripts/scaffold.js",
+      "lines": 193,
+      "sha256": "99eeb526951120cf265240568f9d495cd749c80e188e0603064c9848a4cadf7d"
+    },
+    {
+      "path": "core/scripts/setup.js",
+      "lines": 242,
+      "sha256": "0ec387787aed469ff6577fd7f50f11d5a1888e391ce94dc9d6601376571dce01"
+    },
+    {
+      "path": "core/scripts/statusline.js",
+      "lines": 495,
+      "sha256": "22c30ce42d482493b4495343d35a89c3db36a3ea74b6be0e9442511b00689020"
+    },
+    {
+      "path": "core/scripts/update.js",
+      "lines": 135,
+      "sha256": "8e863126c8f50a7b7b25317068a4efec27f2dc0b0479ec96a558c00f5b538010"
+    },
+    {
+      "path": "core/scripts/verify-runner.js",
+      "lines": 37,
+      "sha256": "85e722a1b2243b83e62e6faea63e6b4949e6fc40330e7cfc67e434239ac192af"
+    },
+    {
+      "path": "core/skills/relay/SKILL.md",
+      "lines": 150,
+      "sha256": "092880b0f7a672e93fa1c2e0d7d6f1dcb4d5488bf67f65da457fef1ef8dfa03a"
+    },
+    {
+      "path": "core/strings.json",
+      "lines": 263,
+      "sha256": "01d5c57deb79900e956707d13ddd52fe107ce22edf43df2c41551266b0e886fb"
+    },
+    {
+      "path": "core/tiers.json",
+      "lines": 119,
+      "sha256": "b6f026a06016dc238758878109e52e76821d196a4c6e0500a4b9034c204df6e1"
+    },
+    {
+      "path": "test/all.js",
+      "lines": 2904,
+      "sha256": "eb515816fc97c7cf55435a1dcdb6e65e9157db46125fe5808f763be544a462c8"
+    },
+    {
+      "path": "test/audit-regressions.js",
+      "lines": 153,
+      "sha256": "e9744ad181e223d4c24923039044827b9d7c9b6076e4ee455e61303b96a7945e"
+    },
+    {
+      "path": "test/closure-integrity.js",
+      "lines": 295,
+      "sha256": "a61e886f274ef22b163c7bd549faae5d9273b651ada478ef54ae6652c0eada8d"
+    },
+    {
+      "path": "test/host-fixture.js",
+      "lines": 53,
+      "sha256": "f3b7fdb853d295a62b4d554ef6368473f620797baf50764c2be6c9d7b23cbc25"
+    },
+    {
+      "path": "test/run.js",
+      "lines": 27,
+      "sha256": "cc886cf9a192583d8146b82a4d85ed0daae4a622bbd483e8747d34af7e3a99fa"
+    },
+    {
+      "path": "test/verify-timeout.js",
+      "lines": 29,
+      "sha256": "2f41331a856f950fc3f1d19a7f1c67df17452ec795b0677990496f77f473de80"
+    },
+    {
+      "path": "tools/audit-evidence.js",
+      "lines": 101,
+      "sha256": "7db3d25d82bfe8ba1bd2a742e74e40cad5d676f8c285bbfef79cce85f255f964"
+    },
+    {
+      "path": "tools/full-review-probes.js",
+      "lines": 193,
+      "sha256": "47cfd2833d977eb12c8a95d97499b582b413aafbe0949ef721b43cc37559260d"
+    }
+  ],
+  "syntax": [
+    {
+      "path": "core/hooks/closure.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/hooks/cue.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/hooks/guard.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/hooks/lib.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/hooks/notice.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/hooks/notify.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/hooks/prefs.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/hooks/schema.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/hooks/seal.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/hooks/watch.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/scripts/advice.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/scripts/bridge.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/scripts/contract.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/scripts/doctor.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/scripts/handoff.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/scripts/log.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/scripts/manset.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/scripts/map.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/scripts/release.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/scripts/risk.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/scripts/scaffold.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/scripts/setup.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/scripts/statusline.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/scripts/update.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "core/scripts/verify-runner.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "test/all.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "test/audit-regressions.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "test/closure-integrity.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "test/host-fixture.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "test/run.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "test/verify-timeout.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "tools/audit-evidence.js",
+      "exitCode": 0,
+      "error": ""
+    },
+    {
+      "path": "tools/full-review-probes.js",
+      "exitCode": 0,
+      "error": ""
+    }
+  ],
+  "before": {
+    "at": "2026-09-03T21:16:52.902Z",
+    "snapshot": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\tkc-current-review-GhiSUJ",
+    "fixture": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\tkc-review-probes-2tbxYm",
+    "results": [
+      {
+        "name": "worktree verifier runs main checkout",
+        "issueReproduced": true,
+        "mainValue": 1,
+        "worktreeValue": 999,
+        "status": 0,
+        "out": "W1 complete -> contracts/done/W1.md\n\n  pass  node -e \"if(require('./src/value.js')!==1) process.exit(4)\"\n\nrisk low\nledger written at HEAD 80390b7d\n\nSealed with no audit record: independent review is not evidenced by this seal.\n\nNo filename/import reference was found for these files (heuristic only):\n  src/value.js\n\nCheck entry points, dynamic loading and build configuration before moving anything.\n",
+        "err": ""
+      },
+      {
+        "name": "unrelated historical auditor can sign",
+        "issueReproduced": true,
+        "status": 0,
+        "out": "Audit record written: .claude\\relay\\audits\\A1-1.json\nheadSha and diffHash were computed here, not supplied.\n",
+        "err": ""
+      },
+      {
+        "name": "audited files change during verification yet seal passes",
+        "issueReproduced": true,
+        "status": 0,
+        "out": "S1 complete -> contracts/done/S1.md\n\n  pass  node -e \"require('fs').writeFileSync('src/value.js','module.exports=999;')\"\n\nrisk high (declared high by the contract author)\nledger written at HEAD 80390b7d, audit record consumed\n\nNo filename/import reference was found for these files (heuristic only):\n  src/value.js\n\nCheck entry points, dynamic loading and build configuration before moving anything.\n",
+        "err": ""
+      },
+      {
+        "name": "empty verify without acceptance reason closes",
+        "issueReproduced": true,
+        "status": 0,
+        "out": "E1 complete -> contracts/done/E1.md\n\n\nrisk low\nledger written at HEAD 24a0e379\n\nSealed with no audit record: independent review is not evidenced by this seal.\n\nNo filename/import reference was found for these files (heuristic only):\n  src/value.js\n\nCheck entry points, dynamic loading and build configuration before moving anything.\n",
+        "err": ""
+      },
+      {
+        "name": "unmet dependency is treated as satisfied",
+        "issueReproduced": true,
+        "status": 0,
+        "out": "D2 complete -> contracts/done/D2.md\n\n  pass  node -e \"if(require('./src/value.js')!==1) process.exit(4)\"\n\nrisk low\nledger written at HEAD a5890485\n\nSealed with no audit record: independent review is not evidenced by this seal.\n\nNo filename/import reference was found for these files (heuristic only):\n  src/value.js\n\nCheck entry points, dynamic loading and build configuration before moving anything.\n",
+        "err": ""
+      },
+      {
+        "name": "closed debt evidence disappears on handoff refresh",
+        "issueReproduced": true,
+        "before": "\n\n## Closed debts\n\n- 2026-09-03 closed: ask the advisor - the advisor answered\n",
+        "after": "<!-- teknesyum:handoff -->\n# Handoff\n\nWhere this project stands. The facts below are written by a hook and cost\nnothing; the intent under them is written by hand, once, when it changes.\n\n## Intent\n\n_not written yet - one paragraph on what is being attempted and why._\n\n## Contracts open\n\nNone.\n\n## Closed last\n\nNothing in the ledger yet.\n\n## Tree\n\n- branch: `main`\n- head: `b7465f1 fixture`\n- uncommitted files: 0\n"
+      },
+      {
+        "name": "dirty import graph still called fresh",
+        "issueReproduced": true,
+        "state": {
+          "state": "fresh",
+          "at": "b7465f148c33d61762639873938edbd1835bfc35"
+        },
+        "fanIn": {
+          "max": 0,
+          "file": "",
+          "read": true
+        },
+        "actualImporters": 1
+      },
+      {
+        "name": "session end closes another session when only payload has session id",
+        "issueReproduced": true,
+        "record": {
+          "id": "other",
+          "sessionId": "other-session",
+          "role": "builder",
+          "files": [],
+          "ended": "2026-09-03T21:16:51.640Z",
+          "stop_reason": "session_end"
+        },
+        "status": 0,
+        "out": "",
+        "err": ""
+      },
+      {
+        "name": "bound agent can write outside repository through Write",
+        "issueReproduced": true,
+        "status": 0,
+        "out": "",
+        "err": ""
+      },
+      {
+        "name": "first known-role dispatch inherits model without existing relay",
+        "issueReproduced": true,
+        "status": 0,
+        "out": "",
+        "err": ""
+      },
+      {
+        "name": "suffix contract is invisible in statusline count",
+        "issueReproduced": true,
+        "status": 0,
+        "out": "Teknesyum ▸ suffix \u001b[2m·\u001b[0m normal",
+        "err": ""
+      },
+      {
+        "name": "forged complete audit and live record are accepted",
+        "issueReproduced": true,
+        "status": 0,
+        "out": "F1 complete -> contracts/done/F1.md\n\n  pass  node -e \"if(require('./src/value.js')!==1) process.exit(4)\"\n\nrisk high (declared high by the contract author)\nledger written at HEAD d4e02ea5, audit record consumed\n\nNo filename/import reference was found for these files (heuristic only):\n  src/value.js\n\nCheck entry points, dynamic loading and build configuration before moving anything.\n",
+        "err": ""
+      }
+    ]
+  },
+  "after": {
+    "at": "2026-09-04T16:55:24.697Z",
+    "snapshot": "C:\\Users\\Administrator\\Desktop\\Projeler\\Teknesyum-Core",
+    "fixture": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\tkc-review-probes-y9FpEd",
+    "results": [
+      {
+        "name": "worktree verifier runs main checkout",
+        "issueReproduced": false,
+        "mainValue": 1,
+        "worktreeValue": 999,
+        "status": 2,
+        "out": "W1 cannot complete - verification failed.\n\n  FAIL  node -e \"if(require('./src/value.js')!==1) process.exit(4)\"  (exit 4)\n",
+        "err": ""
+      },
+      {
+        "name": "unrelated historical auditor can sign",
+        "issueReproduced": false,
+        "status": 2,
+        "out": "Refused - the auditor belongs to another contract or round\n",
+        "err": ""
+      },
+      {
+        "name": "audited files change during verification yet seal passes",
+        "issueReproduced": false,
+        "status": 2,
+        "out": "S1 cannot complete - verification inputs changed during the run; review and verify the new revision.\n",
+        "err": ""
+      },
+      {
+        "name": "empty verify without acceptance reason closes",
+        "issueReproduced": false,
+        "status": 2,
+        "out": "E1 has no executable acceptance.\nAdd verify steps. A manual review requires verification-mode: manual, a manual-reason of at least\n40 characters, an Acceptance section, and an independent audit record. Prose lint alone is not acceptance.\n",
+        "err": ""
+      },
+      {
+        "name": "unmet dependency is treated as satisfied",
+        "issueReproduced": false,
+        "status": 2,
+        "out": "D2 cannot complete - it is blocked by work that has not landed:\n\n  D1  unmet\n\nClose the blocker first, or take it out of blocked-by if it no longer holds.\n",
+        "err": ""
+      },
+      {
+        "name": "closed debt evidence disappears on handoff refresh",
+        "issueReproduced": true,
+        "before": "\n\n## Closed debts\n\n- 2026-09-04 closed: ask the advisor - the advisor answered\n",
+        "after": "<!-- teknesyum:handoff -->\n# Handoff\n\nWhere this project stands. The facts below are written by a hook and cost\nnothing; the intent under them is written by hand, once, when it changes.\n\n## Intent\n\n_not written yet - one paragraph on what is being attempted and why._\n\n## Contracts open\n\nNone.\n\n## Closed last\n\nNothing in the ledger yet.\n\n## Tree\n\n- branch: `main`\n- head: `4423076 fixture`\n- uncommitted files: 0\n"
+      },
+      {
+        "name": "dirty import graph still called fresh",
+        "issueReproduced": true,
+        "state": {
+          "state": "fresh",
+          "at": "a71d2104c8f9ef22c4eb0607b63ae05d52d547e7"
+        },
+        "fanIn": {
+          "max": 0,
+          "file": "",
+          "read": true
+        },
+        "actualImporters": 1
+      },
+      {
+        "name": "session end closes another session when only payload has session id",
+        "issueReproduced": true,
+        "record": {
+          "id": "other",
+          "sessionId": "other-session",
+          "role": "builder",
+          "files": [],
+          "ended": "2026-09-04T16:55:23.509Z",
+          "stop_reason": "session_end"
+        },
+        "status": 0,
+        "out": "",
+        "err": ""
+      },
+      {
+        "name": "bound agent can write outside repository through Write",
+        "issueReproduced": false,
+        "status": 2,
+        "out": "",
+        "err": "BLOCKED: ../outside.txt is outside the owns set of B1.\nowns: src/value.js\n\nDo not widen the contract to fit the edit. Record the blocker under ## Checkpoint\nand return, or ask T0 for a contract that owns this file."
+      },
+      {
+        "name": "first known-role dispatch inherits model without existing relay",
+        "issueReproduced": true,
+        "status": 0,
+        "out": "",
+        "err": ""
+      },
+      {
+        "name": "suffix contract is invisible in statusline count",
+        "issueReproduced": true,
+        "status": 0,
+        "out": "Teknesyum ▸ suffix \u001b[2m·\u001b[0m normal",
+        "err": ""
+      },
+      {
+        "name": "forged complete audit and live record are accepted",
+        "issueReproduced": false,
+        "status": 2,
+        "out": "F1 cannot complete - audit lacks the observed dispatch and transcript binding (schemaVersion 2 required)\n",
+        "err": ""
+      }
+    ],
+    "exitCode": 1
+  },
+  "resultSummary": {
+    "baselineIssuesReproduced": 12,
+    "afterIssuesReproduced": 5,
+    "oldCounterexamplesNoLongerReproduced": 7,
+    "doesNotMeanSevenFindingsFullyClosed": true
+  },
+  "residualFindings": [
+    "G04 same-user filesystem forgery remains possible",
+    "G09 no shell/MCP filesystem sandbox",
+    "G11 remaining regex consumers not migrated",
+    "G14 initial dispatch can inherit parent model",
+    "G21 cross-session SessionEnd",
+    "G24 closed debt history loss",
+    "G27 dirty import map freshness",
+    "G33 suffix-id statusline omission"
+  ],
+  "limitations": [
+    "No actual Claude-host/installed-plugin validation or paid benchmark",
+    "No fsync/power-loss guarantee or automatic hard-crash verifier-lock recovery",
+    "Ignored/external inputs not hermetically snapshotted; arbitrary concurrent processes not frozen",
+    "Transcript/verification claims do not prove semantic correctness",
+    "G12–G60 not globally resolved; no subscription quota savings measured"
+  ],
+  "actionsNotTaken": [
+    "create task",
+    "spawn subagent",
+    "model/API benchmark",
+    "plugin install",
+    "commit",
+    "push"
+  ]
+}

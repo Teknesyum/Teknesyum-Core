@@ -1,7 +1,8 @@
 const fs = require('fs');
 const path = require('path');
-const { read, write, merge, safe, relayRoot, ensureRelay, liveDir, sessionId, setNotice, t } = require('./lib.js');
-const { status, isContractName, field } = require('./schema.js');
+const { read, write, merge, safe, relayRoot, ensureRelay, checkoutRoot, liveDir, sessionId, setNotice, t } = require('./lib.js');
+const { status, isContractName, field, owned, raiseOf } = require('./schema.js');
+const seal = require('./seal.js');
 
 let raw = '';
 process.stdin.on('data', (d) => (raw += d));
@@ -17,7 +18,12 @@ process.stdin.on('end', () => {
     }
     record(j);
     out = halt(j);
-  } catch {}
+  } catch (e) {
+    if (j && j.hook_event_name === 'PreToolUse' && AGENT_TOOLS.test(j.tool_name || '') && roleOf(j) === 'auditor') {
+      process.stderr.write('BLOCKED: cannot record auditor dispatch: ' + e.message);
+      return process.exit(2);
+    }
+  }
   if (out) process.stdout.write(JSON.stringify({ decision: 'block', reason: out }));
   else if (j) chime(j);
   process.exit(0);
@@ -173,6 +179,7 @@ function record(j) {
   const now = new Date().toISOString();
   const rec = read(file) || { id: key, role: '', files: [], steps: 0, started: now };
   if (j.session_id) rec.sessionId = j.session_id;
+  if (!AGENT_TOOLS.test(j.tool_name || '')) rec.checkoutRoot = checkoutRoot(r);
 
   const role = roleOf(j);
   if (!AGENT_TOOLS.test(j.tool_name || '') && role && (!GENERIC.test(role) || !rec.role)) rec.role = role;
@@ -208,7 +215,18 @@ function record(j) {
       const t = j.tool_input || {};
       const target = t.file_path || t.notebook_path || '';
       if (target) {
-        const rel = path.relative(path.dirname(path.dirname(r.relay)), target).replace(/\\/g, '/');
+        const rel = path.relative(checkoutRoot(r), target).replace(/\\/g, '/');
+        const contractName = path.relative(path.join(r.relay, 'contracts'), target);
+        if (isContractName(contractName)) {
+          const id = contractName.replace(/\.md$/i, '');
+          const body = fs.readFileSync(target, 'utf8');
+          if (!rec.contract) Object.assign(rec, { contract: id, contractSteps: 0, round: field('round', body) || '1' });
+          const raised = path.join(live, '_raise', safe(id) + '.json');
+          if (!fs.existsSync(raised)) {
+            const asked = raiseOf(body);
+            write(raised, { raise: asked ? asked.raise : '', why: asked ? asked.why : '', at: Date.now() });
+          }
+        }
         const outside = rel.startsWith('../') || path.isAbsolute(rel);
         if (outside) {
           rec.outsideFiles = rec.outsideFiles || [];
@@ -220,6 +238,21 @@ function record(j) {
 
   if (AGENT_TOOLS.test(j.tool_name || '') && ev === 'PreToolUse') {
     const child = roleOf(j);
+    const input = j.tool_input || {};
+    const m = /contracts[\\/]+(?:done[\\/]+)?([A-Za-z]{1,4}\d{1,4}[A-Za-z]{0,3})\.md/i.exec(String(input.prompt || ''));
+    if (child === 'auditor') {
+      if (!m || !j.tool_use_id) throw new Error('Auditor dispatch needs an exact contract path and host tool_use_id before launch');
+      const body = fs.readFileSync(path.join(r.relay, 'contracts', m[1] + '.md'), 'utf8');
+      const root = checkoutRoot(r);
+      const head = require('child_process').spawnSync('git', ['-C', root, 'rev-parse', 'HEAD'], { encoding: 'utf8', windowsHide: true, timeout: 10000 });
+      if (head.status !== 0) throw new Error('Cannot bind auditor HEAD');
+      const pending = {
+        id: String(j.tool_use_id), parentId: key, role: child, contract: m[1], round: field('round', body) || '1',
+        checkoutRoot: root, reviewStarted: now, reviewHead: head.stdout.trim(), reviewDiffHash: seal.ownsDigest(root, owned(body)),
+        reviewContractHash: seal.digest(body), promptHash: seal.digest(String(input.prompt || '')),
+      };
+      if (!write(path.join(live, '_dispatch', safe(j.tool_use_id) + '.json'), pending)) throw new Error('Cannot record auditor dispatch');
+    }
     if (child) {
       rec.spawned = (rec.spawned || []).concat(child).slice(-40);
       logCall(live, child, j.tool_input || {});
@@ -231,7 +264,9 @@ function record(j) {
     const childId = response.agentId || response.agent_id;
     if (childId) {
       const input = j.tool_input || {};
-      const m = /contracts[\\/]+(?:done[\\/]+)?([A-Za-z]{1,4}\d{1,4})\.md/i.exec(String(input.prompt || ''));
+      const m = /contracts[\\/]+(?:done[\\/]+)?([A-Za-z]{1,4}\d{1,4}[A-Za-z]{0,3})\.md/i.exec(String(input.prompt || ''));
+      const pending = j.tool_use_id && read(path.join(live, '_dispatch', safe(j.tool_use_id) + '.json'));
+      const bound = pending && pending.parentId === key && pending.promptHash === seal.digest(String(input.prompt || '')) ? pending : null;
       let round = '';
       if (m) for (const dir of ['contracts', 'contracts/done']) {
         try { round = field('round', fs.readFileSync(path.join(r.relay, dir, m[1] + '.md'), 'utf8')); break; } catch {}
@@ -239,10 +274,12 @@ function record(j) {
       merge(path.join(live, safe(childId) + '.json'), (cur) => ({
         id: String(childId), files: [], steps: 0, started: now, ...cur,
         role: roleOf(j) || cur.role || '', contract: m ? m[1] : cur.contract || '',
-        round: round || cur.round || '',
+        round: bound ? bound.round : round || cur.round || '',
         requestedModel: String(input.model || ''),
         model: String(response.resolvedModel || response.model || cur.model || ''),
         parentId: key, sessionId: j.session_id || cur.sessionId || '', updated: now,
+        ...(bound ? { dispatchId: bound.id, checkoutRoot: cur.checkoutRoot || bound.checkoutRoot,
+          reviewStarted: bound.reviewStarted, reviewHead: bound.reviewHead, reviewDiffHash: bound.reviewDiffHash, reviewContractHash: bound.reviewContractHash } : {}),
       }));
     }
   }

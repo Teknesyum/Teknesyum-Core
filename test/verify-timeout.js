@@ -4,7 +4,6 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-timeout-'));
 const contract = require.resolve('../core/scripts/contract.js');
-// Only this fixture's recorded PID is inspected/cleaned; never kill by image name.
 fs.writeFileSync(path.join(root, 'child.js'), 'setTimeout(()=>{}, 10000);');
 fs.writeFileSync(path.join(root, 'parent.js'), `const c=require('child_process').spawn(process.execPath,['child.js'],{stdio:'ignore'});require('fs').writeFileSync('pid',String(c.pid));setTimeout(()=>{},10000);`);
 const r = spawnSync(process.execPath, ['-e', 'console.log(JSON.stringify(require(process.argv[1]).runVerify(process.argv[2],["node parent.js"])))', contract, root], {
@@ -13,7 +12,6 @@ const r = spawnSync(process.execPath, ['-e', 'console.log(JSON.stringify(require
 let alive = false;
 const pid = Number(fs.readFileSync(path.join(root, 'pid'), 'utf8'));
 try { process.kill(pid, 0); alive = true; } catch {}
-// Cleanup is limited to the process the fixture itself created.
 if (alive) { try { process.kill(pid, 'SIGKILL'); } catch {} }
 const results = JSON.parse(r.stdout);
 const ok = results[0].timedOut && !results[0].ok && results[0].swept && !alive;

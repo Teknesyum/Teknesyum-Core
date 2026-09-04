@@ -1,9 +1,9 @@
-// Adversarial cases from the VidShrink audit. Only isolated temporary repositories.
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const assert = require('assert/strict');
 const { spawnSync } = require('child_process');
+const { observeAuditor } = require('./host-fixture');
 const core = path.resolve(__dirname, '../core');
 const contract = require(path.join(core, 'scripts/contract.js'));
 const seal = require(path.join(core, 'hooks/seal.js'));
@@ -68,7 +68,7 @@ test('C# namespace imports do not prove dead source files', () => {
 });
 test('low-risk completion consumes an available valid audit', () => {
   put('.claude/relay/contracts/A1.md', body('A1'));
-  put('.claude/relay/live/a1.json', { id: 'a1', role: 'auditor', files: [] });
+  observeAuditor(root, 'A1', 'a1');
   const a = run('scripts/contract.js', ['audit', '--id', 'A1', '--run-id', 'a1', '--verification', 'fixture check -> exit 0']);
   assert.equal(a.status, 0, a.stdout);
   const r = run('scripts/contract.js', ['complete', '--id', 'A1']);

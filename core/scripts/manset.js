@@ -23,8 +23,6 @@ const NEAR = 2;
 
 function canon(raw) {
   const s = String(raw).replace(/\s/g, '');
-  // This checker accepts decimal comma or decimal point, not ambiguous
-  // thousands grouping. Dropping punctuation made 1.2 equal to 12.
   if (/^-?\d+(?:[.,]\d+)?$/.test(s)) return new Set([String(Number(s.replace(',', '.')))]);
   return new Set([s]);
 }

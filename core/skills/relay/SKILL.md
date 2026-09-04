@@ -52,17 +52,17 @@ Updated as work proceeds, not at the end.
 
 Enforced, not advised:
 
-- `owns:` lists **files**. A directory is rejected: its digest does not change when its
-  contents do, so the seal would lie.
-- `verify:` is required and each entry must exit 0. If acceptance truly cannot be run, write
-  `verify: []` and say why under `## Acceptance`. A verify step may not touch `done/`,
-  `audits/`, `live/`, or call `contract.js`.
-- `status:` climbs `open → active → submitted → done`, never back, `open` never past `active`;
-  `blocked` is free in both directions. `blocked-by: [T3]` must be `done` first, and `list
-  --ready` shows what nothing is holding. A close refuses on a changed file another open
-  contract owns, or dirty tracked source outside `owns`.
-- An agent binds to the contract it first edits and writes **only** inside that `owns`.
-  Widening it to fit an edit is wrong: record the blocker under `## Checkpoint`.
+- `owns:` lists files, not directories. Links cannot escape the checkout.
+- `verify:` entries must exit 0. An empty list requires `verification-mode: manual`,
+  `manual-reason:` and `## Acceptance` of at least 40 characters each, plus independent audit.
+  Verify may not touch `done/`, `audits/`, `live/`, or call `contract.js`.
+- `status:` climbs `open → active → submitted → done`; only the CLI writes terminal states.
+  `blocked` must return to `open` or `active` before submission. `blocked-by: [T3]` requires
+  committed success, not an unmet/adopted archive; `list --ready` shows unblocked contracts.
+- Closure refuses overlapping open ownership and Git-visible dirty/untracked files outside
+  `owns`, including docs; relay metadata and generated `.claude/map.md` / `.claude/map.json` are excluded.
+- Binding occurs after the first successful contract write. Bound agents cannot switch
+  contracts or widen `owns`; record blockers under `## Checkpoint`.
 
 ## Layout
 
@@ -71,7 +71,7 @@ Enforced, not advised:
   PLAN.md              projects from scratch only
   contracts/<ID>.md    open work
   contracts/done/      closed; only contract.js writes here
-  audits/  live/       gate-owned; Write, Edit and shell are refused
+  audits/  live/       gate-owned; Write/Edit are refused, shell is not sandboxed
   map.md               import graph, generated
 ```
 
@@ -88,13 +88,15 @@ node <P>/scripts/contract.js complete --id T7   # runs verify, gates, moves to d
 Risk comes from the diff since the merge-base, not from a claim: sensitive paths (auth,
 migrations, hooks, CI, dependency and settings files), more than 8 owned files, or more than
 300 changed lines mean **high**. A contract may escalate with `risk: high`, never lower itself.
-High risk also needs an audit record, which only the auditor writes and which is consumed.
+High risk needs a version-2 audit. Dispatch the auditor with its role and exact contract path.
+Wait for its result and SubagentStop, requiring `verdict: passed` and `findings: none`.
+Then the coordinator runs `audit --id T7 --run-id <child-id> --verification "<evidence>"`
+with `node <P>/scripts/contract.js`, followed by `complete --id T7`.
 
-Unmet work does not vanish:
-
-```bash
-node <P>/scripts/contract.js close --id T7 --reason "<40 characters or more>"
-```
+Changed review inputs require a new review. After I/O failure, retry the same closure with
+unchanged inputs; conflicting journals require manual reconciliation. Metadata is not a
+same-user security boundary. Details: repository `docs/SEAL-INTEGRITY.md`.
+`close --id T7 --reason "<40 characters or more>"` records unmet, keeps the pin, and does not unblock dependents.
 
 ## Agents
 

@@ -4,6 +4,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { spawnSync } = require('child_process');
+const { observeAuditor, issueAudit } = require('./host-fixture');
 
 const CORE = path.resolve(__dirname, '..', 'core');
 const GUARD = path.join(CORE, 'hooks', 'guard.js');
@@ -93,6 +94,8 @@ function testGuard(root) {
   fs.mkdirSync(path.join(root, 'docs', 'scans'), { recursive: true });
   fs.writeFileSync(path.join(root, 'docs', 'scans', 'read.md'), '# read\n');
   ok('valid contract passes once prior art exists', hook(valid, root).status === 0);
+  run('git', ['add', 'docs/scans/read.md'], { cwd: root });
+  run('git', ['commit', '-qm', 'fixture prior art'], { cwd: root });
 
   ok(
     'CLAUDE.md with a body is blocked',
@@ -128,11 +131,11 @@ function testGuard(root) {
     ).status === 2
   );
   ok(
-    'forward transition passes',
+    'direct terminal status requires the completion command',
     hook(
       { tool_name: 'Edit', tool_input: { file_path: c('R1'), old_string: 'status: submitted', new_string: 'status: accepted' } },
       root
-    ).status === 0
+    ).status === 2
   );
 
   writeContract(root, 'R2', '---\nid: R2\nstatus: open\nowns: [src/ok.js]\nverify:\n  - node -e \"process.exit(0)\"\n---\n');
@@ -189,6 +192,7 @@ function testGate(root) {
   fs.writeFileSync(path.join(root, 'notes', 'kept.md'), 'still in the route\n');
   fs.writeFileSync(path.join(root, 'notes', 'index.md'), 'the route runs through kept.md\n');
   run('git', ['add', '-A'], { cwd: root });
+  run('git', ['commit', '-qm', 'notes fixture'], { cwd: root });
   writeContract(
     root,
     'T8',
@@ -206,7 +210,7 @@ function testGate(root) {
   run('git', ['commit', '-m', 'spill'], { cwd: root });
   fs.writeFileSync(spill, 'module.exports = 2;');
   const t3spill = contract(['complete', '--id', 'T3'], root);
-  ok('a contract cannot close over changes it does not own', t3spill.status === 2 && /outside owns are modified/.test(t3spill.stdout), t3spill.stdout);
+  ok('a contract cannot close over changes it does not own', t3spill.status === 2 && /outside owns are dirty or untracked/.test(t3spill.stdout), t3spill.stdout);
   fs.writeFileSync(spill, 'module.exports = 1;');
 
   const t3a = contract(['complete', '--id', 'T3'], root);
@@ -218,18 +222,7 @@ function testGate(root) {
   const audits = path.join(root, '.claude', 'relay', 'audits');
   fs.mkdirSync(live, { recursive: true });
   fs.mkdirSync(audits, { recursive: true });
-  fs.writeFileSync(path.join(live, 'aud1.json'), JSON.stringify({ id: 'aud1', role: 'auditor', files: [] }));
-
-  const record = {
-    contractId: 'T3',
-    auditorRunId: 'aud1',
-    headSha: head,
-    diffHash,
-    owns: ['src/auth/token.js'],
-    verification: ['node -e require -> exit 0'],
-    result: 'passed',
-    createdAt: new Date().toISOString(),
-  };
+  const record = issueAudit(root, 'T3', 'aud1');
 
   fs.writeFileSync(path.join(audits, 'T3-1.json'), JSON.stringify({ ...record, owns: ['src/other.js'] }));
   const t3b = contract(['complete', '--id', 'T3'], root);
@@ -298,11 +291,11 @@ function testBypass(root) {
   );
   const auditsUnix = audits.split(path.sep).join('/');
   ok(
-    'the shell is not policed either - the record itself is the guarantee',
+    'shell access is not a filesystem sandbox (documented trust limit)',
     hook({ tool_name: 'Bash', tool_input: { command: 'echo {} > ' + auditsUnix + '/Z1-1.json' } }, root).status === 0
   );
   ok(
-    'and a hand written record still cannot close a contract',
+    'an empty record fails shape validation; this is not proof against a fully forged record',
     typeof require(path.join(CORE, 'hooks', 'seal.js')).checkRecord({}, { id: 'Z1' }) === 'string'
   );
 
@@ -321,7 +314,12 @@ function testBypass(root) {
       root
     ).status === 0
   );
-  ok('binding is recorded', (JSON.parse(fs.readFileSync(path.join(live, agent + '.json'), 'utf8')) || {}).contract === 'B1');
+  ok('binding waits for a successful tool result', !fs.existsSync(path.join(live, agent + '.json')));
+  run(process.execPath, [path.join(CORE, 'hooks/watch.js')], { cwd: root, input: JSON.stringify({
+    cwd: root, hook_event_name: 'PostToolUse', agent_id: agent, tool_name: 'Edit',
+    tool_input: { file_path: contractPath },
+  }) });
+  ok('successful editing records the binding', JSON.parse(fs.readFileSync(path.join(live, agent + '.json'), 'utf8')).contract === 'B1');
 
   ok(
     'a bound agent may write inside owns',
@@ -382,7 +380,9 @@ function testBypass(root) {
   );
   ok('audit command needs evidence and an auditor', auditCmd.status === 2 || auditCmd2.status === 2, auditCmd2.stdout);
 
-  fs.writeFileSync(path.join(live, 'realaud.json'), JSON.stringify({ id: 'realaud', role: 'auditor', files: [] }));
+  run('git', ['add', 'src'], { cwd: root });
+  run('git', ['commit', '-qm', 'wide file fixture'], { cwd: root });
+  observeAuditor(root, 'D1', 'realaud');
   const auditCmd3 = contract(
     ['audit', '--id', 'D1', '--run-id', 'realaud', '--verification', 'node -e "1" -> exit 0'],
     root
@@ -573,7 +573,8 @@ function testBanner(root) {
   fs.writeFileSync(path.join(liveB, '_calls.json'), JSON.stringify([{ role: 'scout', model: 'sonnet', task: 'tier effort probe', at: Date.now() }]));
   fs.writeFileSync(path.join(liveB, 'a6.json'), JSON.stringify({ id: 'a6', role: 'scout', updated: new Date().toISOString(), files: [] }));
   const tiered = plain(banner(root));
-  ok('a model with no effort beside it borrows the effort its own row says', /Sonnet-Medium/.test(tiered), tiered);
+  const expectedEffort = require(CONTRACT).roleBase('scout').effort;
+  ok('a model with no effort beside it borrows the effort its own row says', new RegExp('Sonnet-' + expectedEffort, 'i').test(tiered), tiered);
   fs.writeFileSync(path.join(liveB, '_calls.json'), JSON.stringify([{ role: 'scout', model: 'haiku', task: 'tier effort probe', at: Date.now() }]));
   const odd = plain(banner(root));
   ok('a model the row does not name gets no invented effort', /Haiku(?!-)/.test(odd) && !/Haiku-/.test(odd), odd);
@@ -1848,12 +1849,16 @@ function testLifetime() {
   if (process.platform === 'win32') {
     const { envPinned } = require(path.join(CORE, 'hooks', 'lib.js'));
     const name = 'TEKNESYUM_PIN_PROBE';
-    ok('a variable nobody pinned reads as loose', !envPinned(name));
-    run('reg', ['add', 'HKCU\\Environment', '/v', name, '/t', 'REG_SZ', '/d', '1', '/f'], { cwd: root });
-    const seen = envPinned(name);
-    run('reg', ['delete', 'HKCU\\Environment', '/v', name, '/f'], { cwd: root });
+    let pinned = false;
+    const probe = { platform: 'win32', pinnedInShell: () => false, execFileSync: (_cmd, args) => {
+      if (pinned && args.at(-1) === name) return name + ' REG_SZ 1';
+      throw new Error('fixture variable is absent');
+    } };
+    ok('a variable nobody pinned reads as loose', !envPinned(name, probe));
+    pinned = true;
+    const seen = envPinned(name, probe);
     ok('a variable pinned in the environment is seen as pinned', seen);
-    ok('an escape hatch nobody pinned still opens the gate', !envPinned('TEKNESYUM_GATE_OPEN'));
+    ok('an escape hatch nobody pinned still opens the gate', !envPinned('TEKNESYUM_GATE_OPEN', probe));
   }
 
   const stop = (extra) =>
@@ -1888,9 +1893,11 @@ function testLifetime() {
     cwd: root,
     tool_input: { file_path: path.join(root, n), content: 'x' },
   });
-  hook({ ...edit('.claude/relay/contracts/W2.md'), tool_input: { file_path: path.join(root, CONTRACTS, 'W2.md'), content: fs.readFileSync(path.join(root, CONTRACTS, 'W2.md'), 'utf8') } }, root);
+  const bindEvent = { ...edit('.claude/relay/contracts/W2.md'), tool_input: { file_path: path.join(root, CONTRACTS, 'W2.md'), content: fs.readFileSync(path.join(root, CONTRACTS, 'W2.md'), 'utf8') } };
+  hook(bindEvent, root);
+  run(process.execPath, [WATCH], { cwd: root, input: JSON.stringify({ ...bindEvent, hook_event_name: 'PostToolUse' }) });
   const bound = path.join(live, 'w-d.json');
-  ok('touching a contract binds the agent to it', JSON.parse(fs.readFileSync(bound, 'utf8')).contract === 'W2', fs.readFileSync(bound, 'utf8'));
+  ok('a successful contract write binds the agent to it', JSON.parse(fs.readFileSync(bound, 'utf8')).contract === 'W2', fs.readFileSync(bound, 'utf8'));
   const first = hook(edit('src/ok.js'), root);
   ok('inside the ceiling the write goes through', first.status === 0, first.stderr);
   fire('PostToolUse', 'Write', 'w-d');
@@ -1960,7 +1967,7 @@ function testWasteGates() {
   const loose = contract(['complete', '--id', 'W1'], root);
   ok(
     'a verify written as one plain line is refused, not read as zero steps',
-    loose.status === 2 && /zero steps/.test(loose.stdout),
+    loose.status === 2 && /verify must be a list/.test(loose.stdout),
     loose.stdout
   );
   const looseSub = contract(['submit', '--id', 'W1'], root);
@@ -1996,7 +2003,7 @@ function testWasteGates() {
   const locked = contract(['complete', '--id', 'W4'], root);
   ok(
     'two verify runs in one checkout do not overlap',
-    locked.status === 2 && /W8 is running its verify steps/.test(locked.stdout),
+    locked.status === 2 && /verifier locked by W8/.test(locked.stdout),
     locked.stdout
   );
   fs.unlinkSync(path.join(live, '_verify.lock'));
@@ -2116,12 +2123,14 @@ function testBaseline() {
     messy.stdout
   );
 
-  fs.writeFileSync(path.join(root, 'notes.md'), 'a document cannot change what verify returns\n');
+  fs.writeFileSync(path.join(root, 'notes.md'), 'documentation can be an input to verification\n');
   run('git', ['-C', root, 'rm', '-q', '--cached', 'src/loose.js']);
   fs.unlinkSync(path.join(root, 'src', 'loose.js'));
   run('git', ['-C', root, 'add', 'notes.md']);
   const docs = contract(['complete', '--id', 'N1'], root);
-  ok('a modified document does not block the close', docs.status === 0, docs.stdout);
+  ok('a modified document outside owns blocks the close', docs.status === 2 && /notes.md/.test(docs.stdout), docs.stdout);
+  run('git', ['-C', root, 'commit', '-qm', 'fixture clean baseline']);
+  ok('the close succeeds after unrelated documentation is committed', contract(['complete', '--id', 'N1'], root).status === 0);
 
   writeContract(
     root,
@@ -2305,6 +2314,7 @@ function testHeadlineGate() {
   const sealed = contract(['complete', '--id', 'M1'], root);
   ok('a contract that owns a document has its numbers checked without asking', sealed.status !== 0, sealed.stdout);
   ok('and the failing step is named', /manset/.test(sealed.stdout), sealed.stdout);
+  run('git', ['-C', root, 'commit', '-qm', 'fixture document before opt-out test']);
 
   fs.writeFileSync(path.join(root, 'docs', 'olcum2.md'), drifted);
   run('git', ['-C', root, 'add', '-A']);
@@ -2411,8 +2421,9 @@ function testAuditKind() {
   const wrong = contract(['audit', '--id', 'A1', '--run-id', 'w7', '--dry-run', '--verification', 'x'], root);
   ok('the gate says before the audit runs that this agent cannot sign it', wrong.status === 2, wrong.stdout);
 
+  observeAuditor(root, 'A1', 'a7');
   const right = contract(['audit', '--id', 'A1', '--run-id', 'a7', '--dry-run', '--verification', 'x'], root);
-  ok('an auditor record is cleared in advance', right.status === 0, right.stdout);
+  ok('a completed bound auditor passes the read-only check', right.status === 0, right.stdout);
 
   const quiet = contract(['complete', '--id', 'A1'], root);
   ok('a low-risk seal with no record says so in one line', /no audit record/i.test(quiet.stdout), quiet.stdout);
@@ -2424,6 +2435,7 @@ function testAuditKind() {
 
 function testRoleFromPrompt() {
   const root = fixture();
+  writeContract(root, 'A1', '# A1\nstatus: submitted\nround: 1\nowns: [src/ok.js]\nverify:\n  - node -e "process.exit(0)"\n');
   const watch = path.join(__dirname, '..', 'core', 'hooks', 'watch.js');
   run(process.execPath, [watch], {
     cwd: root,
@@ -2432,7 +2444,8 @@ function testRoleFromPrompt() {
       tool_name: 'Task',
       agent_id: 'r1',
       agent_type: 'teknesyum-core:worker',
-      tool_input: { model: 'opus', prompt: 'Read core/roles/auditor.md and do that job.' },
+      tool_use_id: 'auditor-role-fixture',
+      tool_input: { model: 'opus', prompt: 'Read core/roles/auditor.md and contracts/A1.md and do that job.' },
       cwd: root,
     }),
   });
@@ -2699,6 +2712,11 @@ function testRungs() {
       }),
     });
     writeContract(root, id, text);
+    run(process.execPath, [path.join(CORE, 'hooks', 'watch.js')], {
+      cwd: root,
+      input: JSON.stringify({ hook_event_name: 'PostToolUse', tool_name: 'Write', cwd: root,
+        tool_input: { file_path: path.join(root, CONTRACTS, id + '.md'), content: text } }),
+    });
   };
 
   openContract('R1', []);

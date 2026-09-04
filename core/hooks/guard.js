@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { read, write, merge, safe, norm, relayRoot, projectRoot, liveDir, logProblem, settings } = require('./lib.js');
-const { RANK, isContractName, status, isKnownStatus, field, list, owned, raiseOf } = require('./schema.js');
+const { read, safe, norm, relayRoot, projectRoot, checkoutRoot, pathKey, inside, liveDir, logProblem, settings } = require('./lib.js');
+const { RANK, isContractName, status, isKnownStatus, field, owned, definitions, fault: schemaFault } = require('./schema.js');
 
 let raw = '';
 let call = null;
@@ -24,8 +24,6 @@ process.stdin.on('end', () => {
 });
 
 function hatchOpen(command) {
-  // A process can retain yesterday's environment after the registry is cleared.
-  // Only an explicit prefix on this single invocation authorizes an exception.
   const cmd = String(command || '');
   return /^\s*TEKNESYUM_GATE_OPEN=1\s+git\s+/i.test(cmd) && !/[;\r\n|]|&&/.test(cmd);
 }
@@ -69,12 +67,14 @@ function canonicalContract(target) {
 function regression(target, nextBody) {
   if (!canonicalContract(target)) return;
   const next = status(nextBody);
-  if (next === null) return;
+  if (next === null) return block('The contract must retain a status field.');
   if (!isKnownStatus(next))
     return block(
       'Unknown contract status: `' + next + '`.',
       'Valid: open, active, submitted, blocked, accepted, done, sealed.'
     );
+  if (['accepted', 'done', 'sealed'].includes(next))
+    return block('Terminal status is written only by contract.js complete/close.');
   let prev = null;
   try {
     prev = status(fs.readFileSync(target, 'utf8'));
@@ -94,7 +94,11 @@ function regression(target, nextBody) {
       'Fix the `status:` line to a valid value first.'
     );
   }
-  if (next === 'blocked' || prev === 'blocked') return;
+  if (next === 'blocked') return;
+  if (prev === 'blocked') {
+    if (next === 'open' || next === 'active') return;
+    return block('A blocked contract must return to active before submission.');
+  }
   if (prev === 'open' && RANK[next] > RANK.active)
     return block(
       'Status skipped a rung: open -> ' + next + '.',
@@ -200,13 +204,14 @@ function ownsSchema(target, content) {
   if (!/\/contracts\/[^/]+\.md$/i.test(n)) return;
   if (/\/done\//i.test(n)) return;
   if (!/^owns:/im.test(content)) return;
-  const owns = list('owns', content);
+  const owns = owned(content);
   let fault = owns.filter((x) => /[\\/]$/.test(String(x))).map((x) => 'owns contains a directory path: ' + x)[0] || '';
   if (!fault) {
     const r = relayRoot(path.dirname(path.resolve(target)), { git: false });
     if (r) {
       try {
-        fault = require('./seal.js').ownsFault(projectRoot(r.relay), owns);
+        const caller = relayRoot((call && call.cwd) || process.cwd(), { git: false }) || r;
+        fault = require('./seal.js').ownsFault(checkoutRoot(caller), owns);
       } catch {}
     }
   }
@@ -216,19 +221,6 @@ function ownsSchema(target, content) {
     'A directory digest does not change when its contents do, so the seal would lie.',
     'List the files the contract touches, one by one.'
   );
-}
-
-function raiseSeal(target, content) {
-  const abs = path.resolve(target);
-  const n = norm(abs);
-  const m = /\/contracts\/([^/]+)\.md$/i.exec(n);
-  if (!m || /\/done\//i.test(n)) return;
-  const r = relayRoot(path.dirname(abs), { git: false });
-  if (!r) return;
-  const f = path.join(liveDir(r.relay), '_raise', safe(m[1]) + '.json');
-  if (fs.existsSync(f)) return;
-  const asked = raiseOf(content);
-  write(f, { raise: asked ? asked.raise : '', why: asked ? asked.why : '', at: Date.now() });
 }
 
 function verifySchema(target, content) {
@@ -279,13 +271,8 @@ function bind(target, agentId) {
   if (!relay) return;
   const f = bindingFile(relay, agentId);
   const rec = read(f) || {};
-  if (rec.contract === path.basename(abs, '.md')) return;
-  merge(f, (cur) =>
-    Object.assign({ id: safe(String(agentId)), files: [] }, cur, {
-      contract: path.basename(abs, '.md'),
-      contractSteps: 0,
-    })
-  );
+  if (rec.contract && rec.contract !== path.basename(abs, '.md'))
+    return block('This agent is already bound to ' + rec.contract + '; it cannot rebind by editing another contract.');
 }
 
 function ownedBy(relay, id) {
@@ -307,7 +294,7 @@ function exhausted(target, agentId) {
   if (!agentId) return;
   const abs = path.resolve(target);
   if (/\/\.claude\/relay\//i.test(norm(abs))) return;
-  const r = relayRoot(path.dirname(abs), { git: false });
+  const r = relayRoot((call && call.cwd) || process.cwd(), { git: false });
   if (!r) return;
   const rec = read(bindingFile(r.relay, agentId));
   if (!rec || !rec.contract) return;
@@ -332,16 +319,18 @@ function exhausted(target, agentId) {
 function boundary(target, agentId) {
   if (!agentId) return;
   const abs = path.resolve(target);
-  const n = norm(abs);
-  if (/\/\.claude\/relay\//i.test(n)) return;
-  const r = relayRoot(path.dirname(abs), { git: false });
+  const r = relayRoot((call && call.cwd) || process.cwd(), { git: false });
   if (!r) return;
   const rec = read(bindingFile(r.relay, agentId));
+  if (rec && rec.role === 'auditor') return block('An auditor cannot write files; return findings to the coordinator.');
+  if (inside(r.relay, abs)) return;
   if (!rec || !rec.contract) return;
   const owns = ownedBy(r.relay, rec.contract);
-  if (!owns || !owns.length) return;
-  const rel = norm(path.relative(projectRoot(r.relay), abs)).toLowerCase();
-  if (owns.some((o) => norm(o).toLowerCase() === rel)) return;
+  if (!owns || !owns.length) return block('The bound contract has no readable owns set.');
+  const root = checkoutRoot(r);
+  if (rec.checkoutRoot && pathKey(rec.checkoutRoot) !== pathKey(root)) return block('The agent belongs to another checkout.');
+  const rel = norm(path.relative(root, abs));
+  if (inside(root, abs) && owns.some((o) => pathKey(path.resolve(root, o)) === pathKey(abs))) return;
   return block(
     rel + ' is outside the owns set of ' + rec.contract + '.',
     'owns: ' + owns.join(', '),
@@ -475,16 +464,29 @@ function decide(j) {
     bind(target, agentId);
     boundary(target, agentId);
     exhausted(target, agentId);
-    if (tool === 'Write') {
+    const content = tool === 'Write' ? t.content || '' : tool === 'Edit' ? edited(target, t) : '';
+    if (tool === 'Write' || tool === 'Edit') {
       priorArt(target);
-      router(target, t.content || '');
-      ownsSchema(target, t.content || '');
-      raiseSeal(target, t.content || '');
-      verifySchema(target, t.content || '');
-    } else if (tool === 'Edit' && ROUTER.test(norm(path.resolve(target)))) {
-      router(target, edited(target, t));
+      router(target, content);
+      if (canonicalContract(target)) {
+        const fault = schemaFault(content);
+        if (fault) return block(fault);
+        let prev = '';
+        try { prev = fs.readFileSync(target, 'utf8'); } catch {}
+        for (const name of ['status', 'round', 'role', 'verify', 'owns']) {
+          if (definitions(name, prev).length && !definitions(name, content).length)
+            return block('Contract field cannot be erased: ' + name);
+        }
+        if (agentId && prev) {
+          if (JSON.stringify(owned(prev)) !== JSON.stringify(owned(content))) return block('A worker cannot change its owns set.');
+          for (const name of ['round', 'role', 'agent', 'run-id'])
+            if (field(name, prev) !== field(name, content)) return block('A worker cannot change contract ' + name + '.');
+        }
+      }
+      ownsSchema(target, content);
+      verifySchema(target, content);
+      regression(target, content);
     }
-    regression(target, tool === 'Write' ? t.content || '' : t.new_string || '');
     if (!DONE.test(norm(target))) return;
     return block(
       'contracts/done/ is read only.',

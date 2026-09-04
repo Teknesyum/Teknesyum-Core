@@ -192,7 +192,7 @@ bunu söylemesi söyleniyor.
 
 ### Kapı
 
-Bir sözleşmeyi kapatabilen tek şey `contract.js complete`. Rapora inanmak yerine verify
+Başarılı kapanış yolu `contract.js complete`; `close` karşılanmamış işi arşivler. Rapora inanmak yerine verify
 komutlarını kendisi çalıştırıyor ve riski, değişikliğin tarifinden değil diff'ten çıkarıyor.
 
 Sözleşme bir merdiven çıkıyor: `open`, `active`, `submitted`, `done`. Yalnız submitted olan
@@ -201,10 +201,11 @@ ediyor" diyen bir dosya kalmıyor.
 
 Etrafındaki ağaç hakkında da üç şeyin doğru olması gerekiyor. Bu sözleşmenin değiştirdiği bir
 dosyayı açık başka bir sözleşme sahiplenemez — yoksa önce kapanan, kendi yapmadığı işi
-mühürler. `owns` dışında değişmiş bir kaynak dosya duramaz; verify adımları bütün ağaca karşı
-koşuyor ve sözleşmenin hiç sahiplenmediği değişiklikleri sınamış olurdu. Belgeler sayılmaz,
-çünkü bir komutun döndürdüğünü değiştiremezler. `blocked-by: [T4]` yazan bir sözleşme de `T4`
-bitene kadar kapanmıyor. `contract.js list --ready` yalnız hiçbir şeyi beklemeyenleri gösterir.
+mühürler. `owns` dışında Git'in gördüğü değişmiş veya izlenmeyen dosya duramaz; belgeler de
+komut girdisi olabilir. Relay metaverisi ve üretilen `.claude/map.md` / `.claude/map.json`
+hariçtir. `blocked-by: [T4]`, `T4` için tamamlanmış başarılı kapanış ister; yalnız `done/`
+altında bulunmak, `unmet` veya `adopted` olmak yetmez. `contract.js list --ready` yalnız
+hiçbir şeyi beklemeyenleri gösterir.
 
 `contract.js reopen --reason "..." --critical "..."` yanlış kapanan sözleşmeyi turunu artırarak geri alıyor;
 kapanan tur defterde kalıyor, yani geri alma bir silme değil bir kayıt. Geri alma altıncı
@@ -219,8 +220,9 @@ kapanınca sabit iniyor; sahipsiz kalan sözleşme sabitini koruyor, zaten mesel
 
 Her adımı `true`, `:`, `exit 0`, `ls`, `echo` ya da yorum olan bir `verify` bloğu başarısız
 olamaz; başarısız olamayan şey de kabul ölçütü değildir. Kapı bunun üstüne kapatmayı
-reddediyor ve adımı adıyla söylüyor. Başarısız olabilen tek komut yeter, gerisi gürültü
-olabilir.
+reddediyor ve adımı adıyla söylüyor. Bu bir sezgisel kontrol; testin kabulü ölçtüğünün ispatı
+değil. Boş verify için açık manuel istisna ve bağımsız denetim gerekir;
+[kapanış bütünlüğü](docs/SEAL-INTEGRITY.md) belgesinde ayrıntıları var.
 
 Mührün ölçmeden geçebileceği üç sessiz yol daha kapandı. Liste yerine tek düz satır yazılan
 bir `verify` sıfır adıma ayrışıyor, sıfır adım da her zaman geçiyor; kapı bunu artık hem
@@ -258,28 +260,29 @@ kapanıyor ve modelin bağlamına tek kelime yazılmıyor.
 
 ### Denetim kaydı
 
-Yüksek riskte kapanış, kayıt olmadan reddediliyor ve kayıt dört yerden bağlı:
+Yüksek riskte ve manuel kabul istisnasında kapanış, sürüm-2 kayıt olmadan reddediliyor:
 
 - sözleşmenin sahiplendiği dosyaların **içeriğine** — denetimden sonra oynayan ağaç artık
   tutmuyor
 - **HEAD'e** — başka bir commit için yazılmış kayıt burada geçmiyor
-- **gerçekten koşmuş bir run-id'ye** — diskte canlı kaydı olan, rolü denetçi olan ve denetim
-  boyunca hiçbir dosyaya yazmamış bir ajan. Rol, ajanın isteminde verilen rol; doğduğu tür
-  değil. Buradaki her ajan `worker` olarak doğuyor, dolayısıyla yalnız türe bakmak işi
-  yapmış denetçiyi reddediyordu. `audit --dry-run`, denetimin bedeli ödenmeden önce o
-  id'nin imzalayıp imzalayamayacağını söylüyor.
+- **gözlenen ve tamamlanan denetçi çağrısına** — ebeveyn, sözleşme, tur, çalışma kopyası,
+  başlangıç revizyonu ve son yanıt dökümü eşleşmeli. İlgisiz eski denetçi yetmez.
+  Denetçi `verdict: passed` ve `findings: none` ile bittikten sonra koordinatör `audit`
+  çalıştırır. `audit --dry-run` çağrı öncesini değil, bitmiş koşunun uygunluğunu denetler.
 - **tek kullanıma** — kayıt sözleşme kapanırken tükeniyor, tekrar oynatılamıyor
 
 Her kapanış, her karşılanmamış kapanış ve her geri alma `audits/ledger.jsonl` dosyasına
 ekleniyor; `contract.js ledger` de `done/` altında oturan ama defterin hiç duymadığı
-sözleşmeyi bildiriyor. Kayıtlar birbirine zincirli değil; her biri kendi bağlarıyla ayakta.
+sözleşmeyi bildiriyor. İşlem günlüğü yarım kalan defter/arşiv adımlarını aynı işlemi iki kez
+yazmadan yeniden denemeyi sağlar. Aynı kullanıcı yetkisiyle dosya yazabilen sürece karşı
+güvenlik sınırı oluşturmaz; [sınırlar ve kurtarma](docs/SEAL-INTEGRITY.md) belgesine bakın.
 
 Mühür kademenin o anki kararını da yazıyor: koşan model, istenen model, ateşleyen sinyaller,
 karşısında ölçüldüğü fan-in, mühürlenmiş `raise:`, onu üreten rol ile Core sürümü ve diff'in
 kabul maddesinin adını andığı yere hiç değip değmediği. Hiçbiri bir kararı değiştirmiyor — kademeye dair bir sonraki soru
 tartışmayla değil sütunla cevaplansın diye orada.
 
-`complete` ve `audit`, `owns` dışındaki izlenen kaynak dosyalar değişikken de reddediyor:
+`complete` ve `audit`, `owns` dışında Git'in gördüğü değişmiş/izlenmeyen dosya varken reddediyor:
 sahip olmadığı bir çalışma ağacını kapatan sözleşme başkasının diff'ini mühürlüyor demektir.
 
 Kapının yaptığı her ret de `live/refused.log` dosyasına aracıyla, ajanıyla ve komutuyla
@@ -288,8 +291,8 @@ ekleniyor; sebebi aynı: yanlış pozitifi sayılmayan bir kapı ayarlanamaz.
 ### Kapı kancası
 
 `guard.js`, `Write`, `Edit` ve `NotebookEdit` önünde çalışıyor. Mevcut sözleşmenin `owns`
-kümesi dışındaki her dosyaya yazmayı engelliyor — ajan sözleşmesine dokunarak kendini ona
-bağlıyor — `audits/` ve `live/` dizinlerini yalnız kapıya bırakıyor, `contracts/done/`
+kümesi dışındaki dosyaya yazmayı engelliyor — ajan ilk başarılı sözleşme yazımından sonra
+bağlanıyor — bu araçlardan `audits/` ve `live/` dizinlerini koruyor, `contracts/done/`
 dizinini salt okunur tutuyor. `prefs.js` gerekli işaretleri taşımayan README ya da LICENSE
 yazımını engelliyor; yazarın tercih dosyası yoksa hemen çıkıyor, yani başkası için hiçbir
 şey yapmıyor.
@@ -301,7 +304,8 @@ dokunmadığı olağan adım. Korumalı bir dala zorlamalı itme, kapı bilerek 
 reddediliyor. `Bash` ve `PowerShell` ikisi de önünde; bir süre yalnız biri öyleydi, yani
 denetim ajanın hangi kabuğu seçtiğine bağlıydı. Komutlarınızın gerisi tahmin edilmiyor: o
 denetim v0.2.0'a kadar düz metin eşleşmesiydi, `cd` içinden geçip gidiyor, defteri okuyan
-meşru bir tek satır reddediliyordu — güvence kaydın kendisinde.
+meşru bir tek satır reddediliyordu. Kayıt olağan akış tutarsızlıklarını yakalar; aynı dosya
+sistemi yetkisine sahip kabuk sürecinin kayıtları uydurmasını engelleyemez.
 
 İlgisiz bir push için tek Bash çağrısında açıkça
 `TEKNESYUM_GATE_OPEN=1 git push ...` yazılır. Üst süreçten devralınan ortam değişkeni,
@@ -608,9 +612,12 @@ node test/all.js
 
 Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
 kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu, borç defteri, danışma
-kaydı ve hiçbir
-kancanın bağlama yazmadığı denetimi üzerine 2.626 sav. Aynı takımı CI Linux, Windows ve
-macOS'ta koşuyor; geliştirme Windows öncelikli.
+kaydı ve hiçbir kancanın bağlama yazmadığı denetimi üzerine 2.630 sav. Yanında 17 denetim
+regresyonu ve 33 kapanış senaryosu, gerçek kancaları yapay bir host üzerinden sürüyor:
+kendi kodunu doğrulayan worktree, turuna bağlı denetçi, doğrulama sırasında değişen diff,
+boş kabul maddesi, karşılanmamış bağımlılık ve ikinci bir defter satırı üretmeden kurtarılan
+yarım kapanış. Aynı takımı CI Linux, Windows ve macOS'ta koşuyor; geliştirme Windows
+öncelikli.
 
 ---
 

@@ -3,9 +3,10 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { relayRoot, projectRoot, settings, liveDir, read, setNotice, t } = require('../hooks/lib.js');
-const { isContractName, field, list, owned, verifySteps, entries, scalar, section } = require('../hooks/schema.js');
+const { relayRoot, projectRoot, checkoutRoot, pathKey, settings, liveDir, read, setNotice, t } = require('../hooks/lib.js');
+const { isContractName, field, list, owned, verifySteps, entries, scalar, section, fault: schemaFault, replaceField } = require('../hooks/schema.js');
 const seal = require('../hooks/seal.js');
+const closure = require('../hooks/closure.js');
 const risk = require('./risk.js');
 
 const NL = String.fromCharCode(10);
@@ -43,7 +44,7 @@ function git(root, args) {
 function locate() {
   const r = relayRoot(arg('root') || process.cwd());
   if (!r) return null;
-  return { relay: r.relay, root: projectRoot(r.relay) };
+  return { relay: r.relay, root: checkoutRoot(r) };
 }
 
 function load(id) {
@@ -59,6 +60,9 @@ function load(id) {
     return { error: 'Cannot read ' + path.relative(where.root, src) };
   }
   if (fs.existsSync(dst)) return { error: id + ' is already under done/.' };
+  const fault = schemaFault(body);
+  if (fault) return { error: id + ': ' + fault };
+  if (field('id', body) && field('id', body) !== id) return { error: 'Contract id differs from its filename.' };
   return { ...where, id, src, dst, body };
 }
 
@@ -132,8 +136,6 @@ function takeLock(relay, id) {
   const f = lockPath(relay);
   try {
     fs.mkdirSync(path.dirname(f), { recursive: true });
-    // Atomic ownership, unlike a read-then-write PID file. A crashed holder's
-    // directory requires explicit recovery, never a fail-open concurrent run.
     fs.mkdirSync(f + '.held');
   } catch (e) {
     return read(f) || { id: 'verify lock unavailable (' + e.code + ')', pid: 'unknown' };
@@ -666,8 +668,6 @@ function orphans(root, owns) {
   const found = [];
   for (const rel of held) {
     if (NEVER_ASKED.some((re) => re.test(rel))) continue;
-    // Filename/import matching cannot establish reachability for namespace, type,
-    // package or build-system based languages. Never recommend trashing those.
     if (/\.(cs|go|rs|java|swift|kt|c|h|cpp|hpp|scala)$/i.test(rel)) continue;
     const others = callers(root, rel).filter(
       (f) => !held.includes(f) && !f.startsWith('trash/') && !RELAY_PATH.test(f)
@@ -738,38 +738,23 @@ function blockers(relay, id, body) {
   for (const b of want) {
     const st = known.get(b.toLowerCase());
     if (st === undefined) {
-      if (!fs.existsSync(path.join(relay, 'contracts', 'done', b + '.md')))
-        open.push({ id: b, status: 'missing' });
+      let done;
+      try { done = fs.readFileSync(path.join(relay, 'contracts', 'done', b + '.md'), 'utf8'); }
+      catch { open.push({ id: b, status: 'missing' }); continue; }
+      const latest = (seal.ledgerRead(relay) || []).filter((r) => r.id === b).at(-1);
+      const met = latest && (latest.result === 'passed' || (!latest.result && latest.headSha && Array.isArray(latest.verify)));
+      if (statusOf(done) !== 'done' || field('result', done) === 'unmet' || !met || !closure.committed(relay, latest))
+        open.push({ id: b, status: latest && latest.result || 'unverified' });
       continue;
     }
-    if (st !== 'done') open.push({ id: b, status: st });
+    open.push({ id: b, status: st === 'done' ? 'unverified active archive' : st });
   }
   return open;
 }
 
 const EXECUTABLE = /\.(js|jsx|mjs|cjs|ts|tsx|py|cs|go|rs|java|rb|php|sh|ps1|bat|sql|json|ya?ml|toml|lock|csproj|sln|gradle)$|(^|\/)(Dockerfile|Makefile|[^/]*\.lock)$/i;
 
-function dirtyOutside(root, owns) {
-  const raw = git(root, ['status', '--porcelain', '--untracked-files=no']);
-  if (raw === null) return [];
-  const mine = new Set(owns.map(keyOf));
-  const dirty = [];
-  for (const row of String(raw).split('\n')) {
-    if (!row.trim()) continue;
-    const p = row
-      .trimStart()
-      .replace(/^[MADRCU]{1,2}\s+/, '')
-      .split(' -> ')
-      .pop()
-      .replace(/^"|"$/g, '');
-    const k = keyOf(p);
-    if (/^\.claude\/relay\//i.test(k)) continue;
-    if (mine.has(k)) continue;
-    if (!EXECUTABLE.test(k)) continue;
-    dirty.push(p);
-  }
-  return dirty;
-}
+function dirtyOutside(root, owns) { return seal.outsideChanges(root, owns); }
 
 const MANSET = path.join(__dirname, 'manset.js');
 
@@ -803,10 +788,10 @@ function acceptanceMiss(root, body, owns) {
   return !tokens.some((tk) => hay.indexOf(tk) >= 0);
 }
 
-function reachOf(relay, owns) {
+function reachOf(relay, owns, root) {
   if (!owns || !owns.length) return { max: 0, file: '', read: true };
   try {
-    return require('./map.js').fanIn(projectRoot(relay), owns);
+    return require('./map.js').fanIn(root || (locate() || {}).root || projectRoot(relay), owns);
   } catch {
     return { max: 0, file: '', read: false, why: 'unreadable' };
   }
@@ -819,7 +804,7 @@ function sealedRaise(relay, id) {
 }
 
 function ledgerTier(c, level, round, owns) {
-  const reach = reachOf(c.relay, owns);
+  const reach = reachOf(c.relay, owns, c.root);
   const sealed = sealedRaise(c.relay, c.id);
   const out = {
     signals: [],
@@ -854,7 +839,7 @@ function overModel(c, level, round) {
   const agent = field('agent', c.body) || field('run-id', c.body);
 
   const owns = owned(c.body);
-  const reach = reachOf(c.relay, owns);
+  const reach = reachOf(c.relay, owns, c.root);
   const sealed = sealedRaise(c.relay, c.id);
   const t = tier(role, {
     risk: level ? level.level : null,
@@ -906,8 +891,8 @@ function overDispatch(r, role, asked, prompt) {
   // profile closes optional advisor calls. It happens before reopening round 3.
   if (roleRow(role) === 'advisor' && asked === 'fable' &&
       Number(field('round', body) || 0) >= Number(tiers().signals.roundAdvisorRequired) - 1) return null;
-  const level = body ? risk.resolve(projectRoot(relay), owns, field('risk', body)) : null;
-  const reach = reachOf(relay, owns);
+  const level = body ? risk.resolve(checkoutRoot(r), owns, field('risk', body)) : null;
+  const reach = reachOf(relay, owns, checkoutRoot(r));
   const t = tier(role, {
     risk: level ? level.level : null,
     round: body ? field('round', body) : 0,
@@ -933,7 +918,34 @@ function overDispatch(r, role, asked, prompt) {
   ];
 }
 
-function complete() {
+function withClosureLock(action) {
+  const id = arg('id');
+  if (!id || !isContractName(id + '.md')) return stop(['Missing or malformed contract id.']);
+  const where = locate();
+  if (!where) return stop(['No relay root - .claude/relay does not exist.']);
+  const busy = takeLock(where.relay, id);
+  if (busy) return stop([id + ' cannot proceed - verifier locked by ' + busy.id + ' (pid ' + busy.pid + ').']);
+  try {
+    const pending = closure.readJournal(where.relay, id);
+    const active = path.join(where.relay, 'contracts', id + '.md');
+    if (pending && (pending.state !== 'committed' || !fs.existsSync(active))) {
+      if (pending.state !== 'committed' && pending.entry.result === 'passed') {
+        const outside = dirtyOutside(where.root, pending.owns);
+        if (outside.length) return stop(['Pending closure has dirty files outside owns: ' + outside.join(', ')]);
+      }
+      closure.resume(where, pending);
+      if (pending.entry.result === 'passed') dropSnapshot(where.root, id);
+      return out([id + ' closure committed (idempotent recovery; verification was not repeated).']);
+    }
+    return action();
+  } catch (e) {
+    return stop(['Closure refused: ' + e.message, 'Any prepared journal is retained; retry only after resolving the reported conflict.']);
+  } finally { dropLock(where.relay); }
+}
+
+function complete() { return withClosureLock(completeLocked); }
+
+function completeLocked() {
   const c = load(arg('id'));
   if (c.error) return stop([c.error, '', 'Usage: contract.js complete --id T7']);
 
@@ -988,7 +1000,7 @@ function complete() {
   const dirty = dirtyOutside(c.root, owns);
   if (dirty.length)
     return stop(
-      [c.id + ' cannot complete - tracked files outside owns are modified:', ''].concat(
+      [c.id + ' cannot complete - files outside owns are dirty or untracked:', ''].concat(
         dirty.slice(0, 20).map((p) => '  ' + p),
         dirty.length > 20 ? ['  ... and ' + (dirty.length - 20) + ' more'] : [],
         [
@@ -1009,12 +1021,16 @@ function complete() {
       'list, `verify: [' + loose + ']`, or as a block of `  - ' + loose + '` lines.',
     ]);
 
-  const steps = verifySteps(c.body).concat(prose(c.root, c.body, owns));
-  if (!steps.length && !/^verify:[ \t]*\[[ \t]*\]/im.test(c.body))
+  const declaredSteps = verifySteps(c.body);
+  const manual = /^\[\s*\]$/.test(field('verify', c.body)) && field('verification-mode', c.body) === 'manual' &&
+    field('manual-reason', c.body).length >= 40 && section('Acceptance', c.body).join(' ').length >= 40;
+  if (!declaredSteps.length && !manual)
     return stop([
-      c.id + ' has no verify steps.',
-      'Add a `verify:` block, or `verify: []` with a written reason under ## Acceptance.',
+      c.id + ' has no executable acceptance.',
+      'Add verify steps. A manual review requires verification-mode: manual, a manual-reason of at least',
+      '40 characters, an Acceptance section, and an independent audit record. Prose lint alone is not acceptance.',
     ]);
+  const steps = declaredSteps.concat(prose(c.root, c.body, owns));
 
   const hollow = hollowVerify(steps);
   if (hollow.length)
@@ -1042,7 +1058,7 @@ function complete() {
   const outside = dirtyOutside(c.root, owns);
   if (outside.length) {
     return stop([
-      c.id + ' cannot complete - tracked files outside owns are modified:',
+      c.id + ' cannot complete - files outside owns are dirty or untracked:',
       '',
       ...outside.slice(0, 8).map((f) => '  ' + f),
       outside.length > 8 ? '  ... and ' + (outside.length - 8) + ' more' : '',
@@ -1057,6 +1073,10 @@ function complete() {
   if (!headSha) return stop(['Cannot read HEAD - not a git repository, or no commit yet.']);
 
   const round = field('round', c.body) || '1';
+  const inputDigest = seal.ownsDigest(c.root, owns);
+  const contractHash = seal.digest(c.body);
+  const indexBefore = git(c.root, ['ls-files', '--stage', '-z']);
+  if (indexBefore === null) return stop(['Cannot read the verification index.']);
   const counted = roundsOpened(c.relay, c.id);
   if (counted !== null && Number(round) !== counted)
     return stop([
@@ -1078,7 +1098,7 @@ function complete() {
   let recordFile = null;
 
   const availableRecord = seal.recordPath(c.relay, c.id, round);
-  if (level.level === 'high' || fs.existsSync(availableRecord)) {
+  if (level.level === 'high' || manual || fs.existsSync(availableRecord)) {
     recordFile = availableRecord;
     record = require('../hooks/lib.js').read(recordFile);
     if (!record)
@@ -1097,27 +1117,19 @@ function complete() {
       id: c.id,
       headSha,
       owns,
-      diffHash: seal.ownsDigest(c.root, owns),
+      diffHash: inputDigest,
+      round, root: c.root, contractHash,
     });
     if (why) return stop([c.id + ' cannot complete - ' + why]);
-    const who = seal.checkAuditor(c.relay, record.auditorRunId);
+    const who = seal.checkAuditor(c.relay, record.auditorRunId, {
+      id: c.id, round, root: c.root, headSha, diffHash: inputDigest, contractHash,
+      builder: field('agent', c.body) || field('run-id', c.body), transcriptHash: record.transcriptHash,
+      dispatchId: record.dispatchId,
+    });
     if (who) return stop([c.id + ' cannot complete - ' + who]);
   }
 
-  const busy = takeLock(c.relay, c.id);
-  if (busy)
-    return stop([
-      c.id + ' cannot complete - ' + busy.id + ' is running its verify steps right now (pid ' + busy.pid + ').',
-      '',
-      'Two verify runs in one checkout share a build output and a test host, so whichever',
-      'finishes second measures the other one. Wait for it, or run this in a worktree.',
-    ]);
-  let results;
-  try {
-    results = runVerify(c.root, steps);
-  } finally {
-    dropLock(c.relay);
-  }
+  const results = runVerify(c.root, steps);
   const failed = results.filter((r) => !r.ok);
   if (failed.length)
     return stop([c.id + ' cannot complete - verification failed.', ''].concat(reportVerify(results)));
@@ -1135,12 +1147,13 @@ function complete() {
       )
     );
 
-  fs.mkdirSync(path.dirname(c.dst), { recursive: true });
-  fs.writeFileSync(c.src, stampStatus(c.body, 'done'), 'utf8');
-  fs.renameSync(c.src, c.dst);
-  setNotice(c.relay, c.id + ' ' + t('notice.closed'));
-  const dropped = dropSnapshot(c.root, c.id);
-  if (recordFile) seal.consume(recordFile, headSha);
+  if (git(c.root, ['rev-parse', 'HEAD']) !== headSha || seal.ownsDigest(c.root, owns) !== inputDigest ||
+      fs.readFileSync(c.src, 'utf8') !== c.body || git(c.root, ['ls-files', '--stage', '-z']) !== indexBefore)
+    return stop([c.id + ' cannot complete - verification inputs changed during the run; review and verify the new revision.']);
+  const changedOutside = dirtyOutside(c.root, owns);
+  if (changedOutside.length) return stop(['Verification changed files outside owns: ' + changedOutside.join(', ')]);
+  if (recordFile && seal.digest(JSON.stringify(read(recordFile))) !== seal.digest(JSON.stringify(record)))
+    return stop(['The audit record changed during verification.']);
   seal.ledgerInit(c.relay);
   const ran = read(path.join(liveDir(c.relay), String(field('agent', c.body) || field('run-id', c.body) || '').replace(/[^A-Za-z0-9_.-]/g, '_') + '.json'));
   const rungs = ledgerTier(c, level, round, owns);
@@ -1148,9 +1161,16 @@ function complete() {
   try {
     coreVersion = require('../../package.json').version;
   } catch {}
-  seal.ledgerAppend(c.relay, {
+  const entry = {
     id: c.id,
+    result: 'passed',
     round,
+    checkoutRoot: c.root,
+    contractHash,
+    diffHash: inputDigest,
+    indexHash: seal.digest(indexBefore),
+    verificationMode: declaredSteps.length ? 'executable' : 'manual',
+    ...(!declaredSteps.length ? { manualReason: field('manual-reason', c.body) } : {}),
     risk: level.level,
     verify: results.map((r) => ({ step: r.step, code: r.code })),
     auditorRunId: record ? record.auditorRunId : null,
@@ -1165,7 +1185,10 @@ function complete() {
     acceptanceMiss: acceptanceMiss(c.root, c.body, owns),
     headSha,
     at: new Date().toISOString(),
-  });
+  };
+  closure.commit(c, replaceField(stampStatus(c.body, 'done'), 'result', 'passed'), entry, record);
+  setNotice(c.relay, c.id + ' ' + t('notice.closed'));
+  const dropped = dropSnapshot(c.root, c.id);
 
   const dead = orphans(c.root, owns);
 
@@ -1322,8 +1345,7 @@ function statusFault(body) {
 }
 
 function stampStatus(body, want) {
-  if (/^status:.*$/im.test(body)) return body.replace(/^status:.*$/im, 'status: ' + want);
-  return body.replace(/^(#.*\n)/, '$1status: ' + want + '\n');
+  return replaceField(body, 'status', want);
 }
 
 function globRe(pattern) {
@@ -1532,7 +1554,9 @@ function reopen() {
   ]);
 }
 
-function close() {
+function close() { return withClosureLock(closeLocked); }
+
+function closeLocked() {
   const c = load(arg('id'));
   if (c.error) return stop([c.error, '', 'Usage: contract.js close --id Y2 --reason "..."']);
 
@@ -1548,19 +1572,15 @@ function close() {
 
   const at = new Date().toISOString();
   const archived =
-    stampStatus(c.body, 'done').replace(/\s*$/, '') +
+    replaceField(stampStatus(c.body, 'done'), 'result', 'unmet').replace(/\s*$/, '') +
     '\n\n## Closed - unmet (' +
     at.slice(0, 10) +
     ')\n\n' +
     reason.trim() +
     '\n\nNot sealed. Acceptance was not met; the work stays in the tree.\n';
-  fs.mkdirSync(path.dirname(c.dst), { recursive: true });
-  fs.writeFileSync(c.src, archived, 'utf8');
-  fs.renameSync(c.src, c.dst);
-  setNotice(c.relay, c.id + ' ' + t('notice.closed'));
-  dropSnapshot(c.root, c.id);
   seal.ledgerInit(c.relay);
-  seal.ledgerAppend(c.relay, { id: c.id, result: 'unmet', reason: reason.trim(), headSha, at });
+  closure.commit(c, archived, { id: c.id, result: 'unmet', round: field('round', c.body) || '1', reason: reason.trim(), headSha, at }, null);
+  setNotice(c.relay, c.id + ' ' + t('notice.closed'));
 
   return out([c.id + ' closed as unmet -> contracts/done/' + c.id + '.md']);
 }
@@ -1723,7 +1743,7 @@ function check() {
   if (outside.length) {
     lines.push('');
     lines.push(
-      'tracked files outside owns are modified: ' +
+      'files outside owns are dirty or untracked: ' +
         outside.slice(0, 8).join(', ') +
         (outside.length > 8 ? ' and ' + (outside.length - 8) + ' more' : '')
     );
@@ -1742,87 +1762,69 @@ function check() {
 
 function audit() {
   const c = load(arg('id'));
-  if (c.error)
-    return stop([
-      c.error,
-      '',
-      'Usage: contract.js audit --id T7 --run-id <agent id> --verification "<cmd> -> exit 0" [--verification "..."]',
-    ]);
-
+  if (c.error) return stop([c.error]);
   const runId = arg('run-id');
-  if (!runId) return stop(['--run-id is required: the auditor agent id from live/.']);
-
-  if (has('dry-run')) {
-    const why = seal.checkAuditor(c.relay, runId);
-    if (why)
-      return stop([
-        'This agent cannot sign the audit of ' + c.id + ' - ' + why + '.',
-        '',
-        'Asked before the audit ran, so nothing is spent. Open the auditor role itself,',
-        'or name the agent that will do the reading.',
-      ]);
-    return out([runId + ' can sign the audit of ' + c.id + '. Nothing written; this was a dry run.']);
-  }
-
-  const evidence = [];
-  for (let i = 0; i < argv.length; i += 1)
-    if (argv[i] === '--verification' && argv[i + 1]) evidence.push(argv[i + 1]);
-  if (!evidence.length)
-    return stop(['At least one --verification line is required; each states what you ran and got.']);
-
+  if (!runId) return stop(['--run-id is required: the completed auditor agent id.']);
   const owns = owned(c.body);
   if (!owns.length) return stop([c.id + ' has an empty owns set.']);
-
-  const who = seal.checkAuditor(c.relay, runId);
-  if (who) return stop(['Refused - ' + who]);
-
   const headSha = git(c.root, ['rev-parse', 'HEAD']);
-  if (!headSha) return stop(['Cannot read HEAD - not a git repository, or no commit yet.']);
-
-  let diffHash;
-  try {
-    diffHash = seal.ownsDigest(c.root, owns);
-  } catch (e) {
-    return stop(['Refused - ' + String((e && e.message) || e)]);
-  }
-
+  if (!headSha) return stop(['Cannot read HEAD.']);
+  const round = field('round', c.body) || '1';
+  const diffHash = seal.ownsDigest(c.root, owns);
+  const contractHash = seal.digest(c.body);
+  const expected = {
+    id: c.id, round, root: c.root, headSha, diffHash, contractHash,
+    builder: field('agent', c.body) || field('run-id', c.body),
+  };
+  const who = seal.checkAuditor(c.relay, runId, expected);
+  if (who) return stop(['Refused - ' + who]);
+  if (has('dry-run')) return out([runId + ' can sign this revision. Nothing written.']);
+  const evidence = [];
+  for (let i = 0; i < argv.length; i++)
+    if (argv[i] === '--verification' && argv[i + 1]) evidence.push(argv[i + 1]);
+  if (!evidence.length) return stop(['At least one --verification line is required.']);
   const outside = dirtyOutside(c.root, owns);
-  if (outside.length) {
-    return stop([
-      'Refused - tracked files outside owns are modified:',
-      '',
-      ...outside.slice(0, 8).map((f) => '  ' + f),
-      outside.length > 8 ? '  ... and ' + (outside.length - 8) + ' more' : '',
-      '',
-      'The audit is meaningless if changes spill outside the owns block.',
-    ]);
+  if (outside.length) return stop(['Refused - files outside owns are modified:', ...outside]);
+  const run = read(path.join(liveDir(c.relay), require('../hooks/lib.js').safe(runId) + '.json'));
+  const transcript = fs.readFileSync(run.transcript);
+  let reply = '';
+  for (const line of transcript.toString('utf8').split('\n')) {
+    if (!line.trim()) continue;
+    let event;
+    try { event = JSON.parse(line); } catch { return stop(['Auditor transcript contains malformed JSON.']); }
+    if (event.type !== 'assistant') continue;
+    const content = (event.message || {}).content;
+    const text = typeof content === 'string' ? content : Array.isArray(content)
+      ? content.filter((x) => x.type === 'text').map((x) => x.text).join('\n') : '';
+    if (text.trim()) reply = text;
   }
-
-  const file = seal.recordPath(c.relay, c.id, field('round', c.body) || '1');
+  const verdicts = [], findings = [];
+  let fence = '';
+  for (const line of reply.split('\n')) {
+    const mark = /^\s*(`{3,}|~{3,})/.exec(line);
+    if (mark) { fence = !fence ? mark[1][0] : mark[1][0] === fence ? '' : fence; continue; }
+    if (fence) continue;
+    const verdict = /^verdict:[ \t]*(.*?)[ \t]*$/i.exec(line);
+    const finding = /^findings:[ \t]*(.*?)[ \t]*$/i.exec(line);
+    if (verdict) verdicts.push(verdict[1].toLowerCase());
+    if (finding) findings.push(finding[1].toLowerCase());
+  }
+  if (verdicts.length !== 1 || verdicts[0] !== 'passed' || findings.length !== 1 || findings[0] !== 'none')
+    return stop(['The completed auditor reply must explicitly say verdict: passed and findings: none.']);
+  const record = {
+    schemaVersion: 2, contractId: c.id, round, auditorRunId: runId,
+    dispatchId: run.dispatchId, checkoutRoot: c.root, contractHash,
+    transcriptHash: seal.digest(transcript), headSha, diffHash, owns,
+    verification: evidence, result: 'passed', createdAt: new Date().toISOString(),
+  };
+  const file = seal.recordPath(c.relay, c.id, round);
+  if (fs.existsSync(file)) return stop(['An audit already exists for this round; do not overwrite its evidence.']);
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(
-    file,
-    JSON.stringify(
-      {
-        contractId: c.id,
-        auditorRunId: runId,
-        headSha,
-        diffHash,
-        owns,
-        verification: evidence,
-        result: 'passed',
-        createdAt: new Date().toISOString(),
-      },
-      null,
-      2
-    ) + '\n',
-    'utf8'
-  );
-
-  return out([
-    'Audit record written: ' + path.relative(c.root, file),
-    'headSha and diffHash were computed here, not supplied.',
-  ]);
+  let fd;
+  try { fd = fs.openSync(file, 'wx'); fs.writeFileSync(fd, JSON.stringify(record, null, 2) + '\n'); }
+  finally { if (fd !== undefined) fs.closeSync(fd); }
+  return out(['Audit record written: ' + path.relative(c.root, file),
+    'Bound to the completed child dispatch, transcript, contract and checkout revision.']);
 }
 
 function ledger() {

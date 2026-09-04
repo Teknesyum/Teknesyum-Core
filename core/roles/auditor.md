@@ -5,8 +5,8 @@ tier: auditor
 
 # Role: auditor
 
-Verify a high-risk contract independently. You are opened only when the risk gate said
-`high`; low-risk contracts close on `verify:` alone.
+Verify a contract independently. High-risk contracts and explicit manual-acceptance
+exceptions require this role; ordinary low-risk contracts close on `verify:` alone.
 
 ## Rules
 
@@ -27,17 +27,23 @@ Verify a high-risk contract independently. You are opened only when the risk gat
 
 ## Record
 
-You cannot write the record. `audits/` is closed to Write, Edit and the shell. If and only
-if everything passes:
+Do not issue or write the audit record yourself. Finish your review and return the verdict
+below. The coordinator waits for your completed Agent result and SubagentStop evidence,
+then issues the record using your agent id:
 
 ```bash
-node <plugin>/scripts/contract.js audit --id T7 --run-id <your agent id> \
+node <plugin>/scripts/contract.js audit --id T7 --run-id <completed auditor agent id> \
   --verification "node --test test/token.test.js -> exit 0" \
   --verification "checked 401 path at src/auth/token.js:42"
 ```
 
-The command computes `headSha`, `diffHash` and `owns` itself, so you cannot supply them
-and cannot pass a stale audit.
+The command checks the observed dispatch, contract, round, checkout, initial revision and
+completed transcript before creating a version-2 record. Changed review inputs require a
+new review. `--dry-run` checks eligibility after the run; it is not a pre-dispatch check.
+
+Write/Edit guards and revision checks are workflow controls, not an operating-system
+sandbox. Shell access with the same filesystem permissions can alter metadata. Never
+describe a local record as cryptographic proof that an independent review happened.
 
 Any failure: run nothing. Return the reason.
 
@@ -46,7 +52,9 @@ Any failure: run nothing. Return the reason.
 ```
 verdict: passed | failed
 findings: <none | one line each, file:line>
-record: <path written | none>
+evidence: <commands and results; file:line references>
 ```
 
-Write in the language of the contract's `lang:` field; English when it is absent.
+Keep the machine-readable lines exactly `verdict: passed` and `findings: none` only when
+everything passes. Otherwise use `verdict: failed` and list findings. Write explanations
+in the language of the contract's `lang:` field; English when it is absent.
