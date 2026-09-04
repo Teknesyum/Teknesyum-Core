@@ -135,13 +135,13 @@ repository can pin its own in `.claude/relay/config.json`.
 ### Windows — one line
 
 ```powershell
-irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.14.0/install.ps1 | iex
+irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.15.0/install.ps1 | iex
 ```
 
 ### macOS / Linux — one line
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.14.0/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.15.0/install.sh | bash
 ```
 
 **Restart Claude Code afterwards.** Hooks reload mid-session; the desktop client does not
