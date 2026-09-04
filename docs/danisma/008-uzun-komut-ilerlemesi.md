@@ -40,3 +40,9 @@ sürümü seçtiği için gerçekte 0.15.0 koşuyor. Probe doğru dosyadaydı.
 
 Yani Fable'ın (b) ve (c) şıkları bu barındırıcıda ölü doğuyor: komut sürerken banner donuyor,
 ne dosya okunuyor ne klasör ölçülüyor. Geriye tek yol kalıyor — Claude Code'un dışı.
+
+## Karar
+
+Kullanıcı: "claude code dışında mümkün değilse gerek yok." İş kapandı, kod yazılmadı.
+Banner'a ilerleme satırı eklenmeyecek, kanca sarmalayıcı kurulmayacak. Dosya, aynı soru
+tekrar açılırsa ölçümün elde olması için duruyor.

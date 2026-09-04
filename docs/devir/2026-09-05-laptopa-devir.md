@@ -67,6 +67,10 @@ Bunlar makineye ait, git'e gitmiyor. Dizüstünde yoksa oturum aynı kurallarla 
 | `~/.claude/projects/<proje>/memory/` | kalıcı hafıza dosyaları ve `MEMORY.md` dizini |
 | `~/.claude/teknesyum-ozel/` | özel ayna deposu (git; ayrıca çekilebilir) |
 
+Bu dosyalarin hazir paketi masaustunde **`D:\!Tmp\Teknesyum Core`** altinda duruyor:
+`KURULUM.md` adim adim kurulumu anlatiyor, `referans/` altinda dosyalarin kendisi var,
+`DEVIR-NOTU.md` bu notun kopyasi. Klasoru dizustune tasi, `KURULUM.md` ile ilerle.
+
 `~/.claude/settings.json` içindeki `additionalDirectories` **artık olmamalı** — o iş projeye
 özel dosyaya taşındı.
 
