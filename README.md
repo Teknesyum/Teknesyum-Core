@@ -46,6 +46,15 @@ descriptions do not sit in your context — only the agent holding a role pays f
 | `scribe` | mechanical work that carries no decision: renames, wording, inventories |
 | `auditor` | verifies a high-risk contract independently, and may not write a single file |
 | `advisor` | one question, one opinion, from a model one rung above whoever asked |
+| `clarifier` | sharpens a request the user marked, and never rewrites the sentence |
+
+A prompt that starts with `??` opens the sharpener before any work begins. The user's own
+sentence stays on top exactly as written and is the first thing read; the role only adds to
+it, and where the addition and the sentence disagree, the sentence wins and the asker comes
+back with one question. The sharpener reads no files of its own - it is handed what the
+asker has already gathered - and it returns an order and a prohibition, not a plan. It runs
+on the advisor's rung, so the mark buys the same model the advisor gets and nothing runs at
+all on an unmarked turn.
 
 Which model each of them gets is not a choice you make per agent — the mode and the role
 decide it together, and [the table](#the-agents) is below.
@@ -663,7 +672,7 @@ costs less to read than opening files, and answers things opening files does not
 node test/all.js
 ```
 
-2,660 assertions over the guard, the completion gate, the ladder, the audit record, the
+2,674 assertions over the guard, the completion gate, the ladder, the audit record, the
 ledger, the known bypasses, the tier and quota locks, the personal-convention gate, the
 scaffold, the cue, the banner, the handoff note, the debt ledger, the consultation record, and
 one check that no hook writes into context. Alongside it, 17 audit regressions and 33

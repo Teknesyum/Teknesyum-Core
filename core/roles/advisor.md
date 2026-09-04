@@ -18,6 +18,9 @@ is a reminder of the moments that are easy to walk past, not a condition of entr
 
 Do not open it for mechanical work, and ask the user first when the user can answer.
 
+This role is not the one the `??` mark opens; that is `clarifier`. An opinion and a
+sharpening are different jobs and they do not share a file.
+
 The advisor never runs the asker's own model - a model cannot give itself a second
 opinion. The pairing is in `tiers.json` under `advisorPair` and the resolver applies it:
 opus asks, fable answers; anything else asks, opus answers.

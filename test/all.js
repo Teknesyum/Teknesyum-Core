@@ -851,6 +851,17 @@ function testLanguage(root) {
     ok(f + ' follows the contract language', /contract's `lang:` field/.test(body), f);
   }
 
+  const advisor = fs.readFileSync(path.join(CORE, 'roles', 'advisor.md'), 'utf8');
+  const clarifier = fs.readFileSync(path.join(CORE, 'roles', 'clarifier.md'), 'utf8');
+  ok('the mark that opens the sharpening is written down', /`\?\?`/.test(clarifier), 'clarifier.md');
+  ok('an opinion and a sharpening are not the same file', /not the one the `\?\?` mark opens/.test(advisor), 'advisor.md');
+  ok('the user sentence is never rewritten in its place', /never rewritten and never replaced/.test(clarifier), 'clarifier.md');
+  ok('and where the two disagree the sentence wins', /the\s+sentence wins/.test(clarifier), 'clarifier.md');
+  ok('the sharpener reads nothing of its own', /Read nothing/.test(clarifier), 'clarifier.md');
+  ok('it returns a question, a fact and a route', /## Soru/.test(clarifier) && /## Olgu/.test(clarifier) && /## Yol/.test(clarifier), 'clarifier.md');
+  ok('it borrows the advisor row rather than adding one', /tier: advisor/.test(clarifier) && !require(CONTRACT).tiers().cells.clarifier, 'clarifier.md');
+  ok('and the ladder still resolves it', require(CONTRACT).roleRow('clarifier') === 'advisor');
+
   const modelFacing = ['guard.js', 'cue.js', 'seal.js', 'schema.js', 'watch.js'];
   for (const f of modelFacing) {
     const body = fs.readFileSync(path.join(CORE, 'hooks', f), 'utf8');
