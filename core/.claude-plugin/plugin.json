@@ -1,6 +1,6 @@
 {
   "name": "teknesyum-core",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "Contract-gated multi-agent relay. Enforcement in hooks, status in the statusline, zero per-turn context cost.",
   "author": {
     "name": "Teknesyum",
