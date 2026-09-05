@@ -19,16 +19,44 @@ function kalemEkle(sepet, model, usage) {
   satir.cache_read_input_tokens += usage.cache_read_input_tokens || 0;
 }
 
+const KALEMLER = [
+  'input_tokens',
+  'output_tokens',
+  'cache_creation_input_tokens',
+  'cache_read_input_tokens',
+];
+
+// Ayni message.id iki satirda dusebilir: biri thinking blogu, digeri metin.
+// Ikisinin usage alani ayni degil - metin kaydi mesajin tamamini tasir.
+// Ilk kaydi tutup digerini atmak, dusunen kollari yuzlerce kat eksik sayar.
+// Bu yuzden kimlik basina her kalemin en buyugu tutulur.
 function kayitlariIsle(kayitlar, sepet, gorulen) {
   for (const kayit of kayitlar) {
     if (kayit.type !== 'assistant' || !kayit.message || !kayit.message.usage) continue;
+    const usage = kayit.message.usage;
+    const model = kayit.message.model || 'bilinmiyor';
     const id = kayit.message.id;
-    if (id) {
-      if (gorulen.has(id)) continue;
-      gorulen.add(id);
+    if (!id) {
+      kalemEkle(sepet, model, usage);
+      continue;
     }
-    kalemEkle(sepet, kayit.message.model || 'bilinmiyor', kayit.message.usage);
+    const onceki = gorulen.get(id);
+    if (!onceki) {
+      const kopya = { model: model };
+      for (const k of KALEMLER) kopya[k] = usage[k] || 0;
+      gorulen.set(id, kopya);
+      continue;
+    }
+    for (const k of KALEMLER) {
+      const v = usage[k] || 0;
+      if (v > onceki[k]) onceki[k] = v;
+    }
   }
+}
+
+function kimlikleriBosalt(sepet, gorulen) {
+  for (const kayit of gorulen.values()) kalemEkle(sepet, kayit.model, kayit);
+  gorulen.clear();
 }
 
 function anaModel(oturumDizini) {
@@ -41,7 +69,7 @@ function anaModel(oturumDizini) {
 
 function tokenlar(oturumDizini) {
   const sepet = {};
-  const gorulen = new Set();
+  const gorulen = new Map();
   kayitlariIsle(jsonlOku(oturumDizini + '.jsonl'), sepet, gorulen);
   const altAjanDizini = path.join(oturumDizini, 'subagents');
   if (fs.existsSync(altAjanDizini)) {
@@ -50,6 +78,7 @@ function tokenlar(oturumDizini) {
       kayitlariIsle(jsonlOku(path.join(altAjanDizini, dosya)), sepet, gorulen);
     }
   }
+  kimlikleriBosalt(sepet, gorulen);
   return sepet;
 }
 

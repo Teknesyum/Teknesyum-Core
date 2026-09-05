@@ -112,3 +112,22 @@ test('anaModel ana oturum yoksa null döner', () => {
 
 console.log(JSON.stringify({ passed, failed }));
 process.exitCode = failed > 0 ? 1 : 0;
+
+// Ayni message.id iki satirda dusebilir: biri thinking blogu, digeri metin. Ikisinin
+// usage alani ayni degil; ilkini tutup digerini atmak dusunen kollari yuzlerce kat
+// eksik sayar. Kimlik basina her kalemin en buyugu tutulmali.
+test('bolunmus bir mesajin dusunme ve metin kayitlarindan buyuk olan cikti sayilir', () => {
+  const kok = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-maliyet-bolunmus-'));
+  const oturum = path.join(kok, 'oturum');
+  const id = 'msg_bolunmus_1';
+  const ortak = { input_tokens: 2, cache_creation_input_tokens: 13166, cache_read_input_tokens: 0 };
+  fs.writeFileSync(
+    oturum + '.jsonl',
+    usageSatiri('claude-sonnet-5', id, Object.assign({ output_tokens: 2 }, ortak)) +
+      usageSatiri('claude-sonnet-5', id, Object.assign({ output_tokens: 1714 }, ortak))
+  );
+  const satir = tokenlar(oturum)['claude-sonnet-5'];
+  assert.equal(satir.output_tokens, 1714);
+  assert.equal(satir.cache_creation_input_tokens, 13166);
+  assert.equal(satir.input_tokens, 2);
+});
