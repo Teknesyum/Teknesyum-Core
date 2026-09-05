@@ -35,6 +35,14 @@ coordinator running the relay is a separate line item, roughly 85% of the total 
 measurement and not yet split by phase. Detail:
 [pilot bench result](raporlar/2026-09-05-pilot-bench-sonuc.md).
 
+**Later the same day, after the fold.** The contract now travels inside the dispatch prompt
+and the close runs on SubagentStop, so the coordinator spends no turn writing or closing a
+contract. Three more runs of the same task: agent cost +2.5% against the contract-less arm,
+coordinator turns 4 for 3 runs against 6. The seal itself did not land in any of them - a
+17-file owns set trips the 8-file high-risk rule and the gate asks for an auditor, which at
+95-100k tokens is ten times the 5% ceiling. That is the structural limit today:
+[operation result](raporlar/2026-09-05-ameliyat-sonuc.md).
+
 Two rules follow, and both are load-bearing: give every arm the same task text, and never ask
 an agent to write its own contract to become bound.
 
