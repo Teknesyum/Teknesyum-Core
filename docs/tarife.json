@@ -1,0 +1,19 @@
+{
+  "surum": 1,
+  "tarih": "2026-09-05",
+  "birim": "USD / 1M token",
+  "kaynak": "claude-api skill, Current Models tablosu (önbellek tarihi 2026-06-24)",
+  "not": "girdi ve cikti oranlari tabloda birebir yazili. cacheYazma ve cacheOkuma opus/sonnet/haiku icin belgelenen yaklasik carpanlardan turetildi (~1.25x girdi, ~0.1x girdi) ve kesin fiyat olarak alintilanmadi. fable-5-1 icin cache okuma dogrudan belgelenmis: 0.25 USD/MTok, yani 0.1x degil 0.025x. Bu ucu koşudan once canli fiyat sayfasindan dogrulanacak.",
+  "dogrulandi": {
+    "girdi": true,
+    "cikti": true,
+    "cacheYazma": false,
+    "cacheOkuma": false
+  },
+  "modeller": {
+    "claude-opus-5": { "girdi": 5.0, "cikti": 25.0, "cacheYazma": 6.25, "cacheOkuma": 0.5 },
+    "claude-sonnet-5": { "girdi": 2.0, "cikti": 10.0, "cacheYazma": 2.5, "cacheOkuma": 0.2 },
+    "claude-haiku-4-5": { "girdi": 1.0, "cikti": 5.0, "cacheYazma": 1.25, "cacheOkuma": 0.1 },
+    "claude-fable-5-1": { "girdi": 10.0, "cikti": 50.0, "cacheYazma": 12.5, "cacheOkuma": 0.25 }
+  }
+}
