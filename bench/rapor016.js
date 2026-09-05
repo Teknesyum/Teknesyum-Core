@@ -151,7 +151,7 @@ function sonra() {
   const sebepler = [...new Set(g.flatMap((r) => (r.kanca && r.kanca.cues) || []).map((c) => c.replace(/^\d+ /, '').split('.')[0]))];
   out.push('Yorum:', '',
     '- Dosya eşiği artık görev 06\'da tetiklenmiyor; onun yerine satır eşiği tetikleniyor ("' + sebepler.join('", "') + '"): görev üç yeni dosyayla ~185 satır yazıyor, eşik 150. İpucu yine her koşuda geldi, model yine "atla" dedi. n=3 ile $ farkı gürültülü (core r1 0,73 $ tek uç değer), ama kabul yine ✗. 150 satır eşiği yeni dosyalarda kaba: karar bekleyen üçüncü madde.',
-    '- Handoff\'ta task tam metinle duruyor (2000 karakter tavanı; 500 ilk denemede görevin maddelerini kesti, o koşu atıldı: `trash/bench-calisma/devam-b-500.jsonl`). core r3\'te handoff hiç yazılmadı: model dosyaları Bash heredoc ile yazdı, count.js Bash yazımını saymaz, dosya sayısı 0 kalınca handoff.js üretmedi. Bu da açık bir madde.',
+    '- Handoff\'ta task tam metinle duruyor (2000 karakter tavanı; 500 ilk denemede görevin maddelerini kesti, o koşu atıldı: `trash/bench-calisma/devam-b-500.jsonl`). core r3\'te handoff yazılmadı: oturum Write 1 + Edit 3 ile aynı dört dosyaya dokundu, SessionEnd sonrası dosya yok; sebep belirlenemedi, çünkü koşu sonunda config dizini ve kanca hata günlüğü siliniyor. Açık madde: devam.js hook-errors.log\'u saklamalı.',
     '- Resume kabulü iki kolda 0/3; görevi taşıyan handoff ikinci oturumu bitirmeye yetmedi. core ikinci oturumda yine daha çok araç (medyan 17\'ye 7) ve iki kat maliyet: handoff\'u okuyup görevi görünce işi yeniden ele alıyor, native ise git diff\'ten devam edip erken duruyor. Altı tur + "devam et" senaryosunda 0.16\'nın devir kancası ölçülebilir bir kazanç göstermedi.',
     '');
   return out.join('\n');
