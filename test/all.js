@@ -999,13 +999,12 @@ function testNoContextWrites() {
   for (const ev of ['PreToolUse', 'PostToolUse', 'Stop', 'SubagentStop', 'Notification']) {
     ok('cue is silent on ' + ev, cue({ hook_event_name: ev, cwd: os.tmpdir() }) === '');
   }
-  ok(
-    'cue is silent on an ordinary prompt',
-    cue({ hook_event_name: 'UserPromptSubmit', prompt: 'blog yazalim mi' }) === ''
-  );
-  const asked = cue({ hook_event_name: 'UserPromptSubmit', prompt: 'tamam log yaz' });
+  const plain = cue({ hook_event_name: 'UserPromptSubmit', prompt: 'blog yazalim mi', cwd: os.tmpdir() });
+  ok('an ordinary prompt carries the split rule and nothing else', plain.includes('relay skill') && !plain.includes('log.js'), plain);
+  ok('a ?? prompt carries no split rule', cue({ hook_event_name: 'UserPromptSubmit', prompt: '?? blog', cwd: os.tmpdir() }) === '');
+  const asked = cue({ hook_event_name: 'UserPromptSubmit', prompt: 'tamam log yaz', cwd: os.tmpdir() });
   ok('cue answers the log phrase', asked.includes('log.js'));
-  ok('cue stays under 200 chars', asked.length > 0 && asked.length <= 200, String(asked.length));
+  ok('cue stays under 320 chars', asked.length > 0 && asked.length <= 320, String(asked.length));
   ok(
     'cue is silent when there is no relay',
     cue({ hook_event_name: 'SessionStart', cwd: os.tmpdir() }) === ''

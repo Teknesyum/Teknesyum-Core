@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { read, relayRoot, liveDir, rewire } = require('./lib.js');
 
-const CAP = 200;
+const CAP = 320;
 const LOG_ASK = /(^|\s)(log|günlük|gunluk)\s*(yaz|tut)\w*/i;
 const STALE_MS = 12 * 60 * 60 * 1000;
 
@@ -24,7 +24,7 @@ function cue(j) {
       require('./notify.js').stamp('prompt', Date.now(), j.cwd);
     } catch {}
     markSharpen(j);
-    return logCue(j);
+    return join(logCue(j), splitCue(j));
   }
   if (ev === 'SessionStart') {
     try {
@@ -53,6 +53,15 @@ function join(a, b) {
   return [a, b].filter(Boolean).join(' | ');
 }
 
+
+const SPLIT_CUE = 'Two or more files, or a design choice: open the relay skill before touching code. One file, no choice: do it directly.';
+
+function splitCue(j) {
+  if (MARK.test(String(j.prompt || ''))) return '';
+  const r = relayRoot(j.cwd || process.cwd(), { git: false });
+  if (r && names(path.join(r.relay, 'contracts'), (f) => f.endsWith('.md')).length) return '';
+  return SPLIT_CUE;
+}
 
 function logCue(j) {
   if (!LOG_ASK.test(String(j.prompt || ''))) return '';
