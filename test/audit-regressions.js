@@ -56,13 +56,8 @@ test('zero collected tests cannot hide above the last twelve lines', () => {
   const r = contract.runVerify(root, ['node -e "console.log(\'collected 0 items\');for(let i=0;i<20;i++)console.log(\'cleanup\')"'])[0];
   assert.equal(r.ok, false); assert.equal(r.empty, true);
 });
-test('a real csproj path requires high-risk review once it changes', () => {
-  const risk = require(path.join(core, 'scripts/risk.js'));
-  put('src/Video.csproj', '<Project />\n');
-  git('add', 'src/Video.csproj'); git('commit', '-qm', 'csproj');
-  assert.equal(risk.resolve(root, ['src/Video.csproj']).level, 'low');
-  put('src/Video.csproj', '<Project Sdk="Microsoft.NET.Sdk" />\n');
-  assert.equal(risk.resolve(root, ['src/Video.csproj']).level, 'high');
+test('a real csproj path requires high-risk review', () => {
+  assert.equal(require(path.join(core, 'scripts/risk.js')).resolve(root, ['src/Video.csproj']).level, 'high');
 });
 test('C# namespace imports do not prove dead source files', () => {
   put('src/PlanCalculator.cs', 'class PlanCalculator {}');

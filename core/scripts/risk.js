@@ -103,16 +103,15 @@ function spotLines(where) {
 
 function assess(root, owns) {
   const reasons = [];
-  const base = owns.length ? baseRef(root) : 'HEAD';
-  const stat = owns.length ? gitNumstat(root, owns, base) : null;
-  if (owns.length && stat === null) reasons.push('the diff could not be read, so its size is unknown');
-  // Risk is a measure of what changed, not of what the agent was allowed to touch: a
-  // contract that owns package.json and never edits it did nothing sensitive.
-  const changed = stat && stat.names ? stat.names : stat === null ? owns : [];
-  for (const p of changed) {
+  for (const p of owns) {
     const n = norm(p);
     if (HIGH_PATHS.some((re) => re.test(n))) reasons.push('sensitive path: ' + n);
   }
+  const base = owns.length ? baseRef(root) : 'HEAD';
+  const stat = owns.length ? gitNumstat(root, owns, base) : null;
+  if (owns.length && stat === null) reasons.push('the diff could not be read, so its size is unknown');
+  // Size is measured on what changed; the sensitive-path check stays on owns because the
+  // tier is resolved before any diff exists and a declared sensitive owns set is intent.
   if (stat && stat.files > FILE_LIMIT) reasons.push('changes ' + stat.files + ' files (limit ' + FILE_LIMIT + ')');
   if (stat && stat.lines > DIFF_LIMIT)
     reasons.push('diff ' + stat.lines + ' lines (limit ' + DIFF_LIMIT + ')');
