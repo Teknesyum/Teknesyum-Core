@@ -47,13 +47,16 @@ function karistir(dizi, seed) {
   return kopya;
 }
 
-function planOlustur(kapsam, seed) {
+function planOlustur(kapsam, seed, secim = {}) {
   const gorevler = kapsam === 'tam' ? GOREVLER : GOREVLER.slice(0, 2);
+  const kollar = secim.kollar && secim.kollar.length ? secim.kollar : KOLLAR;
+  const tekrar = secim.tekrar || TEKRAR;
+  for (const arm of kollar) if (!KOLLAR.includes(arm)) throw new Error('bilinmeyen kol: ' + arm);
   const liste = [];
   for (const taskId of gorevler) {
-    for (const arm of KOLLAR) {
+    for (const arm of kollar) {
       const seat = koltukOku(arm);
-      for (let repeat = 1; repeat <= TEKRAR; repeat++) {
+      for (let repeat = 1; repeat <= tekrar; repeat++) {
         liste.push({ taskId, arm, seat, repeat });
       }
     }
@@ -116,6 +119,27 @@ function eklentiKur(configDizini, profil) {
     pluginDir: hedef.replace(/\\/g, '/'),
     coreRepo: null,
   }, null, 2));
+}
+
+function mdSay(dizin) {
+  if (!fs.existsSync(dizin)) return 0;
+  let n = 0;
+  for (const girdi of fs.readdirSync(dizin, { withFileTypes: true })) {
+    if (girdi.isDirectory()) n += mdSay(path.join(dizin, girdi.name));
+    else if (girdi.name.endsWith('.md')) n += 1;
+  }
+  return n;
+}
+
+function relaySay(calismaDizini, oturumDizini) {
+  const altAjanDizini = path.join(oturumDizini, 'subagents');
+  const altAjan = fs.existsSync(altAjanDizini)
+    ? fs.readdirSync(altAjanDizini).filter((d) => /^agent-.*\.jsonl$/.test(d)).length
+    : 0;
+  return {
+    contracts: mdSay(path.join(calismaDizini, '.claude', 'relay', 'contracts')),
+    subagents: altAjan,
+  };
 }
 
 function sonSessionId(projeDizini) {
@@ -238,6 +262,7 @@ async function koşuYap(kosu, batchId, ccVersion, bagimlar = {}) {
     startedAt: new Date(baslangic).toISOString(),
     wallMs: null, pass: false, dropped: false, dropReason: null,
     tokens: null, usd: null, usdSource: null,
+    relay: null,
   };
   try {
     const gorev = gorevOku(taskId, bagimlar.gorevKok);
@@ -270,6 +295,7 @@ async function koşuYap(kosu, batchId, ccVersion, bagimlar = {}) {
       satir.tokens = sepet;
       satir.usd = toplam;
       satir.usdSource = usdSource;
+      satir.relay = relaySay(calismaDizini, oturumDizini);
     }
 
     if (zamanAsimi) {
@@ -291,7 +317,7 @@ async function koşuYap(kosu, batchId, ccVersion, bagimlar = {}) {
 }
 
 async function calistir(kapsam, seed, secenekler = {}) {
-  const plan = planOlustur(kapsam, seed);
+  const plan = planOlustur(kapsam, seed, secenekler.secim);
   const batchId = 'b' + Date.now().toString(36) + '-' + seed;
   const ccVersion = secenekler.ccVersion !== undefined ? secenekler.ccVersion : ccVersionOku();
   const sonucYolu = secenekler.sonucYolu || path.join(KOK, 'bench', 'sonuc.jsonl');
@@ -331,14 +357,20 @@ function main() {
     process.exit(1);
   }
   const seed = Number(argAl('--seed', '1'));
-  const plan = planOlustur(kapsam, seed);
+  const kollarArg = argAl('--arms', '');
+  const secim = {
+    kollar: kollarArg ? kollarArg.split(',').map((k) => k.trim()).filter(Boolean) : null,
+    tekrar: Number(argAl('--repeat', '0')) || null,
+  };
+  const sonucYolu = argAl('--sonuc', null);
+  const plan = planOlustur(kapsam, seed, secim);
   if (process.argv.includes('--plan')) {
     for (const satir of plan) {
       console.log(JSON.stringify({ taskId: satir.taskId, arm: satir.arm, seat: satir.seat, repeat: satir.repeat }));
     }
     process.exit(0);
   }
-  onKontrolluCalistir(kapsam, seed, { configTemplate }).then((sonuc) => {
+  onKontrolluCalistir(kapsam, seed, { configTemplate, secim, sonucYolu: sonucYolu ? path.resolve(sonucYolu) : undefined }).then((sonuc) => {
     if (!sonuc.basladi) {
       console.error(sonuc.mesaj);
       process.exit(1);
@@ -353,7 +385,7 @@ function main() {
 if (require.main === module) main();
 
 module.exports = {
-  planOlustur, koltukOku, coreArm, encodeCwd, gorevOku, eklentiKur,
+  planOlustur, koltukOku, coreArm, encodeCwd, gorevOku, eklentiKur, relaySay,
   sonSessionId, koşuYap, ccVersionOku, KOLLAR, GOREVLER,
   calistir, onKontrolluCalistir, onKontrolYap, configSablonundanKopyala,
   onKontrolMesaji, IZIN_VERILEN_CONFIG_GIRDILERI,
