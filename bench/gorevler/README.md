@@ -1,15 +1,16 @@
-# Bench görevleri — pilot (görev 1 ve 2)
+# Bench görevleri — tam kapsam (görev 1-5)
 
-**Dondurma tarihi:** 2026-09-05T00:10:28Z. Bu dosyalar ve yanındaki `.md` / `.kabul.sh`
-dosyaları koşu başladıktan sonra değiştirilmez. Bir hata bulunursa yeni bir görev numarası
-açılır, dondurulmuş dosya elle düzeltilmez.
+**Dondurma tarihi:** 2026-09-05T00:44:11Z (görev 3-5 ve 02'nin sızıntı düzeltmesi için;
+görev 1-2'nin ilk dondurması 2026-09-05T00:10:28Z'de kaldı). Bu dosyalar ve yanındaki
+`.md` / `.kabul.sh` dosyaları koşu başladıktan sonra değiştirilmez. Bir hata bulunursa
+yeni bir görev numarası açılır, dondurulmuş dosya elle düzeltilmez.
 
-Kapsam ve kurallar `docs/BENCH.md` bölüm 3 ve 4'te. Görev metinleri (`01-slugify.md`,
-`02-click.md`) harness'tan bağımsızdır, native kola da aynen verilebilir. Kabul testleri
-(`*.kabul.sh`) kol etiketi görmez, yalnız çalışma dizinini alır, geçti/kaldı için 0/1 döner.
-Pinin işlevsel kaynağı her görev dosyasının başındaki `repo:`/`sha:` frontmatter'ıdır;
-gövdedeki sha bahsi ajana giden tek-prompt metnin kendi içinde tutarlı olması için var,
-koşucu onu ayrıştırmaz.
+Kapsam ve kurallar `docs/BENCH.md` bölüm 3 ve 4'te. Görev metinleri (`NN-*.md`)
+harness'tan bağımsızdır, native kola da aynen verilebilir. Kabul testleri (`*.kabul.sh`)
+kol etiketi görmez, yalnız çalışma dizinini alır, geçti/kaldı için 0/1 döner. Pinin
+işlevsel kaynağı her görev dosyasının başındaki `repo:`/`sha:` frontmatter'ıdır; gövdedeki
+sha bahsi ajana giden tek-prompt metnin kendi içinde tutarlı olması için var, koşucu onu
+ayrıştırmaz.
 
 ---
 

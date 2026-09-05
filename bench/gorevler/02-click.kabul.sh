@@ -4,10 +4,10 @@ DIR="${1:-.}"
 
 fail() {
   echo "FAIL: $1"
-  cleanup
   exit 1
 }
 
+VENV_ROOT=""
 VENV=""
 SUITE_LOG=""
 REPRO_PY=""
@@ -17,8 +17,9 @@ cleanup() {
   [ -n "$SUITE_LOG" ] && rm -f "$SUITE_LOG"
   [ -n "$REPRO_PY" ] && rm -f "$REPRO_PY"
   [ -n "$REPRO_LOG" ] && rm -f "$REPRO_LOG"
-  [ -n "$VENV" ] && rm -rf "$VENV"
+  [ -n "$VENV_ROOT" ] && rm -rf "$VENV_ROOT"
 }
+trap cleanup EXIT HUP INT TERM
 
 cd "$DIR" 2>/dev/null || fail "çalışma dizinine girilemedi: $DIR"
 [ -d src/click ] || fail "src/click yok (depo dosyaları eksik)"
@@ -28,7 +29,8 @@ BASE_PY=python
 command -v python >/dev/null 2>&1 || BASE_PY=python3
 command -v "$BASE_PY" >/dev/null 2>&1 || fail "python bulunamadı"
 
-VENV="$(mktemp -d)/click-kabul-venv"
+VENV_ROOT="$(mktemp -d)"
+VENV="$VENV_ROOT/click-kabul-venv"
 "$BASE_PY" -m venv "$VENV" || fail "geçici venv oluşturulamadı"
 
 if [ -x "$VENV/bin/python" ]; then
@@ -76,5 +78,4 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "PASS: mevcut test takımı yeşil ve echo_via_pager reprodüksiyonu düzeldi"
-cleanup
 exit 0
