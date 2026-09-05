@@ -307,7 +307,8 @@ async function koşuYap(kosu, batchId, ccVersion, bagimlar = {}) {
   const disEnv = bagimlar.env || process.env;
 
   const { taskId, arm, seat, repeat } = kosu;
-  const [model, effort] = seat.split('/');
+  const [koltukModel, effort] = seat.split('/');
+  const model = (bagimlar.secim && bagimlar.secim.t0) || koltukModel;
   const baslangic = Date.now();
   const configDizini = mkdtemp('tkc-bench-config-');
   const calismaDizini = mkdtemp('tkc-bench-work-');
@@ -420,6 +421,7 @@ function main() {
     kollar: kollarArg ? kollarArg.split(',').map((k) => k.trim()).filter(Boolean) : null,
     tekrar: Number(argAl('--repeat', '0')) || null,
     tekrarBas: Number(argAl('--repeatFrom', '0')) || null,
+    t0: argAl('--t0', '') || null,
     gorevler: argAl('--tasks', '') ? argAl('--tasks', '').split(',').map((g) => g.trim()).filter(Boolean) : null,
   };
   const sonucYolu = argAl('--sonuc', null);
