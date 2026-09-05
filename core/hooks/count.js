@@ -3,7 +3,7 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 const { read, write, stateFile, safe, t } = require('./lib.js');
 
-const FILE_MAX = 4;
+const FILE_MAX = 5;
 const DIFF_MAX = 150;
 const CTX_MAX = 60;
 const RISK = /(^|\/)(migrations?\/|\.github\/|dockerfile$)|auth|secur|config|\.lock$|-lock\.json$/i;
@@ -17,7 +17,7 @@ function file(j) {
 }
 
 function fresh(j) {
-  return { session: j.session_id || '', cwd: j.cwd || process.cwd(), started: new Date().toISOString(), files: {}, diff: 0, tests: [], warned: {}, ctx: 0 };
+  return { session: j.session_id || '', cwd: j.cwd || process.cwd(), started: new Date().toISOString(), files: {}, diff: 0, tests: [], warned: {}, ctx: 0, transcript: j.transcript_path || '' };
 }
 
 function rel(cwd, p) {
@@ -111,6 +111,7 @@ function handle(j) {
   }
   const st = read(f) || fresh(j);
   if (j.cwd) st.cwd = j.cwd;
+  if (j.transcript_path) st.transcript = j.transcript_path;
   let out = '';
   if (ev === 'PostToolUse') {
     if (EDITS.test(j.tool_name)) out = onEdit(j, st);

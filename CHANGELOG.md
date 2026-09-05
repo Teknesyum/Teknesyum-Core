@@ -7,10 +7,11 @@
   bunların testleri `trash/0.15-relay/` altında. Ölçüm: relay tetiklenince aynı iş için
   kat kat maliyet ve iki kat süre, kazanç yok (`docs/raporlar/2026-09-05-ab-sonuc.md`).
 - Yeni `hooks/count.js`: Write/Edit/NotebookEdit sonrası dokunulan dosyayı ve diff satırını
-  oturum durumuna yazar. Eşik (4 dosya, 150 satır ya da riskli yol) aşılınca ve
+  oturum durumuna yazar. Eşik (5 dosya, 150 satır ya da riskli yol) aşılınca ve
   `docs/plan.md` yoksa oturumda bir kez tek satır; altında sıfır bayt.
 - Yeni `hooks/handoff.js`: bağlam %60'ı geçince ya da SessionEnd'de `.claude/handoff.md`
-  makine yazar (changed_files, tests_run, plan); decisions ve next_action modele kalır ve
+  makine yazar (changed_files, tests_run, plan, task = oturumun ilk istemi, transkriptten,
+  2000 karakter); decisions ve next_action modele kalır ve
   yeniden üretimde korunur. SessionStart'ta varsa tek satır: "Devam: .claude/handoff.md".
 - Statusline artık durum dosyasını okur: dosya sayısı ve satırlar, plan var/yok, koşulan
   testler, bağlam yüzdesi, bekleyen devir, kanca hataları.
@@ -20,7 +21,10 @@
   notify.js relay meşguliyetine bakmaz. lib.js relay yollarını unuttu.
 - Bench koştu (`bench/rapor.md`): sıradan turda kancadan 0 bayt, K0 kuralı tur başına ~200
   token cache okuması; görev 02-05 native ile ±%3, görev 06 +%9 (dört dosya eşiği her koşuda
-  tetiklendi); uyarı satırı ~450 token; resume kabulü devirle 1/5, devirsiz 0/5. Ölçüm
+  tetiklendi); uyarı satırı ~450 token; resume kabulü devirle 1/5, devirsiz 0/5. Eşik 5'e
+  çekilip devire task eklendikten sonra 3 tekrar: görev 06'da bu kez 150 satır eşiği konuştu,
+  kabul yine ✗; resume iki kolda 0/3 (rapor bölüm 6). Açık: yeni dosyalarda satır eşiği,
+  bir koşuda devir yazılmadı, sebebi günlüksüz. Ölçüm
   betikleri `bench/taban.js`, `bench/uyari.js`, `bench/devam.js`, `bench/rapor016.js`;
   `bench/run.js` kolları core/native oldu, tiers.json bağımlılığı gitti.
 

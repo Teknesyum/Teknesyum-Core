@@ -17,6 +17,23 @@ function section(body, name) {
   return text && text !== FILL ? text : '';
 }
 
+function firstPrompt(transcript) {
+  let raw = '';
+  try { raw = fs.readFileSync(String(transcript || ''), 'utf8'); } catch { return ''; }
+  for (const line of raw.split('\n')) {
+    if (!line.includes('"user"')) continue;
+    let j;
+    try { j = JSON.parse(line); } catch { continue; }
+    if (j.type !== 'user' || j.isMeta || !j.message) continue;
+    const c = j.message.content;
+    const text = typeof c === 'string' ? c : Array.isArray(c) ? c.filter((x) => x && x.type === 'text').map((x) => x.text).join('\n') : '';
+    const clean = text.replace(/<[^>]+>[\s\S]*?<\/[^>]+>/g, '').trim();
+    if (!clean) continue;
+    return clean.length > 2000 ? clean.slice(0, 2000) + '…' : clean;
+  }
+  return '';
+}
+
 function render(cwd, st, old) {
   const stat = git(cwd, ['diff', '--stat', 'HEAD']) || '(no diff)';
   const untracked = git(cwd, ['ls-files', '--others', '--exclude-standard']);
@@ -33,6 +50,9 @@ function render(cwd, st, old) {
     '',
     '## plan',
     plan,
+    '',
+    '## task',
+    section(old, 'task') || firstPrompt(st.transcript) || FILL,
     '',
     '## decisions',
     section(old, 'decisions') || FILL,
@@ -60,7 +80,8 @@ function generate(cwd, st) {
 function handle(j) {
   if (j.hook_event_name !== 'SessionEnd') return false;
   const cwd = j.cwd || process.cwd();
-  const st = read(stateFile('state-' + safe(String(j.session_id || 'none'))));
+  const st = read(stateFile('state-' + safe(String(j.session_id || 'none')))) || {};
+  if (j.transcript_path) st.transcript = j.transcript_path;
   return generate(cwd, st);
 }
 
@@ -75,4 +96,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { generate, render, section, handle, FILE, FILL };
+module.exports = { generate, render, section, firstPrompt, handle, FILE, FILL };

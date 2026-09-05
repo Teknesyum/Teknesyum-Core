@@ -36,7 +36,7 @@ ayarlamak yerine söküyor; ölçümler `docs/raporlar/` altında.
 Her `Write`, `Edit` ve `NotebookEdit` sonrası kanca dokunulan dosyayı kaydeder ve kaç satır
 değiştiğini git'e sorar. Eşiğin altında hiçbir şey yazmaz: bağlama sıfır bayt.
 
-Eşik dört dosya, ya da yüz elli değişen satır, ya da yolu riskli görünen tek bir dosyadır:
+Eşik beş dosya, ya da yüz elli değişen satır, ya da yolu riskli görünen tek bir dosyadır:
 `migrations/`, `auth`, `secur`, `config`, bir lock dosyası, `.github/`, `Dockerfile`. Eşik
 aşılınca ve `docs/plan.md` yoksa oturumda bir kez tek satır gelir:
 
@@ -55,8 +55,8 @@ renk ya da ölçü uydurulmaz.
 
 Bağlam yüzde altmışı geçince ya da oturum bitince `.claude/handoff.md` makine tarafından
 üretilir: `changed_files` `git diff --stat`'tan, `tests_run` kancanın gördüğü komutlar ve
-çıkışlarından, `plan` varsa yolundan. İki bölüm modele kalır, `decisions` ve `next_action`;
-eşik anında tek satır bunları ister:
+çıkışlarından, `plan` varsa yolundan, `task` oturumun ilk istemi olarak transkriptten. İki
+bölüm modele kalır, `decisions` ve `next_action`; eşik anında tek satır bunları ister:
 
 > Bağlam %64. .claude/handoff.md içinde decisions ve next_action doldur.
 
@@ -123,7 +123,7 @@ beş satırlık kural budur; sayma kancası tek yaptırımıdır.
 
 ```
 - Tek dosya ve bildiğin iş: yap.
-- Dört ve üstü dosya: önce docs/plan.md.
+- Beş ve üstü dosya: önce docs/plan.md.
 - Bilmediğin kütüphane: yazmadan önce oku.
 - Bitince çalıştır, çıktıyı göster.
 - Küçük iş: bunların hiçbiri.
@@ -153,13 +153,18 @@ içinde.
 - Sıradan tura kancalardan sıfır bayt gelir. CLAUDE.md'de duran beş satırlık kural tur başına
   yaklaşık 200 token cache okuması tutar, kabaca doların on binde biri.
 - Görev 02-05: medyan maliyet native'in yüzde üçü içinde ya da daha ucuz, yani gürültü. Görev
-  06 tam dört dosyaya dokunur, sayma kancası her koşuda konuşur; model her seferinde atla der ve
-  koşu yüzde dokuz pahalı çıkar.
+  06 tam dört dosyaya dokundu, sayma kancası her koşuda konuştu; model her seferinde atla dedi ve
+  koşu yüzde dokuz pahalı çıktı. Eşik bunun üzerine beş dosyaya çekildi. Üç tekrarlık yeniden
+  ölçümde bu kez satır eşiği konuştu, çünkü görev yaklaşık 185 yeni satır yazıyor; koşu yüzde
+  beş çıtasını yine geçemedi.
 - Kancanın söylediği tek satır: yaklaşık 450 token, ek araç çağrısı yok.
 - Resume: devir her seferinde yazılır ama altı turda kesilen oturum bağlam eşiğine varmaz;
   decisions ve next_action boş kalır ve dosya görevi taşımaz. "Devam et" işi devirle beşte bir,
-  devirsiz beşte sıfır koşuda bitirdi. Bundan çıkan ve bu sürüme girmeyen iki değişiklik: devir
-  oturumun ilk istemini taşımalı, dört dosya eşiği meşru dört dosyalık işte tetikleniyor.
+  devirsiz beşte sıfır koşuda bitirdi. Devir artık oturumun ilk istemini `task` olarak taşıyor;
+  üç tekrarlık yeniden ölçümde sonuç değişmedi, iki kolda da üçte sıfır bitti ve core ikinci
+  oturumda iki kat harcadı, çünkü görevi yeniden okuyup baştan ele aldı. Üç oturumdan biri devir
+  bırakmadı ve koşu sebebini söyleyecek kanca günlüğünü saklamadı. İkisi de açık madde, raporun
+  6. bölümünde yazılı.
 
 ---
 

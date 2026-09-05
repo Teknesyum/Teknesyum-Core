@@ -60,10 +60,10 @@ function taban() {
   return out.join('\n');
 }
 
-function gorevler() {
-  const rows = O.jsonlOku(path.join(B, 'sonuc-016.jsonl'));
-  const out = ['## 2. Görev 02-06: core vs native, n=5', ''];
-  out.push('Koltuk sonnet/low iki kolda. core = eklenti 0.16.0 + K0 kuralı CLAUDE.md, native = boş config. Kabul: medyan $ farkı görev başına ≤ %5. Kaynak: `bench/sonuc-016.jsonl`, transcriptler `bench/oturumlar/b*/`.', '');
+function gorevler(dosya = 'sonuc-016.jsonl', baslik = '## 2. Görev 02-06: core vs native, n=5') {
+  const rows = O.jsonlOku(path.join(B, dosya));
+  const out = [baslik, ''];
+  out.push('Koltuk sonnet/low iki kolda. core = eklenti 0.16.0 + K0 kuralı CLAUDE.md, native = boş config. Kabul: medyan $ farkı görev başına ≤ %5. Kaynak: `bench/' + dosya + '`, transcriptler `bench/oturumlar/b*/`.', '');
   const gorevler = [...new Set(rows.map((r) => r.taskId))].sort();
   const satirlar = [];
   let gecen = 0;
@@ -107,10 +107,10 @@ function uyari() {
   return out.join('\n');
 }
 
-function devam() {
-  const rows = O.jsonlOku(path.join(B, 'devam.jsonl'));
-  const out = ['## 4. Resume: kesilen oturum, yeni oturumda yalnız "devam et"', ''];
-  out.push('Görev 06 (slugify CLI, dört parça). Birinci oturum `--max-turns 6` ile kesilir; core kolunda SessionEnd kancası `.claude/handoff.md` yazar, native kolunda hiçbir şey kalmaz. İkinci oturum aynı dizinde yalnız "devam et" der. Tekrar araç = ikinci oturumda birinci oturumla aynı imzalı (araç + hedef) çağrı. Anlamlı araç = Write/Edit/Bash. Kaynak: `bench/devam.jsonl`, transcriptler ve handoff dosyaları `bench/oturumlar/d*/`.', '');
+function devam(dosya = 'devam.jsonl', baslik = '## 4. Resume: kesilen oturum, yeni oturumda yalnız "devam et"') {
+  const rows = O.jsonlOku(path.join(B, dosya));
+  const out = [baslik, ''];
+  out.push('Görev 06 (slugify CLI, dört parça). Birinci oturum `--max-turns 6` ile kesilir; core kolunda SessionEnd kancası `.claude/handoff.md` yazar, native kolunda hiçbir şey kalmaz. İkinci oturum aynı dizinde yalnız "devam et" der. Tekrar araç = ikinci oturumda birinci oturumla aynı imzalı (araç + hedef) çağrı. Anlamlı araç = Write/Edit/Bash. Kaynak: `bench/' + dosya + '`, transcriptler ve handoff dosyaları `bench/oturumlar/d*/`.', '');
   const satirlar = [];
   for (const arm of KOLLAR) {
     const rs = rows.filter((r) => r.arm === arm && r.s2 && r.s2.usd != null);
@@ -124,6 +124,39 @@ function devam() {
   return out.join('\n');
 }
 
+function taskSayisi(rows) {
+  let var_ = 0, dolu = 0;
+  for (const r of rows.filter((x) => x.arm === 'core' && x.handoffVar)) {
+    var_ += 1;
+    const t = r.s1 && r.s1.transcript ? path.join(O.KOK, r.s1.transcript, 'handoff.md') : '';
+    let h = '';
+    try { h = fs.readFileSync(t, 'utf8'); } catch {}
+    const m = /## task\n([\s\S]*?)(?=\n## |\s*$)/.exec(h);
+    if (m && m[1].trim() && m[1].trim() !== '(fill)') dolu += 1;
+  }
+  return { var_, dolu };
+}
+
+function sonra() {
+  const g = O.jsonlOku(path.join(B, 'sonuc-016b.jsonl'));
+  const d = O.jsonlOku(path.join(B, 'devam-b.jsonl'));
+  const out = ['## 6. Değişiklik sonrası: eşik 5 dosya, handoff\'ta task', ''];
+  out.push('Bölüm 5\'teki iki karar uygulandı (count.js FILE_MAX 4→5; handoff.js oturumun ilk istemini transkriptten `## task` olarak yazar) ve yalnız etkilenen iki ölçüm üç tekrarla yeniden koşuldu. Aynı koltuk, aynı yöntem.', '');
+  out.push(gorevler('sonuc-016b.jsonl', '### 6a. Görev 06, n=3').split('\n').slice(2).join('\n'));
+  out.push(devam('devam-b.jsonl', '### 6b. Resume, n=3').split('\n').slice(2).join('\n'));
+  const ts = taskSayisi(d);
+  const c = d.filter((r) => r.arm === 'core' && r.s2 && r.s2.usd != null), n = d.filter((r) => r.arm === 'native' && r.s2 && r.s2.usd != null);
+  const gc = g.filter((r) => r.arm === 'core' && !r.dropped), gn = g.filter((r) => r.arm === 'native' && !r.dropped);
+  out.push('Özet: görev 06 ipucu ' + g.filter((r) => r.arm === 'core').reduce((a, r) => a + (r.kanca ? r.kanca.cueHits : 0), 0) + '/' + g.filter((r) => r.arm === 'core').length + ' koşuda tetiklendi, medyan $ farkı ' + yuzde(O.medyan(gc.map((r) => r.usd)), O.medyan(gn.map((r) => r.usd))) + ' (önce +%9,3). Handoff\'ta task dolu ' + ts.dolu + '/' + ts.var_ + '. Resume kabulü core ' + c.filter((r) => r.s2Kabul && r.s2Kabul.pass).length + '/' + c.length + ', native ' + n.filter((r) => r.s2Kabul && r.s2Kabul.pass).length + '/' + n.length + ' (önce 1/5 ve 0/5). Harcama: ' + f2(g.reduce((a, r) => a + (r.usd || 0), 0) + d.reduce((a, r) => a + ((r.s1 && r.s1.usd) || 0) + ((r.s2 && r.s2.usd) || 0), 0)) + ' $.', '');
+  const sebepler = [...new Set(g.flatMap((r) => (r.kanca && r.kanca.cues) || []).map((c) => c.replace(/^\d+ /, '').split('.')[0]))];
+  out.push('Yorum:', '',
+    '- Dosya eşiği artık görev 06\'da tetiklenmiyor; onun yerine satır eşiği tetikleniyor ("' + sebepler.join('", "') + '"): görev üç yeni dosyayla ~185 satır yazıyor, eşik 150. İpucu yine her koşuda geldi, model yine "atla" dedi. n=3 ile $ farkı gürültülü (core r1 0,73 $ tek uç değer), ama kabul yine ✗. 150 satır eşiği yeni dosyalarda kaba: karar bekleyen üçüncü madde.',
+    '- Handoff\'ta task tam metinle duruyor (2000 karakter tavanı; 500 ilk denemede görevin maddelerini kesti, o koşu atıldı: `trash/bench-calisma/devam-b-500.jsonl`). core r3\'te handoff hiç yazılmadı: model dosyaları Bash heredoc ile yazdı, count.js Bash yazımını saymaz, dosya sayısı 0 kalınca handoff.js üretmedi. Bu da açık bir madde.',
+    '- Resume kabulü iki kolda 0/3; görevi taşıyan handoff ikinci oturumu bitirmeye yetmedi. core ikinci oturumda yine daha çok araç (medyan 17\'ye 7) ve iki kat maliyet: handoff\'u okuyup görevi görünce işi yeniden ele alıyor, native ise git diff\'ten devam edip erken duruyor. Altı tur + "devam et" senaryosunda 0.16\'nın devir kancası ölçülebilir bir kazanç göstermedi.',
+    '');
+  return out.join('\n');
+}
+
 const BULGULAR = [
   '## 5. Bulgular',
   '',
@@ -131,7 +164,7 @@ const BULGULAR = [
   '- Görev 02-05: medyan $ farkı ±%3 ile gürültü içinde; 04 ve 05\'te core daha ucuz çıktı, o da gürültü. Görev 06: +%9,3, kabul dışı. Sebep: görev tam dört dosyaya dokunuyor, eşik dört; ipucu 5/5 koşuda tetiklendi, model beşinde de "atla" dedi, plan yazmadı. Bedel ipucunun kendisi değil (madde 3), modelin ipucuya verdiği cevap ve uzayan süre.',
   '- Uyarı bedeli tek başına: ~450 token, 0,0007 $, ek araç çağrısı yok.',
   '- Resume: handoff 5/5 yazıldı ama decisions/next_action "(fill)" kaldı (altı turda bağlam eşiği dolmaz) ve dosyada görevin kendisi yok. core ikinci oturumda önce handoff\'u okuyor, native doğrudan git diff\'e bakıyor; ikisi de görevi bilmediği için çoğu koşuda "çalışıyor" deyip duruyor. Kabul core 1/5, native 0/5; core ikinci oturumda %31 daha pahalı (daha çok araç). Tekrarlanan araç çağrısı iki kolda da medyan 0.',
-  '- Ölçüm sonrası karar bekleyenler (0.16\'ya girmedi): handoff\'a oturumun ilk kullanıcı istemi eklenmeli; dört dosya eşiği tam dört dosyalık meşru görevde tetikleniyor, eşik ya da bileşimi yeniden düşünülmeli.',
+  '- Ölçümden çıkan iki değişiklik bölüm 6\'da uygulanıp yeniden ölçüldü: handoff\'a oturumun ilk kullanıcı istemi, dosya eşiği 4→5.',
   '- Harcama: 18,36 $ ölçüm, ~1 $ ön kontrol ve deneme. Tekrar sayısı spec gereği 5 (bellekteki 3 tavanı kullanıcının 50 $ yetkisiyle aşıldı).',
   '',
 ].join('\n');
@@ -142,7 +175,7 @@ function main() {
     '',
     'Tarih: ' + new Date().toISOString().slice(0, 10) + '. Claude Code ' + (O.jsonlOku(path.join(B, 'sonuc-016.jsonl'))[0] || {}).ccVersion + ', model claude-sonnet-5, tarife `docs/tarife.json`. Spec: Core v2 yön promptu madde 8. Ölçüm betikleri: `bench/run.js`, `bench/taban.js`, `bench/uyari.js`, `bench/devam.js`; bu rapor `bench/rapor016.js` ile üretildi.',
     '',
-    taban(), gorevler(), uyari(), devam(), BULGULAR,
+    taban(), gorevler(), uyari(), devam(), BULGULAR, sonra(),
   ];
   fs.writeFileSync(path.join(B, 'rapor.md'), parcalar.join('\n') + '\n');
   console.log('bench/rapor.md yazıldı');

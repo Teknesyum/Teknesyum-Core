@@ -13,7 +13,7 @@ const K0 = [
   '# Çalışma kuralı (K0)',
   '',
   '- Tek dosya ve bildiğin iş: yap.',
-  '- Dört ve üstü dosya: önce docs/plan.md.',
+  '- Beş ve üstü dosya: önce docs/plan.md.',
   '- Bilmediğin kütüphane: yazmadan önce oku.',
   '- Bitince çalıştır, çıktıyı göster.',
   '- Küçük iş: bunların hiçbiri.',

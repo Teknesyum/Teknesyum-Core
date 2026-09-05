@@ -117,16 +117,18 @@ function testCountThreshold() {
   hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 's1', cwd: root }, cfg);
   for (const rel of ['src/a.js', 'src/b.js', 'src/c.js']) edit(root, cfg, rel, 's1', 'x\n');
   const fourth = edit(root, cfg, 'src/d.js', 's1', 'x\n');
+  ok('the fourth file is still silent', fourth.stdout === '', fourth.stdout);
+  const fifth = edit(root, cfg, 'src/e.js', 's1', 'x\n');
   let j = null;
   try {
-    j = JSON.parse(fourth.stdout);
+    j = JSON.parse(fifth.stdout);
   } catch {}
-  ok('the fourth file speaks once, as PostToolUse context', j && j.hookSpecificOutput && j.hookSpecificOutput.hookEventName === 'PostToolUse', fourth.stdout);
+  ok('the fifth file speaks once, as PostToolUse context', j && j.hookSpecificOutput && j.hookSpecificOutput.hookEventName === 'PostToolUse', fifth.stdout);
   const line = j ? j.hookSpecificOutput.additionalContext : '';
-  ok('the line says how many files and asks for a plan', /4 files touched/.test(line) && /docs\/plan\.md/.test(line), line);
+  ok('the line says how many files and asks for a plan', /5 files touched/.test(line) && /docs\/plan\.md/.test(line), line);
   ok('the line stays under 40 tokens', line.split(/\s+/).length <= 40, String(line.split(/\s+/).length));
-  const fifth = edit(root, cfg, 'src/e.js', 's1', 'x\n');
-  ok('the fifth file is silent again', fifth.stdout === '', fifth.stdout);
+  const sixth = edit(root, cfg, 'src/f.js', 's1', 'x\n');
+  ok('the sixth file is silent again', sixth.stdout === '', sixth.stdout);
 
   ok('a risky path is the reason before any count', count.reason({ files: { 'src/auth/token.js': { adds: 1, dels: 0 } }, diff: 1 }) === 'src/auth/token.js');
   ok('a big diff is a reason on its own', /^200 /.test(count.reason({ files: { 'a.js': { adds: 200, dels: 0 } }, diff: 200 })));
@@ -145,7 +147,7 @@ function testCountThreshold() {
   fs.writeFileSync(path.join(root3, 'docs', 'plan.md'), '# plan\n');
   hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 's3', cwd: root3 }, cfg);
   let noise = '';
-  for (const rel of ['src/a.js', 'src/b.js', 'src/c.js', 'src/d.js', 'src/auth/x.js']) noise += edit(root3, cfg, rel, 's3', 'x\n').stdout;
+  for (const rel of ['src/a.js', 'src/b.js', 'src/c.js', 'src/d.js', 'src/e.js', 'src/auth/x.js']) noise += edit(root3, cfg, rel, 's3', 'x\n').stdout;
   ok('with a plan on disk the hook never speaks', noise === '', noise);
 
   sweep(root);
@@ -175,7 +177,16 @@ function testHandoff() {
   const handoff = require(HANDOFF);
   const root = fixture();
   const cfg = home();
-  hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 's1', cwd: root }, cfg);
+  const transcript = path.join(cfg, 's1.jsonl');
+  fs.writeFileSync(transcript, [
+    JSON.stringify({ type: 'user', isMeta: true, message: { role: 'user', content: 'Caveat: hidden' } }),
+    JSON.stringify({ type: 'user', message: { role: 'user', content: [{ type: 'text', text: '<system-reminder>noise</system-reminder>add a --dry flag to the cli' }] } }),
+    JSON.stringify({ type: 'assistant', message: { role: 'assistant', content: [{ type: 'text', text: 'ok' }] } }),
+    JSON.stringify({ type: 'user', message: { role: 'user', content: [{ type: 'tool_result', content: 'x' }] } }),
+    JSON.stringify({ type: 'user', message: { role: 'user', content: 'second prompt' } }),
+  ].join('\n') + '\n');
+  hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 's1', cwd: root, transcript_path: transcript }, cfg);
+  ok('the session start files the transcript path into state', stateOf(cfg).transcript === transcript, stateOf(cfg).transcript);
 
   const idle = hook(HANDOFF, { hook_event_name: 'SessionEnd', session_id: 's1', cwd: root }, cfg);
   ok('an untouched session leaves no handoff', idle.status === 0 && !fs.existsSync(path.join(root, '.claude', 'handoff.md')));
@@ -189,12 +200,14 @@ function testHandoff() {
   ok('changed files come from git', /## changed_files/.test(body) && /src\/a\.js/.test(body), body);
   ok('tests run are listed', /## tests_run/.test(body) && /npm test/.test(body), body);
   ok('plan is answered', /## plan\nnone/.test(body), body);
+  ok('task is the first user prompt of the session, stripped of tags', /## task\nadd a --dry flag to the cli\n/.test(body), body);
+  ok('firstPrompt skips meta and tool results and cuts at 2000', handoff.firstPrompt(transcript) === 'add a --dry flag to the cli' && handoff.firstPrompt('nope') === '' && handoff.firstPrompt.length === 1);
   ok('decisions and next_action are left to the model', /## decisions\n\(fill\)/.test(body) && /## next_action\n\(fill\)/.test(body), body);
 
   fs.writeFileSync(file, body.replace('## decisions\n(fill)', '## decisions\nkeep the cache').replace('## next_action\n(fill)', '## next_action\nrun the bench'));
   hook(HANDOFF, { hook_event_name: 'SessionEnd', session_id: 's1', cwd: root }, cfg);
   const again = fs.readFileSync(file, 'utf8');
-  ok('a regenerated handoff keeps what the model wrote', /keep the cache/.test(again) && /run the bench/.test(again), again);
+  ok('a regenerated handoff keeps what the model wrote', /keep the cache/.test(again) && /run the bench/.test(again) && /## task\nadd a --dry flag/.test(again), again);
   ok('section() reads a filled section and ignores the placeholder', handoff.section(again, 'decisions') === 'keep the cache' && handoff.section(body, 'decisions') === '');
 
   const resume = hook(COUNT, { hook_event_name: 'SessionStart', source: 'resume', session_id: 's1', cwd: root }, cfg);
