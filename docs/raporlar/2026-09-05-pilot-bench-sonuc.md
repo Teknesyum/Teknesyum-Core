@@ -72,3 +72,53 @@ bir iş olarak duruyor.
 
 Ham veri: `bench/kol-maliyet.jsonl` (koşu başına dört kalem, tur, süre, geçti/kaldı),
 `bench/anlik.jsonl` (T0 pencereleri). Danışma turları: `docs/danisma/011` – `docs/danisma/014`.
+
+---
+
+## Ek: T0 tarafı evrelere bölündü (2026-09-05, ikinci tur)
+
+T0 turlarını yaptıkları araç çağrısına göre sınıfladım. Sonuç, ilk raporun "ölçülemedi"
+dediği kalemi kapatıyor.
+
+| Evre | native | Core | Not |
+|---|---|---|---|
+| sözleşme yazma | yok | 1 tur / 3 koşu = **0,33** | üçü tek turda yazıldı |
+| dispatch | 1 tur | 1 tur | aynı |
+| bekleme + kabul + ölçüm | 1 tur | 1 tur | aynı |
+| kapanış (`close`) | yok | 2 tur / 3 koşu = **0,67** | ilki sözdizimi hatasıyla düştü |
+| **koşu başına T0** | **2 tur** | **3 tur** | fark: **+1 tur** |
+
+Dolar farkını (native $0,525, Core $0,637) mekanizmaya yazmak yanlış olurdu: tur sayısı
+dispatch ve beklemede birebir aynı, ama Core koşuları oturumun ilerisinde yapıldı ve tur
+başına cache okuma 470-480 binden 579-584 bine çıktı (+%23); dolar da +%21 arttı. Aynı eğri.
+**Bir T0 turunun bedeli koordinatörün bağlam boyunun fonksiyonu, kolun türünün değil.**
+Bu oturumda ortalama bir T0 turu $0,2313 ve tur başına 349.845 token cache okuma.
+
+Amortisman uyarısı: üç sözleşmeyi tek turda yazıp tek turda kapattım. Tek tek yapılsaydı
+sözleşme başına 1 yazım + 1 kapanış, yani **+2 tur** olurdu. Gerçek bir işte doğru sayı bu.
+
+## Son tablo
+
+Birim **tur**, dolar değil: dolar koordinatörün oturum boyuyla şişiyor ve oturumlar arasında
+karşılaştırılamaz — yukarıdaki %21'lik fark bunu kanıtlıyor.
+
+| | native | Core | Fark |
+|---|---|---|---|
+| ajan turu (medyan) | 11 | 10 | ölçülemedi |
+| ajan cache dışı tokeni (medyan) | 3.398 | 3.929 | +%15,6 |
+| ajan $ (medyan, aynı oturum penceresi) | 0,1079 | 0,1047 | ölçülemedi |
+| T0 turu (koşu başına) | 2 | 3 | **+1** |
+| T0 turu (toplu yapılmazsa) | 2 | 4 | **+2** |
+| kabul testi | 3/3 geçti | 3/3 geçti | — |
+
+Okunuşu: **ajan tarafında fark ölçülemedi** — tur medyanı ±1 içinde, dolar aralıkları örtüşük
+(Core 0,096-0,158, native 0,094-0,115). Core'un cache dışı tokeni %15,6 yüksek; bu tek
+gerçek ajan-tarafı işareti ve tur sayısına yansımıyor. **T0 tarafında koşu başına 1 ek tur**
+var (sözleşme yazma + kapanış), toplu yapılmazsa 2.
+
+Tavan tur cinsinden yazılırsa: *Core, native'e göre koşu başına 1-2 ek koordinatör turu; ajan
+tarafında tur medyanı ±1 içinde.* Yüzde cinsinden bir tavan bu ölçümle ifade edilemez, çünkü
+turun dolar bedeli oturumdan oturuma değişiyor.
+
+Kapı doğrulaması: **1 sınama, geçti.** Sözleşmeye hiç dokunmamış bir ajan `owns` içindeki
+dosyaya yazabildi, dışındakine yazamadı. Tek örnek; "tam güçte" demek için yetmez.
