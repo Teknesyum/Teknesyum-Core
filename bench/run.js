@@ -187,8 +187,22 @@ function gercekCalistirici(komut, argumanlar, secenekler) {
   });
 }
 
+function bashYolu() {
+  const adaylar = ['bash'];
+  if (process.platform === 'win32') {
+    adaylar.push(path.join(process.env.ProgramFiles || 'C:\Program Files', 'Git', 'bin', 'bash.exe'));
+  }
+  for (const aday of adaylar) {
+    const r = spawnSync(aday, ['-c', 'true'], { windowsHide: true });
+    if (r.status === 0) return aday;
+  }
+  throw new Error('bash bulunamadi: kabul betikleri kosamaz');
+}
+
 function gercekKabulCalistir(kabulYolu, calismaDizini) {
-  return spawnSync('bash', [kabulYolu, calismaDizini], { windowsHide: true });
+  const r = spawnSync(bashYolu(), [kabulYolu, calismaDizini], { windowsHide: true, encoding: 'utf8' });
+  r.son = String((r.stdout || '') + (r.stderr || '')).trim().split(String.fromCharCode(10)).slice(-3).join(String.fromCharCode(10));
+  return r;
 }
 
 // Dar başlangıç, ölçülmedi: bu makinede giriş yapılmış bir config dizini yok, o yüzden
@@ -281,7 +295,7 @@ async function koşuYap(kosu, batchId, ccVersion, bagimlar = {}) {
     }
     if (!arm.startsWith('native-')) eklentiKur(configDizini, coreArm(arm));
     const env = { ...disEnv, CLAUDE_CONFIG_DIR: configDizini };
-    const argumanlar = ['-p', gorev.prompt, '--model', model, '--effort', effort];
+    const argumanlar = ['-p', gorev.prompt, '--model', model, '--effort', effort, '--permission-mode', 'bypassPermissions'];
     const { zamanAsimi } = await calistirici('claude', argumanlar, { cwd: calismaDizini, env, windowsHide: true });
     satir.wallMs = Date.now() - baslangic;
 
@@ -309,6 +323,7 @@ async function koşuYap(kosu, batchId, ccVersion, bagimlar = {}) {
       const kabulYolu = path.join(KOK, 'bench', 'gorevler', taskId + '.kabul.sh');
       const kabul = kabulCalistir(kabulYolu, calismaDizini);
       satir.pass = kabul.status === 0;
+      satir.kabulNot = kabul.son || null;
     }
   } finally {
     silGeriDonusumsuz(configDizini);
