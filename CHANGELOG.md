@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.16.1
+
+- New-file lines stay out of the line threshold; the handoff opens with a resume rule and carries the task; the bench keeps hook logs and finds bash
+
 ## v0.16.0 — Çıkarma Sürümü
 
 - Sözleşme makinesi söküldü: contract.js, guard, closure, autoclose, seal, embed, schema,
