@@ -75,7 +75,7 @@ function statuslineOk() {
     return { ok: false, message: 'the statusline points at a file that is gone: ' + m[1] };
   const wired = m ? m[1].split('\\').join('/') : '';
   const ver = /teknesyum-core\/([0-9]+\.[0-9]+\.[0-9]+)\//.exec(wired);
-  const now = require('./update.js').installed();
+  const now = installedVersion();
   if (ver && now && ver[1] !== now)
     return {
       ok: false,
@@ -109,14 +109,15 @@ function ledgerOk(root) {
   return 'every close is in the ledger';
 }
 
-function updateOk() {
-  const up = require('./update.js');
-  const here = up.installed();
-  const there = up.hint();
-  if (there) return { ok: false, message: 'v' + there + ' is out, and v' + here + ' is installed - /plugin update teknesyum-core@teknesyum' };
-  const seen = up.cached();
-  if (!seen.checkedAt) return { ok: true, message: 'the latest release has not been looked up yet - node <plugin>/scripts/update.js' };
-  return 'v' + here + ', and nothing newer has been seen';
+// The update check is gone. This much of it stays because a different check
+// needs it: whether the statusline still points at an older installed version.
+function installedVersion() {
+  try {
+    const j = JSON.parse(fs.readFileSync(path.join(CORE, '.claude-plugin', 'plugin.json'), 'utf8'));
+    return j && j.version ? String(j.version) : '';
+  } catch {
+    return '';
+  }
 }
 
 function mapOk(root) {
@@ -196,7 +197,6 @@ function run(root) {
     check('roles', rolesOk),
     check('hooks', hooksOk),
     check('statusline', statuslineOk),
-    check('update', updateOk),
     check('map', () => mapOk(root)),
     check('relay', () => relayOk(root)),
     check('ledger', () => ledgerOk(root)),

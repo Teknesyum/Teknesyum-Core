@@ -131,10 +131,6 @@
     "en": "waiting on you",
     "tr": "seni bekliyor"
   },
-  "line.update": {
-    "en": "is out",
-    "tr": "çıktı"
-  },
   "line.worktree": {
     "en": "worktree",
     "tr": "worktree"

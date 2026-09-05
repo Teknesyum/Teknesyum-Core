@@ -1861,49 +1861,6 @@ function testIndex() {
   } catch {}
 }
 
-function testUpdate() {
-  const up = require(path.join(CORE, 'scripts', 'update.js'));
-  ok('0.2.0 is newer than 0.1.12, not older', up.newer('0.2.0', '0.1.12') === true);
-  ok('0.1.12 is newer than 0.1.9 - these are numbers, not text', up.newer('0.1.12', '0.1.9') === true);
-  ok('the same version is not newer than itself', up.newer('1.0.0', '1.0.0') === false);
-  ok('1.0.0 beats 0.99.99', up.newer('1.0.0', '0.99.99') === true);
-  ok('a v prefix is read', up.newer('v0.3.0', '0.2.9') === true);
-  ok('nonsense is not newer than anything', up.newer('', '1.0.0') === false && up.newer('latest', '1.0.0') === false);
-
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-up-'));
-  const state = path.join(home, 'teknesyum');
-  fs.mkdirSync(state, { recursive: true });
-  const held = process.env.CLAUDE_CONFIG_DIR;
-  process.env.CLAUDE_CONFIG_DIR = home;
-  delete require.cache[require.resolve(path.join(CORE, 'scripts', 'update.js'))];
-  delete require.cache[require.resolve(path.join(CORE, 'hooks', 'lib.js'))];
-  const fresh = require(path.join(CORE, 'scripts', 'update.js'));
-
-  ok('with no cache at all, nothing is claimed', fresh.known() === '');
-  ok('and the check is due', fresh.due() === true);
-  fs.writeFileSync(path.join(state, 'version.json'), JSON.stringify({ latest: '99.0.0', checkedAt: Date.now() }));
-  ok('a fresh answer is used', fresh.known() === '99.0.0', fresh.known());
-  ok('and it is not asked for again within the week', fresh.due() === false);
-  ok('a newer release becomes a hint', /^99\.0\.0$/.test(fresh.hint()), fresh.hint());
-  fs.writeFileSync(path.join(state, 'version.json'), JSON.stringify({ latest: '0.0.1', checkedAt: Date.now() }));
-  ok('and an older one says nothing at all', fresh.hint() === '', fresh.hint());
-
-  process.env.CLAUDE_CONFIG_DIR = held === undefined ? '' : held;
-  if (held === undefined) delete process.env.CLAUDE_CONFIG_DIR;
-  delete require.cache[require.resolve(path.join(CORE, 'scripts', 'update.js'))];
-  delete require.cache[require.resolve(path.join(CORE, 'hooks', 'lib.js'))];
-  try {
-    fs.rmSync(home, { recursive: true, force: true, maxRetries: 3 });
-  } catch {}
-
-  const hooks = fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8');
-  ok('nothing about updates runs on an ordinary turn', !/update\.js/.test(hooks), 'update.js is wired into hooks.json');
-  const line = fs.readFileSync(path.join(CORE, 'scripts', 'statusline.js'), 'utf8');
-  ok('the hint lives on the statusline, which is outside the context', /update\(\)/.test(line));
-  const notice = fs.readFileSync(path.join(CORE, 'hooks', 'notice.js'), 'utf8');
-  ok('and never on the chat banner, which the user has to read', !/update\.js/.test(notice));
-}
-
 function testAcceptance() {
   const mod = require(path.join(CORE, 'scripts', 'contract.js'));
   ok('an empty step measures nothing', mod.hollowStep('  ') === 'is empty');
@@ -2416,7 +2373,6 @@ function main() {
   testRaces();
   testTools();
   testIndex();
-  testUpdate();
   testAcceptance();
   testLifetime();
   testSnapshot();

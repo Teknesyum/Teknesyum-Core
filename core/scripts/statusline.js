@@ -412,14 +412,6 @@ function draw(cwd, phase) {
   return headLine(bits.map(titleCase));
 }
 
-function update() {
-  try {
-    return require('./update.js').hint();
-  } catch {
-    return '';
-  }
-}
-
 function gateOn() {
   try {
     const h = path.join(__dirname, '..', 'hooks', 'hooks.json');
@@ -490,9 +482,6 @@ function build(input) {
 
   const n = getNotice(r.relay);
   if (n) parts.push(paint(C.dim, '⤷ ') + n);
-
-  const up = update();
-  if (up) parts.push(paint(C.dim, 'v' + up + ' ' + t('line.update')));
 
   return parts.join(SEP);
 }
