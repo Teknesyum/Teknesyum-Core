@@ -226,8 +226,12 @@ function record(j) {
   }
 
   if (ev === 'SubagentStop' && rec.role) setNotice(r.relay, rec.role + ' ' + t('notice.done'));
-  if (ev === 'SubagentStop' && rec.contract && /^(builder|ui-builder)$/.test(String(rec.role || '')))
-    require('./autoclose.js').launch(r.relay, checkoutRoot(r), rec.contract, rec.id);
+  if (ev === 'SubagentStop' && rec.contract) {
+    // Kapanisi sozlesmenin rolu belirler, ajan tipinin adi degil: bench-low da builder isi yapar.
+    let contractRole = '';
+    try { contractRole = String(field('role', fs.readFileSync(path.join(r.relay, 'contracts', rec.contract + '.md'), 'utf8')) || '').toLowerCase(); } catch {}
+    if (/^(builder|ui-builder)$/.test(contractRole)) require('./autoclose.js').launch(r.relay, checkoutRoot(r), rec.contract, rec.id);
+  }
 
   if (ev === 'PostToolUseFailure') {
     rec.fails = (rec.fails || 0) + 1;

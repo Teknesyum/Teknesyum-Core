@@ -131,3 +131,21 @@ test('bolunmus bir mesajin dusunme ve metin kayitlarindan buyuk olan cikti sayil
   assert.equal(satir.cache_creation_input_tokens, 13166);
   assert.equal(satir.input_tokens, 2);
 });
+
+// Harness'in araya girdigi mesajlar transcript'e model: <synthetic> ile duser; faturasi
+// yoktur ve tarifede satiri olamaz. Toplayici onu atlamali, hata vermemeli.
+test('sentetik harness kaydi toplanmaz ve tarife hatasi uretmez', () => {
+  const kok = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-maliyet-sentetik-'));
+  const oturum = path.join(kok, 'oturum');
+  fs.writeFileSync(
+    oturum + '.jsonl',
+    usageSatiri('claude-sonnet-5', 'msg_1', { input_tokens: 2, output_tokens: 10, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 }) +
+      usageSatiri('<synthetic>', 'msg_2', { input_tokens: 0, output_tokens: 0, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 })
+  );
+  const sepet = tokenlar(oturum);
+  assert.equal(Object.keys(sepet).length, 1);
+  assert.equal(sepet['claude-sonnet-5'].output_tokens, 10);
+  const tarifeYolu = path.join(kok, 'tarife.json');
+  fs.writeFileSync(tarifeYolu, JSON.stringify({ modeller: { 'claude-sonnet-5': { girdi: 1, cikti: 1, cacheYazma: 1, cacheOkuma: 1 } } }));
+  assert.doesNotThrow(() => usdHesapla(sepet, tarifeOku(tarifeYolu)));
+});

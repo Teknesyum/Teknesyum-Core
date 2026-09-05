@@ -35,6 +35,8 @@ function kayitlariIsle(kayitlar, sepet, gorulen) {
     if (kayit.type !== 'assistant' || !kayit.message || !kayit.message.usage) continue;
     const usage = kayit.message.usage;
     const model = kayit.message.model || 'bilinmiyor';
+    // Harness kendi araya girdigi mesajlari <synthetic> modeliyle yazar; faturasi yoktur.
+    if (model === '<synthetic>') continue;
     const id = kayit.message.id;
     if (!id) {
       kalemEkle(sepet, model, usage);
