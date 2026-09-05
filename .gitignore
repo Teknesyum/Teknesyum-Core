@@ -12,3 +12,5 @@ logs/openlogs/
 .claude/relay/map.json
 .claude/relay/map.md
 .claude/settings.local.json
+bench/kosu/
+bench/kosu2/
