@@ -1,3 +1,8 @@
+---
+repo: https://github.com/pallets/click.git
+sha: a5f5aa6d4012d256ccca24638f2642fc371e9f77
+---
+
 Çalışma dizininde `pallets/click` Python paketinin `a5f5aa6d4012d256ccca24638f2642fc371e9f77`
 commit'ine pinlenmiş bir kopyası var (`pip install -e .` ile kurulu, sanal ortam hazır).
 Pakette bir hata var, onu bul ve düzelt.

@@ -1,3 +1,8 @@
+---
+repo: https://github.com/sindresorhus/slugify.git
+sha: 2acf5b3cadf7faed3928536d051104502ae2b667
+---
+
 Bir Node.js (ESM, `"type": "module"`) paketi olarak, verilen dizindeki `index.js` dosyasına
 bir `slugify` fonksiyonu yaz. Dizinde şu dosyalar hazır ve **değiştirilmeyecek**:
 `package.json`, `test.js`, `overridable-replacements.js`, `index.d.ts`. Senin işin yalnızca

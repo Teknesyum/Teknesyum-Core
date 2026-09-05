@@ -1,12 +1,15 @@
 # Bench görevleri — pilot (görev 1 ve 2)
 
-**Dondurma tarihi:** 2026-09-05T00:05:49Z. Bu dosyalar ve yanındaki `.md` / `.kabul.sh`
+**Dondurma tarihi:** 2026-09-05T00:10:28Z. Bu dosyalar ve yanındaki `.md` / `.kabul.sh`
 dosyaları koşu başladıktan sonra değiştirilmez. Bir hata bulunursa yeni bir görev numarası
 açılır, dondurulmuş dosya elle düzeltilmez.
 
 Kapsam ve kurallar `docs/BENCH.md` bölüm 3 ve 4'te. Görev metinleri (`01-slugify.md`,
 `02-click.md`) harness'tan bağımsızdır, native kola da aynen verilebilir. Kabul testleri
 (`*.kabul.sh`) kol etiketi görmez, yalnız çalışma dizinini alır, geçti/kaldı için 0/1 döner.
+Pinin işlevsel kaynağı her görev dosyasının başındaki `repo:`/`sha:` frontmatter'ıdır;
+gövdedeki sha bahsi ajana giden tek-prompt metnin kendi içinde tutarlı olması için var,
+koşucu onu ayrıştırmaz.
 
 ---
 
@@ -61,16 +64,23 @@ kodu net; kök nedeni bulmak akışın nereden kapandığını (`get_pager_file`
 `_nullpager` → dönen nesnenin `close()`'u) izlemeyi gerektiriyor ama depo küçük ve
 `grep` ile izi sürülebilir. 30 dakikalık tavanın belirgin şekilde altında.
 
-Kabul testi (`02-click.kabul.sh`) önce depodaki `tests/` takımını çalıştırır — tek
-istisna `tests/test_termui.py::test_get_pager_file_nullpager_keeps_stringio_stream`,
-bu test akış nesnesinin *kimliğiyle* ilgili eski bir varsayım taşıyor ve gerçek
-düzeltmeyle (bkz. PR [#3482](https://github.com/pallets/click/pull/3482)) davranışı
-değişiyor, o yüzden değerlendirmeden hariç tutuldu. `pytest`, `uv.lock`'ta kilitli
-`9.0.2` sürümüne sabitlenir; daha yeni pytest (`9.1.x`) bu commit'te ilgisiz bir
-`parametrize` uyarısını hataya çevirip yanlış kırmızı üretiyor. Sonra issue'daki
-reprodüksiyon kodu birebir çalıştırılır, istisnasız ve `"Hello, Click!\n"` çıktısıyla
-bitmesi beklenir.
+Kabul testi (`02-click.kabul.sh`) çalışma dizini için `mktemp -d` ile ayrı, geçici bir
+Python `venv` kurar; `click`'i o venv'e `pip install -e .` ile, `pytest`'i de o venv'e
+`uv.lock`'ta kilitli `9.0.2` sürümüne sabitleyerek kurar (daha yeni pytest, `9.1.x`,
+bu commit'te ilgisiz bir `parametrize` uyarısını hataya çevirip yanlış kırmızı
+üretiyor). Ana makinenin `python`/`pip` kurulumuna dokunmaz; koşu bitince venv ve
+geçici log/script dosyaları (`mktemp` ile üretilmiş, sabit ad yok) silinir — sıralı ya
+da paralel koşularda birbirine sızmaz.
 
-Referans doğrulama: pinlenmiş commit + gerçek PR düzeltmesi (yalnız
-`src/click/_termui_impl.py` diff'i) uygulanınca kabul testi **PASS**; düzeltmesiz pin
-**FAIL** (aynı `ValueError` traceback'iyle) verdi.
+Önce depodaki `tests/` takımını bu venv'in `pytest`'iyle çalıştırır — tek istisna
+`tests/test_termui.py::test_get_pager_file_nullpager_keeps_stringio_stream`, bu test
+akış nesnesinin *kimliğiyle* ilgili eski bir varsayım taşıyor ve gerçek düzeltmeyle
+(bkz. PR [#3482](https://github.com/pallets/click/pull/3482)) davranışı değişiyor, o
+yüzden değerlendirmeden hariç tutuldu. Sonra issue'daki reprodüksiyon kodu birebir
+çalıştırılır, istisnasız ve `"Hello, Click!\n"` çıktısıyla bitmesi beklenir.
+
+Referans doğrulama (izole venv ile, 2026-09-05T00:10:28Z tekrarı): pinlenmiş commit +
+gerçek PR düzeltmesi (yalnız `src/click/_termui_impl.py` diff'i) uygulanınca kabul
+testi **PASS**; düzeltmesiz pin **FAIL** (aynı `ValueError` traceback'iyle) verdi. Her
+iki koşuda da ana `python`'da `click`/`pytest` kurulu kalmadı, geçici venv dizini
+koşu sonunda silindi.
