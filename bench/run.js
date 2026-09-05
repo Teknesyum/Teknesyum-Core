@@ -109,6 +109,10 @@ function eklentiKur(configDizini, profil) {
       extraKnownMarketplaces: { teknesyum: { source: { source: 'github', repo: 'Teknesyum/Teknesyum-Core' } } },
     }, null, 2)
   );
+  for (const ad of ['CLAUDE.md', 'RTK.md', 'RULES.md']) {
+    const k = path.join(os.homedir(), '.claude', ad);
+    if (fs.existsSync(k)) fs.copyFileSync(k, path.join(configDizini, ad));
+  }
   const pazarKaynak = path.join(os.homedir(), '.claude', 'plugins', 'marketplaces', 'teknesyum');
   const pazarHedef = path.join(configDizini, 'plugins', 'marketplaces', 'teknesyum');
   if (fs.existsSync(pazarKaynak)) fs.cpSync(pazarKaynak, pazarHedef, { recursive: true });
