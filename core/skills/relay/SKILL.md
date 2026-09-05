@@ -73,7 +73,7 @@ node <P>/scripts/contract.js complete --id T7   # runs verify, gates, moves to d
 ```
 
 Risk comes from the diff since the merge-base, not from a claim: sensitive paths (auth,
-migrations, hooks, CI, dependency and settings files), more than 8 owned files, or more than
+migrations, hooks, CI, dependency and settings files), more than 8 changed files, or more than
 300 changed lines mean **high**. A contract may escalate with `risk: high`, never lower itself.
 High risk needs a version-2 audit. Dispatch the auditor with its role and exact contract path.
 Wait for its result and SubagentStop, requiring `verdict: passed` and `findings: none`.

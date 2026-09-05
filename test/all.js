@@ -452,7 +452,12 @@ function testBypass(root) {
     '---\nid: W1\nstatus: submitted\nround: 1\nowns: [' + wide.join(', ') + ']\nverify:\n  - node -e "1"\n---\n'
   );
   const w1 = contract(['check', '--id', 'W1'], root);
-  ok('more than eight owned files is high risk', /risk high/.test(w1.stdout) && /owns 9 files/.test(w1.stdout), w1.stdout);
+  ok('owning nine files is not high risk by itself - risk measures what changed', !/changes 9 files/.test(w1.stdout) && !/owns 9 files/.test(w1.stdout), w1.stdout);
+  run('git', ['-C', root, 'add', 'src']);
+  run('git', ['-C', root, '-c', 'user.email=t@t', '-c', 'user.name=t', 'commit', '-qm', 'nine files']);
+  for (let i = 0; i < 9; i += 1) fs.appendFileSync(path.join(root, 'src', 'w' + i + '.js'), '// changed' + String.fromCharCode(10));
+  const w2 = contract(['check', '--id', 'W1'], root);
+  ok('changing nine files is high risk', /risk high/.test(w2.stdout) && /changes 9 files/.test(w2.stdout), w2.stdout);
 
   const auditCmd = contract(
     ['audit', '--id', 'D1', '--run-id', 'notauditor', '--verification', 'ran the tests'],

@@ -105,10 +105,13 @@ function assess(root, owns) {
     const n = norm(p);
     if (HIGH_PATHS.some((re) => re.test(n))) reasons.push('sensitive path: ' + n);
   }
-  if (owns.length > FILE_LIMIT) reasons.push('owns ' + owns.length + ' files (limit ' + FILE_LIMIT + ')');
   const base = owns.length ? baseRef(root) : 'HEAD';
   const stat = owns.length ? gitNumstat(root, owns, base) : null;
   if (owns.length && stat === null) reasons.push('the diff could not be read, so its size is unknown');
+  // Risk is a measure of what changed, not of what the agent was allowed to touch. A
+  // contract that owns a whole package and edits one file is a one-file change; the
+  // sensitive-path check above stays on owns because that one is about permission.
+  if (stat && stat.files > FILE_LIMIT) reasons.push('changes ' + stat.files + ' files (limit ' + FILE_LIMIT + ')');
   if (stat && stat.lines > DIFF_LIMIT)
     reasons.push('diff ' + stat.lines + ' lines (limit ' + DIFF_LIMIT + ')');
   if (stat && stat.classes.D)
