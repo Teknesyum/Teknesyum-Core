@@ -14,3 +14,4 @@ logs/openlogs/
 .claude/settings.local.json
 bench/kosu/
 bench/kosu2/
+bench/kosu3/

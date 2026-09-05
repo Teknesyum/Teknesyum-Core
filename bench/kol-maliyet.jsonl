@@ -8,3 +8,6 @@
 {"kol":"native-eco-2","tur":"native","koltuk":"sonnet/low","agent":"a469c879def856922","mesaj":9,"girdi":18,"cikti":3485,"cacheYazma":11775,"cacheOkuma":148286,"usd":0.093981,"onbellekPayi":0.059095,"sureMs":52384,"gecti":true}
 {"kol":"eco-3","tur":"core","koltuk":"sonnet/low","agent":"a89acc0896e039eda","mesaj":17,"girdi":34,"cikti":4963,"cacheYazma":17264,"cacheOkuma":329293,"usd":0.158717,"onbellekPayi":0.109019,"sureMs":74137,"gecti":true}
 {"kol":"native-eco-3","tur":"native","koltuk":"sonnet/low","agent":"ab0936282d012864f","mesaj":12,"girdi":24,"cikti":3374,"cacheYazma":15576,"cacheOkuma":211647,"usd":0.115057,"onbellekPayi":0.081269,"sureMs":38569,"gecti":true}
+{"kol":"f-1","tur":"core-duzeltilmis","koltuk":"sonnet/low","agent":"a4caa8ac9da16c34b","mesaj":11,"girdi":22,"cikti":2882,"cacheYazma":23906,"cacheOkuma":192869,"usd":0.127203,"onbellekPayi":0.098339,"sureMs":54237,"gecti":true}
+{"kol":"f-2","tur":"core-duzeltilmis","koltuk":"sonnet/low","agent":"a70272b53e86bbe81","mesaj":21,"girdi":42,"cikti":6754,"cacheYazma":24377,"cacheOkuma":482270,"usd":0.225021,"onbellekPayi":0.157396,"sureMs":99649,"gecti":true}
+{"kol":"f-3","tur":"core-duzeltilmis","koltuk":"sonnet/low","agent":"a1f0d4f9ca0874d30","mesaj":18,"girdi":36,"cikti":4764,"cacheYazma":18462,"cacheOkuma":356950,"usd":0.165257,"onbellekPayi":0.117545,"sureMs":65853,"gecti":true}
