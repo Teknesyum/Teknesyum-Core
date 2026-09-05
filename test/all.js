@@ -270,6 +270,57 @@ function testGate(root) {
     root
   );
   ok('close with a reason works', closed2.status === 0, closed2.stdout);
+
+  // Uzun harf onekli bir kimlik dosya olarak yazilabiliyordu ama close reddediyordu;
+  // boyle bir sozlesme acilip bir daha kapatilamiyordu. Acilis ile kapanis ayni
+  // kimligi kabul etmeli.
+  writeContract(root, 'PNORMAL1', '# PNORMAL1 uzun kimlik' + String.fromCharCode(10) + 'status: open' + String.fromCharCode(10) + 'owns: [src/ok.js]' + String.fromCharCode(10) + 'verify:' + String.fromCharCode(10) + '  - node -e \"process.exit(0)\"' + String.fromCharCode(10));
+  const uzunListe = contract(['list'], root);
+  ok('a long letter prefix is listed like any other contract', /PNORMAL1/.test(uzunListe.stdout), uzunListe.stdout);
+  const uzunKapat = contract(
+    ['close', '--id', 'PNORMAL1', '--reason', 'Opened only to prove that a longer identifier can also be closed again.'],
+    root
+  );
+  ok('a contract that can be opened can also be closed', uzunKapat.status === 0, uzunKapat.stdout);
+}
+
+// Baglanma dispatch aninda kuruluyor; ajanin sozlesmeye yazmasi gerekmiyor.
+// Kaydi hic olmayan bir ajan eskiden hicbir denetime ugramadan gecerdi - acik
+// bir sozlesmenin sahipli dosyasina bile yazabiliyordu. Sahipli dosya artik
+// kapali, sahipsiz dosya acik kalmali.
+function testUnboundAgent() {
+  const root = fixture();
+  writeContract(
+    root,
+    'U1',
+    '# U1 sahipli dosya' + String.fromCharCode(10) + 'status: active' + String.fromCharCode(10) + 'owns: [src/ok.js]' + String.fromCharCode(10) + 'verify:' + String.fromCharCode(10) + '  - node -e "process.exit(0)"' + String.fromCharCode(10)
+  );
+
+  const yaz = (dosya) =>
+    hook(
+      {
+        hook_event_name: 'PreToolUse',
+        tool_name: 'Write',
+        tool_input: { file_path: path.join(root, dosya), content: 'x' },
+        cwd: root,
+        agent_id: 'kayitsiz-ajan',
+      },
+      root
+    );
+
+  const sahipli = yaz(path.join('src', 'ok.js'));
+  ok(
+    'an agent with no binding cannot write a file an open contract owns',
+    sahipli.status === 2 && /U1/.test(sahipli.stdout + sahipli.stderr),
+    sahipli.stdout + sahipli.stderr
+  );
+
+  const sahipsiz = yaz(path.join('src', 'baska.js'));
+  ok(
+    'an agent with no binding may still write a file no contract owns',
+    sahipsiz.status === 0,
+    sahipsiz.stdout + sahipsiz.stderr
+  );
 }
 
 function testBypass(root) {
@@ -2375,6 +2426,7 @@ function main() {
   testHeadlineGate();
   testOwnsGlob();
   testGateTargets();
+  testUnboundAgent();
   testAuditKind();
   testRoleFromPrompt();
   testRoundIsCounted();

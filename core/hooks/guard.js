@@ -399,6 +399,32 @@ function spilled(agentId) {
   }
 }
 
+// Kaydi olmayan bir ajan, acik bir sozlesmenin sahipli dosyasina yazamaz.
+// Baglanma dispatch aninda kuruluyor; kayit yoksa ajan o ise bagli degil demektir.
+// Sahipsiz dosya serbest kalir, yoksa sozlesmesiz her ajan kirilirdi.
+function claimedByOpenContract(relay, abs, root) {
+  let adlar = [];
+  try {
+    adlar = fs.readdirSync(path.join(relay, 'contracts')).filter((n) => /\.md$/i.test(n));
+  } catch {
+    return null;
+  }
+  for (const ad of adlar) {
+    let body;
+    try {
+      body = fs.readFileSync(path.join(relay, 'contracts', ad), 'utf8');
+    } catch {
+      continue;
+    }
+    const durum = String(status(body) || '').toLowerCase();
+    if (durum === 'done' || durum === 'unmet') continue;
+    for (const o of owned(body) || []) {
+      if (pathKey(path.resolve(root, o)) === pathKey(abs)) return path.basename(ad, '.md');
+    }
+  }
+  return null;
+}
+
 function boundary(target, agentId) {
   if (!agentId) return;
   const abs = path.resolve(target);
@@ -407,7 +433,16 @@ function boundary(target, agentId) {
   const rec = read(bindingFile(r.relay, agentId));
   if (rec && rec.role === 'auditor') return block('An auditor cannot write files; return findings to the coordinator.');
   if (inside(r.relay, abs)) return;
-  if (!rec || !rec.contract) return;
+  if (!rec || !rec.contract) {
+    const sahip = claimedByOpenContract(r.relay, abs, checkoutRoot(r));
+    if (!sahip) return;
+    return block(
+      norm(path.relative(checkoutRoot(r), abs)) + ' is owned by ' + sahip + ', and this agent is not bound to it.',
+      '',
+      'A dispatch binds an agent by naming its contract path in the prompt.',
+      'Ask T0 to dispatch you against that contract, or work on a file it does not own.'
+    );
+  }
   const owns = ownedBy(r.relay, rec.contract);
   if (!owns || !owns.length) return block('The bound contract has no readable owns set.');
   const root = checkoutRoot(r);

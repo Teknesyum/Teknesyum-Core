@@ -1,4 +1,4 @@
-const ID = /^[A-Z]{1,4}\d{1,4}[A-Z]{0,3}\.md$/i;
+const ID = /^[A-Z]{1,12}\d{1,4}[A-Z]{0,3}\.md$/i;
 const RANK = { open: 0, active: 1, submitted: 2, accepted: 3, done: 3, sealed: 3 };
 const STATES = new Set([...Object.keys(RANK), 'blocked']);
 const FIELDS = ['id', 'owns', 'verify', 'accept', 'round', 'status'];
