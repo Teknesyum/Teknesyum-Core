@@ -134,7 +134,7 @@ Repeated failures are counted for you: the `PostToolUseFailure` hook keeps the r
 
 ## Language
 
-Read `contractLang` from `~/.claude/teknesyum/config.json` once per relay; absent, it is `en`.
+Read `contractLang` from `teknesyum/config.json` under the config root (`$CLAUDE_CONFIG_DIR`, else `~/.claude`) once per relay; absent, it is `en`.
 Write contract bodies, prompts, reports, checkpoints and `_issues.log` in that language, and
 stamp every contract with `lang: <code>` so each agent reads it without opening the config.
 
