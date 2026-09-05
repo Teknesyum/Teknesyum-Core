@@ -331,12 +331,18 @@ function label(r) {
   return r.role + '·' + r.model + (r.effort ? '/' + r.effort : '');
 }
 
+const PROBLEM_WINDOW_MS = 60 * 60 * 1000;
+
 function problems(relay) {
   try {
+    const since = Date.now() - PROBLEM_WINDOW_MS;
     return fs
       .readFileSync(path.join(liveDir(relay), 'problems.log'), 'utf8')
       .split('\n')
-      .filter(Boolean).length;
+      .filter((line) => {
+        const at = Date.parse(line.slice(0, 19).replace(' ', 'T') + 'Z');
+        return Number.isFinite(at) && at >= since;
+      }).length;
   } catch {
     return 0;
   }
