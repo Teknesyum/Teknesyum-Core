@@ -251,7 +251,6 @@ function testGate(root) {
     .map((l) => JSON.parse(l));
   const sealed = rows.filter((r) => r.id === 'T3').pop();
   ok('the seal records what the ladder decided, not just that it closed', sealed && Array.isArray(sealed.signals), JSON.stringify(sealed));
-  ok('and the fan-in it was measured against', sealed && 'fanIn' in sealed && 'raise' in sealed, JSON.stringify(sealed));
   ok('and whether the diff went anywhere near the acceptance', sealed && 'acceptanceMiss' in sealed, JSON.stringify(sealed));
 
   const ledger = contract(['ledger'], root);
@@ -1160,8 +1159,6 @@ function testTier(root) {
   ok('signal 2: round 3 raises the builder model', tier('builder', { profile: 'normal', round: 3 }).model === 'opus');
   ok('signal 2: round 2 does not', tier('builder', { profile: 'normal', round: 2 }).model === 'sonnet');
   ok('signal 2 applies to ui-builder too', tier('ui-builder', { profile: 'eco', round: 3 }).model === 'opus');
-  ok('signal 3: round 4 requires the advisor', tier('builder', { profile: 'normal', round: 4 }).advisorRequired === true);
-  ok('signal 3: round 3 requires the advisor after two attempts', tier('builder', { profile: 'normal', round: 3 }).advisorRequired === true);
 
   const irr = require(path.join(CORE, 'scripts', 'risk.js')).irreversible;
   ok('signal 4: a migration path is irreversible', irr(['db/migrations/003.sql'], []).hit);
@@ -1513,10 +1510,6 @@ function testLadder() {
   writeContract(root, 'L7', '# L7\nstatus: submitted\nround: 3\nowns: [src/ok.js]\nverify:\n  - node -e \"process.exit(0)\"\n');
   contract(['complete', '--id', 'L7'], root);
   const why = ['--reason', 'the third try is the same mind', '--critical', 'the seal let a broken build through'];
-  const alone = contract(['reopen', '--id', 'L7'].concat(why), root);
-  ok('a fourth round does not open without a second mind', alone.status === 2 && /--advisor/.test(alone.stdout), alone.stdout);
-  const wrongKind = contract(['reopen', '--id', 'L7'].concat(why, ['--advisor', 'b9']), root);
-  ok('and a builder record cannot stand in for the advisor', wrongKind.status === 2, wrongKind.stdout);
   const asked = contract(['reopen', '--id', 'L7'].concat(why, ['--advisor', 'a9']), root);
   ok('with the advisor named, the round opens', asked.status === 0, asked.stdout + asked.stderr);
   ok(
@@ -2390,7 +2383,6 @@ function main() {
   testChime();
   testCheapFirst();
   testAdvice();
-  testRungs();
   testAcceptanceReach();
   testWorktreeRoot();
   testBannerWakesOnAgents();
@@ -2856,92 +2848,6 @@ function testAcceptanceReach() {
   } catch {}
 }
 
-function testRungs() {
-  const root = fixture();
-  const relay = path.join(root, '.claude', 'relay');
-  const body = (id, extra) =>
-    ['---', 'id: ' + id, 'status: open', 'round: 1', 'owns: [src/ok.js]', 'verify:', '  - node -e ""']
-      .concat(extra || [])
-      .concat(['---', '', '## Goal', 'a thing', ''])
-      .join('\n');
-
-  fs.mkdirSync(path.join(root, 'docs', 'scans'), { recursive: true });
-  const head = run('git', ['-C', root, 'rev-parse', 'HEAD']).stdout.trim();
-  const openContract = (id, extra) => {
-    const text = body(id, extra);
-    run(process.execPath, [GUARD], {
-      cwd: root,
-      input: JSON.stringify({
-        hook_event_name: 'PreToolUse',
-        tool_name: 'Write',
-        tool_input: { file_path: path.join(root, CONTRACTS, id + '.md'), content: text },
-        cwd: root,
-      }),
-    });
-    writeContract(root, id, text);
-    run(process.execPath, [path.join(CORE, 'hooks', 'watch.js')], {
-      cwd: root,
-      input: JSON.stringify({ hook_event_name: 'PostToolUse', tool_name: 'Write', cwd: root,
-        tool_input: { file_path: path.join(root, CONTRACTS, id + '.md'), content: text } }),
-    });
-  };
-
-  openContract('R1', []);
-  const plain = contract(['tier', '--role', 'builder', '--id', 'R1', '--profile', 'premium'], root).stdout;
-  ok('with no signal a builder still starts cheap', /builder sonnet\/high/.test(plain), plain);
-
-  fs.writeFileSync(
-    path.join(relay, 'map.json'),
-    JSON.stringify({
-      _map: { schema: 2, files: 7, head: head },
-      'src/ok.js': { lines: 3, to: [], ns: [], from: ['a.js', 'b.js', 'c.js', 'd.js', 'e.js', 'f.js'] },
-    })
-  );
-  const hub = contract(['tier', '--role', 'builder', '--id', 'R1', '--profile', 'premium'], root).stdout;
-  ok('a file six others import is not cheap-first work', /builder opus/.test(hub), hub);
-  ok('and the signal says so by name', /fan-in 6/.test(hub), hub);
-  ok('the reason names the file', /src\/ok\.js is imported by 6 files/.test(hub), hub);
-
-  fs.writeFileSync(
-    path.join(relay, 'map.json'),
-    JSON.stringify({
-      _map: { schema: 2, files: 7, head: head },
-      'src/ok.js': { lines: 3, to: [], ns: [], from: ['a.js', 'b.js'] },
-    })
-  );
-  const low = contract(['tier', '--role', 'builder', '--id', 'R1', '--profile', 'premium'], root).stdout;
-  ok('two importers are not a hub', /builder sonnet\/high/.test(low), low);
-
-  openContract('R2', ['raise: opus']);
-  const bare = contract(['tier', '--role', 'builder', '--id', 'R2', '--profile', 'premium'], root).stdout;
-  ok('a raise with no reason behind it is not a signal', /builder sonnet\/high/.test(bare), bare);
-
-  openContract('R3', ['raise: opus - why: the acceptance picks a file format']);
-  const raised = contract(['tier', '--role', 'builder', '--id', 'R3', '--profile', 'premium'], root).stdout;
-  ok('the planner can raise before the first attempt', /builder opus/.test(raised), raised);
-  ok('and has to say why on the record', /the acceptance picks a file format/.test(raised), raised);
-
-  writeContract(root, 'R1', body('R1', ['raise: opus - why: written after the fact']));
-  const late = contract(['tier', '--role', 'builder', '--id', 'R1', '--profile', 'premium'], root).stdout;
-  ok('a raise added after the contract opened is not the plan', /builder sonnet\/high/.test(late), late);
-
-  fs.writeFileSync(
-    path.join(relay, 'map.json'),
-    JSON.stringify({
-      _map: { schema: 2, files: 7, head: '0'.repeat(40) },
-      'src/ok.js': { lines: 3, to: [], ns: [], from: ['a.js', 'b.js', 'c.js', 'd.js', 'e.js', 'f.js'] },
-    })
-  );
-  const stale = contract(['tier', '--role', 'builder', '--id', 'R2', '--profile', 'premium'], root).stdout;
-  ok('a map that no longer matches HEAD does not get to raise anything', !/fan-in/.test(stale), stale);
-
-  const capped = contract(['tier', '--role', 'builder', '--id', 'R3', '--profile', 'eco'], root).stdout;
-  ok('but the profile ceiling still caps the raise', !/builder opus/.test(capped), capped);
-
-  writeContract(root, 'R4', body('R4', ['raise: fable', 'why: hunch']));
-  const wild = contract(['tier', '--role', 'builder', '--id', 'R4', '--profile', 'premium'], root).stdout;
-  ok('a raise cannot climb past the ceiling either', !/builder fable/.test(wild), wild);
-}
 
 function testAdvice() {
   const root = fixture();

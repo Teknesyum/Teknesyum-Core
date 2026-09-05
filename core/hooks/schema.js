@@ -91,10 +91,6 @@ function scalar(name, text) {
 }
 function owned(text) { return entries('owns', text); }
 function verifySteps(text) { return entries('verify', text); }
-function raiseOf(text) {
-  const m = /^([A-Za-z]+)[ \t]*(?:[-–—]{1,2}[ \t]*why:[ \t]*(\S.*?))?[ \t]*$/.exec(field('raise', text));
-  return m ? { raise: m[1].toLowerCase(), why: String(m[2] || '').trim() } : null;
-}
 function replaceField(text, name, value) {
   const lines = String(text).replace(/\r\n/g, '\n').split('\n'), row = definitions(name, text)[0];
   if (row) lines[row.index] = name + ': ' + value;
@@ -123,6 +119,6 @@ function fault(text) {
 }
 module.exports = {
   ID, RANK, STATES, FIELDS, isContractName, status, isKnownStatus, field, list,
-  block, section, entries, scalar, owned, verifySteps, raiseOf,
+  block, section, entries, scalar, owned, verifySteps,
   metadata, definitions, fault, replaceField,
 };

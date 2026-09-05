@@ -324,7 +324,7 @@ yazmadan yeniden denemeyi sağlar. Aynı kullanıcı yetkisiyle dosya yazabilen 
 güvenlik sınırı oluşturmaz; [sınırlar ve kurtarma](docs/SEAL-INTEGRITY.md) belgesine bakın.
 
 Mühür kademenin o anki kararını da yazıyor: koşan model, istenen model, ateşleyen sinyaller,
-karşısında ölçüldüğü fan-in, mühürlenmiş `raise:`, onu üreten rol ile Core sürümü ve diff'in
+onu üreten rol ile Core sürümü ve diff'in
 kabul maddesinin adını andığı yere hiç değip değmediği. Hiçbiri bir kararı değiştirmiyor — kademeye dair bir sonraki soru
 tartışmayla değil sütunla cevaplansın diye orada.
 
@@ -389,26 +389,7 @@ Sinyaller hücreyi yükseltiyor, profil tavanı koyuyor, hiçbir şey aşağı �
 |---|---|
 | Üst üste iki araç çağrısı başarısız | önce efor, sonra model yükseliyor |
 | Tur 3 | model yükseliyor |
-| Tur 4 | danışman önerilmiyor, zorunlu oluyor |
 | Değişiklik geri alınamaz bir yola dokunuyor | denetçi açılıyor |
-| Sözleşmenin sahiplendiği dosyayı beş ya da daha çok dosya içeri alıyor | ilk deneme ucuz olan değil |
-| Sözleşmede arkasında `why:` olan bir `raise:` satırı var | plancının modeli geçerli |
-
-Son iki basamak var, çünkü diğer bütün sinyaller gürültülü. Düşen bir doğrulama, üçüncü tur,
-`owns` altında bir silme — hepsi kendini duyuruyor. Kimsenin duymadığı hata makul görünen
-yanlış diff: küçük, yeşil ve kendinden emin biçimde yanlış. Onun adına iki şey konuşuyor.
-İçe aktarma haritası projenin hangi dosyaya yaslandığını zaten biliyor; beş dosyanın içeri
-aldığı bir dosya ucuz ilk denemenin yeri değil. Bir de plancı var: hedefi kimse tek satır
-yazmadan önce okuyan kişi sözleşmeye `raise: opus — why: ...` yazabiliyor — tek satırda,
-çünkü gerekçesi sorulmayan bir yükseltme tavanın kendisinden başka bir şey değil.
-
-İki basamak da altından değiştirilebilecek bir şeyi okuyor; bu yüzden ikisi de geç okumuyor.
-`raise:` satırı sözleşme dosyası ilk yazıldığı anda mühürleniyor ve kademe sayfayı değil
-mührü okuyor: ikinci turda kendi sözleşmesine yükseltme yazan bir builder hiçbir şey
-yükseltmiyor. İçe aktarma haritası da inanılmadan önce HEAD'e vuruluyor — bayatsa yeniden
-kuruluyor, kurulamıyorsa fan-in sinyali üzerine karar verilmiyor, `unknown` diye
-kaydediliyor. Kimsenin tazelemediği bir harita üzerine verilen yükseltme kademenin basamağı
-değil, etrafından dolanan yol.
 
 Üst üste hataları kanca ajan başına sayıyor; bir ajanın kötü günü başka bir ajanın bütçesini
 harcayamıyor. Üstelik ikinci hatada davranıyor, çünkü üçüncüyü beklemek bile bile lades

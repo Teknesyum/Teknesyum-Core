@@ -367,27 +367,6 @@ function tier(role, opt) {
     }
   }
 
-  const reach = Number(o.fanIn || 0);
-  if (reach >= (T.signals.fanIn || Infinity) && T.riskExempt.indexOf(row) >= 0) {
-    signals.push('fan-in ' + reach);
-    if (MODEL_RANK[model] < MODEL_RANK.opus) {
-      model = 'opus';
-      reasons.push(
-        (o.fanInFile ? o.fanInFile + ' is imported by ' + reach + ' files' : reach + ' files import what this owns') +
-          ', so the first attempt is not the cheap one'
-      );
-    }
-  }
-
-  const raise = String(o.raise || '').toLowerCase();
-  if (BUMP_CHAIN.indexOf(raise) >= 0 && String(o.raiseWhy || '').trim()) {
-    if (MODEL_RANK[raise] > MODEL_RANK[model]) {
-      signals.push('planner raise');
-      model = raise;
-      reasons.push('the planner asked for ' + raise + ': ' + String(o.raiseWhy).trim());
-    }
-  }
-
   const round = Number(o.round || 0);
   if (round >= T.signals.roundModelBump && T.riskExempt.indexOf(row) >= 0) {
     signals.push('round ' + round);
@@ -399,9 +378,6 @@ function tier(role, opt) {
     }
   }
 
-  const advisorRequired = round >= T.signals.roundAdvisorRequired;
-  if (advisorRequired)
-    notes.push('round >= ' + T.signals.roundAdvisorRequired + ' - the advisor opens before the next attempt');
 
   const irreversible = !!o.irreversible;
   if (irreversible)
@@ -479,7 +455,6 @@ function tier(role, opt) {
     signals,
     reasons,
     notes,
-    advisorRequired,
     irreversible,
     asker: asker || null,
     blocked,
@@ -550,9 +525,6 @@ function tierCmd() {
   let irrev = null;
   let round = arg('round');
   let relay = null;
-  let reach = { max: 0, file: '' };
-  let raise = '';
-  let raiseWhy = '';
 
   if (id) {
     const c = load(id);
@@ -561,10 +533,6 @@ function tierCmd() {
     const owns = owned(c.body);
     level = risk.resolve(c.root, owns, field('risk', c.body));
     irrev = risk.irreversible(owns, verifySteps(c.body));
-    reach = reachOf(c.relay, owns);
-    const sealed = sealedRaise(c.relay, c.id);
-    raise = sealed.raise;
-    raiseWhy = sealed.why;
     if (!round) round = field('round', c.body);
   } else {
     const where = locate();
@@ -584,10 +552,6 @@ function tierCmd() {
     effort: arg('effort'),
     asker: arg('asker'),
     userAsked: has('user'),
-    fanIn: reach.max,
-    fanInFile: reach.file,
-    raise: raise,
-    raiseWhy: raiseWhy,
   });
 
   const quota = t.row === 'advisor' && relay ? advisorQuota(relay, t.profile, id) : null;
@@ -788,29 +752,11 @@ function acceptanceMiss(root, body, owns) {
   return !tokens.some((tk) => hay.indexOf(tk) >= 0);
 }
 
-function reachOf(relay, owns, root) {
-  if (!owns || !owns.length) return { max: 0, file: '', read: true };
-  try {
-    return require('./map.js').fanIn(root || (locate() || {}).root || projectRoot(relay), owns);
-  } catch {
-    return { max: 0, file: '', read: false, why: 'unreadable' };
-  }
-}
 
-function sealedRaise(relay, id) {
-  const f = path.join(liveDir(relay), '_raise', String(id).replace(/[^A-Za-z0-9_.-]/g, '_') + '.json');
-  const rec = read(f);
-  return { raise: rec ? String(rec.raise || '') : '', why: rec ? String(rec.why || '') : '' };
-}
 
 function ledgerTier(c, level, round, owns) {
-  const reach = reachOf(c.relay, owns, c.root);
-  const sealed = sealedRaise(c.relay, c.id);
   const out = {
     signals: [],
-    fanIn: reach.read === false ? 'unknown' : reach.max,
-    fanInFile: reach.file || null,
-    raise: sealed.raise,
   };
   const role = String(field('role', c.body) || '').toLowerCase();
   if (!roleRow(role)) return out;
@@ -821,10 +767,6 @@ function ledgerTier(c, level, round, owns) {
       round,
       repeatFail: agent ? tallyFails(c.relay, agent) : 0,
       irreversible: risk.irreversible(owns, verifySteps(c.body)).hit,
-      fanIn: reach.read === false ? 0 : reach.max,
-      fanInFile: reach.file,
-      raise: sealed.raise,
-      raiseWhy: sealed.why,
     });
     if (t && t.signals) out.signals = t.signals;
   } catch {}
@@ -839,17 +781,11 @@ function overModel(c, level, round) {
   const agent = field('agent', c.body) || field('run-id', c.body);
 
   const owns = owned(c.body);
-  const reach = reachOf(c.relay, owns, c.root);
-  const sealed = sealedRaise(c.relay, c.id);
   const t = tier(role, {
     risk: level ? level.level : null,
     round,
     repeatFail: agent ? tallyFails(c.relay, agent) : 0,
     irreversible: risk.irreversible(owns, verifySteps(c.body)).hit,
-    fanIn: reach.max,
-    fanInFile: reach.file,
-    raise: sealed.raise,
-    raiseWhy: sealed.why,
   });
   if (!t || MODEL_RANK[asked] <= MODEL_RANK[t.model]) return null;
 
@@ -887,21 +823,12 @@ function overDispatch(r, role, asked, prompt) {
   }
 
   const owns = body ? owned(body) : [];
-  // A mandatory second opinion must remain reachable even when the normal
-  // profile closes optional advisor calls. It happens before reopening round 3.
-  if (roleRow(role) === 'advisor' && asked === 'fable' &&
-      Number(field('round', body) || 0) >= Number(tiers().signals.roundAdvisorRequired) - 1) return null;
   const level = body ? risk.resolve(checkoutRoot(r), owns, field('risk', body)) : null;
-  const reach = reachOf(relay, owns, checkoutRoot(r));
   const t = tier(role, {
     risk: level ? level.level : null,
     round: body ? field('round', body) : 0,
     repeatFail: tallyFails(relay, '', id),
     irreversible: body ? risk.irreversible(owns, verifySteps(body)).hit : false,
-    fanIn: reach.max,
-    fanInFile: reach.file,
-    raise: body ? field('raise', body) : '',
-    raiseWhy: body ? field('why', body) : '',
   });
   if (!t || MODEL_RANK[asked] <= MODEL_RANK[t.model]) return null;
 
@@ -1179,9 +1106,6 @@ function completeLocked() {
     builderRole: (ran && ran.role) || null,
     coreVersion,
     signals: rungs.signals,
-    fanIn: rungs.fanIn,
-    fanInFile: rungs.fanInFile,
-    raise: rungs.raise || null,
     acceptanceMiss: acceptanceMiss(c.root, c.body, owns),
     headSha,
     at: new Date().toISOString(),
@@ -1440,15 +1364,7 @@ function submit() {
   );
 }
 
-const ADVISOR_FROM = Number(tiers().signals.roundAdvisorRequired);
 
-function roleRecord(relay, runId, want) {
-  const rec = read(path.join(liveDir(relay), String(runId).replace(/[^A-Za-z0-9_.-]/g, '_') + '.json'));
-  if (!rec) return 'no live record for ' + runId + ' - an advisor is an agent that ran, not a name';
-  const role = String(rec.role || rec.agent_type || '?').replace(/^teknesyum(-core)?:/, '');
-  if (role !== want) return runId + ' is a ' + role + ' record, not an ' + want;
-  return '';
-}
 
 function roundsOpened(relay, id) {
   let rows = [];
@@ -1467,29 +1383,6 @@ function roundsOpened(relay, id) {
   return known ? n : null;
 }
 
-function secondOpinion(relay, round, advisor, id) {
-  if (round < ADVISOR_FROM) return null;
-  if (!advisor)
-    return [
-      'Round ' + round + ' means the contract has been misread twice already. That is where a',
-      'second mind is worth more than a third attempt by the same one.',
-      '',
-      'Open the advisor role, then name its agent id: --advisor <agent-id>',
-      '',
-      'The rule was written down for a long time and never once fired, because nothing',
-      'asked for it. Now the gate asks.',
-    ];
-  const why = roleRecord(relay, advisor, 'advisor');
-  if (why) return ['Refused - ' + why + '.'];
-  const rec = read(path.join(liveDir(relay), String(advisor).replace(/[^A-Za-z0-9_.-]/g, '_') + '.json'));
-  if (!/^(fable|claude-fable-[\w.-]+)$/.test(String(rec.model || '')))
-    return ['Refused - the advisor must have a resolved Fable model; a role name alone is not a second-model review.'];
-  if (String(rec.contract || '') !== String(id) || Number(rec.round) !== round - 1)
-    return ['Refused - the advisor record belongs to another contract or round.'];
-  if (!rec.ended)
-    return ['Refused - wait for the advisor to finish before opening the next round.'];
-  return null;
-}
 
 function reopen() {
   const id = arg('id');
@@ -1530,8 +1423,6 @@ function reopen() {
       '',
       'If you really mean it: add --force.',
     ]);
-  const second = secondOpinion(where.relay, Number(round), advisor, id);
-  if (second) return stop(second);
   let next = stampStatus(body, 'active');
   next = /^round:.*$/im.test(next)
     ? next.replace(/^round:.*$/im, 'round: ' + round)

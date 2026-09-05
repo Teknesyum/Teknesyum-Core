@@ -328,36 +328,6 @@ function report(key, node, note) {
   return 0;
 }
 
-function fanIn(root, owns) {
-  const relay = path.join(root, '.claude', 'relay');
-  const where = () => (fs.existsSync(path.join(relay, 'map.json')) ? relay : path.join(root, '.claude'));
-  let dir = where();
-  let json = previous(dir);
-  const usable = () => !!json && Number(json._map && json._map.schema) === SCHEMA;
-  if (usable() && staleness(root, dir).state === 'stale') {
-    try {
-      emit(root, build(root), {});
-    } catch {}
-    dir = where();
-    json = previous(dir);
-    if (!usable() || staleness(root, dir).state === 'stale')
-      return { max: 0, file: '', read: false, why: 'stale' };
-  }
-  if (!usable()) return { max: 0, file: '', read: false, why: 'missing' };
-  let max = 0;
-  let file = '';
-  for (const own of owns || []) {
-    const want = String(own).replace(/\\/g, '/').replace(/^\.\//, '');
-    const key = Object.keys(json).find((k) => k[0] !== '_' && (k === want || k.endsWith('/' + want)));
-    if (!key) continue;
-    const n = (json[key].from || []).length;
-    if (n > max) {
-      max = n;
-      file = key;
-    }
-  }
-  return { max, file, read: true };
-}
 
 function who(root, target) {
   const relay = path.join(root, '.claude', 'relay');
@@ -404,4 +374,4 @@ function main() {
 }
 
 if (require.main === module) main();
-module.exports = { build, emit, scan, cycles, staleness, headOf, who, fanIn, shrinkFault, SCHEMA, MD_BUDGET };
+module.exports = { build, emit, scan, cycles, staleness, headOf, who, shrinkFault, SCHEMA, MD_BUDGET };

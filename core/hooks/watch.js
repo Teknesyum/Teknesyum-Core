@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { read, write, merge, safe, relayRoot, ensureRelay, checkoutRoot, liveDir, logProblem, sessionId, setNotice, t } = require('./lib.js');
-const { status, isContractName, field, owned, raiseOf } = require('./schema.js');
+const { status, isContractName, field, owned } = require('./schema.js');
 const seal = require('./seal.js');
 
 let raw = '';
@@ -247,11 +247,6 @@ function record(j) {
           const id = contractName.replace(/\.md$/i, '');
           const body = fs.readFileSync(target, 'utf8');
           if (!rec.contract) Object.assign(rec, { contract: id, contractSteps: 0, round: field('round', body) || '1' });
-          const raised = path.join(live, '_raise', safe(id) + '.json');
-          if (!fs.existsSync(raised)) {
-            const asked = raiseOf(body);
-            write(raised, { raise: asked ? asked.raise : '', why: asked ? asked.why : '', at: Date.now() });
-          }
         }
         const outside = rel.startsWith('../') || path.isAbsolute(rel);
         if (outside) {

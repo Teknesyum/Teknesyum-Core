@@ -330,8 +330,7 @@ transactions. They do not provide a security boundary against same-user filesyst
 See [the threat model and recovery limits](docs/SEAL-INTEGRITY.md).
 
 A seal also records what the ladder decided at the time: the model that ran, the model that
-was asked for, the signals that fired, the fan-in it was measured against, the sealed
-`raise:`, the role and the Core version that produced it, and whether the diff went anywhere
+was asked for, the signals that fired, the role and the Core version that produced it, and whether the diff went anywhere
 near the identifiers the acceptance names. None of it changes a decision — it is there so the
 next question about the ladder is answered from a column rather than an argument.
 
@@ -398,25 +397,7 @@ Signals raise a cell, the profile caps it, nothing lowers it.
 |---|---|
 | Two tool calls fail in a row | the effort goes up, then the model |
 | Round 3 | the model goes up |
-| Round 4 | the advisor is required, not offered |
 | The change touches an irreversible path | the auditor opens |
-| What the contract owns is imported by five files or more | the first attempt is not the cheap one |
-| The contract carries a `raise:` line with a `why:` behind it | the planner's model wins |
-
-The last two rungs exist because every other signal is loud. A failing verify, a third
-round, a delete under `owns` — all of them announce themselves. The failure nobody hears is
-the plausible wrong diff: small, green, and confidently wrong. So two things speak for it.
-The import map already knows which files the project leans on, and a file five others import
-is not where a cheap first attempt belongs. And the planner, who read the goal before anyone
-wrote a line, can say `raise: opus — why: ...` in the contract — one line, because a raise
-nobody has to justify is just the ceiling again.
-
-Both rungs read from something that could be edited under them, so neither reads it late.
-The `raise:` line is sealed the first time the contract file is written and the ladder reads
-the seal, not the page: a builder who adds a raise to its own contract on round two raises
-nothing. And the import map is checked against HEAD before it is believed — if it is stale it
-is rebuilt, and if it cannot be, the fan-in signal is recorded as unknown rather than acted
-on. A raise granted on a map nobody refreshed is a way around the ladder, not a rung on it.
 
 The run of failures is counted per agent by a hook, so one agent's bad afternoon cannot
 spend another agent's budget — and it acts on the second failure, because waiting for a
