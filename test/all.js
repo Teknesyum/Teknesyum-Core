@@ -638,7 +638,11 @@ function testBanner(root) {
   fs.mkdirSync(danisma, { recursive: true });
   fs.writeFileSync(path.join(danisma, '_pending.json'), JSON.stringify([{ file: '001-x.md', model: 'fable', toolUseId: 'tu1', runId: '', at: Date.now() }]));
   const consulted = plain(banner(root));
-  ok('an open consultation is named on the banner while it is open', /Fable (önerisi soruluyor|is being asked)/i.test(consulted), consulted);
+  ok('an open consultation is named on the banner while it is open', /Fable(-[a-z]+)? (önerisi soruluyor|is being asked)/i.test(consulted), consulted);
+
+  fs.writeFileSync(path.join(danisma, '_pending.json'), JSON.stringify([{ file: '002-x.md', model: 'fable', effort: 'high', toolUseId: 'tu2', runId: '', at: Date.now() }]));
+  const seated = plain(banner(root));
+  ok('the consultation names which seat is being asked, not just the family', /Fable-High/i.test(seated), seated);
   fs.writeFileSync(path.join(danisma, '_pending.json'), '[]');
 
   const CUE = path.join(CORE, 'hooks', 'cue.js');
