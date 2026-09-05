@@ -143,6 +143,19 @@ function relaySay(calismaDizini, oturumDizini) {
   };
 }
 
+function transkriptSakla(oturumDizini, batchId, kosu) {
+  try {
+    const hedef = path.join(KOK, 'bench', 'oturumlar', batchId, kosu.taskId + '-' + kosu.arm + '-r' + kosu.repeat);
+    fs.mkdirSync(hedef, { recursive: true });
+    fs.copyFileSync(oturumDizini + '.jsonl', path.join(hedef, 'oturum.jsonl'));
+    const alt = path.join(oturumDizini, 'subagents');
+    if (fs.existsSync(alt)) fs.cpSync(alt, path.join(hedef, 'subagents'), { recursive: true });
+    return path.relative(KOK, hedef).split(path.sep).join('/');
+  } catch {
+    return null;
+  }
+}
+
 function sonSessionId(projeDizini) {
   if (!fs.existsSync(projeDizini)) return null;
   const dosyalar = fs.readdirSync(projeDizini)
@@ -311,6 +324,7 @@ async function koşuYap(kosu, batchId, ccVersion, bagimlar = {}) {
       satir.usd = toplam;
       satir.usdSource = usdSource;
       satir.relay = relaySay(calismaDizini, oturumDizini);
+      satir.transcript = transkriptSakla(oturumDizini, batchId, kosu);
     }
 
     if (zamanAsimi) {
