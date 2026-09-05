@@ -230,7 +230,8 @@ function record(j) {
     // Kapanisi sozlesmenin rolu belirler, ajan tipinin adi degil: bench-low da builder isi yapar.
     let contractRole = '';
     try { contractRole = String(field('role', fs.readFileSync(path.join(r.relay, 'contracts', rec.contract + '.md'), 'utf8')) || '').toLowerCase(); } catch {}
-    if (/^(builder|ui-builder)$/.test(contractRole)) require('./autoclose.js').launch(r.relay, checkoutRoot(r), rec.contract, rec.id);
+    const stoppedRole = String(rec.role || contractRole || '').toLowerCase();
+    if (/^(builder|ui-builder)$/.test(stoppedRole)) require('./autoclose.js').launch(r.relay, checkoutRoot(r), rec.contract, rec.id);
   }
 
   if (ev === 'PostToolUseFailure') {

@@ -55,15 +55,17 @@ function gitNumstat(root, paths, base) {
     lines += (Number(m[1]) || 0) + (Number(m[2]) || 0);
   }
   const classes = { A: 0, M: 0, D: 0, R: 0 };
+  const changedNames = [];
   const names = git(root, ['diff', '--name-status', from, '--'].concat(paths));
   if (names !== null)
     for (const row of names.split('\n')) {
-      const k = /^([AMDRCT])\d*\t/.exec(row);
+      const k = /^([AMDRCT])\d*\t(.+)$/.exec(row);
       if (!k) continue;
       const c = k[1] === 'C' ? 'A' : k[1] === 'T' ? 'M' : k[1];
       classes[c] += 1;
+      changedNames.push(k[2].split('\t').pop().trim());
     }
-  return { lines, files, classes, base: from };
+  return { lines, files, classes, base: from, names: changedNames };
 }
 
 function spots(root, paths, base) {
@@ -101,16 +103,16 @@ function spotLines(where) {
 
 function assess(root, owns) {
   const reasons = [];
-  for (const p of owns) {
-    const n = norm(p);
-    if (HIGH_PATHS.some((re) => re.test(n))) reasons.push('sensitive path: ' + n);
-  }
   const base = owns.length ? baseRef(root) : 'HEAD';
   const stat = owns.length ? gitNumstat(root, owns, base) : null;
   if (owns.length && stat === null) reasons.push('the diff could not be read, so its size is unknown');
-  // Risk is a measure of what changed, not of what the agent was allowed to touch. A
-  // contract that owns a whole package and edits one file is a one-file change; the
-  // sensitive-path check above stays on owns because that one is about permission.
+  // Risk is a measure of what changed, not of what the agent was allowed to touch: a
+  // contract that owns package.json and never edits it did nothing sensitive.
+  const changed = stat && stat.names ? stat.names : stat === null ? owns : [];
+  for (const p of changed) {
+    const n = norm(p);
+    if (HIGH_PATHS.some((re) => re.test(n))) reasons.push('sensitive path: ' + n);
+  }
   if (stat && stat.files > FILE_LIMIT) reasons.push('changes ' + stat.files + ' files (limit ' + FILE_LIMIT + ')');
   if (stat && stat.lines > DIFF_LIMIT)
     reasons.push('diff ' + stat.lines + ' lines (limit ' + DIFF_LIMIT + ')');
