@@ -158,3 +158,37 @@ Yorum:
 - Kanca günlüğü üç koşuda da temiz, handoff 3/3 yazıldı; bölüm 6'daki kayıp handoff bu turda tekrarlanmadı.
 - Resume: core 3/3 bitirdi, native 0/3. Devir dosyası task + kural satırıyla ikinci oturumu işe bağlıyor; native git diff'e bakıp "çalışıyor" deyip duruyor. core ikinci oturumda üç kat harcıyor (0,33 $ ile 0,11 $) ama native hiçbir koşuda işi bitirmediği için bitmiş iş başına maliyet karşılaştırması native lehine kurulamıyor. İlk koşu bash hatasıyla atıldı (`trash/bench-calisma/devam-c-bashsiz.jsonl`), tablo yeniden koşulan üç çiftten.
 
+## 8. 0.15 parçaları tek tek geri takıldı, n=1
+
+Karar kuralı koşudan önce yazıldı (`trash/plan-0.15-parcalar.md`): ünite koşusu tabanın min–max aralığında kalırsa sinyal yok, eklenmez; aralık dışında ve kabul ✓ ise n=3 ile doğrulanır; kabul ✗ ya da 1,5 kat pahalıysa reddedilir. Görev 06 tabanı bölüm 7'nin üç core koşusu; görev 07 tabanı bu turda koşulan 0.16.1 ve native. Varyantlar `bench/varyant/`, koşturucu `bench/varyant.js` + `BENCH_EKLENTI`. Kaynak: `bench/sonuc-ozellik.jsonl`.
+
+Görev 06 tabanı (core 0.16.1, n=3): $ 0.26 / 0.37 / 0.38, kabul 3/3.
+
+| ünite | görev | kol | kabul | $ | dk | ipucu | alt ajan | tabana göre | karar |
+|---|---|---|---|---|---|---|---|---|---|
+| taban-0.16.1 | 07 | native | ✓ | 0.64 | 3.84 | 0 | 0 | - | - |
+| taban-0.16.1 | 07 | core | ✓ | 1.00 | 5.82 | 0 | 0 | - | - |
+| u0-hepsi | 07 | core | ✓ | 2.98 | 11.33 | 0 | 9 | 301.7% | ret (1,5 kat) |
+| u0-hepsi | 06 | core | ✓ | 2.92 | 13.95 | 0 | 7 | 698.3% | ret (1,5 kat) |
+| u3-guard | 07 | core | ✓ | 0.88 | 4.37 | 0 | 0 | 18.9% | sinyal yok |
+| u1-cue | 06 | core | ✓ | 0.50 | 3.38 | 0 | 0 | 37.8% | pahalı, sinyal yok |
+| u2-risk | 06 | core | ✓ | 0.43 | 2.73 | 1 | 0 | 18.3% | pahalı, sinyal yok |
+| u4-verify | 06 | core | ✓ | 0.55 | 3.70 | 0 | 0 | 51.1% | ret (1,5 kat) |
+| u3-guard | 07 | core | ✓ | 0.64 | 3.84 | 0 | 0 | -13.4% | sinyal yok |
+| taban-0.16.1 | 07 | core | ✗ | 0.74 | 4.04 | 0 | 0 | - | - |
+| taban-0.16.1 | 07 | core | ✓ | 0.52 | 3.25 | 0 | 0 | - | - |
+| u3-guard | 07 | core | ✓ | 0.71 | 3.43 | 0 | 0 | -4.2% | sinyal yok |
+
+Görev 07 native: 0.64 $, kabul ✓; core 0.16.1 (n=3): $ 0.52 / 0.74 / 1.00, kabul 2/3. Görev 06 tabanına göre kolon 06 satırlarında bölüm 7 medyanı, 07 satırlarında bu turun 0.16.1 medyanı.
+
+Toplam harcama: 12.53 $ (12 koşu).
+
+Yorum:
+
+- u0-hepsi (0.15.0 olduğu gibi): iki görevde de kabul ✓ ama görev 06'da 2,92 $ (taban medyanı 0,37 $, 8 kat; 13,9 dk, 7 alt ajan), görev 07'de 2,98 $ (0.16.1 medyanı 0,74 $, 4 kat; native 0,65 $; 15 Agent çağrısı, opus ve haiku katmanları). Ret. Bölüm 1'deki 3,4 kat bulgusu 0.16 koşullarında da tutuyor.
+- u1-cue (her istemde sayım satırı): 0,51 $, taban aralığının (0,26–0,38) üstünde ama 1,5 katın altında; pahalı, sinyal yok. `-p` koşusunda istem bir kez geldiği için satır bir kez girdi; çok turlu oturumdaki tur başı bedeli bu bench'te ölçülemez, tek satır ~30 token.
+- u2-risk (package.json dahil geniş risk listesi): ipucu package.json'da ateşlendi, model "atla" dedi, 0,43 $ (aralık üstü, +%18). Sinyal yok; ipucu davranışı değiştirmedi, yalnız bir tur ekledi.
+- u4-verify (Stop'ta bir kez npm test): 0,55 $ (aralık üstü, +%51, 1,5 katın hemen üstünde, kural gereği ret). Kanca testi koştu, geçti, hiçbir şeyi engellemedi; bench görevlerinde iki kolun kabulü zaten 3/3 olduğu için kazanç ölçülebilir değil.
+- u3-guard (eşikte Write/Edit reddi): n=1'de 0.16.1 tabanından ucuz çıktığı için kural gereği n=3'e çıkarıldı. Görev 07 n=3: u3 0,64 / 0,71 / 0,88 $ (medyan 0,71, kabul 3/3), taban 0,52 / 0,74 / 1,00 $ (medyan 0,74, kabul 2/3; düşen koşu readme'ye maxLength yazmadı). Medyan farkı −%4, u3'ün üç koşusu da tabanın aralığı içinde. Kapı koşularda 2, 0, 3 kez reddetti; ama iki kolda da altı koşunun altısı docs/plan.md yazdı, yani beş dosya ipucu zaten plan yazdırıyor, kapı üstüne bir şey koymuyor. Sinyal yok.
+- Karar: beş üniteden hiçbiri 0.16'ya girmiyor. Varyantlar `bench/varyant/` altında duruyor, yeniden ölçmek `bench/varyant.js` ile bir komut.
+

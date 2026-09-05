@@ -1,0 +1,12 @@
+{
+  "ad": "u2-risk",
+  "aciklama": "0.15 risk.js HIGH_PATHS listesi count.js RISK'e girer (package.json, Dockerfile, workflows, migrations, hooks, settings)",
+  "kaynak": "trash/0.15-relay/core/scripts/risk.js",
+  "degistir": [
+    {
+      "dosya": "hooks/count.js",
+      "ara": "const RISK = /(^|\\/)(migrations?\\/|\\.github\\/|dockerfile$)|auth|secur|config|\\.lock$|-lock\\.json$/i;",
+      "yaz": "const RISK = /(^|\\/)(migrations?\\/|\\.github\\/|dockerfile$)|auth|secur|config|\\.lock$|-lock\\.json$|(^|\\/)(authn|authz|session|login|token|credential|secret)s?(\\/|\\.|$)|(^|\\/)(hooks?|middleware|guard)s?\\/[^/]+\\.(js|ts|mjs|cjs|py|cs|go|rs)$|(^|\\/)docker-compose\\.ya?ml$|(^|\\/)(package\\.json|Cargo\\.toml|go\\.mod|requirements\\.txt|pyproject\\.toml|[^/]+\\.csproj)$|(^|\\/)(settings|appsettings)[^/]*\\.(json|ya?ml|toml)$/i;"
+    }
+  ]
+}

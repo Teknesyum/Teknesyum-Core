@@ -170,6 +170,16 @@ config, five repeats per arm. Tables, method and the raw rows are in [bench/rapo
   three. The second session costs about three times more on the core arm, because it does
   the work. Sections 6 and 7 of the report hold the rows, including one round whose
   acceptance column was invalid because the runner could not find bash.
+- **Putting 0.15 back, piece by piece.** Each removed part was re-added as a variant on top of
+  0.16.1 and run once against the same tasks, with the rule written down first: a run inside
+  the baseline's three-run range is no signal and stays out. The whole 0.15 plugin passed both
+  tasks but cost eight times the baseline on the CLI task and four times on the three-part
+  task, with up to fifteen agent calls. A per-prompt count line, a wider risk list and a
+  test run at stop each cost more than the baseline range and changed nothing the acceptance
+  could see. The write gate looked cheaper once, so it got three runs: the median sat four
+  percent under the baseline, inside its range, and every run on both arms wrote the plan file
+  anyway. Nothing went back in. Section 8 of the report has the rows; variants live under
+  `bench/varyant/` and rerun with one command.
 
 ---
 

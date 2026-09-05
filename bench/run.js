@@ -103,8 +103,9 @@ function silGeriDonusumsuz(dizin) {
 }
 
 function eklentiKur(configDizini) {
-  const surum = JSON.parse(fs.readFileSync(path.join(KOK, 'core', '.claude-plugin', 'plugin.json'), 'utf8')).version;
-  const kaynak = path.join(os.homedir(), '.claude', 'plugins', 'cache', 'teknesyum', 'teknesyum-core', surum);
+  const ozel = process.env.BENCH_EKLENTI || '';
+  const surum = JSON.parse(fs.readFileSync(path.join(ozel || path.join(KOK, 'core'), '.claude-plugin', 'plugin.json'), 'utf8')).version;
+  const kaynak = ozel || path.join(os.homedir(), '.claude', 'plugins', 'cache', 'teknesyum', 'teknesyum-core', surum);
   const hedef = path.join(configDizini, 'plugins', 'cache', 'teknesyum', 'teknesyum-core', surum);
   fs.mkdirSync(path.dirname(hedef), { recursive: true });
   fs.cpSync(kaynak, hedef, { recursive: true });
@@ -324,6 +325,7 @@ async function koşuYap(kosu, batchId, ccVersion, bagimlar = {}) {
     wallMs: null, pass: false, dropped: false, dropReason: null,
     tokens: null, usd: null, usdSource: null,
     kanca: null,
+    varyant: process.env.BENCH_VARYANT || null,
   };
   try {
     const gorev = gorevOku(taskId, bagimlar.gorevKok);

@@ -165,6 +165,15 @@ içinde.
   "devam et" işi üçte üç koşuda bitirdi; düz Claude Code üçte sıfır. İkinci oturum core kolunda
   yaklaşık üç kat pahalı, çünkü işi yapıyor. Satırlar raporun 6. ve 7. bölümünde; bir turun kabul
   sütunu geçersiz, koşturucu bash'i bulamamıştı.
+- **0.15 parçaları tek tek geri takıldı.** Çıkarılan her parça 0.16.1 üstüne varyant olarak
+  bindirildi ve aynı görevlerde birer kez koşuldu; kural önceden yazıldı: tabanın üç koşuluk
+  aralığında kalan koşu sinyal değildir, dışarıda kalır. 0.15 eklentisinin tamamı iki görevi de
+  geçti ama CLI görevinde tabanın sekiz katı, üç parçalı görevde dört katı harcadı, on beşe kadar
+  ajan çağrısıyla. İstem başına sayım satırı, geniş risk listesi ve durakta test koşusu üçü de
+  taban aralığının üstüne çıktı ve kabulün görebildiği hiçbir şeyi değiştirmedi. Yazma kapısı bir
+  koşuda ucuz göründüğü için üç koşuya çıkarıldı: medyan tabanın yüzde dört altında, aralığın
+  içinde; iki kolda da her koşu zaten plan dosyasını yazdı. Hiçbiri geri girmedi. Satırlar raporun
+  8. bölümünde; varyantlar `bench/varyant/` altında, tek komutla yeniden koşar.
 
 ---
 

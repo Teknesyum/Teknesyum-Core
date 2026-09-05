@@ -40,6 +40,12 @@
       "cikti": 50,
       "cacheYazma": 12.5,
       "cacheOkuma": 0.25
+    },
+    "claude-haiku-4-5-20251001": {
+      "girdi": 1,
+      "cikti": 5,
+      "cacheYazma": 1.25,
+      "cacheOkuma": 0.1
     }
   }
 }

@@ -180,6 +180,52 @@ const BULGULAR = [
   '',
 ].join('\n');
 
+
+const OZELLIK_YORUM = [
+  'Yorum:',
+  '',
+  '- u0-hepsi (0.15.0 olduğu gibi): iki görevde de kabul ✓ ama görev 06\'da 2,92 $ (taban medyanı 0,37 $, 8 kat; 13,9 dk, 7 alt ajan), görev 07\'de 2,98 $ (0.16.1 medyanı 0,74 $, 4 kat; native 0,65 $; 15 Agent çağrısı, opus ve haiku katmanları). Ret. Bölüm 1\'deki 3,4 kat bulgusu 0.16 koşullarında da tutuyor.',
+  '- u1-cue (her istemde sayım satırı): 0,51 $, taban aralığının (0,26–0,38) üstünde ama 1,5 katın altında; pahalı, sinyal yok. `-p` koşusunda istem bir kez geldiği için satır bir kez girdi; çok turlu oturumdaki tur başı bedeli bu bench\'te ölçülemez, tek satır ~30 token.',
+  '- u2-risk (package.json dahil geniş risk listesi): ipucu package.json\'da ateşlendi, model "atla" dedi, 0,43 $ (aralık üstü, +%18). Sinyal yok; ipucu davranışı değiştirmedi, yalnız bir tur ekledi.',
+  '- u4-verify (Stop\'ta bir kez npm test): 0,55 $ (aralık üstü, +%51, 1,5 katın hemen üstünde, kural gereği ret). Kanca testi koştu, geçti, hiçbir şeyi engellemedi; bench görevlerinde iki kolun kabulü zaten 3/3 olduğu için kazanç ölçülebilir değil.',
+  '- u3-guard (eşikte Write/Edit reddi): n=1\'de 0.16.1 tabanından ucuz çıktığı için kural gereği n=3\'e çıkarıldı. Görev 07 n=3: u3 0,64 / 0,71 / 0,88 $ (medyan 0,71, kabul 3/3), taban 0,52 / 0,74 / 1,00 $ (medyan 0,74, kabul 2/3; düşen koşu readme\'ye maxLength yazmadı). Medyan farkı −%4, u3\'ün üç koşusu da tabanın aralığı içinde. Kapı koşularda 2, 0, 3 kez reddetti; ama iki kolda da altı koşunun altısı docs/plan.md yazdı, yani beş dosya ipucu zaten plan yazdırıyor, kapı üstüne bir şey koymuyor. Sinyal yok.',
+  '- Karar: beş üniteden hiçbiri 0.16\'ya girmiyor. Varyantlar `bench/varyant/` altında duruyor, yeniden ölçmek `bench/varyant.js` ile bir komut.',
+].join('\n');
+
+function ozellik() {
+  const rows = O.jsonlOku(path.join(B, 'sonuc-ozellik.jsonl'));
+  const taban06 = O.jsonlOku(path.join(B, 'sonuc-016c.jsonl')).filter((r) => r.arm === 'core' && r.taskId === '06-slugify-cli' && !r.dropped);
+  const usd06 = taban06.map((r) => r.usd).filter((x) => x != null).sort((a, b) => a - b);
+  const taban07r = rows.filter((r) => r.varyant === 'taban-0.16.1' && r.arm === 'core' && !r.dropped);
+  const usd07 = taban07r.map((r) => r.usd).filter((x) => x != null).sort((a, b) => a - b);
+  const taban07 = taban07r.length ? { usd: O.medyan(usd07), pass: taban07r.filter((r) => r.pass).length + '/' + taban07r.length } : null;
+  const native07 = rows.find((r) => r.arm === 'native' && r.taskId === '07-slugify-uc-parca' && !r.dropped);
+  const out = ['## 8. 0.15 parçaları tek tek geri takıldı, n=1', ''];
+  out.push('Karar kuralı koşudan önce yazıldı (`trash/plan-0.15-parcalar.md`): ünite koşusu tabanın min–max aralığında kalırsa sinyal yok, eklenmez; aralık dışında ve kabul ✓ ise n=3 ile doğrulanır; kabul ✗ ya da 1,5 kat pahalıysa reddedilir. Görev 06 tabanı bölüm 7\'nin üç core koşusu; görev 07 tabanı bu turda koşulan 0.16.1 ve native. Varyantlar `bench/varyant/`, koşturucu `bench/varyant.js` + `BENCH_EKLENTI`. Kaynak: `bench/sonuc-ozellik.jsonl`.', '');
+  out.push('Görev 06 tabanı (core 0.16.1, n=3): $ ' + usd06.map(f2).join(' / ') + ', kabul ' + taban06.filter((r) => r.pass).length + '/' + taban06.length + '.', '');
+  const satirlar = [];
+  for (const r of rows) {
+    let ref = null;
+    if (r.taskId === '06-slugify-cli') ref = { min: usd06[0], max: usd06[usd06.length - 1], med: O.medyan(usd06) };
+    else if (taban07 && r.varyant !== 'taban-0.16.1' && r.arm === 'core') ref = { min: usd07[0], max: usd07[usd07.length - 1], med: taban07.usd };
+    const fark = ref && r.usd != null ? (r.usd - ref.med) / ref.med * 100 : null;
+    let karar = '-';
+    if (r.dropped) karar = 'düştü: ' + r.dropReason;
+    else if (ref) {
+      if (!r.pass) karar = 'ret (kabul ✗)';
+      else if (r.usd >= ref.min && r.usd <= ref.max) karar = 'sinyal yok';
+      else if (r.usd > ref.max) karar = r.usd > ref.med * 1.5 ? 'ret (1,5 kat)' : 'pahalı, sinyal yok';
+      else karar = 'aday (ucuz), n=3 ister';
+    }
+    satirlar.push([r.varyant || r.arm, r.taskId.slice(0, 2), r.arm, r.dropped ? '-' : r.pass ? '✓' : '✗', f2(r.usd), f2(r.wallMs / 60000), r.kanca ? r.kanca.cueHits : '-', r.kanca ? r.kanca.subagents : '-', fark == null ? '-' : fark.toFixed(1) + '%', karar]);
+  }
+  out.push(tablo(['ünite', 'görev', 'kol', 'kabul', '$', 'dk', 'ipucu', 'alt ajan', 'tabana göre', 'karar'], satirlar), '');
+  if (native07) out.push('Görev 07 native: ' + f2(native07.usd) + ' $, kabul ' + (native07.pass ? '✓' : '✗') + '; core 0.16.1 (n=' + taban07r.length + '): $ ' + usd07.map(f2).join(' / ') + ', kabul ' + (taban07 ? taban07.pass : '-') + '. Görev 06 tabanına göre kolon 06 satırlarında bölüm 7 medyanı, 07 satırlarında bu turun 0.16.1 medyanı.', '');
+  out.push('Toplam harcama: ' + f2(rows.reduce((a, r) => a + (r.usd || 0), 0)) + ' $ (' + rows.length + ' koşu).', '');
+  out.push(OZELLIK_YORUM, '');
+  return out.join('\n');
+}
+
 function main() {
   const parcalar = [
     '# Bench Raporu: Core 0.16.0 vs Native Claude Code',
@@ -188,6 +234,7 @@ function main() {
     '',
     taban(), gorevler(), uyari(), devam(), BULGULAR, sonra(),
     sonra('c', 7, 'Üç açık madde sonrası: yeni dosya satırları, kanca günlüğü, devir kuralı', 'Bölüm 6\'nın üç açık maddesi uygulandı: count.js yeni dosyaların satırlarını sayar ama eşiğe yalnız izlenen dosyalardaki değişiklik girer (`edited`); devam.js koşu sonunda kanca durum dizinini ve hata günlüğünü saklar; handoff.md başına tek satır kural girdi ("önce task, sonra changed_files; ilk bitmemiş parçadan sür, diff\'in gösterdiğini yeniden yapma"). İki ölçüm üç tekrarla yeniden koşuldu.'),
+    ozellik(),
   ];
   fs.writeFileSync(path.join(B, 'rapor.md'), parcalar.join('\n') + '\n');
   console.log('bench/rapor.md yazıldı');
