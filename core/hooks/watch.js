@@ -38,6 +38,11 @@ function dispatch(j) {
   if (!role) return '';
   const r = relayRoot(j.cwd || process.cwd(), { git: false });
   if (!r) return '';
+  try {
+    require('./embed.js').materialize(r.relay, String(input.prompt || ''));
+  } catch (e) {
+    return 'The embedded contract was not written: ' + e.message;
+  }
 
   let lines = null;
   try {
@@ -221,6 +226,8 @@ function record(j) {
   }
 
   if (ev === 'SubagentStop' && rec.role) setNotice(r.relay, rec.role + ' ' + t('notice.done'));
+  if (ev === 'SubagentStop' && rec.contract && /^(builder|ui-builder)$/.test(String(rec.role || '')))
+    require('./autoclose.js').launch(r.relay, checkoutRoot(r), rec.contract, rec.id);
 
   if (ev === 'PostToolUseFailure') {
     rec.fails = (rec.fails || 0) + 1;

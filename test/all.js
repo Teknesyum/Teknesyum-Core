@@ -322,6 +322,41 @@ function testUnboundAgent() {
   );
 }
 
+// Sozlesme Agent prompt'unun icinde gider ve kanca dosyayi PreToolUse'ta yazar; kapanis
+// SubagentStop'ta ayrik kosar. Koordinator ne yazma turu ne kapatma turu harcar.
+function testFold() {
+  const root = fixture();
+  const WATCH = path.join(CORE, 'hooks', 'watch.js');
+  const relay = path.join(root, '.claude', 'relay');
+  const NL = String.fromCharCode(10);
+  const body = (id) => ['---', 'id: ' + id, 'status: active', 'round: 1', 'owns: [src/ok.js]', 'verify:', '  - node -e "process.exit(0)"', '---', '', '## Goal', 'sinama', ''].join(NL);
+  const spawn = (id, text) => run(process.execPath, [WATCH], { cwd: root, input: JSON.stringify({
+    hook_event_name: 'PreToolUse', tool_name: 'Agent', agent_id: 'parent', cwd: root,
+    tool_input: { subagent_type: 'teknesyum-core:worker', model: 'sonnet', prompt: 'Contract: .claude/relay/contracts/' + id + '.md' + NL + '<<<SOZLESME>>>' + NL + text + '<<</SOZLESME>>>' + NL },
+  }) });
+  const file = path.join(relay, 'contracts', 'E1.md');
+  const w = spawn('E1', body('E1'));
+  ok('a contract embedded in the dispatch prompt is written before the agent exists', w.status === 0 && fs.existsSync(file), w.stdout + w.stderr);
+  ok('and the file is the embedded text, id first', fs.readFileSync(file, 'utf8').split(String.fromCharCode(13)).join('').indexOf('---' + NL + 'id: E1' + NL) === 0, fs.readFileSync(file, 'utf8').slice(0, 40));
+  fs.appendFileSync(file, 'DEGISTI' + NL);
+  spawn('E1', body('E1'));
+  ok('a second dispatch never overwrites a contract that already exists', /DEGISTI/.test(fs.readFileSync(file, 'utf8')));
+  fs.unlinkSync(file);
+  const bad = spawn('E1', body('E2'));
+  ok('an embedded id that disagrees with the path is refused and nothing is written', bad.status === 2 && /says id: E2/.test(bad.stderr) && !fs.existsSync(file), bad.stdout + bad.stderr);
+  const broken = spawn('E1', body('E1').replace('status: active', 'status: active' + NL + 'status: open'));
+  ok('a malformed embedded contract is refused, not written half-right', broken.status === 2 && !fs.existsSync(file), broken.stdout + broken.stderr);
+
+  const auto = require(path.join(CORE, 'hooks', 'autoclose.js'));
+  writeContract(root, 'A1', body('A1'));
+  const closed = auto.run(relay, root, 'A1', 'a1');
+  ok('a stopped builder is submitted and completed without a coordinator turn', closed.closed === true && fs.existsSync(path.join(root, FINISHED, 'A1.md')), JSON.stringify(closed).slice(0, 300));
+  ok('and the outcome is written where the coordinator reads it', fs.existsSync(auto.resultPath(relay, 'A1')));
+  writeContract(root, 'A2', body('A2').replace('process.exit(0)', 'process.exit(1)'));
+  const failed = auto.run(relay, root, 'A2', 'a2');
+  ok('a red verify leaves the contract submitted and records why - nothing retries', failed.closed === false && failed.complete && failed.complete.code !== 0 && /status: submitted/.test(fs.readFileSync(path.join(relay, 'contracts', 'A2.md'), 'utf8')), JSON.stringify(failed).slice(0, 300));
+}
+
 function testBypass(root) {
   const relay = path.join(root, '.claude', 'relay');
   const live = path.join(relay, 'live');
@@ -2376,6 +2411,7 @@ function main() {
   testOwnsGlob();
   testGateTargets();
   testUnboundAgent();
+  testFold();
   testAuditKind();
   testRoleFromPrompt();
   testRoundIsCounted();
