@@ -1,6 +1,7 @@
 ---
-id: P-eco
-status: submitted
+result: unmet
+id: PECO1
+status: done
 round: 1
 lang: tr
 role: builder
@@ -41,3 +42,9 @@ verify: []
 Açıldı.
 başladı
 Kök neden: `get_pager_file`, yazdığı `MaybeStripAnsi` (bir `io.TextIOWrapper`) nesnesini yalnızca flush edip çöp toplayıcıya bırakıyordu; wrapper GC edilirken sarmaladığı `buffer`'ı (CliRunner'ın stdout'unu) da kapatıyor ve sonraki `result.output` erişimi kapalı dosyada patlıyordu — düzeltme, finally bloğunda `stream.detach()` ile buffer'ı wrapper'dan ayırıp kapanmasını engelliyor.
+
+## Closed - unmet (2026-09-05)
+
+Pilotun ilk turu: dort kol kosuldu ve olculdu, kalan iki kol kullanici karariyla durduruldu. Kabul betigi kosan kollarda bagimsiz PASS verdi; kod atilacak klonda oldugu icin denetci turu acilmadi.
+
+Not sealed. Acceptance was not met; the work stays in the tree.

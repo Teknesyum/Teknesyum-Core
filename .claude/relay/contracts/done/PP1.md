@@ -1,6 +1,7 @@
 ---
-id: P-premium
-status: open
+result: unmet
+id: PP1
+status: done
 round: 1
 lang: tr
 role: builder
@@ -39,3 +40,9 @@ verify: []
 
 ## Checkpoint
 Açıldı.
+
+## Closed - unmet (2026-09-05)
+
+Pilotun ilk turu: dort kol kosuldu ve olculdu, kalan iki kol kullanici karariyla durduruldu. Kabul betigi kosan kollarda bagimsiz PASS verdi; kod atilacak klonda oldugu icin denetci turu acilmadi.
+
+Not sealed. Acceptance was not met; the work stays in the tree.

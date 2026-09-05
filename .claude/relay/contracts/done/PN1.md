@@ -1,6 +1,7 @@
 ---
-id: P-normal
-status: submitted
+result: unmet
+id: PN1
+status: done
 round: 1
 lang: tr
 role: builder
@@ -41,3 +42,9 @@ verify: []
 Açıldı.
 başladı
 Kök neden: `get_pager_file`, non-tty (nullpager) durumunda CliRunner'ın stdout'una ait `buffer`'ı sarmalayan yeni bir `MaybeStripAnsi(TextIOWrapper)` yaratıyor ve bu sarmalayıcı with bloğu bitince referanssız kalıp çöp toplanınca kendi `close()`'u paylaşılan buffer'ı da kapatıyordu, sonraki `sys.stdout.flush()` bu yüzden kapalı dosyaya rastlıyordu; düzeltme `finally` içinde sarmalanmış akışı `detach()` ederek sahiplenmediği buffer'ın kapanmasını engelliyor (`src/click/_termui_impl.py`).
+
+## Closed - unmet (2026-09-05)
+
+Pilotun ilk turu: dort kol kosuldu ve olculdu, kalan iki kol kullanici karariyla durduruldu. Kabul betigi kosan kollarda bagimsiz PASS verdi; kod atilacak klonda oldugu icin denetci turu acilmadi.
+
+Not sealed. Acceptance was not met; the work stays in the tree.
