@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.16.2
+
+- README rewritten with the bench table first and a What Went Out section; stale 0.15.0 plugin cache removed so no worker seat without role files appears in the agent list; stale consultation record cleared
+- Bench: every part removed in 0.16 was re-added as a variant on top of 0.16.1 and measured once (bench/varyant.js, BENCH_EKLENTI); the whole 0.15 plugin cost four to eight times the baseline, the write gate matched the baseline at n=3, nothing went back in (report section 8).
+
 ## v0.16.1
 
 - New-file lines stay out of the line threshold; the handoff opens with a resume rule and carries the task; the bench keeps hook logs and finds bash

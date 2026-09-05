@@ -143,13 +143,13 @@ picks them the way it always did. The removed part was the machine that chose fo
 ### Windows - one line
 
 ```powershell
-irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.16.1/install.ps1 | iex
+irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.16.2/install.ps1 | iex
 ```
 
 ### macOS / Linux - one line
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.16.1/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.16.2/install.sh | bash
 ```
 
 **Restart Claude Code afterwards.** Hooks reload mid-session; the desktop client does not
