@@ -37,7 +37,7 @@ function outsideChanges(root, owns) {
     if (/[RC]/.test(row.slice(0, 2))) names.push(rows[++i]);
     for (const p of names) {
       const k = pathToken(p);
-      if (/^\.claude\/relay\//i.test(k) || /^\.claude\/map\.(md|json)$/i.test(k)) continue;
+      if (/^\.claude\/(relay|worktrees)\//i.test(k) || /^\.claude\/map\.(md|json)$/i.test(k)) continue;
       if (!mine.has(k)) dirty.push(p);
     }
   }

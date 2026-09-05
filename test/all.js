@@ -287,6 +287,17 @@ function testGate(root) {
 // Kaydi hic olmayan bir ajan eskiden hicbir denetime ugramadan gecerdi - acik
 // bir sozlesmenin sahipli dosyasina bile yazabiliyordu. Sahipli dosya artik
 // kapali, sahipsiz dosya acik kalmali.
+function testWorktreeLeftover() {
+  const root = fixture();
+  const seal = require(path.join(CORE, 'hooks', 'seal.js'));
+  fs.mkdirSync(path.join(root, '.claude', 'worktrees', 'agent-x'), { recursive: true });
+  fs.writeFileSync(path.join(root, '.claude', 'worktrees', 'agent-x', 'left.txt'), 'x');
+  fs.writeFileSync(path.join(root, 'stray.txt'), 'x');
+  const dirty = seal.outsideChanges(root, ['src/ok.js']);
+  ok('a leftover agent worktree is not dirt outside owns', !dirty.some((d) => /worktrees/.test(d)), JSON.stringify(dirty));
+  ok('a stray file still is', dirty.some((d) => /stray\.txt/.test(d)), JSON.stringify(dirty));
+}
+
 function testSplitGate() {
   const root = fixture();
   const sess = 'split-' + Date.now();
@@ -2429,7 +2440,8 @@ function main() {
   testHeadlineGate();
   testOwnsGlob();
   testGateTargets();
-  testSplitGate();
+  testWorktreeLeftover();
+testSplitGate();
 testUnboundAgent();
   testFold();
   testAuditKind();
