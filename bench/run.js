@@ -104,7 +104,31 @@ function eklentiKur(configDizini, profil) {
   fs.cpSync(kaynak, hedef, { recursive: true });
   fs.writeFileSync(
     path.join(configDizini, 'settings.json'),
-    JSON.stringify({ enabledPlugins: { 'teknesyum-core@teknesyum': true } }, null, 2)
+    JSON.stringify({
+      enabledPlugins: { 'teknesyum-core@teknesyum': true },
+      extraKnownMarketplaces: { teknesyum: { source: { source: 'github', repo: 'Teknesyum/Teknesyum-Core' } } },
+    }, null, 2)
+  );
+  const pazarKaynak = path.join(os.homedir(), '.claude', 'plugins', 'marketplaces', 'teknesyum');
+  const pazarHedef = path.join(configDizini, 'plugins', 'marketplaces', 'teknesyum');
+  if (fs.existsSync(pazarKaynak)) fs.cpSync(pazarKaynak, pazarHedef, { recursive: true });
+  const simdi = new Date().toISOString();
+  fs.writeFileSync(
+    path.join(configDizini, 'plugins', 'known_marketplaces.json'),
+    JSON.stringify({
+      teknesyum: { source: { source: 'github', repo: 'Teknesyum/Teknesyum-Core' }, installLocation: pazarHedef, lastUpdated: simdi },
+    }, null, 2)
+  );
+  fs.writeFileSync(
+    path.join(configDizini, 'plugins', 'installed_plugins.json'),
+    JSON.stringify({
+      version: 2,
+      plugins: {
+        'teknesyum-core@teknesyum': [
+          { scope: 'user', installPath: hedef, version: surum, installedAt: simdi, lastUpdated: simdi },
+        ],
+      },
+    }, null, 2)
   );
   const teknesyumDizini = path.join(configDizini, 'teknesyum');
   fs.mkdirSync(teknesyumDizini, { recursive: true });
