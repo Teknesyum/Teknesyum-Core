@@ -51,12 +51,13 @@ function planOlustur(kapsam, seed, secim = {}) {
   const gorevler = kapsam === 'tam' ? GOREVLER : GOREVLER.slice(0, 2);
   const kollar = secim.kollar && secim.kollar.length ? secim.kollar : KOLLAR;
   const tekrar = secim.tekrar || TEKRAR;
+  const tekrarBas = secim.tekrarBas || 1;
   for (const arm of kollar) if (!KOLLAR.includes(arm)) throw new Error('bilinmeyen kol: ' + arm);
   const liste = [];
   for (const taskId of gorevler) {
     for (const arm of kollar) {
       const seat = koltukOku(arm);
-      for (let repeat = 1; repeat <= tekrar; repeat++) {
+      for (let repeat = tekrarBas; repeat <= tekrar; repeat++) {
         liste.push({ taskId, arm, seat, repeat });
       }
     }
@@ -361,6 +362,7 @@ function main() {
   const secim = {
     kollar: kollarArg ? kollarArg.split(',').map((k) => k.trim()).filter(Boolean) : null,
     tekrar: Number(argAl('--repeat', '0')) || null,
+    tekrarBas: Number(argAl('--repeatFrom', '0')) || null,
   };
   const sonucYolu = argAl('--sonuc', null);
   const plan = planOlustur(kapsam, seed, secim);
