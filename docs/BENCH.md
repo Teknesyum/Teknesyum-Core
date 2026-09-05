@@ -120,8 +120,15 @@ rapora not düşülür.
   config dizini Core'u da yok eder.
 - RTK kancası ya bütün koşularda açık ya bütün koşularda kapalı.
 - Görev metinleri ve kabul testleri **koşudan önce** yazılır ve dondurulur.
-- Native koşuya aynı görev metni **tek seferde** verilir, arkasından hiçbir ek mesaj yok.
-  Core'un sözleşme şablonundan gelen ek yönerge görev metnine sızmaz.
+- **İki kola da birebir aynı görev metni verilir**, tek seferde, arkasından hiçbir ek mesaj
+  yok. Core kolunun sözleşmesi görev metninin yerine geçmez, yanına eklenir: sözleşme yalnız
+  kapıyı ve `owns` sınırını tanımlar. Bu kural 2026-09-05 pilotunda ihlal edildi ve ölçümü
+  geçersiz kıldı — Core koluna yalın bir `Goal` verilmişti, native koluna traceback ve
+  reprodüksiyon kodu dahil tam metin. Aradaki %57 kapının değil eksik brifingin bedeliydi.
+  Bkz. [pilot sonucu](raporlar/2026-09-05-pilot-bench-sonuc.md).
+- **Ajan sözleşme dosyasına dokunmaz.** Bağlanma dispatch anında, promptta geçen sözleşme
+  yolundan kurulur; ajana önce status: active yaz dedirtmek koşu başına bir tur ekler ve
+  hiçbir güvence katmaz.
 - **Kabul yargısı kördür.** pass@1'i kabul testi verdiği için zaten kör; ama "düşen koşu" ve
   tavan kararı da kol etiketi görünmeden verilir.
 - Görev başına **30 dk duvar tavanı**. Tavana çarpan koşu `fail` sayılır.

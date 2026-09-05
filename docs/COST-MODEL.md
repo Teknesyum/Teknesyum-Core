@@ -10,6 +10,34 @@ tool results, actionable cues and blocked calls still contribute. Repeated work
 and model routing can dominate these savings. See the
 [VidShrink audit](raporlar/2026-09-03-vidshrink-denetim.md) for measured usage and limits.
 
+## Measured: what the relay itself costs (2026-09-05)
+
+The claim above is about context injection, not about the relay being free. Both halves have
+now been measured on a real task (`pallets/click` bugfix, `sonnet/low`, three repeats each).
+
+**Context injection is zero.** All four context hooks - `UserPromptSubmit`, `SessionStart`,
+`Stop`, `MessageDisplay` - were run against a live session payload and each returned zero
+bytes. Nothing reaches the model on an ordinary turn.
+
+**The gate itself is free too, once the agent never touches the contract.** Binding is
+established at dispatch from the contract path in the prompt, so the agent needs no write of
+its own. With the identical task text on both sides:
+
+| Arm | Turns (median) | Agent cost (median) |
+|---|---|---|
+| no contract | 11 | $0.1079 |
+| under contract, agent writes it once | 12 | $0.1292 |
+| under contract, agent never touches it | 10 | $0.1047 |
+
+The last row sits 2.9% *below* the contract-less arm and the ranges overlap, so the gate has
+no measurable cost. Two caveats hold: one task, three repeats, one seat; and the cost of the
+coordinator running the relay is a separate line item, roughly 85% of the total in that
+measurement and not yet split by phase. Detail:
+[pilot bench result](raporlar/2026-09-05-pilot-bench-sonuc.md).
+
+Two rules follow, and both are load-bearing: give every arm the same task text, and never ask
+an agent to write its own contract to become bound.
+
 ## Classes
 
 | Class | Paid | Cached | Stays in transcript | Verdict |
