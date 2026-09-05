@@ -144,6 +144,25 @@ olan oturum.
 
 ---
 
+## Ölçüldü
+
+Core 0.16.0, 2026-09-05'te düz Claude Code'a karşı: aynı koltuk (sonnet, düşük effort), temiz
+config, kol başına beş tekrar. Tablolar, yöntem ve ham satırlar [bench/rapor.md](bench/rapor.md)
+içinde.
+
+- Sıradan tura kancalardan sıfır bayt gelir. CLAUDE.md'de duran beş satırlık kural tur başına
+  yaklaşık 200 token cache okuması tutar, kabaca doların on binde biri.
+- Görev 02-05: medyan maliyet native'in yüzde üçü içinde ya da daha ucuz, yani gürültü. Görev
+  06 tam dört dosyaya dokunur, sayma kancası her koşuda konuşur; model her seferinde atla der ve
+  koşu yüzde dokuz pahalı çıkar.
+- Kancanın söylediği tek satır: yaklaşık 450 token, ek araç çağrısı yok.
+- Resume: devir her seferinde yazılır ama altı turda kesilen oturum bağlam eşiğine varmaz;
+  decisions ve next_action boş kalır ve dosya görevi taşımaz. "Devam et" işi devirle beşte bir,
+  devirsiz beşte sıfır koşuda bitirdi. Bundan çıkan ve bu sürüme girmeyen iki değişiklik: devir
+  oturumun ilk istemini taşımalı, dört dosya eşiği meşru dört dosyalık işte tetikleniyor.
+
+---
+
 ## Kancalar
 
 Altı olay, altı komut, hepsi `core/hooks/` altında:

@@ -18,8 +18,11 @@
   Notification. Bağlama yalnız count.js yazar; test bunu denetler.
 - setup.js sözleşme dili, profil ve araştırma sorularını sormaz. doctor.js yedi kontrole indi.
   notify.js relay meşguliyetine bakmaz. lib.js relay yollarını unuttu.
-- README'ye bench sayısı yazılmadı; bench (taban, 02-06, uyarı bedeli, resume) sürüm
-  kapanmadan koşulacak ve `bench/rapor.md`'ye girecek.
+- Bench koştu (`bench/rapor.md`): sıradan turda kancadan 0 bayt, K0 kuralı tur başına ~200
+  token cache okuması; görev 02-05 native ile ±%3, görev 06 +%9 (dört dosya eşiği her koşuda
+  tetiklendi); uyarı satırı ~450 token; resume kabulü devirle 1/5, devirsiz 0/5. Ölçüm
+  betikleri `bench/taban.js`, `bench/uyari.js`, `bench/devam.js`, `bench/rapor016.js`;
+  `bench/run.js` kolları core/native oldu, tiers.json bağımlılığı gitti.
 
 ## v0.15.0
 

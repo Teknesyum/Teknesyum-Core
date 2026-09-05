@@ -65,17 +65,16 @@ karşılaştırılır; yoksa ölçülen şey harness farkı değil koltuk farkı
 
 | Çift | Core kolu | Native eşi | Koltuk |
 |---|---|---|---|
-| 1 | `eco` | `native-eco` | `sonnet/low` |
-| 2 | `normal` | `native-normal` | `sonnet/medium` |
-| 3 | `premium` | `native-premium` | `sonnet/high` |
+| 1 | `core` | `native` | `sonnet/low` (`--seat` ile değişir) |
 
-Koltuk, `core/tiers.json`'daki builder hücresidir. Core kolunda t0 ayrıca kendi koltuğunu
-kullanır (eco `sonnet`, normal ve premium `opus`); native kolunda t0 diye bir şey yok, tek
-ajan builder koltuğuyla koşar. Bu asimetri Core'un mekanizmasının parçasıdır ve maliyete
-dahildir — gizlenmez, raporda ayrı satırda gösterilir.
+0.16 ile kol ikiye indi: `core` eklenti 0.16.0 artı CLAUDE.md'de K0 kuralı, `native` boş
+config. İki kol aynı koltukta koşar; koltuk `bench/run.js --seat model/effort` ile verilir,
+varsayılan `sonnet/low`. Sonuçlar `bench/sonuc-016.jsonl`, rapor `bench/rapor.md`
+(`bench/rapor016.js` üretir). Taban, uyarı bedeli ve resume ölçümleri `bench/taban.js`,
+`bench/uyari.js`, `bench/devam.js`.
 
-**Pilot:** 2 görev × 3 tekrar × 6 kol = **36 koşu**.
-**Tam:** 5 görev × 3 tekrar × 6 kol = **90 koşu**.
+**Pilot:** 2 görev × 3 tekrar × 2 kol = **12 koşu**.
+**Tam:** 5 görev × 5 tekrar × 2 kol = **50 koşu**.
 
 Görev türleri, tamda üçü de temsil edilir:
 
@@ -154,12 +153,8 @@ README'ye girecek tablo:
 
 | Çift | Kol | pass@1 | medyan $ | medyan dk | düşen koşu |
 |---|---|---|---|---|---|
-| eco | native-eco | | | | |
-| eco | eco | | | | |
-| normal | native-normal | | | | |
-| normal | normal | | | | |
-| premium | native-premium | | | | |
-| premium | premium | | | | |
+| 1 | native | | | | |
+| 1 | core | | | | |
 
 Yanına tarih, model id ve Claude Code sürümü. Rakamlar gelmeden README'ye tek satır yazılmaz.
 

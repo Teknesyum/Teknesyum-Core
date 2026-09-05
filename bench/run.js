@@ -5,9 +5,20 @@ const { spawn, spawnSync } = require('child_process');
 const maliyet = require('./maliyet');
 
 const KOK = path.resolve(__dirname, '..');
-const GOREVLER = ['01-slugify', '02-click', '03-wrap-ansi', '04-gray-matter', '05-requests'];
-const KOLLAR = ['eco', 'native-eco', 'normal', 'native-normal', 'premium', 'native-premium'];
-const TEKRAR = 3;
+const GOREVLER = ['02-click', '03-wrap-ansi', '04-gray-matter', '05-requests', '06-slugify-cli'];
+const KOLLAR = ['core', 'native'];
+const KOLTUK = 'sonnet/low';
+const TEKRAR = 5;
+const K0 = [
+  '# Çalışma kuralı (K0)',
+  '',
+  '- Tek dosya ve bildiğin iş: yap.',
+  '- Dört ve üstü dosya: önce docs/plan.md.',
+  '- Bilmediğin kütüphane: yazmadan önce oku.',
+  '- Bitince çalıştır, çıktıyı göster.',
+  '- Küçük iş: bunların hiçbiri.',
+  '',
+].join('\n');
 const TAVAN_MS = 30 * 60 * 1000;
 
 function argAl(bayrak, varsayilan) {
@@ -16,14 +27,9 @@ function argAl(bayrak, varsayilan) {
   return process.argv[i + 1];
 }
 
-function coreArm(arm) {
-  return arm.startsWith('native-') ? arm.slice('native-'.length) : arm;
-}
-
-function koltukOku(arm) {
-  const tiers = JSON.parse(fs.readFileSync(path.join(KOK, 'core', 'tiers.json'), 'utf8'));
-  const koltuk = tiers.cells.builder[coreArm(arm)];
-  if (!koltuk) throw new Error('koltuk bulunamadi: ' + arm);
+function koltukOku(secim = {}) {
+  const koltuk = secim.koltuk || KOLTUK;
+  if (!/^[a-z0-9.-]+\/(low|medium|high|max)$/.test(koltuk)) throw new Error('koltuk bicimi model/effort olmali: ' + koltuk);
   return koltuk;
 }
 
@@ -56,7 +62,7 @@ function planOlustur(kapsam, seed, secim = {}) {
   const liste = [];
   for (const taskId of gorevler) {
     for (const arm of kollar) {
-      const seat = koltukOku(arm);
+      const seat = koltukOku(secim);
       for (let repeat = tekrarBas; repeat <= tekrar; repeat++) {
         liste.push({ taskId, arm, seat, repeat });
       }
@@ -96,7 +102,7 @@ function silGeriDonusumsuz(dizin) {
   try { fs.rmSync(dizin, { recursive: true, force: true }); } catch {}
 }
 
-function eklentiKur(configDizini, profil) {
+function eklentiKur(configDizini) {
   const surum = JSON.parse(fs.readFileSync(path.join(KOK, 'core', '.claude-plugin', 'plugin.json'), 'utf8')).version;
   const kaynak = path.join(os.homedir(), '.claude', 'plugins', 'cache', 'teknesyum', 'teknesyum-core', surum);
   const hedef = path.join(configDizini, 'plugins', 'cache', 'teknesyum', 'teknesyum-core', surum);
@@ -109,10 +115,7 @@ function eklentiKur(configDizini, profil) {
       extraKnownMarketplaces: { teknesyum: { source: { source: 'github', repo: 'Teknesyum/Teknesyum-Core' } } },
     }, null, 2)
   );
-  for (const ad of ['CLAUDE.md', 'RTK.md', 'RULES.md']) {
-    const k = path.join(os.homedir(), '.claude', ad);
-    if (fs.existsSync(k)) fs.copyFileSync(k, path.join(configDizini, ad));
-  }
+  fs.writeFileSync(path.join(configDizini, 'CLAUDE.md'), K0);
   const pazarKaynak = path.join(os.homedir(), '.claude', 'plugins', 'marketplaces', 'teknesyum');
   const pazarHedef = path.join(configDizini, 'plugins', 'marketplaces', 'teknesyum');
   if (fs.existsSync(pazarKaynak)) fs.cpSync(pazarKaynak, pazarHedef, { recursive: true });
@@ -137,38 +140,39 @@ function eklentiKur(configDizini, profil) {
   const teknesyumDizini = path.join(configDizini, 'teknesyum');
   fs.mkdirSync(teknesyumDizini, { recursive: true });
   fs.writeFileSync(path.join(teknesyumDizini, 'config.json'), JSON.stringify({
-    lang: 'en',
-    contractLang: 'en',
-    profile: profil,
+    lang: 'tr',
     notify: false,
-    research: false,
     projectsRoot: null,
     privateRepo: null,
     installedAt: new Date().toISOString(),
     pluginDir: hedef.replace(/\\/g, '/'),
-    coreRepo: null,
   }, null, 2));
 }
 
-function mdSay(dizin) {
-  if (!fs.existsSync(dizin)) return 0;
-  let n = 0;
-  for (const girdi of fs.readdirSync(dizin, { withFileTypes: true })) {
-    if (girdi.isDirectory()) n += mdSay(path.join(dizin, girdi.name));
-    else if (girdi.name.endsWith('.md')) n += 1;
-  }
-  return n;
-}
-
-function relaySay(calismaDizini, oturumDizini) {
+function kancaSay(oturumDizini) {
   const altAjanDizini = path.join(oturumDizini, 'subagents');
   const altAjan = fs.existsSync(altAjanDizini)
     ? fs.readdirSync(altAjanDizini).filter((d) => /^agent-.*\.jsonl$/.test(d)).length
     : 0;
-  return {
-    contracts: mdSay(path.join(calismaDizini, '.claude', 'relay', 'contracts')),
-    subagents: altAjan,
-  };
+  let cueHits = 0;
+  let cueBytes = 0;
+  const cues = [];
+  const yol = oturumDizini + '.jsonl';
+  if (fs.existsSync(yol)) {
+    for (const satir of fs.readFileSync(yol, 'utf8').split('\n')) {
+      if (!satir.includes('hook_additional_context')) continue;
+      let j;
+      try { j = JSON.parse(satir); } catch { continue; }
+      const ek = j.attachment && j.attachment.type === 'hook_additional_context' ? j.attachment : null;
+      if (!ek) continue;
+      for (const icerik of [].concat(ek.content || [])) {
+        cueHits += 1;
+        cueBytes += Buffer.byteLength(String(icerik));
+        cues.push(String(icerik).slice(0, 120));
+      }
+    }
+  }
+  return { subagents: altAjan, cueHits, cueBytes, cues };
 }
 
 function transkriptSakla(oturumDizini, batchId, kosu) {
@@ -319,7 +323,7 @@ async function koşuYap(kosu, batchId, ccVersion, bagimlar = {}) {
     startedAt: new Date(baslangic).toISOString(),
     wallMs: null, pass: false, dropped: false, dropReason: null,
     tokens: null, usd: null, usdSource: null,
-    relay: null,
+    kanca: null,
   };
   try {
     const gorev = gorevOku(taskId, bagimlar.gorevKok);
@@ -335,7 +339,7 @@ async function koşuYap(kosu, batchId, ccVersion, bagimlar = {}) {
     if (!disEnv.ANTHROPIC_API_KEY && bagimlar.configTemplate) {
       (bagimlar.kopyala || configSablonundanKopyala)(bagimlar.configTemplate, configDizini);
     }
-    if (!arm.startsWith('native-')) eklentiKur(configDizini, coreArm(arm));
+    if (arm === 'core') eklentiKur(configDizini);
     const env = { ...disEnv, CLAUDE_CONFIG_DIR: configDizini };
     const argumanlar = ['-p', gorev.prompt, '--model', model, '--effort', effort, '--permission-mode', 'bypassPermissions'];
     const { zamanAsimi } = await calistirici('claude', argumanlar, { cwd: calismaDizini, env, windowsHide: true });
@@ -346,7 +350,7 @@ async function koşuYap(kosu, batchId, ccVersion, bagimlar = {}) {
     if (sessionId) {
       const oturumDizini = path.join(projeDizini, sessionId);
       satir.transcript = transkriptSakla(oturumDizini, batchId, kosu);
-      satir.relay = relaySay(calismaDizini, oturumDizini);
+      satir.kanca = kancaSay(oturumDizini);
       satir.modelId = maliyet.anaModel(oturumDizini);
       const sepet = maliyet.tokenlar(oturumDizini);
       satir.tokens = sepet;
@@ -428,6 +432,7 @@ function main() {
     tekrar: Number(argAl('--repeat', '0')) || null,
     tekrarBas: Number(argAl('--repeatFrom', '0')) || null,
     t0: argAl('--t0', '') || null,
+    koltuk: argAl('--seat', '') || null,
     gorevler: argAl('--tasks', '') ? argAl('--tasks', '').split(',').map((g) => g.trim()).filter(Boolean) : null,
   };
   const sonucYolu = argAl('--sonuc', null);
@@ -453,8 +458,8 @@ function main() {
 if (require.main === module) main();
 
 module.exports = {
-  planOlustur, koltukOku, coreArm, encodeCwd, gorevOku, eklentiKur, relaySay,
-  sonSessionId, koşuYap, ccVersionOku, KOLLAR, GOREVLER,
+  planOlustur, koltukOku, encodeCwd, gorevOku, eklentiKur, kancaSay,
+  sonSessionId, koşuYap, ccVersionOku, KOLLAR, GOREVLER, KOLTUK, K0,
   calistir, onKontrolluCalistir, onKontrolYap, configSablonundanKopyala,
   onKontrolMesaji, IZIN_VERILEN_CONFIG_GIRDILERI,
 };

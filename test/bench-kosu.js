@@ -58,7 +58,7 @@ test('her kol için model, effort ve CLAUDE_CONFIG_DIR argümanlara doğru geçe
     });
     return { kod: 0, zamanAsimi: false };
   };
-  const kosu = { taskId: 'sahte-gorev', arm: 'premium', seat: 'sonnet/high', repeat: 1 };
+  const kosu = { taskId: 'sahte-gorev', arm: 'core', seat: 'sonnet/high', repeat: 1 };
   await koşuYap(kosu, 'batch1', 'cc-test', { git: basariliGit(), calistirici, mkdtemp, gorevKok: GOREV_KOK });
   assert.equal(yakalanan.length, 1);
   assert.equal(yakalanan[0].komut, 'claude');
@@ -66,64 +66,49 @@ test('her kol için model, effort ve CLAUDE_CONFIG_DIR argümanlara doğru geçe
   assert.equal(yakalanan[0].env.CLAUDE_CONFIG_DIR, dizinler[0]);
 });
 
-test('core kolunda config.json doğru profille yazılır', async () => {
+test('core kolunda config.json profilsiz yazılır ve CLAUDE.md yalnız K0 kuralıdır', async () => {
   const { mkdtemp } = mkdtempSahte();
-  let cfg;
+  let cfg, claudeMd;
   const calistirici = async (komut, argumanlar, secenekler) => {
     cfg = configOku(secenekler.env.CLAUDE_CONFIG_DIR);
+    claudeMd = fs.readFileSync(path.join(secenekler.env.CLAUDE_CONFIG_DIR, 'CLAUDE.md'), 'utf8');
     sahteOturumYaz(secenekler.env.CLAUDE_CONFIG_DIR, secenekler.cwd, 'claude-sonnet-5', {
       input_tokens: 1, output_tokens: 1, cache_creation_input_tokens: 1, cache_read_input_tokens: 1,
     });
     return { kod: 0, zamanAsimi: false };
   };
-  const kosu = { taskId: 'sahte-gorev', arm: 'normal', seat: 'sonnet/medium', repeat: 1 };
+  const kosu = { taskId: 'sahte-gorev', arm: 'core', seat: 'sonnet/low', repeat: 1 };
   await koşuYap(kosu, 'batch1', 'cc-test', { git: basariliGit(), calistirici, mkdtemp, gorevKok: GOREV_KOK });
-  assert.equal(cfg.profile, 'normal');
+  assert.equal(cfg.profile, undefined);
+  assert.equal(cfg.contractLang, undefined);
   assert.equal(typeof cfg.lang, 'string');
-  assert.equal(typeof cfg.contractLang, 'string');
+  assert.ok(/docs\/plan\.md/.test(claudeMd));
+  assert.ok(!/relay|sözleşme/i.test(claudeMd));
 });
 
-test('native kolunda config.json hiç yazılmaz', async () => {
+test('native kolunda config.json, CLAUDE.md ve eklenti hiç yazılmaz', async () => {
   const { mkdtemp } = mkdtempSahte();
   let varMi;
   const calistirici = async (komut, argumanlar, secenekler) => {
-    varMi = fs.existsSync(path.join(secenekler.env.CLAUDE_CONFIG_DIR, 'teknesyum', 'config.json'));
+    const d = secenekler.env.CLAUDE_CONFIG_DIR;
+    varMi = ['teknesyum/config.json', 'CLAUDE.md', 'plugins'].some((x) => fs.existsSync(path.join(d, x)));
     sahteOturumYaz(secenekler.env.CLAUDE_CONFIG_DIR, secenekler.cwd, 'claude-sonnet-5', {
       input_tokens: 1, output_tokens: 1, cache_creation_input_tokens: 1, cache_read_input_tokens: 1,
     });
     return { kod: 0, zamanAsimi: false };
   };
-  const kosu = { taskId: 'sahte-gorev', arm: 'native-normal', seat: 'sonnet/medium', repeat: 1 };
+  const kosu = { taskId: 'sahte-gorev', arm: 'native', seat: 'sonnet/low', repeat: 1 };
   await koşuYap(kosu, 'batch1', 'cc-test', { git: basariliGit(), calistirici, mkdtemp, gorevKok: GOREV_KOK });
   assert.equal(varMi, false);
 });
 
-test('üç Core kolu birbirinden farklı effort ve profille çağrılır', async () => {
-  const cagrilar = {};
-  for (const arm of ['eco', 'normal', 'premium']) {
-    const { mkdtemp } = mkdtempSahte();
-    let argumanlar, cfg;
-    const calistirici = async (komut, a, secenekler) => {
-      argumanlar = a;
-      cfg = configOku(secenekler.env.CLAUDE_CONFIG_DIR);
-      sahteOturumYaz(secenekler.env.CLAUDE_CONFIG_DIR, secenekler.cwd, 'claude-sonnet-5', {
-        input_tokens: 1, output_tokens: 1, cache_creation_input_tokens: 1, cache_read_input_tokens: 1,
-      });
-      return { kod: 0, zamanAsimi: false };
-    };
-    const seat = { eco: 'sonnet/low', normal: 'sonnet/medium', premium: 'sonnet/high' }[arm];
-    const kosu = { taskId: 'sahte-gorev', arm, seat, repeat: 1 };
-    await koşuYap(kosu, 'batch1', 'cc-test', { git: basariliGit(), calistirici, mkdtemp, gorevKok: GOREV_KOK });
-    cagrilar[arm] = { effort: argumanlar[argumanlar.indexOf('--effort') + 1], profile: cfg.profile };
-  }
-  assert.equal(cagrilar.eco.effort, 'low');
-  assert.equal(cagrilar.normal.effort, 'medium');
-  assert.equal(cagrilar.premium.effort, 'high');
-  assert.equal(cagrilar.eco.profile, 'eco');
-  assert.equal(cagrilar.normal.profile, 'normal');
-  assert.equal(cagrilar.premium.profile, 'premium');
-  assert.equal(new Set(Object.values(cagrilar).map((c) => c.effort)).size, 3);
-  assert.equal(new Set(Object.values(cagrilar).map((c) => c.profile)).size, 3);
+test('koltuk argümandan gelir, plan iki kolu aynı koltukla üretir', async () => {
+  const { planOlustur, KOLLAR, GOREVLER } = require('../bench/run');
+  const plan = planOlustur('tam', 1, { koltuk: 'sonnet/medium', tekrar: 2 });
+  assert.equal(plan.length, GOREVLER.length * KOLLAR.length * 2);
+  assert.ok(plan.every((k) => k.seat === 'sonnet/medium'));
+  assert.deepEqual(new Set(plan.map((k) => k.arm)), new Set(['core', 'native']));
+  assert.throws(() => planOlustur('tam', 1, { koltuk: 'sonnet' }), /koltuk/);
 });
 
 test('git clone/checkout başarısız olursa dropped:true, dropReason:setup, kabul hiç çalışmaz', async () => {
@@ -131,7 +116,7 @@ test('git clone/checkout başarısız olursa dropped:true, dropReason:setup, kab
   let calistiriciCagrildi = false;
   const calistirici = async () => { calistiriciCagrildi = true; return { kod: 0, zamanAsimi: false }; };
   const basarisizGit = { klonla: () => ({ status: 1 }), checkoutYap: () => ({ status: 0 }) };
-  const kosu = { taskId: 'sahte-gorev', arm: 'eco', seat: 'sonnet/low', repeat: 1 };
+  const kosu = { taskId: 'sahte-gorev', arm: 'core', seat: 'sonnet/low', repeat: 1 };
   const satir = await koşuYap(kosu, 'batch1', 'cc-test', { git: basarisizGit, calistirici, mkdtemp, gorevKok: GOREV_KOK });
   assert.equal(satir.dropped, true);
   assert.equal(satir.dropReason, 'setup');
@@ -147,7 +132,7 @@ test('tavana çarpan koşu dropped:true, dropReason:ceiling olur ve harcanan tok
     });
     return { kod: 1, zamanAsimi: true };
   };
-  const kosu = { taskId: 'sahte-gorev', arm: 'eco', seat: 'sonnet/low', repeat: 1 };
+  const kosu = { taskId: 'sahte-gorev', arm: 'core', seat: 'sonnet/low', repeat: 1 };
   const satir = await koşuYap(kosu, 'batch1', 'cc-test', { git: basariliGit(), calistirici, mkdtemp, gorevKok: GOREV_KOK });
   assert.equal(satir.dropped, true);
   assert.equal(satir.dropReason, 'ceiling');
@@ -163,7 +148,7 @@ test('gerçek model kimliği transcriptten okunur, koltuk adı değil', async ()
     });
     return { kod: 0, zamanAsimi: false };
   };
-  const kosu = { taskId: 'sahte-gorev', arm: 'eco', seat: 'sonnet/low', repeat: 1 };
+  const kosu = { taskId: 'sahte-gorev', arm: 'core', seat: 'sonnet/low', repeat: 1 };
   const satir = await koşuYap(kosu, 'batch1', 'cc-test', { git: basariliGit(), calistirici, mkdtemp, gorevKok: GOREV_KOK });
   assert.equal(satir.modelId, 'claude-sonnet-5');
   assert.notEqual(satir.modelId, 'sonnet');
@@ -172,7 +157,7 @@ test('gerçek model kimliği transcriptten okunur, koltuk adı değil', async ()
 test('görev dosyasında frontmatter yoksa net bir hatayla durur, sessizce başka kaynağa düşmez', async () => {
   const { mkdtemp } = mkdtempSahte();
   const calistirici = async () => { throw new Error('calistirici cagrilmamali'); };
-  const kosu = { taskId: 'bozuk-gorev', arm: 'eco', seat: 'sonnet/low', repeat: 1 };
+  const kosu = { taskId: 'bozuk-gorev', arm: 'core', seat: 'sonnet/low', repeat: 1 };
   await assert.rejects(
     koşuYap(kosu, 'batch1', 'cc-test', { git: basariliGit(), calistirici, mkdtemp, gorevKok: GOREV_KOK }),
     /frontmatter/

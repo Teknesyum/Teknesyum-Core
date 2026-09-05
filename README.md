@@ -147,6 +147,26 @@ second is a session that wrote its plan, ran its tests, and has a handoff waitin
 
 ---
 
+## Measured
+
+Core 0.16.0 against plain Claude Code on 2026-09-05: same seat (sonnet, low effort), clean
+config, five repeats per arm. Tables, method and the raw rows are in [bench/rapor.md](bench/rapor.md).
+
+- An ordinary turn gets zero bytes from the hooks. The five-line rule sitting in CLAUDE.md
+  costs about 200 tokens of cache read per turn, roughly a ten-thousandth of a dollar.
+- Tasks 02-05: median cost within three percent of native, or cheaper, which is noise. Task 06
+  touches exactly four files, so the count hook speaks on every run; the model says skip each
+  time and the run costs nine percent more.
+- The one line the hook speaks: about 450 tokens, no extra tool call.
+- Resume: the handoff is written every time, but a session cut at six turns never reaches
+  the context threshold, so decisions and next_action stay empty and the file does not carry
+  the task. "Continue" finished the task in one of five runs with the handoff and none of five
+  without. Two things to change follow from that and are not in this release: the handoff
+  should carry the session's first prompt, and a four-file threshold fires on a legitimate
+  four-file task.
+
+---
+
 ## Hooks
 
 Six events, six commands, all under `core/hooks/`:
