@@ -225,3 +225,28 @@ test-cli.js` yeşil. Kol etiketi görmez, yalnız dizin alır.
 
 Referans doğrulama: temiz pin **FAIL** (`bin.slugify yok`); bağımsız bir sonnet/low ajanının
 yalnız görev metniyle ürettiği çözüm **PASS** (35 ava testi yeşil).
+
+---
+
+## 07 — sindresorhus/slugify üç parça (paralel bölme bench'i)
+
+**Dondurma tarihi:** 2026-09-05T16:45:00Z. **Pinlenen commit:** 01/06 ile aynı.
+
+**Neden var:** karar dosyasındaki (docs/raporlar/2026-09-05-karar.md) paralel ölçüm. Üç
+bağımsız parça — A: CLI (`cli.js`, `package.json` bin, `test-cli.js`), B: `maxLength`
+seçeneği (`index.js`, `index.d.ts`, `test-maxlength.js`), C: Türkçe/Almanca tabloları
+(`overridable-replacements.js`, `test-replacements.js`) — hepsi `readme.md`'ye ayrı bölüm
+ekler (ortak dosya). Parçaların dosya kümeleri ortak dosya dışında kesişmez.
+
+**Kollar:** `07-slugify-uc-parca.md` Core ve native-ardışık kollarına aynen gider;
+`07-slugify-uc-parca-paralel.md` aynı metin + tek cümle ("parçaları ayrı alt ajanlara verip
+paralel çalıştırabilirsin"), native-paralel kolu için. Kabul betiği ikisi için de
+`07-slugify-uc-parca.kabul.sh` (koşucu `-paralel` ekini düşürür).
+
+**Kabul:** bağımlılık sınırı; A için CLI davranışları (06 ile aynı çekirdek); B için yedi
+`maxLength` örneği (`.kabul-b.mjs` prob dosyası çalışma dizinine yazılıp silinir); C için
+tablo dışa aktarımları, dört örnek (`Ölçü birimi` → `olcu-birimi` yalnız Türkçe tabloyla
+çıkar, varsayılan `oelcue`); üç test dosyası ve üç readme başlığı; `npx ava` dört dosyada yeşil.
+
+**Tahmini süre:** ardışık 8-15 dk. Referans doğrulama: temiz pin **FAIL** (`A: bin.slugify yok`);
+bağımsız sonnet/low ajanının çözümü **PASS** (40 ava testi).

@@ -368,7 +368,8 @@ async function koşuYap(kosu, batchId, ccVersion, bagimlar = {}) {
       satir.dropped = true;
       satir.dropReason = 'modelId-okunamadi';
     } else {
-      const kabulYolu = path.join(KOK, 'bench', 'gorevler', taskId + '.kabul.sh');
+      let kabulYolu = path.join(KOK, 'bench', 'gorevler', taskId + '.kabul.sh');
+      if (!fs.existsSync(kabulYolu)) kabulYolu = path.join(KOK, 'bench', 'gorevler', taskId.replace(/-paralel$/, '') + '.kabul.sh');
       const kabul = kabulCalistir(kabulYolu, calismaDizini);
       satir.pass = kabul.status === 0;
       satir.kabulNot = kabul.son || null;
