@@ -29,26 +29,8 @@ Report a broken rule; do not hide one.
 
 ## Contract
 
-```markdown
----
-id: T7
-status: open
-round: 1
-owns: [src/auth/token.js, test/token.test.js]
-verify:
-  - node --test test/token.test.js
----
-
-## Goal
-One sentence.
-
-## Acceptance
-- Refresh tokens expire after 15 minutes.
-- Expired refresh returns 401, not 500.
-
-## Checkpoint
-Updated as work proceeds, not at the end.
-```
+Frontmatter as in the dispatch template below. Under it: `## Goal` in one sentence,
+`## Acceptance` as bullets, `## Checkpoint` only when a blocker has to be recorded.
 
 Enforced, not advised:
 
@@ -61,8 +43,8 @@ Enforced, not advised:
   committed success, not an unmet/adopted archive; `list --ready` shows unblocked contracts.
 - Closure refuses overlapping open ownership and Git-visible dirty/untracked files outside
   `owns`, including docs; relay metadata and generated `.claude/map.md` / `.claude/map.json` are excluded.
-- Binding occurs after the first successful contract write. Bound agents cannot switch
-  contracts or widen `owns`; record blockers under `## Checkpoint`.
+- Binding happens at dispatch, from the contract path in the prompt. Bound agents cannot
+  switch contracts or widen `owns`; a blocker goes in the return, not in the file.
 
 ## Layout
 
@@ -80,12 +62,10 @@ Enforced, not advised:
 
 ## Closing
 
-When a bound `builder` or `ui-builder` stops, the `SubagentStop` hook runs `submit` and then
-`complete` in a detached process and writes what the gate said to
-`.claude/relay/live/_kapanis/<ID>.json`. Read that file; do not run the close yourself. A red
-verify or a refused seal leaves the contract `submitted` with the reason in that file, and
-nothing retries - the next move is yours. The manual path stays for the cases the hook does
-not cover, an auditor round among them:
+When a bound `builder`/`ui-builder` stops, `SubagentStop` runs `submit` then `complete`
+detached and writes the verdict to `.claude/relay/live/_kapanis/<ID>.json` - read that, do not
+close by hand. A red verify leaves the contract `submitted` with the reason there; nothing
+retries. The manual path stays for what the hook does not cover, an auditor round among them:
 
 ```bash
 node <P>/scripts/contract.js check --id T7      # risk and verify steps, no side effect
@@ -123,17 +103,12 @@ verify:
   - node --test test/token.test.js
 ---
 
-## Goal
-...
 <<</SOZLESME>>>
 ```
 
-The contract rides inside the prompt. The `PreToolUse` hook writes the file from the block
-before the agent exists, refuses the dispatch if the block is malformed or its `id:` disagrees
-with the path, and never overwrites a file that is already there. You do not write the file
-and the agent does not touch it: binding comes from the path in the prompt, the report comes
-back in the agent's final message. That is the whole cost of a contract - zero turns on
-either side beyond the dispatch itself.
+The contract rides inside the prompt: `PreToolUse` writes the file from the block before the
+agent exists, refuses a malformed block or an `id:` that disagrees with the path, and never
+overwrites an existing file. Neither you nor the agent writes it - zero turns beyond the dispatch.
 
 `builder`, `ui-builder`, `auditor`, `planner`, `advisor`, `scout`, `scribe`. The role file names
 its row; row x profile picks the cell in `<P>/tiers.json`. Resolve it, never restate it: `node
