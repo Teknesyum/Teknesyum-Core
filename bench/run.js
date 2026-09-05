@@ -61,27 +61,19 @@ function planOlustur(kapsam, seed) {
   return karistir(liste, seed);
 }
 
-function gorevMetaOku(taskId) {
-  const readmeYolu = path.join(KOK, 'bench', 'gorevler', 'README.md');
-  const readme = fs.readFileSync(readmeYolu, 'utf8');
-  const numara = taskId.split('-')[0];
-  const basliklar = [...readme.matchAll(/^## (\d+) — ([^\s(]+)/gm)];
-  const baslikIndex = basliklar.findIndex((b) => b[1] === numara);
-  if (baslikIndex === -1) throw new Error('gorev metadata bulunamadi: ' + taskId + ' (' + readmeYolu + ')');
-  const baslik = basliklar[baslikIndex];
-  const bolumBaslangic = baslik.index + baslik[0].length;
-  const bolumBitis = baslikIndex + 1 < basliklar.length ? basliklar[baslikIndex + 1].index : readme.length;
-  const bolum = readme.slice(bolumBaslangic, bolumBitis);
-  const shaEslesme = bolum.match(/Pinlenen commit:\*\*\s*`([0-9a-fA-F]+)`/);
-  if (!shaEslesme) throw new Error('pinlenen commit bulunamadi: ' + taskId + ' (' + readmeYolu + ')');
-  return { repo: 'https://github.com/' + baslik[2] + '.git', sha: shaEslesme[1] };
-}
-
-function gorevOku(taskId) {
-  const gorevYolu = path.join(KOK, 'bench', 'gorevler', taskId + '.md');
-  const prompt = fs.readFileSync(gorevYolu, 'utf8').trim();
-  const meta = gorevMetaOku(taskId);
-  return { repo: meta.repo, sha: meta.sha, prompt };
+function gorevOku(taskId, gorevKok) {
+  const kok = gorevKok || path.join(KOK, 'bench', 'gorevler');
+  const gorevYolu = path.join(kok, taskId + '.md');
+  const metin = fs.readFileSync(gorevYolu, 'utf8');
+  const eslesme = metin.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
+  if (!eslesme) throw new Error('gorev frontmatter eksik: ' + gorevYolu + ' -> "---" ile baslayan repo/sha bloklu bir onbaslik bekleniyor');
+  const on = {};
+  for (const satir of eslesme[1].split('\n')) {
+    const kv = satir.match(/^(\w+):\s*(.+)$/);
+    if (kv) on[kv[1]] = kv[2].trim();
+  }
+  if (!on.repo || !on.sha) throw new Error('gorev frontmatter repo/sha eksik: ' + gorevYolu);
+  return { repo: on.repo, sha: on.sha, prompt: eslesme[2].trim() };
 }
 
 function encodeCwd(cwd) {
@@ -194,7 +186,7 @@ async function koşuYap(kosu, batchId, ccVersion, bagimlar = {}) {
     tokens: null, usd: null, usdSource: null,
   };
   try {
-    const gorev = gorevOku(taskId);
+    const gorev = gorevOku(taskId, bagimlar.gorevKok);
     satir.repoPin = gorev.repo + '@' + gorev.sha;
     const klon = git.klonla(gorev.repo, calismaDizini);
     const checkout = klon.status === 0 ? git.checkoutYap(calismaDizini, gorev.sha) : null;
