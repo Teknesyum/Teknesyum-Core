@@ -86,7 +86,7 @@ function open(relay, o) {
     '# ' + (o.topic || 'Danisma'),
     '',
     '- soran: ' + (o.asker || 'T0'),
-    '- danisilan: ' + (o.model || ''),
+    '- danisilan: ' + (o.model || '') + (o.effort ? '/' + o.effort : ''),
     '- tarih: ' + new Date().toISOString().slice(0, 10),
     '',
     '## Sorulan',
@@ -105,7 +105,7 @@ function open(relay, o) {
   }
   const cur = read(pendingFile(relay));
   const list = Array.isArray(cur) ? cur : [];
-  list.push({ file: name, model: String(o.model || ''), toolUseId: String(o.toolUseId || ''), runId: '', at: Date.now() });
+  list.push({ file: name, model: String(o.model || ''), effort: String(o.effort || ''), toolUseId: String(o.toolUseId || ''), runId: '', at: Date.now() });
   write(pendingFile(relay), list.slice(-8));
   return name;
 }

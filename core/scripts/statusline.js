@@ -236,7 +236,14 @@ function consulting(relay) {
     const now = Date.now();
     const live = rows.filter((x) => now - Number(x.at || 0) < CONSULT_MS);
     if (!live.length) return '';
-    const who = familyOf(live[live.length - 1].model);
+    const row = live[live.length - 1];
+    const cell = tierCell('advisor');
+    const model = row.model || (cell && cell.model) || '';
+    const effort =
+      row.effort ||
+      (cell && familyOf(cell.model) === familyOf(model) ? cell.effort : '') ||
+      '';
+    const who = cellName(model, effort);
     return who ? titleCase(who) + ' ' + t('line.consulting') : t('line.consulting');
   } catch {}
   return '';
