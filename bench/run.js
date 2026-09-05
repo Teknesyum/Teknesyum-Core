@@ -166,11 +166,65 @@ function gercekKabulCalistir(kabulYolu, calismaDizini) {
   return spawnSync('bash', [kabulYolu, calismaDizini], { windowsHide: true });
 }
 
+// Dar başlangıç, ölçülmedi: bu makinede giriş yapılmış bir config dizini yok, o yüzden
+// hangi dosyaların kimlik doğrulama için gerçekten gerekli olduğu bilinmiyor. Yalnız bu
+// ikisi kopyalanır; listede olmayan her şey — bilinen ya da bilinmeyen — sessizce atlanır.
+// Eksik çıkarsa ön kontrol zaten yakalar ve kullanıcıya söyler.
+const IZIN_VERILEN_CONFIG_GIRDILERI = ['.credentials.json', '.claude.json'];
+
+function configSablonundanKopyala(sablonDizini, hedefDizini) {
+  for (const girdi of IZIN_VERILEN_CONFIG_GIRDILERI) {
+    const kaynakYolu = path.join(sablonDizini, girdi);
+    if (!fs.existsSync(kaynakYolu)) continue;
+    fs.cpSync(kaynakYolu, path.join(hedefDizini, girdi), { recursive: true });
+  }
+}
+
+const ONKONTROL_ISTEMI = 'ping';
+
+function gercekOnKontrolCalistirici(argumanlar, secenekler) {
+  const sonuc = spawnSync('claude', argumanlar, { ...secenekler, encoding: 'utf8', windowsHide: true });
+  const kod = typeof sonuc.status === 'number' ? sonuc.status : 1;
+  const cikti = (sonuc.stdout || '') + (sonuc.stderr || '');
+  return { kod, cikti };
+}
+
+function onKontrolMesaji(kod, cikti) {
+  const ilkSatir = cikti ? cikti.trim().split('\n')[0] : '';
+  return [
+    'Ön kontrol başarısız: kimlik doğrulama bu ortamda çalışmıyor (kod ' + kod + (ilkSatir ? ', ' + ilkSatir : '') + ').',
+    'Kimlik doğrulama koşu başına temiz config dizininde bulunmuyor.',
+    'Çözüm: ANTHROPIC_API_KEY ortam değişkenini ayarlayın, ya da bir kez `claude` ile giriş yapılmış bir config dizinini --configTemplate <dizin> ile verin.',
+  ].join('\n');
+}
+
+function onKontrolYap(secenekler = {}) {
+  const env = secenekler.env || process.env;
+  const mkdtemp = secenekler.mkdtemp || ((onEk) => fs.mkdtempSync(path.join(os.tmpdir(), onEk)));
+  const calistirici = secenekler.calistirici || gercekOnKontrolCalistirici;
+  const kopyala = secenekler.kopyala || configSablonundanKopyala;
+  const apiKeyVar = !!env.ANTHROPIC_API_KEY;
+  const configDizini = mkdtemp('tkc-bench-onkontrol-');
+  try {
+    if (!apiKeyVar && secenekler.configTemplate) {
+      kopyala(secenekler.configTemplate, configDizini);
+    }
+    const calismaEnv = { ...env, CLAUDE_CONFIG_DIR: configDizini };
+    const argumanlar = ['-p', ONKONTROL_ISTEMI, '--model', 'sonnet', '--effort', 'low'];
+    const { kod, cikti } = calistirici(argumanlar, { env: calismaEnv });
+    const basarili = kod === 0;
+    return { basarili, kod, cikti, apiKeyVar, mesaj: basarili ? null : onKontrolMesaji(kod, cikti) };
+  } finally {
+    silGeriDonusumsuz(configDizini);
+  }
+}
+
 async function koşuYap(kosu, batchId, ccVersion, bagimlar = {}) {
   const git = bagimlar.git || gercekGit;
   const calistirici = bagimlar.calistirici || gercekCalistirici;
   const kabulCalistir = bagimlar.kabulCalistir || gercekKabulCalistir;
   const mkdtemp = bagimlar.mkdtemp || ((onEk) => fs.mkdtempSync(path.join(os.tmpdir(), onEk)));
+  const disEnv = bagimlar.env || process.env;
 
   const { taskId, arm, seat, repeat } = kosu;
   const [model, effort] = seat.split('/');
@@ -196,8 +250,11 @@ async function koşuYap(kosu, batchId, ccVersion, bagimlar = {}) {
       satir.wallMs = Date.now() - baslangic;
       return satir;
     }
+    if (!disEnv.ANTHROPIC_API_KEY && bagimlar.configTemplate) {
+      (bagimlar.kopyala || configSablonundanKopyala)(bagimlar.configTemplate, configDizini);
+    }
     if (!arm.startsWith('native-')) eklentiKur(configDizini, coreArm(arm));
-    const env = { ...process.env, CLAUDE_CONFIG_DIR: configDizini };
+    const env = { ...disEnv, CLAUDE_CONFIG_DIR: configDizini };
     const argumanlar = ['-p', gorev.prompt, '--model', model, '--effort', effort];
     const { zamanAsimi } = await calistirici('claude', argumanlar, { cwd: calismaDizini, env, windowsHide: true });
     satir.wallMs = Date.now() - baslangic;
@@ -233,18 +290,41 @@ async function koşuYap(kosu, batchId, ccVersion, bagimlar = {}) {
   return satir;
 }
 
-async function calistir(kapsam, seed) {
+async function calistir(kapsam, seed, secenekler = {}) {
   const plan = planOlustur(kapsam, seed);
   const batchId = 'b' + Date.now().toString(36) + '-' + seed;
-  const ccVersion = ccVersionOku();
-  const sonucYolu = path.join(KOK, 'bench', 'sonuc.jsonl');
+  const ccVersion = secenekler.ccVersion !== undefined ? secenekler.ccVersion : ccVersionOku();
+  const sonucYolu = secenekler.sonucYolu || path.join(KOK, 'bench', 'sonuc.jsonl');
   for (const kosu of plan) {
-    const satir = await koşuYap(kosu, batchId, ccVersion);
+    const satir = await koşuYap(kosu, batchId, ccVersion, secenekler);
     fs.appendFileSync(sonucYolu, JSON.stringify(satir) + '\n');
   }
 }
 
+async function onKontrolluCalistir(kapsam, seed, secenekler = {}) {
+  const onKontrolFn = secenekler.onKontrolYap || onKontrolYap;
+  const onKontrol = onKontrolFn({
+    configTemplate: secenekler.configTemplate,
+    env: secenekler.env,
+    calistirici: secenekler.onKontrolCalistirici,
+    mkdtemp: secenekler.onKontrolMkdtemp,
+    kopyala: secenekler.kopyala,
+  });
+  if (!onKontrol.basarili) {
+    return { basladi: false, mesaj: onKontrol.mesaj, onKontrol };
+  }
+  await calistir(kapsam, seed, secenekler);
+  return { basladi: true, onKontrol };
+}
+
 function main() {
+  const configTemplate = argAl('--configTemplate', undefined);
+  if (process.argv.includes('--onkontrol')) {
+    const sonuc = onKontrolYap({ configTemplate });
+    if (sonuc.mesaj) console.error(sonuc.mesaj);
+    else console.log('Ön kontrol başarılı (kod 0).');
+    process.exit(sonuc.basarili ? 0 : 1);
+  }
   const kapsam = argAl('--scope', 'pilot');
   if (kapsam !== 'pilot' && kapsam !== 'tam') {
     console.error('bilinmeyen --scope: ' + kapsam);
@@ -258,7 +338,13 @@ function main() {
     }
     process.exit(0);
   }
-  calistir(kapsam, seed).then(() => process.exit(0)).catch((hata) => {
+  onKontrolluCalistir(kapsam, seed, { configTemplate }).then((sonuc) => {
+    if (!sonuc.basladi) {
+      console.error(sonuc.mesaj);
+      process.exit(1);
+    }
+    process.exit(0);
+  }).catch((hata) => {
     console.error(hata.message);
     process.exit(1);
   });
@@ -269,4 +355,6 @@ if (require.main === module) main();
 module.exports = {
   planOlustur, koltukOku, coreArm, encodeCwd, gorevOku, eklentiKur,
   sonSessionId, koşuYap, ccVersionOku, KOLLAR, GOREVLER,
+  calistir, onKontrolluCalistir, onKontrolYap, configSablonundanKopyala,
+  onKontrolMesaji, IZIN_VERILEN_CONFIG_GIRDILERI,
 };
