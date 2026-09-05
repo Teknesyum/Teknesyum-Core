@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { read, write, safe, norm, relayRoot, projectRoot, checkoutRoot, pathKey, inside, liveDir, logProblem, settings } = require('./lib.js');
+const { read, write, safe, norm, relayRoot, projectRoot, checkoutRoot, pathKey, inside, liveDir, logProblem, settings, gitInfo, stateFile } = require('./lib.js');
 const { RANK, isContractName, status, isKnownStatus, field, owned, definitions, fault: schemaFault } = require('./schema.js');
 
 let raw = '';
@@ -415,6 +415,47 @@ function claimedByOpenContract(relay, abs, root) {
   return null;
 }
 
+const CODE = /\.(js|jsx|mjs|cjs|ts|tsx|py|cs|go|rs|java|kt|rb|php|swift|c|h|cpp|hpp|vue|svelte|html|css|scss|sql|sh|ps1)$/i;
+const SPLIT_TTL = 24 * 60 * 60 * 1000;
+
+function splitGate(target, j) {
+  if (j.agent_id) return;
+  if (process.env.TEKNESYUM_GATE_OPEN === '1') return;
+  const abs = path.resolve(target);
+  if (!CODE.test(abs) || /[\\/]\.claude[\\/]/.test(abs)) return;
+  const git = gitInfo(path.dirname(abs));
+  if (!git) return;
+  const session = String(j.session_id || '');
+  if (!session) return;
+  const r = relayRoot(path.dirname(abs), { git: false });
+  if (r) {
+    try {
+      if (fs.readdirSync(path.join(r.relay, 'contracts')).some((f) => f.endsWith('.md'))) return;
+    } catch {}
+  }
+  const f = stateFile('t0-yazim');
+  const now = Date.now();
+  const all = read(f) || {};
+  for (const k of Object.keys(all)) if (!all[k] || now - (all[k].at || 0) > SPLIT_TTL) delete all[k];
+  const key = session + '|' + pathKey(git.common);
+  const rec = all[key] || { files: [], at: now };
+  const me = pathKey(abs);
+  if (!rec.files.includes(me)) {
+    if (rec.files.length >= 1) {
+      const first = path.relative(git.common, rec.files[0]);
+      return block(
+        'Second code file in this session without a contract: ' + first + ' then ' + path.relative(git.common, abs) + '.',
+        'Two or more files is relay work: open the relay skill and dispatch a builder under a contract.',
+        'To pass deliberately, run with TEKNESYUM_GATE_OPEN=1.'
+      );
+    }
+    rec.files.push(me);
+  }
+  rec.at = now;
+  all[key] = rec;
+  write(f, all);
+}
+
 function boundary(target, agentId) {
   if (!agentId) return;
   const abs = path.resolve(target);
@@ -573,6 +614,7 @@ function decide(j) {
     const target = t.file_path || t.notebook_path || '';
     if (!target) return;
     sealedArea(target);
+    splitGate(target, j);
     bind(target, agentId);
     boundary(target, agentId);
     exhausted(target, agentId);

@@ -287,6 +287,21 @@ function testGate(root) {
 // Kaydi hic olmayan bir ajan eskiden hicbir denetime ugramadan gecerdi - acik
 // bir sozlesmenin sahipli dosyasina bile yazabiliyordu. Sahipli dosya artik
 // kapali, sahipsiz dosya acik kalmali.
+function testSplitGate() {
+  const root = fixture();
+  const sess = 'split-' + Date.now();
+  const w = (file, session, extra) => hook({ hook_event_name: 'PreToolUse', tool_name: 'Write', cwd: root, session_id: session, tool_input: { file_path: path.join(root, file), content: 'x' }, ...(extra || {}) }, root);
+  ok('first code file without a contract passes', w('src/a.js', sess).status === 0);
+  ok('the same file again passes', w('src/a.js', sess).status === 0);
+  const second = w('src/b.js', sess);
+  ok('second code file in the same session is blocked', second.status === 2 && /Second code file/.test(second.stderr), second.stderr);
+  ok('a document is not a code file for the split rule', w('docs/note.md', sess).status === 0);
+  ok('another session starts its own count', w('src/b.js', sess + '-2').status === 0);
+  ok('a bound agent is not the split rule\'s business', w('src/c.js', sess, { agent_id: 'ag-1' }).status !== 2 || !/Second code file/.test(w('src/c.js', sess, { agent_id: 'ag-1' }).stderr));
+  const opened = run(process.execPath, [GUARD], { cwd: root, env: { ...process.env, TEKNESYUM_GATE_OPEN: '1' }, input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'Write', cwd: root, session_id: sess, tool_input: { file_path: path.join(root, 'src/d.js'), content: 'x' } }) });
+  ok('the hatch passes the split rule deliberately', opened.status === 0, opened.stderr);
+}
+
 function testUnboundAgent() {
   const root = fixture();
   writeContract(
@@ -2414,7 +2429,8 @@ function main() {
   testHeadlineGate();
   testOwnsGlob();
   testGateTargets();
-  testUnboundAgent();
+  testSplitGate();
+testUnboundAgent();
   testFold();
   testAuditKind();
   testRoleFromPrompt();
