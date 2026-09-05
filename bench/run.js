@@ -345,15 +345,20 @@ async function koşuYap(kosu, batchId, ccVersion, bagimlar = {}) {
     const sessionId = sonSessionId(projeDizini);
     if (sessionId) {
       const oturumDizini = path.join(projeDizini, sessionId);
+      satir.transcript = transkriptSakla(oturumDizini, batchId, kosu);
+      satir.relay = relaySay(calismaDizini, oturumDizini);
       satir.modelId = maliyet.anaModel(oturumDizini);
       const sepet = maliyet.tokenlar(oturumDizini);
-      const tarife = maliyet.tarifeOku(path.join(KOK, 'docs', 'tarife.json'));
-      const { toplam, usdSource } = maliyet.usdHesapla(sepet, tarife);
       satir.tokens = sepet;
-      satir.usd = toplam;
-      satir.usdSource = usdSource;
-      satir.relay = relaySay(calismaDizini, oturumDizini);
-      satir.transcript = transkriptSakla(oturumDizini, batchId, kosu);
+      try {
+        const tarife = maliyet.tarifeOku(path.join(KOK, 'docs', 'tarife.json'));
+        const { toplam, usdSource } = maliyet.usdHesapla(sepet, tarife);
+        satir.usd = toplam;
+        satir.usdSource = usdSource;
+      } catch (hata) {
+        satir.usd = null;
+        satir.usdSource = 'hata: ' + hata.message;
+      }
     }
 
     if (zamanAsimi) {

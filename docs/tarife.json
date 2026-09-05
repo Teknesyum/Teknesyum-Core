@@ -11,9 +11,35 @@
     "cacheOkuma": true
   },
   "modeller": {
-    "claude-opus-5": { "girdi": 5.0, "cikti": 25.0, "cacheYazma": 6.25, "cacheOkuma": 0.5 },
-    "claude-sonnet-5": { "girdi": 2.0, "cikti": 10.0, "cacheYazma": 2.5, "cacheOkuma": 0.2 },
-    "claude-haiku-4-5": { "girdi": 1.0, "cikti": 5.0, "cacheYazma": 1.25, "cacheOkuma": 0.1 },
-    "claude-fable-5-1": { "girdi": 10.0, "cikti": 50.0, "cacheYazma": 12.5, "cacheOkuma": 0.25 }
+    "claude-opus-5": {
+      "girdi": 5,
+      "cikti": 25,
+      "cacheYazma": 6.25,
+      "cacheOkuma": 0.5
+    },
+    "claude-sonnet-5": {
+      "girdi": 2,
+      "cikti": 10,
+      "cacheYazma": 2.5,
+      "cacheOkuma": 0.2
+    },
+    "claude-haiku-4-5": {
+      "girdi": 1,
+      "cikti": 5,
+      "cacheYazma": 1.25,
+      "cacheOkuma": 0.1
+    },
+    "claude-fable-5-1": {
+      "girdi": 10,
+      "cikti": 50,
+      "cacheYazma": 12.5,
+      "cacheOkuma": 0.25
+    },
+    "claude-fable-5": {
+      "girdi": 10,
+      "cikti": 50,
+      "cacheYazma": 12.5,
+      "cacheOkuma": 0.25
+    }
   }
 }
