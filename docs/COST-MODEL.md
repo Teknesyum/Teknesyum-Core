@@ -37,10 +37,14 @@ measurement and not yet split by phase. Detail:
 
 **Later the same day, after the fold.** The contract now travels inside the dispatch prompt
 and the close runs on SubagentStop, so the coordinator spends no turn writing or closing a
-contract. Three more runs of the same task: agent cost +2.5% against the contract-less arm,
-coordinator turns 4 for 3 runs against 6. The seal itself did not land in any of them - a
-17-file owns set trips the 8-file high-risk rule and the gate asks for an auditor, which at
-95-100k tokens is ten times the 5% ceiling. That is the structural limit today:
+contract. Six more runs of the same task, same text, against three contract-less runs: agent
+cost +16% by median and +21% by mean, coordinator turns 1 per run against 2. The first three
+of those runs did not seal - the risk rule counted the 17-file `owns` set instead of the diff
+and asked for an auditor; the rule was changed to count changed files and the last three sealed
+from the hook, `done/` reached with no coordinator write. The +16% is not resolved: the six
+Core runs spread from $0.08 to $0.17 on an identical prompt, wider than the gap between the
+arms, and n=3 against n=6 cannot see a 5% difference. About twenty runs per arm (~$25) would.
+Details and the pre-registered thresholds, both of them, in the
 [operation result](raporlar/2026-09-05-ameliyat-sonuc.md).
 
 Two rules follow, and both are load-bearing: give every arm the same task text, and never ask
