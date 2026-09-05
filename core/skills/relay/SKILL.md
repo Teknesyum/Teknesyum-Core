@@ -1,6 +1,6 @@
 ---
 name: relay
-description: Split work into gated contracts and run them with agents. Use whenever a change touches two or more files or needs a design choice, even inside one small package; only a single-file fix with no design choice is done directly.
+description: Split work into gated contracts and run them with agents. Use whenever a change touches two or more files or needs a design choice, even inside one small package; only a single-file fix with no design choice is done directly. Independent parts run as parallel contracts to cut wall time.
 ---
 
 # Relay
