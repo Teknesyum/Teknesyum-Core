@@ -62,7 +62,7 @@ test('her kol için model, effort ve CLAUDE_CONFIG_DIR argümanlara doğru geçe
   await koşuYap(kosu, 'batch1', 'cc-test', { git: basariliGit(), calistirici, mkdtemp, gorevKok: GOREV_KOK });
   assert.equal(yakalanan.length, 1);
   assert.equal(yakalanan[0].komut, 'claude');
-  assert.deepEqual(yakalanan[0].argumanlar.slice(-4), ['--model', 'sonnet', '--effort', 'high']);
+  assert.deepEqual(yakalanan[0].argumanlar.slice(-6), ['--model', 'sonnet', '--effort', 'high', '--permission-mode', 'bypassPermissions']);
   assert.equal(yakalanan[0].env.CLAUDE_CONFIG_DIR, dizinler[0]);
 });
 
