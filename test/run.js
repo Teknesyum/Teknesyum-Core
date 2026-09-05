@@ -11,11 +11,11 @@ for (const item of fs.readdirSync(source))
   if (!excluded.has(item)) fs.cpSync(path.join(source, item), path.join(repo, item), { recursive: true });
 const config = path.join(sandbox, 'config');
 fs.mkdirSync(config);
-const env = { ...process.env, CLAUDE_CONFIG_DIR: config, TEKNESYUM_BEEP_SESSIZ: '1', TEKNESYUM_GATE_OPEN: '' };
+const env = { ...process.env, CLAUDE_CONFIG_DIR: config, TEKNESYUM_BEEP_SESSIZ: '1' };
 delete env.CLAUDE_CODE_SESSION_ID;
 delete env.CLAUDE_CODE_HOST_SESSION_ID;
 const summaries = [];
-for (const file of ['all.js', 'audit-regressions.js', 'closure-integrity.js', 'verify-timeout.js']) {
+for (const file of ['all.js']) {
   const r = spawnSync(process.execPath, [path.join(repo, 'test', file)], {
     cwd: repo, env, stdio: 'inherit', windowsHide: true,
   });

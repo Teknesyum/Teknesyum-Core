@@ -3,17 +3,9 @@
     "en": "Language for what you see - messages, setup, statusline? (en/tr)",
     "tr": "Language for what you see - messages, setup, statusline? (en/tr)"
   },
-  "ask.contractLang": {
-    "en": "Language for contract bodies and agent reports - the model reads these (en/tr)",
-    "tr": "Sözleşme gövdeleri ve ajan raporları hangi dilde olsun - bunları model okur (en/tr)"
-  },
   "ask.notify": {
     "en": "Play a sound when a turn ends or needs you? (yes/no)",
     "tr": "Tur bitince ya da seni bekleyince ses çalsın mı? (evet/hayır)"
-  },
-  "ask.research": {
-    "en": "Block the first contract of a new project until prior art is read? (yes/no)",
-    "tr": "Yeni projede ilk sözleşme, benzer işler taranana kadar bekletilsin mi? (evet/hayır)"
   },
   "ask.privateRepo": {
     "en": "Private mirror repository for untouchable files, if any (git URL, or blank)",
@@ -39,10 +31,6 @@
     "en": "sound",
     "tr": "ses"
   },
-  "setup.research": {
-    "en": "prior art",
-    "tr": "ön tarama"
-  },
   "setup.private": {
     "en": "private",
     "tr": "özel depo"
@@ -54,10 +42,6 @@
   "setup.off": {
     "en": "off",
     "tr": "kapalı"
-  },
-  "setup.gated": {
-    "en": "gated",
-    "tr": "bekletilir"
   },
   "setup.core": {
     "en": "core repo",
@@ -79,188 +63,56 @@
     "en": "The statusline applies at the next session start.",
     "tr": "Durum satırı bir sonraki oturum açılışında yürürlüğe girer."
   },
-  "line.noRelay": {
-    "en": "no relay",
-    "tr": "röle yok"
-  },
-  "line.active": {
-    "en": "under way",
-    "tr": "sürüyor"
-  },
-  "line.submitted": {
-    "en": "waiting at the gate",
-    "tr": "onay bekliyor"
-  },
-  "line.open": {
-    "en": "not started",
-    "tr": "başlanmadı"
-  },
-  "line.blocked": {
-    "en": "stuck",
-    "tr": "tıkandı"
-  },
-  "line.contracts": {
-    "en": "contracts",
-    "tr": "sözleşme"
-  },
-  "line.agents": {
-    "en": "agents",
-    "tr": "ajan"
-  },
-  "line.problems": {
-    "en": "gate denials/1h",
-    "tr": "kapı reddi/1s"
-  },
   "line.logs": {
     "en": "logs",
     "tr": "günlük"
-  },
-  "line.stale": {
-    "en": "abandoned",
-    "tr": "sahipsiz"
   },
   "line.context": {
     "en": "context",
     "tr": "bağlam"
   },
-  "line.mapStale": {
-    "en": "map stale",
-    "tr": "harita bayat"
+  "line.files": {
+    "en": "files",
+    "tr": "dosya"
   },
-  "line.waiting": {
-    "en": "waiting on you",
-    "tr": "seni bekliyor"
+  "line.plan": {
+    "en": "plan",
+    "tr": "plan"
   },
-  "line.worktree": {
-    "en": "worktree",
-    "tr": "worktree"
+  "line.noPlan": {
+    "en": "no plan",
+    "tr": "plan yok"
   },
-  "setup.contractLang": {
-    "en": "contracts",
-    "tr": "sözleşmeler"
+  "line.tests": {
+    "en": "tests",
+    "tr": "test"
   },
-  "notice.done": {
-    "en": "finished",
-    "tr": "bitti"
+  "line.handoff": {
+    "en": "handoff",
+    "tr": "devir"
   },
-  "notice.closed": {
-    "en": "closed",
-    "tr": "kapandı"
+  "line.hookErrors": {
+    "en": "hook errors",
+    "tr": "kanca hatası"
   },
-  "line.steps": {
-    "en": "steps watched",
-    "tr": "adım izlendi"
+  "cue.files": {
+    "en": "files touched",
+    "tr": "dosyaya dokunuldu"
   },
-  "ask.profile": {
-    "en": "Tier profile - eco, normal or premium? (normal)",
-    "tr": "Katman profili - eco, normal, premium? (normal)"
+  "cue.lines": {
+    "en": "lines changed",
+    "tr": "satır değişti"
   },
-  "setup.profile": {
-    "en": "profile",
-    "tr": "profil"
+  "cue.plan": {
+    "en": "and no plan. Write docs/plan.md or say skip.",
+    "tr": "ve plan yok. docs/plan.md yaz ya da atla de."
   },
-  "line.gateOff": {
-    "en": "GATE OFF",
-    "tr": "KAPI KAPALI"
+  "cue.context": {
+    "en": "Context %N%. Fill decisions and next_action in .claude/handoff.md.",
+    "tr": "Bağlam %%N. .claude/handoff.md içinde decisions ve next_action doldur."
   },
-  "line.fails": {
-    "en": "failed",
-    "tr": "hata"
-  },
-  "line.caution": {
-    "en": "heads up",
-    "tr": "dikkat"
-  },
-  "line.failRun": {
-    "en": "tool calls failed in a row",
-    "tr": "araç çağrısı üst üste başarısız"
-  },
-  "line.agent": {
-    "en": "agent",
-    "tr": "ajan"
-  },
-  "line.contract": {
-    "en": "contract",
-    "tr": "sözleşme"
-  },
-  "line.assigned": {
-    "en": "assigned",
-    "tr": "atandı"
-  },
-  "line.doing": {
-    "en": "in progress",
-    "tr": "yapılıyor"
-  },
-  "line.working": {
-    "en": "at work",
-    "tr": "çalışıyor"
-  },
-  "line.idle": {
-    "en": "nothing running",
-    "tr": "iş yok"
-  },
-  "role.builder": {
-    "en": "builder",
-    "tr": "yapıcı"
-  },
-  "role.ui-builder": {
-    "en": "ui builder",
-    "tr": "arayüz yapıcı"
-  },
-  "role.planner": {
-    "en": "planner",
-    "tr": "planlayıcı"
-  },
-  "role.auditor": {
-    "en": "auditor",
-    "tr": "denetçi"
-  },
-  "role.advisor": {
-    "en": "advisor",
-    "tr": "danışman"
-  },
-  "role.scout": {
-    "en": "scout",
-    "tr": "izci"
-  },
-  "role.scribe": {
-    "en": "scribe",
-    "tr": "yazıcı"
-  },
-  "role.worker": {
-    "en": "worker",
-    "tr": "işçi"
-  },
-  "role.explore": {
-    "en": "explorer",
-    "tr": "kâşif"
-  },
-  "role.plan": {
-    "en": "planner",
-    "tr": "planlayıcı"
-  },
-  "role.general-purpose": {
-    "en": "agent",
-    "tr": "ajan"
-  },
-  "line.quiet": {
-    "en": "min quiet",
-    "tr": "dk sessiz"
-  },
-  "line.consulting": {
-    "en": "is being asked",
-    "tr": "önerisi soruluyor"
-  },
-  "line.sharpening": {
-    "en": "sharpening the request",
-    "tr": "iş netleştiriliyor"
-  },
-  "line.last": {
-    "en": "last:",
-    "tr": "son:"
-  },
-  "line.more": {
-    "en": "more jobs",
-    "tr": "iş daha"
+  "cue.resume": {
+    "en": "Resume: .claude/handoff.md",
+    "tr": "Devam: .claude/handoff.md"
   }
 }

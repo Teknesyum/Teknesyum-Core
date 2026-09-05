@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 const lib = require('../hooks/lib.js');
-const seal = require('../hooks/seal.js');
 
 const argv = process.argv.slice(2);
 const CORE = path.resolve(__dirname, '..');
@@ -31,35 +30,6 @@ function gitOk() {
   return String(r.stdout || '').trim();
 }
 
-function tiersOk() {
-  const T = JSON.parse(fs.readFileSync(path.join(CORE, 'tiers.json'), 'utf8'));
-  const rows = Object.keys(T.cells || {});
-  if (!rows.length) return { ok: false, message: 'the tier table has no rows' };
-  for (const row of rows)
-    for (const p of T.profiles)
-      if (!T.cells[row][p]) return { ok: false, message: row + ' has no cell for ' + p };
-  return rows.length + ' rows × ' + T.profiles.length + ' profiles';
-}
-
-function rolesOk() {
-  const dir = path.join(CORE, 'roles');
-  let files = [];
-  try {
-    files = fs.readdirSync(dir).filter((f) => /\.md$/i.test(f));
-  } catch {
-    return { ok: false, message: 'core/roles is missing' };
-  }
-  const T = JSON.parse(fs.readFileSync(path.join(CORE, 'tiers.json'), 'utf8'));
-  const bad = [];
-  for (const f of files) {
-    const body = fs.readFileSync(path.join(dir, f), 'utf8');
-    const row = (body.match(/^tier:[ \t]*(\S+)/im) || [])[1];
-    if (!row || !T.cells[row]) bad.push(f.replace(/\.md$/i, ''));
-  }
-  if (bad.length) return { ok: false, message: 'no tier row for: ' + bad.join(', ') };
-  return files.length + ' roles resolve';
-}
-
 function statuslineOk() {
   const p = path.join(lib.configRoot(), 'settings.json');
   let s;
@@ -84,31 +54,6 @@ function statuslineOk() {
   return 'wired';
 }
 
-function relayOk(root) {
-  const r = lib.relayRoot(root, { git: false });
-  if (!r) return { ok: true, message: 'no relay in this project - nothing to check' };
-  const need = ['contracts', path.join('contracts', 'd' + 'one'), 'audits', 'live'];
-  const gone = need.filter((d) => !fs.existsSync(path.join(r.relay, d)));
-  if (gone.length)
-    return {
-      ok: true,
-      message: 'no work has run here yet - ' + gone.length + ' folder(s) appear on the first contract',
-    };
-  return 'complete';
-}
-
-function ledgerOk(root) {
-  const r = lib.relayRoot(root, { git: false });
-  if (!r) return 'no relay here';
-  const unrecorded = seal.auditDone(lib.projectRoot(r.relay), r.relay);
-  if (unrecorded && unrecorded.length)
-    return {
-      ok: false,
-      message: 'closed without going through the gate: ' + unrecorded.join(', '),
-    };
-  return 'every close is in the ledger';
-}
-
 // The update check is gone. This much of it stays because a different check
 // needs it: whether the statusline still points at an older installed version.
 function installedVersion() {
@@ -121,8 +66,7 @@ function installedVersion() {
 }
 
 function mapOk(root) {
-  const r = lib.relayRoot(root, { git: false });
-  const dir = r ? r.relay : path.join(root, '.claude');
+  const dir = path.join(root, '.claude');
   const st = require('./map.js').staleness(root, dir);
   if (st.state === 'missing') return { ok: true, message: 'no map yet - node <plugin>/scripts/map.js .' };
   if (st.state === 'unsealed') return { ok: false, message: 'the map does not say which commit it was built from - rebuild it' };
@@ -193,13 +137,9 @@ function run(root) {
     check('node', nodeOk),
     check('git', gitOk),
     check('version', versionOk),
-    check('tier table', tiersOk),
-    check('roles', rolesOk),
     check('hooks', hooksOk),
     check('statusline', statuslineOk),
     check('map', () => mapOk(root)),
-    check('relay', () => relayOk(root)),
-    check('ledger', () => ledgerOk(root)),
     check('logs', logsOk),
   ];
 }

@@ -28,29 +28,8 @@ const QUESTIONS = [
     fallback: 'en',
   },
   {
-    key: 'contractLang',
-    ask: 'ask.contractLang',
-    parse: (v) => (/^(tr|turkce|turkish)$/i.test(String(v).trim()) ? 'tr' : 'en'),
-    fallback: 'en',
-  },
-  {
-    key: 'profile',
-    ask: 'ask.profile',
-    parse: (v) => {
-      const p = String(v).trim().toLowerCase();
-      return /^(eco|premium)$/.test(p) ? p : 'normal';
-    },
-    fallback: 'normal',
-  },
-  {
     key: 'notify',
     ask: 'ask.notify',
-    parse: (v) => /^(y|yes|e|evet|true|1)$/i.test(String(v)),
-    fallback: true,
-  },
-  {
-    key: 'research',
-    ask: 'ask.research',
     parse: (v) => /^(y|yes|e|evet|true|1)$/i.test(String(v)),
     fallback: true,
   },
@@ -253,7 +232,7 @@ function apply(answers) {
   if (cfg.projectsRoot) scope = wireProjectScope(cfg.projectsRoot);
   else offer = suggestScope();
 
-  const labels = ['setup.config', 'setup.statusline', 'setup.contractLang', 'setup.profile', 'setup.sound', 'setup.research', 'setup.private', 'setup.core', 'setup.scope'];
+  const labels = ['setup.config', 'setup.statusline', 'setup.sound', 'setup.private', 'setup.core', 'setup.scope'];
   const width = Math.max(...labels.map((k) => t(k).length)) + 2;
   const row = (k, v) => '  ' + t(k).padEnd(width) + v;
 
@@ -262,10 +241,7 @@ function apply(answers) {
     '',
     row('setup.config', stateFile('config')),
     row('setup.statusline', bridge),
-    row('setup.contractLang', cfg.contractLang || 'en'),
-    row('setup.profile', cfg.profile || 'normal'),
     row('setup.sound', t(cfg.notify ? 'setup.on' : 'setup.off')),
-    row('setup.research', t(cfg.research ? 'setup.gated' : 'setup.off')),
     row('setup.private', cfg.privateRepo || t('setup.none')),
     row('setup.core', cfg.coreRepo || t('setup.none')),
     row('setup.scope', scope ? scope.dir + '  (' + scope.file + ')' : t('setup.none')),

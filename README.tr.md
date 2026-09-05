@@ -3,129 +3,83 @@
 [<img src="assets/badge-lang.tr.svg" alt="Türkçe seçili, switch to English" width="124" height="44">](README.md)
 
 <div align="center">
-<img src="assets/banner.tr.svg" alt="Teknesyum Core, Claude Code için çok amaçlı iş istasyonu. Adın altında eklentinin sohbete bastığı satır: Teknesyum, 3× Opus-Medium İşçi Atandı. Onun altında birbirine bağlı üç aşama: kancalar zorluyor, kapı kapatıyor, roller işi yapıyor." width="900">
+<img src="assets/banner.tr.svg" alt="Teknesyum Core, Claude Code için bir çıkarma eklentisi." width="900">
 </div>
 
 # Teknesyum Core
 
-Çok Amaçlı İş İstasyonu
+Sayar, Gösterir, Bir Kez Konuşur
 
 ---
 
 ## Nedir
 
-Teknesyum Core, Claude Code için tasarlanmış çok amaçlı bir plugindir. Büyük işi küçük
-sözleşmelere böler: her sözleşme hangi dosyalara sahip olduğunu ve bittiğini nasıl
-kanıtlayacağını yazar. Ajanlar paralel çalışır, her işe boyuna uygun model gider ve hiçbir
-sözleşme doğrulama komutları gerçekten geçmeden kapanmaz.
+Teknesyum Core, sıradan tura hiçbir şey eklemeyen bir Claude Code eklentisidir. Oturumun
+dokunduğu dosyaları sayar, sayıyı statusline'da gösterir ve sohbete tam bir kez konuşur:
+iş eşiği aştığında ve diskte plan yoksa. Oturum bittiğinde ya da bağlam penceresi
+dolduğunda bir devir dosyası yazar; bir sonraki oturum iki kelimeyle devam eder:
+"devam et".
 
-Kendi uygulamalarımı geliştirirken kullandığım plugin bu; şekli de oradan geliyor. İçindeki
-her şey gerçek bir projede gerektiği için var. Muhtemelen ben uygulama geliştirmeye devam
-ettikçe güncelleme almaya devam edecek.
+Claude Code'un native yaptığı her şey — alt ajanlar, worktree'ler, plan modu, kancalar,
+statusline — olduğu gibi bırakılır. Hiçbir şey sarılmaz, kapıya alınmaz, yeniden yazılmaz.
+
+Önceki tasarım çok ajanlı işi sözleşmelerin arkasına alıyordu. Düz Claude Code ile
+ölçüldüğünde aynı sonuç için kat kat pahalı çıktı ve daha geç bitti. Bu sürüm o makineyi
+ayarlamak yerine söküyor; ölçümler `docs/raporlar/` altında.
 
 ---
 
-## İşi kim yapıyor
+## Ne yapar
 
-`t0`, konuştuğunuz oturumun kendisi. Kodu o yazmıyor: işi sözleşmelere bölüyor ve her birini
-bir ajana veriyor.
+### Sayar
 
-<div align="center">
-<img src="assets/flow-agents.tr.svg" alt="İşin nasıl dağıtıldığı. Ana ajan işi sözleşmelere bölüyor. Her sözleşme bir rol adı taşıyor, rol çarpı profil tablodan tek bir hücre seçiyor, hücre de bir modele ve bir efora karşılık geliyor. Ajanlar paralel çalışıyor, her biri diske kendi kaydını bırakıyor. Yanlarında danışman, soranın bir üst basamağında açılıyor: sonnet soruyor opus cevaplıyor, opus soruyor fable cevaplıyor." width="900">
-</div>
+Her `Write`, `Edit` ve `NotebookEdit` sonrası kanca dokunulan dosyayı kaydeder ve kaç satır
+değiştiğini git'e sorar. Eşiğin altında hiçbir şey yazmaz: bağlama sıfır bayt.
 
-Ajan türü tek. Rol, ajana okuması söylenen bir dosya; yani rol açıklamaları sizin
-bağlamınızda oturmuyor — rolün bedelini yalnız o rolü taşıyan ajan ödüyor.
+Eşik dört dosya, ya da yüz elli değişen satır, ya da yolu riskli görünen tek bir dosyadır:
+`migrations/`, `auth`, `secur`, `config`, bir lock dosyası, `.github/`, `Dockerfile`. Eşik
+aşılınca ve `docs/plan.md` yoksa oturumda bir kez tek satır gelir:
 
-| Rol | Ne yapıyor |
+> 4 dosyaya dokunuldu ve plan yok. docs/plan.md yaz ya da atla de.
+
+Konuşmanın tamamı budur. Model planı yazar ya da atla der; kanca bir daha sormaz.
+
+### Gösterir
+
+Statusline aynı durumu okur: dokunulan dosyalar ve eklenen/silinen satırlar, plan var mı,
+oturumun koştuğu testler ve kaçının düştüğü, bağlam yüzdesi, bekleyen devir var mı, açık
+hata günlükleri ve varsa kanca hataları. Arayüz standardı gelene kadar düz metindir; burada
+renk ya da ölçü uydurulmaz.
+
+### Devreder
+
+Bağlam yüzde altmışı geçince ya da oturum bitince `.claude/handoff.md` makine tarafından
+üretilir: `changed_files` `git diff --stat`'tan, `tests_run` kancanın gördüğü komutlar ve
+çıkışlarından, `plan` varsa yolundan. İki bölüm modele kalır, `decisions` ve `next_action`;
+eşik anında tek satır bunları ister:
+
+> Bağlam %64. .claude/handoff.md içinde decisions ve next_action doldur.
+
+Yeniden üretilen devir, modelin yazdığını korur. Sonraki oturum başında tek satır söylenir,
+`Devam: .claude/handoff.md`, başka hiçbir şey. İş bitince dosya `trash/`'e gider.
+
+### Çalar
+
+Claude sizi beklerken bir ses: izin sorusu, bir soru, bir diyalog. Sizi gerektirmeyen her
+şeyde sessizlik. Tek ayarla kapanır.
+
+### Yalnız çağrılınca çalışan araçlar
+
+| Betik | Ne yapar |
 |---|---|
-| `t0` | oturumun kendisi — işi böler, sözleşmeleri açar, diğerlerini çağırır |
-| `planner` | bölünmeyi önerir: id'ler, sahiplenilen dosyalar, verify komutları. Kod yazmaz |
-| `builder` · `ui-builder` | sözleşmenin istediğini yazar, yalnız `owns` listesinin içinde |
-| `scout` | var olanı okuyup bulguyla döner: önceki işler ya da bir ölçüm |
-| `scribe` | karar taşımayan mekanik iş: yeniden adlandırma, dil, envanter |
-| `auditor` | yüksek riskli sözleşmeyi bağımsız doğrular, tek dosyaya bile yazamaz |
-| `advisor` | tek soru, tek görüş; soranın bir üst basamağındaki modelden |
-
-`??` ile başlayan prompt, iş başlamadan danışmanı açıyor ve ondan görüş değil netleştirme
-istiyor. Aynı rol, aynı dosya: işaretli tur yalnız iki şeyi değiştiriyor — kullanıcının
-cümlesi girdinin ilk satırı oluyor, ve dönüş bir hüküm yerine bir soru, bir olgu ve bir
-yol oluyor.
-
-Cümle üstte yazıldığı gibi duruyor ve ilk okunan şey o; rol yalnız ekliyor, ek ile cümle
-çelişirse cümle kazanıyor ve soran tek soruyla geri dönüyor. Danışman kendi başına dosya
-okumuyor — soranın zaten topladığı şey eline veriliyor — ve plan değil bir sıra ile bir
-yasak döndürüyor. İşaretsiz turda hiçbir şey koşmuyor.
-
-Hangisine hangi modelin gideceği ajan ajan sizin seçiminiz değil — modla rol birlikte karar
-veriyor, [tablo](#ajanlar) aşağıda.
-
----
-
-## Özellikler
-
-- **İşe göre model** — Basit iş güçlü modele gitmez; kimse faturayı sevmiyor. Rol ve profil
-  modeli ve eforu birlikte seçer, üst üste başarısızlık ikisini de yükseltir.
-- **Riskten haberdar** — Risk diff'ten hesaplanır. Yüksekse kapanış denetim kaydı ister ve
-  kayıt gerçekten koşmuş bir ajanı adıyla göstermek zorunda.
-- **Rol dosyaları** — Yapıcı, planlayıcı, denetçi, danışman. Rol metnini yalnızca o rolü
-  taşıyan ajan ödüyor, sizin oturumunuz değil.
-- **Banner ve statusline** — O an ne olduğunu tek satırda söyler. Pano değil. Koltuğu ve
-  koştuğu maliyet gözünü yazar — `Fable-Medium Danışman`, yani merdivenin hangi basamağını
-  ödediğiniz görünür — işin adını, en son dokunduğu dosyayı ve `??` işaretli bir turda iş
-  başlamadan isteğin netleştirildiğini. Kimsenin bakmadığı sayılar yok: adım sayacı yok,
-  dosya sayacı yok, geçen dakika yok.
-- **Devir notu** — `.claude/relay/HANDOFF.md` projenin nerede olduğunu yazar: ne açık, en
-  son ne kapandı, hangi dal. Oturum biterken ve sıkıştırmadan önce bir kanca tazeler, yani
-  bedeli yok; Claude
-  değil, herhangi bir model okuyabilir.
-- **Ajanı çağırmadan sor** — `contract.js precheck` verify adımlarını önce çalıştırır.
-  Zaten geçiyorsa iş bitmiştir, ajan açmaya değmez.
-- **Başarısız olabilen kabul** — Her adımı `true`, `echo` ya da yorum olan bir `verify`
-  bloğu kabul ölçütü değildir. Kapı bunun üstüne kapatmaz ve nedenini söyler.
-- **Tavan** — Sözleşme kaç adım ettiğini yazabilir. Tavanı geçince sözleşme yazılabilir
-  olmaktan çıkar; yakınsamayan koşu kendiliğinden durur.
-- **Geri dönülebilecek bir sabit** — `precheck`, iş başlamadan izlenen ağacı
-  `refs/teknesyum/<ID>` olarak kaydeder; `revert` sahiplenilen dosyaları oraya geri koyar.
-- **Sahipsiz kalan iş kayda geçer** — Oturum biterken hâlâ `active` olan sözleşme deftere
-  yazılır ve statusline'da görünür. Bağlamınıza tek kelime yazılmaz.
-- **`doctor`** — Kurulumun sağlam olup olmadığını tek komut söyler: sürümler, tablo, roller,
-  kancalar, statusline ve defterde karşılığı olmayan kapanış var mı.
-
----
-
-## Üç mod
-
-Core üç moddan birinde çalışır — `eco`, `normal`, `premium`. Mod, tier tablosundan bir sütun
-seçer; sütun da her role hangi modelin ve hangi eforun gideceğine karar verir.
-
-| Mod | Ne için |
-|---|---|
-| `eco` | Uzun ve ucuz oturumlar. İşi Haiku ve Sonnet yapar, danışman açıktır. |
-| `normal` | Gündelik iş. Sonnet yapar, Opus planlar ve denetler, danışman yok. |
-| `premium` | İlk seferde doğru olması gereken iş. Baştan sona Opus, danışman Fable. |
-
-**Modu siz ayarlarsınız, plugin sizin yerinize değiştirmez.** Bu bir eksik değil, tasarım:
-tavan sizin verdiğiniz bir karar olduğunda tüketim minimal kalır. Sinyaller mod içinde tek
-bir hücreyi yükseltebilir — üst üste başarısızlık, yüksek risk — ama mod onları sınırlar ve
-modun kendisini hiçbir şey yükseltmez.
-
-Birini seçin ve çalıştırın:
-
-```bash
-node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js --profile eco
-```
-
-```bash
-node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js --profile normal
-```
-
-```bash
-node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js --profile premium
-```
-
-Mod statusline'da yazar, yani hangisini ödediğinizi her an bilirsiniz. Tek bir depo kendi
-modunu `.claude/relay/config.json` içinde sabitleyebilir.
+| `scripts/map.js .` | Import grafiği: merkezler, döngüler, yetimler. `map.js who <dosya>` kimin import ettiğini söyler. |
+| `scripts/log.js write` | Sabit biçimli hata günlüğü, projenin kendi deposuna. |
+| `scripts/manset.js` | İsterseniz manşet satırı. |
+| `scripts/advice.js list` | `??` turları için `docs/danisma/` altındaki danışma kayıtları. |
+| `scripts/scaffold.js` | Lisans, imza bloğu, dil linki: modelin asla yazmadığı sabit metinler. |
+| `scripts/setup.js` | Makine ayarı: dil, zil, özel depo, projeler klasörü. |
+| `scripts/doctor.js` | Yedi kontrol: node, git, sürüm, kancalar, statusline, harita, günlükler. |
+| `scripts/release.js` | Sürümü artırır, kurulum satırlarını yeniler, etiketler. |
 
 ---
 
@@ -134,557 +88,125 @@ modunu `.claude/relay/config.json` içinde sabitleyebilir.
 ### Windows — tek satır
 
 ```powershell
-irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.15.0/install.ps1 | iex
+irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.16.0/install.ps1 | iex
 ```
 
 ### macOS / Linux — tek satır
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.15.0/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.16.0/install.sh | bash
 ```
 
-**Sonrasında Claude Code'u yeniden başlatın.** Kancalar oturum ortasında yeniden yüklenir
-ama masaüstü istemci ürettiklerini yeniden çizmez. Bunu herkes bir kez unutuyor.
+**Sonrasında Claude Code'u yeniden başlatın.** Kancalar oturum ortasında yüklenir; masaüstü
+istemci ürettiklerini yeniden başlayana kadar çizmez.
 
-İki tek satırlık kurulum da bir etikete bakıyor, `main`'e değil — kabuğa borulayacağınız
-şey, dalın bugün ne taşıdığı değil, yayımlanmış betik olmalı. Her sürüm iki kurulum
-betiğinin de SHA-256'sını yayımlıyor.
+İki tek satır da bir etikete işaret eder, asla `main`'e değil. Her sürüm iki kurucunun
+SHA-256'sını yayınlar.
 
-**Gerekli:** Claude Code, git. **İsteğe bağlı:** Node.js. O olmadan statusline ve kapı
-betikleri çalışmaz; tahmin ettirilmez, size söylenir.
+**Gerekli:** Claude Code, git, Node.js.
 
-Kurulum betikleri sonunda kurulumu kendi terminalinizde çalıştırıyor; sorularını orada
-bedavaya soruyor. Atladınız mı? Betiği kendiniz çalıştırın:
+Kurucular kendi terminalinizde kurulumu çalıştırarak biter. Atladıysanız kendiniz çalıştırın:
 
 ```bash
 node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js
 ```
 
-**ya da şunu Claude'a yapıştırın:**
-
-> Teknesyum Core'u kur. `node <plugin>/scripts/setup.js --check` çalıştır; `<plugin>` kurulu
-> teknesyum-core dizini. JSON basar. `missing` altındaki bütün soruları bana tek mesajda
-> sor, sonra `node <plugin>/scripts/setup.js --apply` komutunu uygun bayraklarla çağır.
-> Hiçbir ayar dosyasını kendin yazma.
-
-Kurulum `~/.claude/teknesyum/config.json` dosyasını yazıyor ve statusline'ı bağlıyor. Bir
-sonraki oturum başında geçerli oluyor.
-
-## Kardes projeye uzanmak
-
-Bir oturum yalnız açıldığı klasörün altına yazabiliyor; iki projeni birden ilgilendiren bir iş
-o sınırda duruyor. Kurulum bunu genişletebilir ve sessizce yapmaz: cevap verilmezse hiçbir
-şey yazmaz, izin vermek için çalıştıracağın komutu basar.
-
-```bash
-node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js --apply --projectsRoot "<projelerinin durduğu klasör>"
-```
-
-Klasör küresel ayar dosyasına değil, bu deponun kendi `.claude/settings.local.json`
-dosyasına yazılıyor; kapsam tek projeye ait kalıyor ve geri almak tek dosyayı silmek oluyor.
-Dosya aynı adımda `.gitignore`'a giriyor, çünkü yol seninkidir, takımın değil. Ev dizinin,
-dosya sisteminin kökü, var olmayan bir klasör ve `~/.claude` içindeki her şey reddediliyor.
-
-Bağlantı kendini onarıyor. Eski bir kurulumdan kalan statusline komutu artık var olmayan bir
-dosyayı gösterebiliyor ve satır sessizce hiç görünmüyor — ayar duruyor gibi görünüyor ama
-hiçbir şey yapmıyor. Betiği yerinde olmayan komut artık saygı görmüyor, değiştiriliyor.
+Kurulum `~/.claude/teknesyum/config.json` dosyasını yazar ve statusline'ı bağlar. Bir
+sonraki oturum başında geçerli olur.
 
 ---
 
-## Nasıl çalışıyor
+## CLAUDE.md kuralı
 
-### Sözleşme
-
-`.claude/relay/contracts/` altında bir markdown dosyası. Bir hedef, sahiplendiği dosyalar,
-onu kanıtlayan komutlar.
-
-```markdown
-## Goal
-Banner kullanıcının dilinde okunuyor.
-
-## owns
-core/scripts/statusline.js
-core/strings.json
-
-## verify
-node test/all.js
-```
-
-`owns` dosya sayıyor, dizin değil — dizin, henüz var olmayan dosyalar hakkında verilmiş bir
-söz demek. Mutlak yol ya da proje dışı bir yol yazamıyor, ve kimsenin yaratmadığı bir
-dosyayı sahiplenen sözleşme kapanamıyor: okunamayan dosya eskiden boş sayılıyor ve
-yapılmamış iş geçiyordu.
-
-`verify`, sözleşmeyi kapatılabilir kılan kısım. Kabul ölçütü 0 ile çıkan bir komut olarak
-yazılamıyorsa bölme yanlıştır; planlayıcıya da uydurma bir onay kutusu icat etmek yerine
-bunu söylemesi söyleniyor.
-
-<div align="center">
-<img src="assets/flow-contract.tr.svg" alt="Bir sözleşmenin ömrü: açılıyor, bir ajan onu aktife alıyor, ajan teslim ediyor ve kapı sözleşmenin kendi verify komutlarını çalıştırıyor. Başarısız komut sözleşmeyi aktife geri gönderiyor. Her komut sıfırla çıkınca kapı riski diff'ten hesaplıyor; yüksek riskte ayrıca denetim kaydı istiyor ve sözleşme ancak o zaman done'a geçiyor." width="900">
-</div>
-
-### Kapı
-
-Başarılı kapanış yolu `contract.js complete`; `close` karşılanmamış işi arşivler. Rapora inanmak yerine verify
-komutlarını kendisi çalıştırıyor ve riski, değişikliğin tarifinden değil diff'ten çıkarıyor.
-
-Sözleşme bir merdiven çıkıyor: `open`, `active`, `submitted`, `done`. Yalnız submitted olan
-kapanıyor, arşivlenen dosyaya `done` damgası vuruluyor; böylece `done/` altında hâlâ "devam
-ediyor" diyen bir dosya kalmıyor.
-
-Etrafındaki ağaç hakkında da üç şeyin doğru olması gerekiyor. Bu sözleşmenin değiştirdiği bir
-dosyayı açık başka bir sözleşme sahiplenemez — yoksa önce kapanan, kendi yapmadığı işi
-mühürler. `owns` dışında Git'in gördüğü değişmiş veya izlenmeyen dosya duramaz; belgeler de
-komut girdisi olabilir. Relay metaverisi ve üretilen `.claude/map.md` / `.claude/map.json`
-hariçtir. `blocked-by: [T4]`, `T4` için tamamlanmış başarılı kapanış ister; yalnız `done/`
-altında bulunmak, `unmet` veya `adopted` olmak yetmez. `contract.js list --ready` yalnız
-hiçbir şeyi beklemeyenleri gösterir.
-
-`contract.js reopen --reason "..." --critical "..."` yanlış kapanan sözleşmeyi turunu artırarak geri alıyor;
-kapanan tur defterde kalıyor, yani geri alma bir silme değil bir kayıt. Geri alma altıncı
-turda duruyor. Yedinci tur, ajanın şanssız değil sözleşmenin yanlış olduğunu söyler — böl,
-ya da sahiplendiğini daralt. Katılmadığınız gün için `--force` duruyor.
-
-Bunların hepsinden önce, `contract.js precheck --id X` iş hiç başlamamışken verify adımlarını
-çalıştırıyor. Zaten geçiyorlarsa iş bitmiştir ve ajan açmak israftır. Aynı anda izlenen ağacı
-`refs/teknesyum/<ID>` olarak sabitliyor — gerçek bir ref, yani gc alamıyor — ve
-`contract.js revert --id X --yes` sahiplenilen dosyaları o noktaya geri koyuyor. Sözleşme
-kapanınca sabit iniyor; sahipsiz kalan sözleşme sabitini koruyor, zaten meselesi o.
-
-Her adımı `true`, `:`, `exit 0`, `ls`, `echo` ya da yorum olan bir `verify` bloğu başarısız
-olamaz; başarısız olamayan şey de kabul ölçütü değildir. Kapı bunun üstüne kapatmayı
-reddediyor ve adımı adıyla söylüyor. Bu bir sezgisel kontrol; testin kabulü ölçtüğünün ispatı
-değil. Boş verify için açık manuel istisna ve bağımsız denetim gerekir;
-[kapanış bütünlüğü](docs/SEAL-INTEGRITY.md) belgesinde ayrıntıları var.
-
-Mührün ölçmeden geçebileceği üç sessiz yol daha kapandı. Liste yerine tek düz satır yazılan
-bir `verify` sıfır adıma ayrışıyor, sıfır adım da her zaman geçiyor; kapı bunu artık hem
-submit'te hem kapanışta reddediyor — sessizliği mühürlemiyor. Hiç test toplamadan sıfırla
-çıkan adım da aynı kuralla reddediliyor: `no tests ran`, `collected 0 items`, `Total tests:
-0` — hiçbir şeye uymayan bir filtre geçmiş takım değildir. Ve tek çalışma kopyasında iki
-sözleşme verify adımlarını aynı anda koşamıyor; her biri ötekinin yarım yazılmış dosyalarını
-ölçerdi. İkincisine kimin koştuğu söyleniyor.
-
-Sistemin en büyük gideri tur. 124 mühürlü sözleşme üzerinde ölçüldü: 54'ü en az bir ek tur
-gördü, toplam 72 tur, her biri bir yapıcı artı bir denetçi. Bu yüzden `reopen` artık
-`--critical "<mührün kaçırdığı şey>"` istiyor. Stil, daha iyi bir ad, "şunu da test
-etseydik" — bunlar borçtur, `## Checkpoint` altına yazılır; iki ajan daha ödemenin
-gerekçesi değildir.
-
-Üçüncü turdan itibaren aynı istek bir adım ileri gidiyor: `reopen`, `--advisor <ajan-id>`
-olmadan tur açmıyor ve verilen id'nin diskte, rolü danışman olan canlı bir kaydı olması
-gerekiyor. Üçüncü tur, sözleşmeyi iki aklın aynı biçimde yanlış okuduğu anlamına geliyor; o
-noktada en ucuz şey üçüncü bir akıl. Kural uzun süredir yazılıydı ve bir kez bile
-işlemedi, çünkü onu kimse istemiyordu. Kimin danışıldığını defter tutuyor.
-
-Sözleşme bir `.md` dosyası sahipleniyorsa kapı, mühürden önce üzerinde `manset.js`
-koşuyor: düzyazıdaki her sayının aynı bölümdeki bir tabloda, listede ya da kod bloğunda
-geçmesi — ya da o sütunun toplamı olması — gerekiyor. Sayıyı ölçüm üretiyor, cümleyi
-sonradan model yazıyor ve ikisini bağlayan hiçbir şey yoktu; günlükteki en çok tekrar eden
-kusur buydu. Hiçbir tablonun tutmadığı bir şeyi özetleyen belge `manset: off` ile
-muaf tutulabiliyor.
-
-Sözleşme `ceiling: <n>` taşıyabilir — kaç araç adımı ettiği. Tavanı geçince kapı kancası o
-sözleşme altındaki işi kabul etmiyor; yakınsamayan bir koşu kimse başında beklemeden
-bitiyor. Sayım bütün araçları kapsıyor, kabuk dâhil; eskiden yalnız yazma araçlarını
-kapsıyordu, yani işini `Bash` üzerinden yapan bir sözleşme tavanı elli adım aşabiliyor ve
-statusline aşımı yazdığı hâlde kimse ona bakmıyordu. Geçmesine izin verilen tek komut,
-sözleşmeyi kapatan komut. Satırı olmayan sözleşmeye cömert bir varsayılan veriliyor.
-
-Kapı, yol listesi olmayan sınırı da tutuyor. Bir checkout'un içinde bağımsız git depoları
-durabiliyor; kökten ağacı gezen bir betik onlara da yazıyor ve bunu ne `owns` ne de tavan
-görüyordu, çünkü ikisi de araç çağrısından okunuyordu ve araç çağrısı `Bash`'ti. Kapı artık
-o depoların nerede olduğunu ve nelerinin işlenmemiş durduğunu not ediyor; biri kımıldarsa
-bir sonraki kabuk çağrısını reddediyor. Ayarlanacak eşik yok: bir sözleşmenin kendisine ait
-olmayan bir depoyu değiştirmek için masum bir sebebi olmuyor. Checkout'un kendi içinde
-`owns` dışındaki izlenen dosyaları kirleten kabuk çağrısı ayrı mesele — o yalnız
-`live/problems.log` dosyasına yazılıyor, çünkü bir lock dosyası ya da snapshot çoğu zaman
-dürüst cevaptır ve yanlış pozitif oranı ölçülmemiş bir kapı tahmindir. Oturum, hâlâ `active`
-olan ve hiçbir ajanın tutmadığı bir sözleşmeyle biterse deftere `stale` kaydı düşüyor ve
-statusline bunu söylüyor. Bu bir kayıt, çıkışın reddi değil — oturum her zamanki gibi
-kapanıyor ve modelin bağlamına tek kelime yazılmıyor.
-
-### Denetim kaydı
-
-Yüksek riskte ve manuel kabul istisnasında kapanış, sürüm-2 kayıt olmadan reddediliyor:
-
-- sözleşmenin sahiplendiği dosyaların **içeriğine** — denetimden sonra oynayan ağaç artık
-  tutmuyor
-- **HEAD'e** — başka bir commit için yazılmış kayıt burada geçmiyor
-- **gözlenen ve tamamlanan denetçi çağrısına** — ebeveyn, sözleşme, tur, çalışma kopyası,
-  başlangıç revizyonu ve son yanıt dökümü eşleşmeli. İlgisiz eski denetçi yetmez.
-  Denetçi `verdict: passed` ve `findings: none` ile bittikten sonra koordinatör `audit`
-  çalıştırır. `audit --dry-run` çağrı öncesini değil, bitmiş koşunun uygunluğunu denetler.
-- **tek kullanıma** — kayıt sözleşme kapanırken tükeniyor, tekrar oynatılamıyor
-
-Her kapanış, her karşılanmamış kapanış ve her geri alma `audits/ledger.jsonl` dosyasına
-ekleniyor; `contract.js ledger` de `done/` altında oturan ama defterin hiç duymadığı
-sözleşmeyi bildiriyor. İşlem günlüğü yarım kalan defter/arşiv adımlarını aynı işlemi iki kez
-yazmadan yeniden denemeyi sağlar. Aynı kullanıcı yetkisiyle dosya yazabilen sürece karşı
-güvenlik sınırı oluşturmaz; [sınırlar ve kurtarma](docs/SEAL-INTEGRITY.md) belgesine bakın.
-
-Mühür kademenin o anki kararını da yazıyor: koşan model, istenen model, ateşleyen sinyaller,
-onu üreten rol ile Core sürümü ve diff'in
-kabul maddesinin adını andığı yere hiç değip değmediği. Hiçbiri bir kararı değiştirmiyor — kademeye dair bir sonraki soru
-tartışmayla değil sütunla cevaplansın diye orada.
-
-`complete` ve `audit`, `owns` dışında Git'in gördüğü değişmiş/izlenmeyen dosya varken reddediyor:
-sahip olmadığı bir çalışma ağacını kapatan sözleşme başkasının diff'ini mühürlüyor demektir.
-
-Kapının yaptığı her ret de `live/refused.log` dosyasına aracıyla, ajanıyla ve komutuyla
-ekleniyor; sebebi aynı: yanlış pozitifi sayılmayan bir kapı ayarlanamaz.
-
-### Kapı kancası
-
-`guard.js`, `Write`, `Edit` ve `NotebookEdit` önünde çalışıyor. Mevcut sözleşmenin `owns`
-kümesi dışındaki dosyaya yazmayı engelliyor — ajan ilk başarılı sözleşme yazımından sonra
-bağlanıyor — bu araçlardan `audits/` ve `live/` dizinlerini koruyor, `contracts/done/`
-dizinini salt okunur tutuyor. `prefs.js` gerekli işaretleri taşımayan README ya da LICENSE
-yazımını engelliyor; yazarın tercih dosyası yoksa hemen çıkıyor, yani başkası için hiçbir
-şey yapmıyor.
-
-Kabuk komutlarını tek bir şey için okuyor: sözleşme açıkken `main`'e ulaşan iş. Komutu
-arayarak değil ayrıştırarak bakıyor — heredoc'lar önce kesiliyor, yani `git push origin
-main` geçen bir belge yazmak kapıdan geçmek değil; kendi çalışma dalınıza itmek de zaten
-dokunmadığı olağan adım. Korumalı bir dala zorlamalı itme, kapı bilerek açıkken bile
-reddediliyor. `Bash` ve `PowerShell` ikisi de önünde; bir süre yalnız biri öyleydi, yani
-denetim ajanın hangi kabuğu seçtiğine bağlıydı. Komutlarınızın gerisi tahmin edilmiyor: o
-denetim v0.2.0'a kadar düz metin eşleşmesiydi, `cd` içinden geçip gidiyor, defteri okuyan
-meşru bir tek satır reddediliyordu. Kayıt olağan akış tutarsızlıklarını yakalar; aynı dosya
-sistemi yetkisine sahip kabuk sürecinin kayıtları uydurmasını engelleyemez.
-
-İlgisiz bir push için tek Bash çağrısında açıkça
-`TEKNESYUM_GATE_OPEN=1 git push ...` yazılır. Üst süreçten devralınan ortam değişkeni,
-kayıt defterinden silinmiş olsa bile kapıyı açmaz. Birleşik komutlar bu istisnayı
-alamaz. Force push yine reddedilir.
-
-Relay'i olmayan bir projede kapı kapalı değil açık düşüyor. Birinin ilgisiz deposunu bozan
-bir kanca, kaçırılan bir denetimden daha kötü bir arıza.
-
-### Ajanlar
-
-Tek ajan türü `worker`, rol de istemine bir yol olarak geliyor:
+Eklenti modele nasıl çalışacağını söylemez. Kendi `CLAUDE.md` dosyanıza koymanızı önerdiği
+beş satırlık kural budur; sayma kancası tek yaptırımıdır.
 
 ```
-Read <plugin>/roles/builder.md and follow it.
-Contract: .claude/relay/contracts/T7.md
+- Tek dosya ve bildiğin iş: yap.
+- Dört ve üstü dosya: önce docs/plan.md.
+- Bilmediğin kütüphane: yazmadan önce oku.
+- Bitince çalıştır, çıktıyı göster.
+- Küçük iş: bunların hiçbiri.
 ```
-
-Rol ve mod, [core/tiers.json](core/tiers.json) içinden bir hücre seçiyor; hücre bir model
-ve bir efor.
-
-| Rol | `eco` | `normal` | `premium` |
-|---|---|---|---|
-| `t0` — oturumun kendisi | sonnet | opus | opus |
-| `planner` | sonnet/medium | opus/medium | opus/high |
-| `builder` · `ui-builder` | sonnet/low | sonnet/medium | sonnet/high |
-| `scout` | haiku/low | sonnet/low | sonnet/medium |
-| `scribe` | haiku/low | haiku/low | sonnet/low |
-| `auditor` | opus/medium | opus/medium | opus/high |
-| `advisor` | opus/medium | kapalı | fable/medium |
-
-Sinyaller hücreyi yükseltiyor, profil tavanı koyuyor, hiçbir şey aşağı çekmiyor.
-
-| Sinyal | Etkisi |
-|---|---|
-| Üst üste iki araç çağrısı başarısız | önce efor, sonra model yükseliyor |
-| Tur 3 | model yükseliyor |
-| Değişiklik geri alınamaz bir yola dokunuyor | denetçi açılıyor |
-
-Üst üste hataları kanca ajan başına sayıyor; bir ajanın kötü günü başka bir ajanın bütçesini
-harcayamıyor. Üstelik ikinci hatada davranıyor, çünkü üçüncüyü beklemek bile bile lades
-demek.
-
-Proje kendi profilini `.claude/relay/config.json` içinde tutabiliyor; `premium` bir makinede
-`eco` bir depo `eco` kalıyor.
-
-`premium` tavanı yükseltiyor, başlangıç modelini değil. Bir builder yine sonnet'le açılıyor —
-eforu artırılmış olarak — ve ucuz denemenin yetmediğini bir sinyal söylediğinde opus'a
-çıkıyor. Bir projede 156 sözleşme ölçüldü: 118'i opus'ta koşmuş, bunların 59'u hâlâ 1. turda
-ve risk alanı bile yokmuş. İlk denemenin ucuz olmasına hiç izin verilmemiş.
-
-Bu yüzden kapı modeli mühürde değil dağıtımda okuyor. Rolün çözdüğü modelin üstündeki bir
-`Agent` çağrısı, arkasında sinyal yoksa tek token harcanmadan reddediliyor; hücrenin altına
-inmek her zaman serbest. Mühür yine bakıyor, ama o noktada para çoktan gitti: bitmiş işi
-rehin almak yerine aşımı `live/problems.log`'a yazıyor.
-
-**Danışman** soranın bir üst basamağında çalışıyor: sonnet soruyor, opus cevaplıyor; opus
-soruyor, fable cevaplıyor. Bir model kendine ikinci görüş veremiyor. Hak kazanma listesi yok
-— istemek yeterli sebep — ve danışmana hedef, kabul ölçütü ve kanıt gidiyor; sizin taslak
-cevabınız asla.
-
-### Maliyet
-
-Claude Code'un sunduğu her mekanizma bedelini ne zaman ödediğinize göre sınıflanıyor: **S**
-bağlam başına bir kez, **O** yalnız özellik çalışınca, **C** her mesajda sonsuza kadar,
-**Z** hiç. Bu tablodan tek bir kural çıkıyor — sıradan bir turda hiçbir kanca bağlama
-yazmıyor.
-
-<div align="center">
-<img src="assets/flow-cost.tr.svg" alt="Eklentinin kancalarından geçen bir tur ve her birinin modelin bağlamına ne yazdığı. İşaret kancası susuyor; kapı sözleşme dışına yazmayı engelliyor; tercih kancası işaretsiz README'yi engelliyor; izleyici adımı diske yazıyor; bildirim kancası banner'ı yalnızca çizim olarak basıyor; ses kancası sonda bir ses çalıyor. Bağlam sütunundaki her hücre boş, yani tur başına maliyet sıfır token." width="900">
-</div>
-
-Sohbet banner'ı `MessageDisplay` kancasında duruyor; bu kanca çizileni değiştiriyor,
-saklanana ve modelin gördüğüne dokunmuyor. İkilinin kendi ifadesiyle: *"Display-only: the
-stored message and what the model sees are untouched."* Mesaj başına yaklaşık 30 ms node
-açılışı, sıfır token.
-
-Bandın bir biçimi var: cevabın üstünde tezgâhı adlandıran bir baş satırı ve en çok iki iş
-satırı, altında en çok bir satır. Kapanış satırı açılışın tekrarı değil — cevap yazılırken
-ne değiştiğini ya da şimdi seni neyin beklediğini taşıyor, ikisi de yoksa boş kalıyor.
-Okuduğu kayıt, oturum ilk ajanını başlattığı anda doğuyor; sözleşme açılması gerekmiyor.
-Yani hiç sözleşme yazmayan bir oturum da bandını görüyor.
-
-Bandın yazdığı şey, eklentinin geri kalanının yazdığı gibi yazılıyor: iş satırı da
-eklentinin bastığı her başlık gibi Her Kelimenin İlk Harfi Büyük; koltuk, çözümlenen kimliği
-değil modelin ailesini taşıyor, yani satır bir modelle açılıp başkasıyla bitmiyor. Çözümlenen
-kimliği kayıt ve mühür saklamayı sürdürüyor; kısaltma yalnız çizim anında oluyor.
-
-Danışman turu da bandda. Tek aracı çağırmadan cevap veren bir danışma arkasında adım
-bırakmıyor, dolayısıyla koşarken bandda hiçbir şey kımıldamıyordu; açık danışma artık danışma
-kaydının kendisinden okunuyor ve band, cevap gelene kadar kime sorulduğunu yazıyor.
-
-Zil, koşu gerçekten durduğunda çalıyor; duraklamayla dürtmeyi, bir şey en son ne zaman
-kımıldadığına göre değil bildirimin taşıdığı ada göre ayırıyor. İzin sorusu, cevap bekleyen
-ajan ve bir MCP sunucusunun açtığı pencere kullanıcıyı çağırıyor; bunlar çalıyor. Boşta
-kalma hatırlatması, oturum açma, kota bildirimi, süren bir turun altında biten alt ajan —
-hiçbiri duraklama değil, hiçbiri çalmıyor. Hiç ad göndermeyen bir sürümde eski okuma
-devreye giriyor: koltuk hâlâ çalışıyorsa sessizlik.
-
-Zil, onu çaldıran projenin. Damga dosyası tek, ama son zil geldiği checkout'un altına
-yazılıyor; yani birbirine yakın biten üç proje kendi sesini duyuyor, ilki diğerlerini
-yutmuyor.
-
-Araç çağrılarını izleyen kancalar artık matcher taşıyor, yani dosya okumak süreç açtırmıyor.
-
-### Yalnız çağrılınca çalışan araçlar
-
-| Betik | Ne yapıyor |
-|---|---|
-| `contract.js precheck` | ajan açılmadan önce verify adımlarını çalıştırıyor |
-| `contract.js check` | risk, verify adımları ve onların adını verip de var olmayan şeyler |
-| `contract.js list` | ne açık, ve bir dosya hangi sözleşmenin |
-| `contract.js snapshot` | izlenen ağacı `refs/teknesyum/<ID>` olarak sabitler |
-| `contract.js revert` | sahiplenilen dosyaları o sabite geri koyar |
-| `handoff.js` | `.claude/relay/HANDOFF.md` dosyasını, projenin durumunu yazıyor |
-| `advice.js list` | kayıttaki danışmalar, soru ve cevap tam metniyle |
-| `handoff.js owe` | söz verilip henüz yapılmayanların kısa listesi |
-| `doctor.js` | kurulum sağlam mı söylüyor |
-| `release.js` | sonraki sürümü `.changes/` içindeki notlardan belirliyor |
-| `update.js` | yeni bir sürüm çıkmış mı söylüyor |
-| `map.js` | import haritası — merkezler, döngüler, öksüzler |
-| `map.js who <dosya>` | değiştireceğin dosyayı kim import ediyor |
-| `log.js` | hata günlüğü; elle yazılmıyor |
-| `setup.js` | makine ayarı ve statusline bağlama |
-
-Devir notu ikiye ayrılıyor. Mekanik yarısı — açık sözleşmeler, durumları ve turları, son
-kapanışlar, dal, baş, ne kadarı commit edilmemiş, hangi ajan takılmış — oturum sonu
-kancasıyla ve sıkıştırmadan hemen önce tazeleniyor; bedeli yok ve hiç bayatlamıyor. Öteki
-yarısı makinenin yazamayacağı tek paragraf, yani niyet; tazeleme onu koruyor. Dosya düz
-markdown, yani projeyi sonra açan model Claude olmasa da okuyabiliyor.
-
-İkinci bir görüş, yalnızca soranın tekrarlamayı seçtiği cümleyi görüyorsanız hiçbir işe
-yaramaz. Bir ajan tavan modelde ya da `advisor` rolünde açıldığında, dağıtım kancası ona
-verilen istemi daha o çalışmadan `docs/danisma/NNN-<konu>.md` dosyasına yazıyor; ajan
-durduğunda da cevap yarısını kendi transkriptinden dolduruyor. İki yarı da soran modelin
-elinden geçmiyor, yani sonuca uydurulmak üzere kırpılamıyor; dosya da açıp okuyabileceğiniz
-düz markdown. Sıradan iş kayıt bırakmıyor: sonnet'teki bir builder oraya hiçbir şey yazmıyor.
-
-Turun ortasında verilen söz dünyanın en kolay kaybedilen şeyidir — model ikinci bir görüş
-soracağını söyler, tur işle dolar, söz de bağlamla birlikte gider. `.claude/relay/OWED.md`
-bunun cevabı ve bilerek küçük: üç satır, her biri altmış karakter, her birinin bir tarihi.
-
-```bash
-node <eklenti>/scripts/handoff.js owe --add "tablo için fable'a danış"
-node <eklenti>/scripts/handoff.js owe --done 1 --because "danışıldı; sonnet'te kaldı"
-```
-
-Listeyi her istem geri getiriyor, hem de zaten orada olan işaret dizisinin başında; yani boş
-defterin bedeli yok, dolu defterin bedeli bir satır. Hiçbir şey zaman aşımına uğramıyor: üç
-günlük borç düşmüyor, `stale` diye işaretleniyor — sürekli yapmadığın şey, görülmeye en değer
-olandır. Kapatmak gerekçe istiyor ve gerekçe `HANDOFF.md` içinde **Closed debts** başlığına
-düşüyor; sessizce kapatılan borç, düşürülen borçtur. Dördüncü madde reddediliyor: dörtte artık
-hatırlatma değil, sözleşme ya da yol haritası satırıdır. Dosyayı komut yazıyor, el değil —
-kapı `Edit`'i engelliyor.
-
-`contract.js check` ayrıca sözleşmede adı geçip de var olmayan şeyleri okuyor: kimsenin
-yazmadığı bir betiği çağıran verify adımı kabul ölçütü değil, çalışamayacak bir adımdır ve
-bunu kapıda değil iş başlamadan bilmek gerekir. Arkasında dosya olmayan bir `owns` girdisi
-ise bilgi olarak bildiriliyor — genelde iş odur.
-
-Yeni sürüm, statusline'ın sonunda tek sönük kelime olarak görünüyor; başka hiçbir yerde —
-sohbette değil, modelin bağlamında hiç değil. Sorgu, haftada en fazla bir kez, oturum zaten
-kapanırken, kimsenin beklemediği ayrık bir süreçte koşan bir `git ls-remote`. Bu bir garanti
-değil bir ipucu: gösterdiği şey doğru, ama susması güncel olduğunuzu kanıtlamıyor.
-`node <plugin>/scripts/update.js` şimdi sorar ve açıkça söyler.
-
-Harita üretildiği commit'i damgalıyor. Yoksa üç hafta sonra artık var olmayan merkezleri,
-döngüleri ve öksüzleri tam bir güvenle sayardı. Onun yerine `map.md` ilk satırında hangi
-HEAD'de üretildiğini yazıyor, HEAD ilerlediği anda statusline `harita bayat` diyor, `doctor`
-kaç commit geride olduğunu söylüyor ve `map.js who` bayat dosyadan değil canlı taramadan
-cevaplıyor. Üretilmiş bir çıktının tazeliği yazıldığı yerde değil okunduğu yerde sınanır;
-sessizce bayat bir cevap, yanlış cevaptır.
-
-`map.md` bir boyut bütçesiyle yazılıyor (`--budget=<bayt>`, öntanımlı 64 KB) ve sessizce
-kesilmek yerine kaç dosyayı dışarıda bıraktığını ve gerisinin nerede olduğunu açıkça yazıyor.
-Bir tarama, önceki haritanın yarısından az dosya bulursa üstüne yazmayı reddediyor ve nedenini
-söylüyor — yanlış kökte çalıştırmak böyle görünüyor.
-
-`doctor.js` `{name, ok, message}` satırlarıyla cevap veriyor ve `--json` alıyor. Neyi
-denetlediği, bastığı şeydir; okumak yerine çalıştırın.
 
 ---
 
-## Bunu native Claude Code zaten yapmıyor mu?
+## Kullanımda nasıl görünür
 
-Bir kısmını evet: alt ajan açıyor, paralel çalıştırıyor, plan tutuyor. Yukarıdaki her şey
-Core'un üstüne koyduğu. Kısa hali:
+```
+Teknesyum ▸ my-app · bağlam 41% · 3 dosya +82-14 · plan yok · test 1✓
+Teknesyum ▸ my-app · bağlam 67% · 6 dosya +240-31 · plan · test 2✓ 1✗ · devir
+```
 
-| | Native Claude Code | Teknesyum Core |
+İlk satır her eşiğin altındaki bir oturum: modele hiçbir şey söylenmemiş. İkincisi planını
+yazmış, testlerini koşmuş ve `decisions` ile `next_action` satırlarını bekleyen bir devri
+olan oturum.
+
+---
+
+## Kancalar
+
+Altı olay, altı komut, hepsi `core/hooks/` altında:
+
+| Olay | Kanca | Söylediği |
 |---|---|---|
-| "Bitti"ye kim karar veriyor | ajan öyle diyor | `contract.js` verify komutlarını kendisi koşuyor ve geçmeyen kapanışı reddediyor |
-| Kabul ölçütü | istemdeki düz metin | 0 ile çıkması gereken komutlar; her adımı `true` ya da `echo` olan blok kabul sayılmıyor |
-| Paralel yazma | iki ajan aynı dosyayı ezebiliyor | kapı, sözleşmenin `owns` listesi dışına yazmayı engelliyor |
-| Yüksek riskli değişiklik | ayrımı yok | risk diff'ten hesaplanıyor; yüksek riskli kapanış, dosya içeriğine, HEAD'e ve gerçekten koşmuş bir denetçiye bağlı kayıt istiyor |
-| Yakınsamayan koşu | sürüp gidiyor | sözleşme `ceiling` taşıyabiliyor, sınırı geçince yazılabilir olmaktan çıkıyor |
-| Geri dönmek | kendi git disiplininiz | `precheck` izlenen ağacı gerçek bir ref olarak sabitliyor, `revert` sahiplenilen dosyaları geri koyuyor |
-| Oturum bitince | plan uçuyor | sözleşmeler dosya, sahipsiz kalan deftere yazılıyor |
-| Model seçimi | alt ajan başına siz seçiyorsunuz | rol çarpı mod hücreyi seçiyor, sinyaller yükseltiyor |
-| İkinci görüş | aynı modele tekrar sormak | danışman, soranın bir üst basamağında koşuyor |
-| Tur başına maliyet | açıklamalar ve kurallar her mesajda taşınıyor | 0 token; her kanca diske ya da ekrana yazıyor, bağlama değil |
+| `SessionStart` | `count.js` | varsa `Devam: .claude/handoff.md`, yoksa hiçbir şey |
+| `PostToolUse` | `count.js` | eşikte bir satır, bir kez; yoksa hiçbir şey |
+| `PreToolUse` | `prefs.js` | README yazılırken kendi README kurallarınız |
+| `Stop` | `count.js` | hiçbir şey; statusline için diff'i tazeler |
+| `SessionEnd` | `handoff.js` | hiçbir şey; devri yazar |
+| `Notification` | `notify.js` | hiçbir şey; çalar |
+
+Bağlama yalnız `count.js` yazabilir; test takımı tek konuşanın o olduğunu denetler.
 
 ---
 
-## Core neyin yerine geçiyor, ölçüsüyle
-
-Core'un yanına başka bir şey kurmanıza gerek yok. Bu bir iddia olduğu için altındaki rakamlar
-burada. On altı komşu proje incelendi, ikisi bu makinede kontrollü deneye sokuldu; tablodaki
-her satır varsayım değil, ölçümün döndürdüğü şey.
-
-| Kurmayı düşünebileceğiniz | Ne için | Ölçüm ne dedi | Nerede kalıyorsunuz |
-|---|---|---|---|
-| Kod grafiği indeksi — graphify, Aider repo haritası, Serena | "neyi ne çağırıyor" | fastify üzerinde beş mimari soru (1.032 dosya): grafik indeksiyle **63.462** token, Core'un `map.js`'iyle **56.120**, düz grep'le **50.525**. Aynı beş cevap. | `map.js` Core ile geliyor. İndeksten 3× hızlı kuruluyor ve 74× ucuz — çünkü hiç model çağırmıyor. |
-| Obsidian tarzı vault, wiki-bağlantı, backlink eklentisi | oturumdan artakalan proje hafızası | Dört not düzeni, tek soru seti, **dördünde de 5/5 doğru**. Vault **%10**, backlink indeksi **%14** fazla token yedi ve alıntıları daha kötüydü. Hiçbir ajan bir wiki-bağlantısını izlemedi. | Tek düz `MEMORY.md` ve tek bir yol haritası dosyası. Kurulacak bir şey yok, eşitlenecek bir şey yok. |
-| MCP orkestrasyon takımı | ajanlar, sürüler, görev panoları | Popüler bir sunucu **358 araç** yayımlıyor. Şeması **~270 KB** ve *her* isteğe biniyor — tek kelime iş yapılmadan yaklaşık **64–67 bin token** — üstelik tamamlanma kapısı yok. | Core'un bütün yüzeyi çağrılınca koşan betikler: sıradan turda **0 token**. |
-| CodeQL ya da Semgrep | derin statik analiz | CodeQL'in lisansı özel depodan veritabanı üretmeye izin vermiyor. Semgrep'in dosyalar arası analizi ücretli katman. | İkisi de bir eklentinin size verebileceği şey değil. İhtiyaç varsa CI'da koşturun. |
-| Şartname / PRD çerçevesi | kabul ölçütü | Hiçbir şeyin çalıştırmadığı markdown merasimi. | Core'un `verify:` adımları 0 ile çıkmak zorunda olan komutlardır; başarısız olamayan bir adım "kabul değildir" diye reddedilir. |
-| Hafıza katmanı MCP'si | oturumlar arası hatırlama | Değer üretmek için her turda okuyup yazmak zorunda. | Core'un yapmayacağı tek şey o. |
-
-İndeks sonucunun dürüst özeti: **indeks token değil isabet satın alıyor**, o da tek bir soru
-sınıfında — *bu sembolü kim çağırıyor*. Hiç okumadığınız bir kod tabanında günlük sorunuz buysa,
-o iş için bir grafik aracı kurun. Yeri eklenti katmanı değil; orada hiç sormasanız da her
-oturumda bedelini ödersiniz.
-
-### Core'un yapmadığı
-
-- **Sembol seviyesinde çağrı grafiği yok.** `map.js` dosya import'unda durur: hub, döngü, öksüz, kenar.
-- **Semantik arama yok.** Grep ve import haritası; gömülü hiçbir şey yok.
-- **Dosyalar arası taint analizi yok.**
-
-Bunların ölçüldüğünden çok daha büyük bir kod tabanında ya da hiç açmadığınız yabancı bir depoda
-özel bir indeks maliyetini hak eder. Kurma anı orasıdır — o iş için, temelli değil.
-
----
-
-## Kullanımda nasıl görünüyor
-
-Her cevabın altında ve üstünde tek satır; o an olup biten en önemli tek şeyi söylüyor. Pano
-değil.
+## Düzen
 
 ```
-### Teknesyum ▸ Opus-High Denetçi Atandı > T82 Denetimi Yapılıyor
-### Teknesyum ▸ 2× Opus Kâşif · Sonnet-Medium İzci Atandı > Rozet Metni · Kapı Tasarımı Yapılıyor
-### Teknesyum ▸ 3× Opus-Medium İşçi Atandı
-### Teknesyum ▸ Dikkat — 4 Araç Çağrısı Üst Üste Başarısız
-### Teknesyum ▸ 1 Sözleşme Onay Bekliyor · 1 Sözleşme Başlanmadı
+.claude/
+  handoff.md           işin durumu, makine yazar, iki satır sizin
+  map.md               import grafiği
+docs/
+  plan.md              kancanın sorduğunda istediği plan
+  danisma/             ?? turlarının danışma kayıtları
+~/.claude/teknesyum/
+  config.json          ayarınız
+  state-<oturum>.json  sayım
+  hook-errors.log      bir kancanın yapamadığı
 ```
-
-Satır markdown başlığı olarak yazılıyor; istemci de başlık gibi çiziyor, yani göz okumadan
-buluyor.
-
-Ajanlar çalışırken satır her koltuğu hücresiyle birlikte anıyor — `Opus-Medium İşçi`, rol ve
-onun çözüldüğü model ile efor demek. Aynı hücreyi tutan koltuklar tek girdide toplanıyor;
-`3×` oradan geliyor.
-
-Önce koltuk, `>` işaretinden sonra iş: kim atandı, sonra ne yapılıyor. Ajan bir sözleşmeye
-bağlıysa iş, sözleşmenin kendi başlığı — spawn'dan çok sonra da doğru kalan şey; değilse
-ajanın çağrıldığı açıklama. Satıra sığmayan kısım sondan atılıyor, yani koltuklar kalıyor,
-yeri görevler veriyor.
-
-Görevler listeleniyor, koltuklarla teker teker eşleştirilmiyor: aynı rolde iki ajan varken
-hangi görevin hangi koltuğa ait olduğu tahmindir ve satır bunu bildiği gibi gösteriyor.
-Hiç açıklama taşımayan bir çağrı için yalnız `Atandı` yazıyor — uydurulmuş bir cevap hiç
-cevaptan kötü olurdu.
-
-Koltuk ayrıca kaç dosyaya dokunduğunu ve ne kadardır koştuğunu söylüyor; iş satırı da adımı
-sözleşmenin tavanına karşı sayıyor — `Adım 12/150`, tavan bilerek yükseltilmişse
-`Adım 197/250 (yükseltildi)`; büyük sayı aşım değil karar olarak okunuyor. Asıl kural burada: yalnızca büyüyen sayaç
-süstür, o yüzden bir sayı satıra ancak karşılaştıracağı bir şey bulduğunda çıkıyor. Adımın
-tavanı var, yerini hak ediyor; açık günlüğün hiç olmadı, o yüzden kesildi.
-
-Üst üste başarısız araç çağrısı her şeyin önüne geçiyor. Kapanış satırı biteni bildiriyor,
-çünkü mesajdan sonra hesaplanıyor ve daha fazlasını biliyor.
-
----
-
-## Komutlar
-
-Yok. Giriş noktası `relay` skill'i; gerisi betik ve betikler yukarıdaki tabloda.
-
----
-
-## Yerleşim
-
-```
-.claude/relay/
-  contracts/           açık iş, sözleşme başına bir dosya
-  contracts/done/      kapanan iş, damgalanmış ve arşivlenmiş
-  audits/              kayıtlar ve ledger.jsonl
-  live/                ajan kayıtları, kanca yazıyor
-  config.json          bu projenin profili, sabitlediyse
-  HANDOFF.md           proje nerede
-  OWED.md              söz verilen, henüz yapılmayan
-  map.md               import haritası
-```
-
-`node <plugin>/scripts/map.js` import haritasını yazıyor — merkezler, döngüler, öksüzler,
-kenarlar. Okuması dosya açmaktan ucuz ve dosya açmanın cevaplamadığı şeyleri cevaplıyor.
 
 ---
 
 ## Testler
 
 ```bash
-node test/all.js
+npm test
 ```
 
-Kapı, kapanış, merdiven, denetim kaydı, defter, bilinen kaçış yolları, tablo ve kota
-kilitleri, kişisel usul kapısı, iskele, işaret, banner, devir notu, borç defteri, danışma
-kaydı ve hiçbir kancanın bağlama yazmadığı denetimi üzerine 2.672 sav. Yanında 17 denetim
-regresyonu ve 33 kapanış senaryosu, gerçek kancaları yapay bir host üzerinden sürüyor:
-kendi kodunu doğrulayan worktree, turuna bağlı denetçi, doğrulama sırasında değişen diff,
-boş kabul maddesi, karşılanmamış bağımlılık ve ikinci bir defter satırı üretmeden kurtarılan
-yarım kapanış. Aynı takımı CI Linux, Windows ve macOS'ta koşuyor; geliştirme Windows
-öncelikli.
+Takım gerçek kancaları geçici bir depodan geçirir: sayım eşiğin altında sessiz kalır ve
+sıfır bayt yazar, üstünde bir kez konuşur, riskli yolu tek başına sebep sayar, diskte plan
+varken susar. Devir git'ten üretilir, modelin yazdığını korur, sonraki başlangıçta söylenir
+ama sıkıştırma sonrası söylenmez. Yanında: iki dilde statusline, kişisel kural kapısı,
+iskele, harita, zil ve doktor.
 
 ---
 
 ## Tasarım notları
 
-- [docs/COST-MODEL.md](docs/COST-MODEL.md) — token nereye gidiyor ve bundan çıkan kural
-- [docs/TRIAGE.md](docs/TRIAGE.md) — Teknesyum Base'den ne geldi, ne gelmedi
-- [docs/DECISIONS.md](docs/DECISIONS.md) — bunu şekillendiren kararlar ve gerekçeleri
+- [docs/COST-MODEL.md](docs/COST-MODEL.md) — token'lar nereye gidiyor, ondan çıkan kural
+- [docs/DECISIONS.md](docs/DECISIONS.md) — bunu şekillendiren kararlar ve nedenleri
+- [docs/BENCH.md](docs/BENCH.md) — eklenti düz Claude Code'a karşı nasıl ölçülüyor
 
 ---
 
 ## Katkı
 
-Kod yazmadan önce bir issue açın — yamanızın bir şeyle çarpıştığını sonradan öğrenmekten
-hızlıdır. Pull request'i küçük tutun; tek iş yapan diff aynı gün okunur, beş iş yapan diff
-hiç okunmaz.
+Kod yazmadan önce bir issue açın — yamanızın bir şeyle çakıştığını sonradan öğrenmekten
+hızlıdır. Pull request'i küçük tutun; tek iş yapan diff aynı gün okunur, beş iş yapan hiç.
 
-Depo İngilizce yazılıyor. Katkılar buradaki her şeyle aynı lisansla, AGPL-3.0-or-later
-altında geliyor; imzalanacak CLA ve yapılacak tören yok.
+Depo İngilizce yazılır. Katkılar buradaki her şey gibi AGPL-3.0-or-later altında iner; CLA
+yok, tören yok.
 
 Vaktinizden kazandırıyorsa [çalışmayı destekleyebilirsiniz](https://github.com/sponsors/Teknesyum).
 

@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.16.0 — Çıkarma Sürümü
+
+- Sözleşme makinesi söküldü: contract.js, guard, closure, autoclose, seal, embed, schema,
+  watch, cue, notice, risk, verify-runner, roller, relay skill'i, worker ajanı, tiers.json ve
+  bunların testleri `trash/0.15-relay/` altında. Ölçüm: relay tetiklenince aynı iş için
+  kat kat maliyet ve iki kat süre, kazanç yok (`docs/raporlar/2026-09-05-ab-sonuc.md`).
+- Yeni `hooks/count.js`: Write/Edit/NotebookEdit sonrası dokunulan dosyayı ve diff satırını
+  oturum durumuna yazar. Eşik (4 dosya, 150 satır ya da riskli yol) aşılınca ve
+  `docs/plan.md` yoksa oturumda bir kez tek satır; altında sıfır bayt.
+- Yeni `hooks/handoff.js`: bağlam %60'ı geçince ya da SessionEnd'de `.claude/handoff.md`
+  makine yazar (changed_files, tests_run, plan); decisions ve next_action modele kalır ve
+  yeniden üretimde korunur. SessionStart'ta varsa tek satır: "Devam: .claude/handoff.md".
+- Statusline artık durum dosyasını okur: dosya sayısı ve satırlar, plan var/yok, koşulan
+  testler, bağlam yüzdesi, bekleyen devir, kanca hataları.
+- hooks.json altı olaya indi: SessionStart, PostToolUse, PreToolUse (prefs), Stop, SessionEnd,
+  Notification. Bağlama yalnız count.js yazar; test bunu denetler.
+- setup.js sözleşme dili, profil ve araştırma sorularını sormaz. doctor.js yedi kontrole indi.
+  notify.js relay meşguliyetine bakmaz. lib.js relay yollarını unuttu.
+- README'ye bench sayısı yazılmadı; bench (taban, 02-06, uyarı bedeli, resume) sürüm
+  kapanmadan koşulacak ve `bench/rapor.md`'ye girecek.
+
 ## v0.15.0
 
 - ---

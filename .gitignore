@@ -1,5 +1,4 @@
 node_modules/
-.claude/relay/live/
 .claude/map.json
 .claude/map.md
 trash/
@@ -7,10 +6,6 @@ Teknesyum-Base/
 *.tmp
 *.log
 logs/openlogs/
-.claude/relay/HANDOFF.md
-.claude/relay/audits/
-.claude/relay/map.json
-.claude/relay/map.md
 .claude/settings.local.json
 bench/kosu/
 bench/kosu2/
@@ -22,3 +17,4 @@ bench/tehdit2/
 bench/kosu6/
 bench/kapi-testi2/
 bench/oturumlar/
+.claude/handoff.md

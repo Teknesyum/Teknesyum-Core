@@ -205,8 +205,7 @@ function emit(root, graph, opt) {
   const nsTop = nsAll.slice(0, 12);
   const loops = cycles(nodes);
 
-  const relay = path.join(root, '.claude', 'relay');
-  const dir = fs.existsSync(relay) ? relay : path.join(root, '.claude');
+  const dir = path.join(root, '.claude');
   const old = previous(dir);
   const fault = force ? null : shrinkFault(old, all.length);
   if (fault) return { dir, refused: fault };
@@ -330,8 +329,7 @@ function report(key, node, note) {
 
 
 function who(root, target) {
-  const relay = path.join(root, '.claude', 'relay');
-  const dir = fs.existsSync(path.join(relay, 'map.json')) ? relay : path.join(root, '.claude');
+  const dir = path.join(root, '.claude');
   const want = String(target).replace(/\\/g, '/').replace(/^\.\//, '');
   const find = (json) => Object.keys(json).find((k) => k[0] !== '_' && (k === want || k.endsWith('/' + want)));
 

@@ -154,120 +154,6 @@ function askGit(start) {
   }
 }
 
-function linkedRoot(d) {
-  let raw = '';
-  try {
-    const g = path.join(d, '.git');
-    if (!fs.statSync(g).isFile()) return null;
-    raw = fs.readFileSync(g, 'utf8');
-  } catch {
-    return null;
-  }
-  const m = /^gitdir:\s*(.+)$/m.exec(raw);
-  if (!m) return null;
-  let gitdir = path.resolve(d, m[1].trim());
-  try { gitdir = fs.realpathSync(gitdir); } catch {}
-  let common = path.dirname(path.dirname(gitdir));
-  try {
-    const marker = path.join(gitdir, 'commondir');
-    if (fs.existsSync(marker)) {
-      common = path.resolve(gitdir, fs.readFileSync(marker, 'utf8').trim());
-      try { common = fs.realpathSync(common); } catch {}
-    }
-  } catch {}
-  if (path.basename(common).toLowerCase() === '.git') common = path.dirname(common);
-  return common;
-}
-
-function relayRoot(start, opt) {
-  let d = path.resolve(start || '.');
-  for (;;) {
-    const main = linkedRoot(d);
-    if (main) {
-      const shared = path.join(main, '.claude', 'relay');
-      if (fs.existsSync(shared)) return { relay: shared, worktree: d };
-    }
-    const c = path.join(d, '.claude', 'relay');
-    if (fs.existsSync(c)) return { relay: c, worktree: null };
-    if (fs.existsSync(path.join(d, '.git'))) break;
-    const up = path.dirname(d);
-    if (up === d) break;
-    d = up;
-  }
-  if (opt && opt.git === false) return null;
-  const git = gitInfo(start);
-  if (!git) return null;
-  const relay = path.join(git.common, '.claude', 'relay');
-  if (!fs.existsSync(relay)) return null;
-  return { relay, worktree: norm(git.top) !== norm(git.common) ? git.top : null };
-}
-
-const RELAY_IGNORE = ['live/', 'HANDOFF.md', ''].join('\n');
-
-function ensureRelay(start) {
-  const found = relayRoot(start);
-  if (found) return found;
-  const git = gitInfo(start);
-  if (!git) return null;
-  const relay = path.join(git.common, '.claude', 'relay');
-  try {
-    fs.mkdirSync(path.join(relay, 'live'), { recursive: true });
-    const ig = path.join(relay, '.gitignore');
-    if (!fs.existsSync(ig)) fs.writeFileSync(ig, RELAY_IGNORE);
-  } catch {
-    return null;
-  }
-  return { relay, worktree: norm(git.top) !== norm(git.common) ? git.top : null };
-}
-
-function liveDir(relay) {
-  return path.join(relay, 'live');
-}
-
-function projectRoot(relay) {
-  return path.dirname(path.dirname(relay));
-}
-
-function checkoutRoot(context) {
-  return path.resolve(context.worktree || projectRoot(context.relay));
-}
-
-function realPath(target) {
-  let at = path.resolve(target);
-  const tail = [];
-  for (;;) {
-    try { return path.join(fs.realpathSync(at), ...tail.reverse()); }
-    catch (e) {
-      if (e.code !== 'ENOENT') throw e;
-      const up = path.dirname(at);
-      if (up === at) throw e;
-      tail.push(path.basename(at));
-      at = up;
-    }
-  }
-}
-
-function pathKey(target) {
-  const value = norm(realPath(target));
-  return process.platform === 'win32' ? value.toLowerCase() : value;
-}
-
-function inside(root, target) {
-  const rel = path.relative(pathKey(root), pathKey(target));
-  return rel !== '..' && !rel.startsWith('..' + path.sep) && !path.isAbsolute(rel);
-}
-
-function logProblem(relay, source, line) {
-  const live = liveDir(relay);
-  try {
-    fs.mkdirSync(live, { recursive: true });
-    fs.appendFileSync(
-      path.join(live, 'problems.log'),
-      new Date().toISOString().replace('T', ' ').slice(0, 19) + ' | ' + source + ' | ' + line + '\n'
-    );
-  } catch {}
-}
-
 function pluginRoot(id) {
   const name = id || 'teknesyum-core@teknesyum';
   try {
@@ -364,29 +250,6 @@ function openLogCount() {
   }
 }
 
-const NOTICE = '_duyuru.json';
-const NOTICE_TTL = 120 * 1000;
-
-function noticeFile(relay) {
-  return path.join(liveDir(relay), NOTICE);
-}
-
-function setNotice(relay, text) {
-  if (!relay || !text) return false;
-  const f = noticeFile(relay);
-  const cur = read(f);
-  if (cur && cur.text === text) return false;
-  write(f, { text: String(text).slice(0, 80), at: Date.now() });
-  return true;
-}
-
-function getNotice(relay) {
-  const cur = read(noticeFile(relay));
-  if (!cur || !cur.text) return '';
-  if (!cur.at || Date.now() - cur.at > NOTICE_TTL) return '';
-  return String(cur.text);
-}
-
 const PINNED = {
   win32: [
     'HKCU\\Environment',
@@ -440,15 +303,6 @@ module.exports = {
   safe,
   exists,
   gitInfo,
-  relayRoot,
-  ensureRelay,
-  liveDir,
-  projectRoot,
-  checkoutRoot,
-  realPath,
-  pathKey,
-  inside,
-  logProblem,
   pluginRoot,
   settings,
   rewire,
@@ -457,6 +311,4 @@ module.exports = {
   t,
   openLogs,
   openLogCount,
-  setNotice,
-  getNotice,
 };

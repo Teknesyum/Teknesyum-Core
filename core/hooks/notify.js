@@ -168,27 +168,7 @@ const CALLS_YOU = /^(permission_prompt|agent_needs_input|elicitation_dialog|elic
 function wanted(j) {
   const kind = String((j && j.notification_type) || '');
   if (kind) return CALLS_YOU.test(kind);
-  return !busy(j && j.cwd);
-}
-
-const BUSY_MS = 45000;
-
-function busy(cwd) {
-  try {
-    const { relayRoot, liveDir, read: readJson } = require('./lib.js');
-    const r = relayRoot(cwd || process.cwd(), { git: false });
-    if (!r) return false;
-    const dir = liveDir(r.relay);
-    const now = Date.now();
-    for (const f of fs.readdirSync(dir)) {
-      if (!/\.json$/.test(f) || f[0] === '_') continue;
-      const rec = readJson(path.join(dir, f));
-      if (!rec || rec.ended) continue;
-      const at = Date.parse(rec.updated || rec.started || '') || 0;
-      if (at && now - at < BUSY_MS) return true;
-    }
-  } catch {}
-  return false;
+  return true;
 }
 
 const WINDOW = { waiting: 60000, done: 10000, error: 10000 };
@@ -271,8 +251,6 @@ module.exports = {
   soundPath,
   WINDOW,
   MIN_MS,
-  BUSY_MS,
-  busy,
   CALLS_YOU,
   wanted,
   tooQuick,

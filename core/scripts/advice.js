@@ -1,13 +1,13 @@
 const fs = require('fs');
 const path = require('path');
-const { read, write, safe, projectRoot } = require('../hooks/lib.js');
+const { read, write, safe } = require('../hooks/lib.js');
 
 const DIR = 'docs/danisma';
 const PENDING = '_pending.json';
 const TAIL = 2 * 1024 * 1024;
 
-function dir(relay) {
-  return path.join(projectRoot(relay), DIR);
+function dir(root) {
+  return path.join(root, DIR);
 }
 
 function pendingFile(relay) {
@@ -163,13 +163,9 @@ function list(relay) {
 
 function main(argv) {
   const cmd = argv[0];
-  const rel = require('../hooks/lib.js').relayRoot(process.cwd(), { git: false });
-  if (!rel) {
-    process.stdout.write('no relay here\n');
-    return 1;
-  }
+  const root = process.cwd();
   if (cmd === 'list') {
-    const rows = list(rel.relay);
+    const rows = list(root);
     process.stdout.write(rows.length ? rows.join('\n') + '\n' : 'nothing recorded\n');
     return 0;
   }
