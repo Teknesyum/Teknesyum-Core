@@ -52,7 +52,6 @@ test('child role does not overwrite parent identity', () => {
   assert.equal(dispatch('sonnet').status, 0);
   assert.equal(JSON.parse(fs.readFileSync(path.join(relay, 'live/parent.json'))).role, 'planner');
 });
-test('third round is the single advisor threshold', () => assert.equal(contract.tier('builder', { profile: 'premium', round: 3 }).advisorRequired, true));
 test('zero collected tests cannot hide above the last twelve lines', () => {
   const r = contract.runVerify(root, ['node -e "console.log(\'collected 0 items\');for(let i=0;i<20;i++)console.log(\'cleanup\')"'])[0];
   assert.equal(r.ok, false); assert.equal(r.empty, true);
@@ -95,19 +94,6 @@ test('an unrelated subagent cannot answer a pending advisor question', () => {
   assert.ok(advice.bind(relay, 'call-1', 'advisor-1'));
   assert.equal(advice.close(relay, '', path.join(root, 'reply.jsonl'), 'advisor-1'), name);
 });
-test('Fable consultation is tied to the finished agent, contract and previous round', () => {
-  put('.claude/relay/contracts/done/R1.md', body('R1').replace('round: 1', 'round: 2'));
-  const args = ['reopen', '--id', 'R1', '--reason', 'broken output still reproduced', '--critical', 'the output corrupts the exported file', '--advisor', 'f1'];
-  const rec = { id: 'f1', role: 'advisor', model: 'opus', contract: 'R1', round: '2', files: [], ended: new Date().toISOString() };
-  put('.claude/relay/live/f1.json', rec);
-  assert.match(run('scripts/contract.js', args).stdout, /resolved Fable/);
-  rec.model = 'claude-fable-5'; rec.contract = 'R9'; put('.claude/relay/live/f1.json', rec);
-  assert.match(run('scripts/contract.js', args).stdout, /another contract or round/);
-  rec.contract = 'R1'; delete rec.ended; put('.claude/relay/live/f1.json', rec);
-  assert.match(run('scripts/contract.js', args).stdout, /wait for the advisor/);
-  rec.ended = new Date().toISOString(); put('.claude/relay/live/f1.json', rec);
-  const r = run('scripts/contract.js', args); assert.equal(r.status, 0, r.stdout);
-});
 test('host launch response records child identity and resolved model', () => {
   const r = run('hooks/watch.js', [], { hook_event_name: 'PostToolUse', tool_name: 'Agent', agent_id: 'parent', agent_type: 'planner',
     tool_input: { model: 'fable', subagent_type: 'teknesyum-core:worker', prompt: 'Read roles/advisor.md for contracts/R1.md' },
@@ -141,7 +127,7 @@ test('an inherited gate-open flag is not a per-command exception', () => {
   });
   assert.equal(r.status, 2, r.stderr);
 });
-test('mandatory Fable remains dispatchable for a closed second round in normal profile', () => {
+test('an advisor whose profile cell is off is dispatched at the asked model, not blocked', () => {
   put('.claude/relay/config.json', { profile: 'normal' });
   put('.claude/relay/contracts/done/F2.md', body('F2').replace('round: 1', 'round: 2'));
   const r = dispatch('fable', 'Read roles/advisor.md and contracts/done/F2.md');

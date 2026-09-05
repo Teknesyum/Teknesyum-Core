@@ -787,7 +787,7 @@ function overModel(c, level, round) {
     repeatFail: agent ? tallyFails(c.relay, agent) : 0,
     irreversible: risk.irreversible(owns, verifySteps(c.body)).hit,
   });
-  if (!t || MODEL_RANK[asked] <= MODEL_RANK[t.model]) return null;
+  if (!t || !t.model || MODEL_RANK[asked] <= MODEL_RANK[t.model]) return null;
 
   return [
     c.id + ' ran on ' + asked + '; ' + role + ' resolves to ' + t.model + '.',
@@ -830,7 +830,7 @@ function overDispatch(r, role, asked, prompt) {
     repeatFail: tallyFails(relay, '', id),
     irreversible: body ? risk.irreversible(owns, verifySteps(body)).hit : false,
   });
-  if (!t || MODEL_RANK[asked] <= MODEL_RANK[t.model]) return null;
+  if (!t || !t.model || MODEL_RANK[asked] <= MODEL_RANK[t.model]) return null;
 
   return [
     (id || role) + ' is being sent to ' + asked + '; ' + role + ' resolves to ' + t.model + '.',
