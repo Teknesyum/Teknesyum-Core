@@ -58,6 +58,10 @@ An opinion:
 <what the asker did not consider>
 ```
 
+The headings are written in the contract language, not in English. In Turkish they are
+`## Karar`, `## Gerekce` and `## Kacirdigin`. Answering in Turkish under English headings
+leaves the reply half-translated, and it lands in docs/danisma that way.
+
 Twenty lines maximum.
 
 A sharpening, when the mark opened it:
