@@ -48,7 +48,7 @@ function karistir(dizi, seed) {
 }
 
 function planOlustur(kapsam, seed, secim = {}) {
-  const gorevler = kapsam === 'tam' ? GOREVLER : GOREVLER.slice(0, 2);
+  const gorevler = secim.gorevler && secim.gorevler.length ? secim.gorevler : kapsam === 'tam' ? GOREVLER : GOREVLER.slice(0, 2);
   const kollar = secim.kollar && secim.kollar.length ? secim.kollar : KOLLAR;
   const tekrar = secim.tekrar || TEKRAR;
   const tekrarBas = secim.tekrarBas || 1;
@@ -378,6 +378,7 @@ function main() {
     kollar: kollarArg ? kollarArg.split(',').map((k) => k.trim()).filter(Boolean) : null,
     tekrar: Number(argAl('--repeat', '0')) || null,
     tekrarBas: Number(argAl('--repeatFrom', '0')) || null,
+    gorevler: argAl('--tasks', '') ? argAl('--tasks', '').split(',').map((g) => g.trim()).filter(Boolean) : null,
   };
   const sonucYolu = argAl('--sonuc', null);
   const plan = planOlustur(kapsam, seed, secim);

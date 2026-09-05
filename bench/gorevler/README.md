@@ -203,3 +203,25 @@ yardımcıya bölünmüş hâli) ile kabul testi
 `PASS: tests/test_utils.py yeşil ve guess_json_utf davranışı korunmuş` verdi (`228
 passed, 1 skipped`). Kırık bir çözümle (`"utf-8"` dönüşü `"utf-8-BROKEN"` yapıldı) aynı
 kabul testi `FAIL: tests/test_utils.py kırmızı` verdi.
+
+---
+
+## 06 — sindresorhus/slugify CLI (çok dosyalı özellik, JS) — relay tetikleyici
+
+**Dondurma tarihi:** 2026-09-05T14:40:00Z. **Pinlenen commit:** 01 ile aynı
+(`2acf5b3cadf7faed3928536d051104502ae2b667`), ama bu kez `index.js` hazır: iş bir CLI eklemek.
+
+**Neden var:** 01-05 tek dosyalık; Core'un relay skill'i tek dosyada sözleşme açmıyor, A/B'nin
+1. tekrarında beş koşunun hiçbirinde sözleşme/alt ajan yoktu. Bu görev dört dosyaya yayılır
+(`cli.js`, `package.json`, `readme.md`, `test-cli.js`) ve gerçek tasarım kararı taşır (argüman
+ayrıştırma, stdin, çıkış kodları); skill'in "iki ya da daha çok dosya → bir sözleşme, bir builder"
+satırını tetiklemesi beklenir. Görev metni Core'dan söz etmez, native kola aynen gider.
+
+**Tahmini süre:** 10-20 dk. **Kabul (`06-slugify-cli.kabul.sh`):** `package.json`'da
+`bin.slugify`, shebang'lı hedef dosya, çalışma zamanı bağımlılıklarının değişmemesi, sekiz sabit
+CLI örneği, çok satırlı stdin, boş girdi (çıkış 1), `--help` (çıkış 0, "separator" geçer),
+bilinmeyen bayrak (çıkış 2), `test-cli.js` varlığı, `readme.md`'de `## CLI`, `npx ava test.js
+test-cli.js` yeşil. Kol etiketi görmez, yalnız dizin alır.
+
+Referans doğrulama: temiz pin **FAIL** (`bin.slugify yok`); bağımsız bir sonnet/low ajanının
+yalnız görev metniyle ürettiği çözüm **PASS** (35 ava testi yeşil).
