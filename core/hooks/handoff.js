@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { read, stateFile, safe } = require('./lib.js');
+const { read, stateFile, safe, t } = require('./lib.js');
 
 const FILE = path.join('.claude', 'handoff.md');
 const FILL = '(fill)';
@@ -41,6 +41,8 @@ function render(cwd, st, old) {
   const plan = fs.existsSync(path.join(cwd, 'docs', 'plan.md')) ? 'docs/plan.md' : 'none';
   return [
     '# Handoff — ' + new Date().toISOString().slice(0, 16).replace('T', ' '),
+    '',
+    t('handoff.rule'),
     '',
     '## changed_files',
     stat + (untracked ? '\nuntracked:\n' + untracked : ''),

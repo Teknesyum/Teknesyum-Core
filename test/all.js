@@ -91,6 +91,7 @@ function testCountSilence() {
   const st = stateOf(cfg);
   ok('every touched file is counted', Object.keys(st.files).length === 3, JSON.stringify(st.files));
   ok('the diff is summed from git', st.diff === 3, String(st.diff));
+  ok('lines in new files are counted but not as edits', st.edited === 0 && Object.values(st.files).every((f) => f.fresh), JSON.stringify(st));
 
   const read = hook(COUNT, { hook_event_name: 'PostToolUse', tool_name: 'Read', session_id: 's1', cwd: root, tool_input: { file_path: path.join(root, 'src', 'ok.js') } }, cfg);
   ok('a read is neither counted nor answered', read.stdout === '' && Object.keys(stateOf(cfg).files).length === 3, read.stdout);
@@ -132,6 +133,8 @@ function testCountThreshold() {
 
   ok('a risky path is the reason before any count', count.reason({ files: { 'src/auth/token.js': { adds: 1, dels: 0 } }, diff: 1 }) === 'src/auth/token.js');
   ok('a big diff is a reason on its own', /^200 /.test(count.reason({ files: { 'a.js': { adds: 200, dels: 0 } }, diff: 200 })));
+  ok('a big diff made of new files is not', count.reason({ files: { 'a.js': { adds: 200, dels: 0, fresh: true } }, diff: 200, edited: 0 }) === '');
+  ok('edited lines are what count when known', /^160 /.test(count.reason({ files: { 'a.js': { adds: 200, dels: 0, fresh: true }, 'b.js': { adds: 160, dels: 0 } }, diff: 360, edited: 160 })));
   ok('below both nothing is a reason', count.reason({ files: { 'a.js': { adds: 5, dels: 0 } }, diff: 5 }) === '');
   for (const p of ['db/migrations/001.sql', '.github/workflows/ci.yml', 'Dockerfile', 'src/config.js', 'package-lock.json', 'lib/security.js'])
     ok('risky: ' + p, count.RISK.test(p));
@@ -198,6 +201,7 @@ function testHandoff() {
   ok('a session that touched files ends with a handoff', end.status === 0 && fs.existsSync(file), end.stderr);
   const body = fs.readFileSync(file, 'utf8');
   ok('changed files come from git', /## changed_files/.test(body) && /src\/a\.js/.test(body), body);
+  ok('the handoff opens with the one-line rule for the next session', /^# Handoff[^\n]*\n\n[^\n]*unfinished part/.test(body), body);
   ok('tests run are listed', /## tests_run/.test(body) && /npm test/.test(body), body);
   ok('plan is answered', /## plan\nnone/.test(body), body);
   ok('task is the first user prompt of the session, stripped of tags', /## task\nadd a --dry flag to the cli\n/.test(body), body);

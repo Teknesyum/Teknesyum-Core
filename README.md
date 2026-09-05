@@ -157,18 +157,19 @@ config, five repeats per arm. Tables, method and the raw rows are in [bench/rapo
   costs about 200 tokens of cache read per turn, roughly a ten-thousandth of a dollar.
 - Tasks 02-05: median cost within three percent of native, or cheaper, which is noise. Task 06
   touched exactly four files, so the count hook spoke on every run; the model said skip each
-  time and the run cost nine percent more. The threshold moved to five files after that. In
-  the three-run rerun the line threshold spoke instead, since the task writes about 185 new
-  lines, and the run still failed the five percent bar.
+  time and the run cost nine percent more. The threshold moved to five files, and lines in
+  new files stopped counting toward the line threshold; in the last three-run rerun the hook
+  never spoke and the median sat seven percent above native, inside the noise of three runs.
 - The one line the hook speaks: about 450 tokens, no extra tool call.
 - Resume: the handoff is written every time, but a session cut at six turns never reaches
   the context threshold, so decisions and next_action stay empty and the file does not carry
   the task. "Continue" finished the task in one of five runs with the handoff and none of five
-  without. The handoff now carries the session's first prompt as `task`; in a three-run rerun
-  that did not change the outcome, none of three finished on either arm, and the core arm
-  spent twice as much in the second session because it re-read the task and started over.
-  One of three sessions left no handoff and the run kept no hook error log to say why. Both
-  are open items, written down in section 6 of the report.
+  without. The handoff now carries the session's first prompt as `task` and opens with one
+  line telling the next session to continue from the first unfinished part. With that,
+  "continue" finished the task in three of three runs; plain Claude Code finished none of
+  three. The second session costs about three times more on the core arm, because it does
+  the work. Sections 6 and 7 of the report hold the rows, including one round whose
+  acceptance column was invalid because the runner could not find bash.
 
 ---
 

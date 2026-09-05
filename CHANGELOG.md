@@ -23,8 +23,10 @@
   token cache okuması; görev 02-05 native ile ±%3, görev 06 +%9 (dört dosya eşiği her koşuda
   tetiklendi); uyarı satırı ~450 token; resume kabulü devirle 1/5, devirsiz 0/5. Eşik 5'e
   çekilip devire task eklendikten sonra 3 tekrar: görev 06'da bu kez 150 satır eşiği konuştu,
-  kabul yine ✗; resume iki kolda 0/3 (rapor bölüm 6). Açık: yeni dosyalarda satır eşiği,
-  bir koşuda devir yazılmadı, sebebi günlüksüz. Ölçüm
+  kabul yine ✗; resume kabulü o turda ölçülemedi, koşturucu bash'i bulamadı (rapor bölüm 6).
+  Üç düzeltme daha (bölüm 7): yeni dosya satırları eşiğe girmez, devir başına "ilk bitmemiş
+  parçadan sür" satırı, devam.js kanca günlüğünü saklar ve bash'i run.js gibi bulur. Sonuç:
+  görev 06'da ipucu 0/3, resume kabulü core 3/3, native 0/3. Ölçüm
   betikleri `bench/taban.js`, `bench/uyari.js`, `bench/devam.js`, `bench/rapor016.js`;
   `bench/run.js` kolları core/native oldu, tiers.json bağımlılığı gitti.
 

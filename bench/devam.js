@@ -4,14 +4,14 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 const O = require('./olcum');
-const { gorevOku } = require('./run');
+const { gorevOku, bashYolu } = require('./run');
 
 const GOREV = '06-slugify-cli';
 const ANLAMLI = new Set(['Write', 'Edit', 'MultiEdit', 'NotebookEdit', 'Bash', 'PowerShell']);
 
 function kabul(cwd) {
   const yol = path.join(O.KOK, 'bench', 'gorevler', GOREV + '.kabul.sh');
-  const r = spawnSync('bash', [yol, cwd], { encoding: 'utf8', windowsHide: true });
+  const r = spawnSync(bashYolu(), [yol, cwd], { encoding: 'utf8', windowsHide: true });
   return { pass: r.status === 0, son: String((r.stdout || '') + (r.stderr || '')).trim().split('\n').slice(-2).join(' | ') };
 }
 
@@ -45,10 +45,14 @@ async function cift(arm, tekrar, env, maxTurns, sonucYolu, saklaKok) {
     }
     const handoffYolu = path.join(cwd, '.claude', 'handoff.md');
     satir.handoffVar = fs.existsSync(handoffYolu);
-    if (satir.handoffVar) {
-      const h = path.join(saklaKok, arm + '-r' + tekrar + '-s1');
-      fs.mkdirSync(h, { recursive: true });
-      fs.copyFileSync(handoffYolu, path.join(h, 'handoff.md'));
+    const h = path.join(saklaKok, arm + '-r' + tekrar + '-s1');
+    fs.mkdirSync(h, { recursive: true });
+    if (satir.handoffVar) fs.copyFileSync(handoffYolu, path.join(h, 'handoff.md'));
+    const kancaDizini = path.join(configDizini, 'teknesyum');
+    if (fs.existsSync(kancaDizini)) {
+      fs.cpSync(kancaDizini, path.join(h, 'kanca'), { recursive: true });
+      satir.kancaHata = fs.existsSync(path.join(kancaDizini, 'hook-errors.log'));
+      satir.durumDosyasi = fs.readdirSync(kancaDizini).filter((d) => /^state-/.test(d)).length;
     }
     satir.s1Kabul = kabul(cwd);
 

@@ -461,5 +461,5 @@ module.exports = {
   planOlustur, koltukOku, encodeCwd, gorevOku, eklentiKur, kancaSay,
   sonSessionId, koşuYap, ccVersionOku, KOLLAR, GOREVLER, KOLTUK, K0,
   calistir, onKontrolluCalistir, onKontrolYap, configSablonundanKopyala,
-  onKontrolMesaji, IZIN_VERILEN_CONFIG_GIRDILERI,
+  onKontrolMesaji, IZIN_VERILEN_CONFIG_GIRDILERI, bashYolu,
 };

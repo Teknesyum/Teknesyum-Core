@@ -137,22 +137,33 @@ function taskSayisi(rows) {
   return { var_, dolu };
 }
 
-function sonra() {
-  const g = O.jsonlOku(path.join(B, 'sonuc-016b.jsonl'));
-  const d = O.jsonlOku(path.join(B, 'devam-b.jsonl'));
-  const out = ['## 6. Değişiklik sonrası: eşik 5 dosya, handoff\'ta task', ''];
-  out.push('Bölüm 5\'teki iki karar uygulandı (count.js FILE_MAX 4→5; handoff.js oturumun ilk istemini transkriptten `## task` olarak yazar) ve yalnız etkilenen iki ölçüm üç tekrarla yeniden koşuldu. Aynı koltuk, aynı yöntem.', '');
-  out.push(gorevler('sonuc-016b.jsonl', '### 6a. Görev 06, n=3').split('\n').slice(2).join('\n'));
-  out.push(devam('devam-b.jsonl', '### 6b. Resume, n=3').split('\n').slice(2).join('\n'));
+function sonra(ek = 'b', no = 6, baslik = 'Değişiklik sonrası: eşik 5 dosya, handoff\'ta task', giris = 'Bölüm 5\'teki iki karar uygulandı (count.js FILE_MAX 4→5; handoff.js oturumun ilk istemini transkriptten `## task` olarak yazar) ve yalnız etkilenen iki ölçüm üç tekrarla yeniden koşuldu. Aynı koltuk, aynı yöntem.') {
+  const g = O.jsonlOku(path.join(B, 'sonuc-016' + ek + '.jsonl'));
+  const d = O.jsonlOku(path.join(B, 'devam-' + ek + '.jsonl'));
+  const out = ['## ' + no + '. ' + baslik, ''];
+  out.push(giris, '');
+  out.push(gorevler('sonuc-016' + ek + '.jsonl', '### ' + no + 'a. Görev 06, n=3').split('\n').slice(2).join('\n'));
+  out.push(devam('devam-' + ek + '.jsonl', '### ' + no + 'b. Resume, n=3').split('\n').slice(2).join('\n'));
+  if (ek === 'b') out.push('**Bu turun kabul sütunları geçersiz.** Koşu PowerShell\'den ayrık başlatıldı, devam.js kabul betiğini çıplak `bash` adıyla çağırıyordu ve bulamadı (kabul çıktısı altı satırda da boş). Handoff, araç ve maliyet sütunları geçerli; kabul s1/s2 ölçülmedi. Hata bölüm 7\'den önce yakalandı, devam.js artık run.js\'in `bashYolu()`\'nu kullanıyor.', '');
+  if (d.some((r) => r.kancaHata != null)) out.push('Kanca günlüğü (core, s1): ' + d.filter((r) => r.arm === 'core').map((r) => 'r' + r.repeat + ' hata ' + (r.kancaHata ? 'var' : 'yok') + ', durum dosyası ' + (r.durumDosyasi == null ? '-' : r.durumDosyasi) + ', handoff ' + (r.handoffVar ? 'var' : 'yok')).join('; ') + '. Kopyalar `bench/oturumlar/d*/core-r*-s1/kanca/`.', '');
   const ts = taskSayisi(d);
   const c = d.filter((r) => r.arm === 'core' && r.s2 && r.s2.usd != null), n = d.filter((r) => r.arm === 'native' && r.s2 && r.s2.usd != null);
   const gc = g.filter((r) => r.arm === 'core' && !r.dropped), gn = g.filter((r) => r.arm === 'native' && !r.dropped);
   out.push('Özet: görev 06 ipucu ' + g.filter((r) => r.arm === 'core').reduce((a, r) => a + (r.kanca ? r.kanca.cueHits : 0), 0) + '/' + g.filter((r) => r.arm === 'core').length + ' koşuda tetiklendi, medyan $ farkı ' + yuzde(O.medyan(gc.map((r) => r.usd)), O.medyan(gn.map((r) => r.usd))) + ' (önce +%9,3). Handoff\'ta task dolu ' + ts.dolu + '/' + ts.var_ + '. Resume kabulü core ' + c.filter((r) => r.s2Kabul && r.s2Kabul.pass).length + '/' + c.length + ', native ' + n.filter((r) => r.s2Kabul && r.s2Kabul.pass).length + '/' + n.length + ' (önce 1/5 ve 0/5). Harcama: ' + f2(g.reduce((a, r) => a + (r.usd || 0), 0) + d.reduce((a, r) => a + ((r.s1 && r.s1.usd) || 0) + ((r.s2 && r.s2.usd) || 0), 0)) + ' $.', '');
   const sebepler = [...new Set(g.flatMap((r) => (r.kanca && r.kanca.cues) || []).map((c) => c.replace(/^\d+ /, '').split('.')[0]))];
+  if (ek === 'c') {
+    out.push('Yorum:', '',
+      '- Görev 06: ipucu artık hiç gelmiyor (yeni dosya satırları eşiğe girmiyor); $ farkı n=3 ile gürültü sınırında, native r1 tek uç değer. Eşik mekanizması bu görevde sustu, bedel K0 kuralının ~200 tokenine indi.',
+      '- Kanca günlüğü üç koşuda da temiz, handoff 3/3 yazıldı; bölüm 6\'daki kayıp handoff bu turda tekrarlanmadı.',
+      '- Resume: core 3/3 bitirdi, native 0/3. Devir dosyası task + kural satırıyla ikinci oturumu işe bağlıyor; native git diff\'e bakıp "çalışıyor" deyip duruyor. core ikinci oturumda üç kat harcıyor (0,33 $ ile 0,11 $) ama native hiçbir koşuda işi bitirmediği için bitmiş iş başına maliyet karşılaştırması native lehine kurulamıyor. İlk koşu bash hatasıyla atıldı (`trash/bench-calisma/devam-c-bashsiz.jsonl`), tablo yeniden koşulan üç çiftten.',
+      '');
+    return out.join('\n');
+  }
+  if (ek !== 'b') return out.join('\n');
   out.push('Yorum:', '',
     '- Dosya eşiği artık görev 06\'da tetiklenmiyor; onun yerine satır eşiği tetikleniyor ("' + sebepler.join('", "') + '"): görev üç yeni dosyayla ~185 satır yazıyor, eşik 150. İpucu yine her koşuda geldi, model yine "atla" dedi. n=3 ile $ farkı gürültülü (core r1 0,73 $ tek uç değer), ama kabul yine ✗. 150 satır eşiği yeni dosyalarda kaba: karar bekleyen üçüncü madde.',
     '- Handoff\'ta task tam metinle duruyor (2000 karakter tavanı; 500 ilk denemede görevin maddelerini kesti, o koşu atıldı: `trash/bench-calisma/devam-b-500.jsonl`). core r3\'te handoff yazılmadı: oturum Write 1 + Edit 3 ile aynı dört dosyaya dokundu, SessionEnd sonrası dosya yok; sebep belirlenemedi, çünkü koşu sonunda config dizini ve kanca hata günlüğü siliniyor. Açık madde: devam.js hook-errors.log\'u saklamalı.',
-    '- Resume kabulü iki kolda 0/3; görevi taşıyan handoff ikinci oturumu bitirmeye yetmedi. core ikinci oturumda yine daha çok araç (medyan 17\'ye 7) ve iki kat maliyet: handoff\'u okuyup görevi görünce işi yeniden ele alıyor, native ise git diff\'ten devam edip erken duruyor. Altı tur + "devam et" senaryosunda 0.16\'nın devir kancası ölçülebilir bir kazanç göstermedi.',
+    '- Resume kabulü bu turda ölçülemedi (yukarıdaki not). Ölçülen: core ikinci oturumda yine daha çok araç (medyan 17\'ye 7) ve iki kat maliyet; transcriptlerde handoff\'u okuyup görevi görünce işi yeniden ele alıyor, native ise git diff\'ten devam edip erken duruyor. Kabul sorusu bölüm 7\'de.',
     '');
   return out.join('\n');
 }
@@ -176,6 +187,7 @@ function main() {
     'Tarih: ' + new Date().toISOString().slice(0, 10) + '. Claude Code ' + (O.jsonlOku(path.join(B, 'sonuc-016.jsonl'))[0] || {}).ccVersion + ', model claude-sonnet-5, tarife `docs/tarife.json`. Spec: Core v2 yön promptu madde 8. Ölçüm betikleri: `bench/run.js`, `bench/taban.js`, `bench/uyari.js`, `bench/devam.js`; bu rapor `bench/rapor016.js` ile üretildi.',
     '',
     taban(), gorevler(), uyari(), devam(), BULGULAR, sonra(),
+    sonra('c', 7, 'Üç açık madde sonrası: yeni dosya satırları, kanca günlüğü, devir kuralı', 'Bölüm 6\'nın üç açık maddesi uygulandı: count.js yeni dosyaların satırlarını sayar ama eşiğe yalnız izlenen dosyalardaki değişiklik girer (`edited`); devam.js koşu sonunda kanca durum dizinini ve hata günlüğünü saklar; handoff.md başına tek satır kural girdi ("önce task, sonra changed_files; ilk bitmemiş parçadan sür, diff\'in gösterdiğini yeniden yapma"). İki ölçüm üç tekrarla yeniden koşuldu.'),
   ];
   fs.writeFileSync(path.join(B, 'rapor.md'), parcalar.join('\n') + '\n');
   console.log('bench/rapor.md yazıldı');

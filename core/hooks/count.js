@@ -37,7 +37,7 @@ function numstat(cwd, names) {
     if (!out[n]) {
       let adds = 0;
       try { adds = fs.readFileSync(path.join(cwd, n), 'utf8').replace(/\r?\n$/, '').split('\n').length; } catch {}
-      out[n] = { adds, dels: 0 };
+      out[n] = { adds, dels: 0, fresh: true };
     }
   return out;
 }
@@ -46,11 +46,14 @@ function refresh(st) {
   const names = Object.keys(st.files);
   const rows = numstat(st.cwd, names);
   let total = 0;
+  let edited = 0;
   for (const n of names) {
     st.files[n] = rows[n] || st.files[n] || { adds: 0, dels: 0 };
     total += st.files[n].adds + st.files[n].dels;
+    if (!st.files[n].fresh) edited += st.files[n].adds + st.files[n].dels;
   }
   st.diff = total;
+  st.edited = edited;
 }
 
 function planAt(cwd) {
@@ -62,7 +65,8 @@ function reason(st) {
   const risky = names.find((n) => RISK.test(n));
   if (risky) return risky;
   if (names.length >= FILE_MAX) return names.length + ' ' + t('cue.files');
-  if (st.diff >= DIFF_MAX) return st.diff + ' ' + t('cue.lines');
+  const edited = st.edited == null ? st.diff : st.edited;
+  if (edited >= DIFF_MAX) return edited + ' ' + t('cue.lines');
   return '';
 }
 

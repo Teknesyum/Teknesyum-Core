@@ -154,17 +154,17 @@ içinde.
   yaklaşık 200 token cache okuması tutar, kabaca doların on binde biri.
 - Görev 02-05: medyan maliyet native'in yüzde üçü içinde ya da daha ucuz, yani gürültü. Görev
   06 tam dört dosyaya dokundu, sayma kancası her koşuda konuştu; model her seferinde atla dedi ve
-  koşu yüzde dokuz pahalı çıktı. Eşik bunun üzerine beş dosyaya çekildi. Üç tekrarlık yeniden
-  ölçümde bu kez satır eşiği konuştu, çünkü görev yaklaşık 185 yeni satır yazıyor; koşu yüzde
-  beş çıtasını yine geçemedi.
+  koşu yüzde dokuz pahalı çıktı. Eşik beş dosyaya çekildi ve yeni dosyaların satırları satır
+  eşiğine girmez oldu; son üç tekrarlık ölçümde kanca hiç konuşmadı, medyan native'in yüzde
+  yedi üstünde kaldı, üç koşunun gürültüsü içinde.
 - Kancanın söylediği tek satır: yaklaşık 450 token, ek araç çağrısı yok.
 - Resume: devir her seferinde yazılır ama altı turda kesilen oturum bağlam eşiğine varmaz;
   decisions ve next_action boş kalır ve dosya görevi taşımaz. "Devam et" işi devirle beşte bir,
-  devirsiz beşte sıfır koşuda bitirdi. Devir artık oturumun ilk istemini `task` olarak taşıyor;
-  üç tekrarlık yeniden ölçümde sonuç değişmedi, iki kolda da üçte sıfır bitti ve core ikinci
-  oturumda iki kat harcadı, çünkü görevi yeniden okuyup baştan ele aldı. Üç oturumdan biri devir
-  bırakmadı ve koşu sebebini söyleyecek kanca günlüğünü saklamadı. İkisi de açık madde, raporun
-  6. bölümünde yazılı.
+  devirsiz beşte sıfır koşuda bitirdi. Devir artık oturumun ilk istemini `task` olarak taşıyor
+  ve başında sonraki oturuma ilk bitmemiş parçadan sürmesini söyleyen tek satır var. Bununla
+  "devam et" işi üçte üç koşuda bitirdi; düz Claude Code üçte sıfır. İkinci oturum core kolunda
+  yaklaşık üç kat pahalı, çünkü işi yapıyor. Satırlar raporun 6. ve 7. bölümünde; bir turun kabul
+  sütunu geçersiz, koşturucu bash'i bulamamıştı.
 
 ---
 

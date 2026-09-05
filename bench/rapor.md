@@ -108,11 +108,53 @@ Görev 06 (slugify CLI, dört parça). Birinci oturum `--max-turns 6` ile kesili
 | core | 3 | 8 | 4 | 0 | `Bash:git diff package.json readme.md; echo ---; cat cli.js 2>/dev/null \| head -100` | ✗ |
 | native | 3 | 7 | 7 | 2 | `Bash:cd "C:/Users/TEKNES~1/AppData/Local/Temp/tkc-olcum-work-tPBN1a" && git diff package.j` | ✗ |
 
+**Bu turun kabul sütunları geçersiz.** Koşu PowerShell'den ayrık başlatıldı, devam.js kabul betiğini çıplak `bash` adıyla çağırıyordu ve bulamadı (kabul çıktısı altı satırda da boş). Handoff, araç ve maliyet sütunları geçerli; kabul s1/s2 ölçülmedi. Hata bölüm 7'den önce yakalandı, devam.js artık run.js'in `bashYolu()`'nu kullanıyor.
+
 Özet: görev 06 ipucu 3/3 koşuda tetiklendi, medyan $ farkı 28.8% (önce +%9,3). Handoff'ta task dolu 2/2. Resume kabulü core 0/3, native 0/3 (önce 1/5 ve 0/5). Harcama: 4.80 $.
 
 Yorum:
 
 - Dosya eşiği artık görev 06'da tetiklenmiyor; onun yerine satır eşiği tetikleniyor ("satır değişti ve plan yok"): görev üç yeni dosyayla ~185 satır yazıyor, eşik 150. İpucu yine her koşuda geldi, model yine "atla" dedi. n=3 ile $ farkı gürültülü (core r1 0,73 $ tek uç değer), ama kabul yine ✗. 150 satır eşiği yeni dosyalarda kaba: karar bekleyen üçüncü madde.
 - Handoff'ta task tam metinle duruyor (2000 karakter tavanı; 500 ilk denemede görevin maddelerini kesti, o koşu atıldı: `trash/bench-calisma/devam-b-500.jsonl`). core r3'te handoff yazılmadı: oturum Write 1 + Edit 3 ile aynı dört dosyaya dokundu, SessionEnd sonrası dosya yok; sebep belirlenemedi, çünkü koşu sonunda config dizini ve kanca hata günlüğü siliniyor. Açık madde: devam.js hook-errors.log'u saklamalı.
-- Resume kabulü iki kolda 0/3; görevi taşıyan handoff ikinci oturumu bitirmeye yetmedi. core ikinci oturumda yine daha çok araç (medyan 17'ye 7) ve iki kat maliyet: handoff'u okuyup görevi görünce işi yeniden ele alıyor, native ise git diff'ten devam edip erken duruyor. Altı tur + "devam et" senaryosunda 0.16'nın devir kancası ölçülebilir bir kazanç göstermedi.
+- Resume kabulü bu turda ölçülemedi (yukarıdaki not). Ölçülen: core ikinci oturumda yine daha çok araç (medyan 17'ye 7) ve iki kat maliyet; transcriptlerde handoff'u okuyup görevi görünce işi yeniden ele alıyor, native ise git diff'ten devam edip erken duruyor. Kabul sorusu bölüm 7'de.
+
+## 7. Üç açık madde sonrası: yeni dosya satırları, kanca günlüğü, devir kuralı
+
+Bölüm 6'nın üç açık maddesi uygulandı: count.js yeni dosyaların satırlarını sayar ama eşiğe yalnız izlenen dosyalardaki değişiklik girer (`edited`); devam.js koşu sonunda kanca durum dizinini ve hata günlüğünü saklar; handoff.md başına tek satır kural girdi ("önce task, sonra changed_files; ilk bitmemiş parçadan sür, diff'in gösterdiğini yeniden yapma"). İki ölçüm üç tekrarla yeniden koşuldu.
+
+Koltuk sonnet/low iki kolda. core = eklenti 0.16.0 + K0 kuralı CLAUDE.md, native = boş config. Kabul: medyan $ farkı görev başına ≤ %5. Kaynak: `bench/sonuc-016c.jsonl`, transcriptler `bench/oturumlar/b*/`.
+
+| görev | pass native | pass core | $ native (medyan) | $ core (medyan) | $ farkı | dk native | dk core | düşen n/c | core ipucu | alt ajan n/c | ≤%5 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 06-slugify-cli | 3/3 | 3/3 | 0.34 | 0.37 | 7.2% | 1.92 | 2.59 | 0/0 | 0 | 0/0 | ✗ |
+
+Kabulü geçen görev: 0/1. Toplam harcama: 2.21 $ (6 koşu).
+
+Görev 06 (slugify CLI, dört parça). Birinci oturum `--max-turns 6` ile kesilir; core kolunda SessionEnd kancası `.claude/handoff.md` yazar, native kolunda hiçbir şey kalmaz. İkinci oturum aynı dizinde yalnız "devam et" der. Tekrar araç = ikinci oturumda birinci oturumla aynı imzalı (araç + hedef) çağrı. Anlamlı araç = Write/Edit/Bash. Kaynak: `bench/devam-c.jsonl`, transcriptler ve handoff dosyaları `bench/oturumlar/d*/`.
+
+| kol | n | handoff var | kabul s1 | kabul s2 | tekrar araç (medyan) | s2 araç (medyan) | ilk araç ms | ilk anlamlı araç ms | s2 token (medyan) | s2 $ (medyan) | s2 ipucu |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| native | 3 | 0 | 0 | 0 | 1 | 6 | 3,830 | 3,830 | 329,007 | 0.1130 | 0 |
+| core | 3 | 3 | 0 | 3 | 3 | 19 | 4,066 | 8,073 | 1,080,363 | 0.3322 | 0 |
+
+İkinci oturumun ilk anlamlı adımı, koşu koşu:
+
+| kol | tekrar | s1 araç | s2 araç | tekrar araç | s2 ilk anlamlı adım | kabul |
+|---|---|---|---|---|---|---|
+| core | 1 | 6 | 19 | 1 | `dev/null \| head -200; echo ---; cat package.json; echo ---; grep -n "CLI" -A 40 readme.md` | ✓ |
+| native | 1 | 7 | 6 | 0 | `Bash:ls .claude/handoff.md 2>/dev/null && cat .claude/handoff.md; echo "---"; git status; ` | ✗ |
+| core | 2 | 9 | 13 | 3 | `Bash:cat .claude/handoff.md 2>/dev/null \|\| echo NONE` | ✓ |
+| native | 2 | 8 | 6 | 2 | `Bash:git diff; echo ---; git status; echo ---; ls` | ✗ |
+| core | 3 | 8 | 19 | 4 | `Bash:cd "C:/Users/TEKNES~1/AppData/Local/Temp/tkc-olcum-work-jXFVfe" && grep -n execa pack` | ✓ |
+| native | 3 | 7 | 6 | 1 | `Bash:git log --oneline -5 && git diff --stat && ls` | ✗ |
+
+Kanca günlüğü (core, s1): r1 hata yok, durum dosyası 1, handoff var; r2 hata yok, durum dosyası 1, handoff var; r3 hata yok, durum dosyası 1, handoff var. Kopyalar `bench/oturumlar/d*/core-r*-s1/kanca/`.
+
+Özet: görev 06 ipucu 0/3 koşuda tetiklendi, medyan $ farkı 7.2% (önce +%9,3). Handoff'ta task dolu 3/3. Resume kabulü core 3/3, native 0/3 (önce 1/5 ve 0/5). Harcama: 4.43 $.
+
+Yorum:
+
+- Görev 06: ipucu artık hiç gelmiyor (yeni dosya satırları eşiğe girmiyor); $ farkı n=3 ile gürültü sınırında, native r1 tek uç değer. Eşik mekanizması bu görevde sustu, bedel K0 kuralının ~200 tokenine indi.
+- Kanca günlüğü üç koşuda da temiz, handoff 3/3 yazıldı; bölüm 6'daki kayıp handoff bu turda tekrarlanmadı.
+- Resume: core 3/3 bitirdi, native 0/3. Devir dosyası task + kural satırıyla ikinci oturumu işe bağlıyor; native git diff'e bakıp "çalışıyor" deyip duruyor. core ikinci oturumda üç kat harcıyor (0,33 $ ile 0,11 $) ama native hiçbir koşuda işi bitirmediği için bitmiş iş başına maliyet karşılaştırması native lehine kurulamıyor. İlk koşu bash hatasıyla atıldı (`trash/bench-calisma/devam-c-bashsiz.jsonl`), tablo yeniden koşulan üç çiftten.
 
