@@ -237,17 +237,7 @@ function verifySchema(target, content) {
 }
 
 const SEALED_DIRS = /(^|\/)\.claude\/relay\/(audits|live)\//i;
-const OWED_FILE = /(^|\/)\.claude\/relay\/OWED\.md$/i;
 
-function owedByHand(target) {
-  if (!OWED_FILE.test(norm(path.resolve(target)))) return;
-  return block(
-    'OWED.md is written by the command, not by hand.',
-    'A debt nobody can see is not a debt:',
-    '  node <plugin>/scripts/handoff.js owe --add "ask fable about X"',
-    '  node <plugin>/scripts/handoff.js owe --done 1 --because "..."'
-  );
-}
 
 function sealedArea(target) {
   if (!SEALED_DIRS.test(norm(path.resolve(target)))) return;
@@ -583,7 +573,6 @@ function decide(j) {
     const target = t.file_path || t.notebook_path || '';
     if (!target) return;
     sealedArea(target);
-    owedByHand(target);
     bind(target, agentId);
     boundary(target, agentId);
     exhausted(target, agentId);

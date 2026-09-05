@@ -24,13 +24,13 @@ function cue(j) {
       require('./notify.js').stamp('prompt', Date.now(), j.cwd);
     } catch {}
     markSharpen(j);
-    return join(owedCue(j), logCue(j));
+    return logCue(j);
   }
   if (ev === 'SessionStart') {
     try {
       rewire();
     } catch {}
-    return join(owedCue(j), relayCue(j));
+    return relayCue(j);
   }
   return '';
 }
@@ -53,15 +53,6 @@ function join(a, b) {
   return [a, b].filter(Boolean).join(' | ');
 }
 
-function owedCue(j) {
-  const r = relayRoot(j.cwd || process.cwd(), { git: false });
-  if (!r) return '';
-  try {
-    return require('../scripts/handoff.js').owedCue(r.relay);
-  } catch {
-    return '';
-  }
-}
 
 function logCue(j) {
   if (!LOG_ASK.test(String(j.prompt || ''))) return '';

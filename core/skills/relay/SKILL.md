@@ -137,11 +137,6 @@ Your chat with the user is always the user's language, and that summary lists th
 `## Acceptance` items one for one — an abridged one approves something else. An `_issues.log`
 line is `<contract> | <role> | <what was sought> | <what was missing> | <what was done>`.
 
-## Owed
-
-A promise you cannot keep this turn goes on the ledger: `handoff.js owe --add "..."`. Every
-prompt carries it back until `owe --done <n> --because "..."` closes it. Three, then a contract.
-
 ## Reporting
 
 What changed, where, what the gate said. The statusline shows contracts, agents and problems;
