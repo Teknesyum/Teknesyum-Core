@@ -111,10 +111,9 @@ agent exists, refuses a malformed block or an `id:` that disagrees with the path
 overwrites an existing file. Neither you nor the agent writes it - zero turns beyond the dispatch.
 
 Independent contracts go out in **one message**, each `Agent` call with `isolation: "worktree"`:
-every builder gets its own checkout, its `verify:` runs there, the hooks resolve the shared relay
-from the linked tree, and no two writers share a git index. When all seals are in, merge each
-worktree branch into the main tree yourself and run the shared test once; a merge conflict is a
-split that was not independent - reopen, do not resolve it by hand.
+own checkout, `verify:` runs there, hooks resolve the shared relay, no shared git index. When the
+seals are in, merge each worktree yourself and run the shared test once; a conflict means the split
+was not independent - reopen, never resolve it by hand.
 
 `builder`, `ui-builder`, `auditor`, `planner`, `advisor`, `scout`, `scribe`. The role file names
 its row; row x profile picks the cell in `<P>/tiers.json`. Resolve it, never restate it: `node
@@ -130,9 +129,6 @@ contract. It gets the goal and the evidence, never your draft answer; both halve
 
 Repeated failures are counted for you: the `PostToolUseFailure` hook keeps the run in `live/_tally.json`, the resolver reads it unasked, the banner shows it from two upward.
 
-- Independent contracts start together, not in sequence, each in its own worktree (above).
-- Two writers in one checkout share one git index; the first commit sweeps in the other's
-  files. Never dispatch two builders into the same checkout.
 - The auditor never writes; one written file voids the audit. An empty return is a failure:
   reopen the agent, do not finish its work for it.
 
