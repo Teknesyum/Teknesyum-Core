@@ -1,0 +1,11 @@
+{
+  "ad": "c1-sessiz",
+  "aciklama": "plan ipucu susturuldu: sayac statusline'da kalir, count.js baglama tek satir bile yazmaz",
+  "degistir": [
+    {
+      "dosya": "hooks/count.js",
+      "ara": "return speak(why + ' ' + t('cue.plan'));",
+      "yaz": "return '';"
+    }
+  ]
+}

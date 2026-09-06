@@ -655,6 +655,42 @@ function testScan() {
   sweep(cfg);
 }
 
+function testScout() {
+  const SCOUT = path.join(CORE, 'scripts', 'scout.js');
+  const GATE = path.join(CORE, 'hooks', 'scout.js');
+  const root = fixture();
+  const cfg = home();
+  const env = { ...process.env, CLAUDE_CONFIG_DIR: cfg };
+  const gate = (prompt, model) => {
+    const r = run(process.execPath, [GATE], { cwd: root, env, input: JSON.stringify({ tool_name: 'Agent', tool_input: { prompt, model, subagent_type: 'general-purpose' } }) });
+    try {
+      return JSON.parse(r.stdout).hookSpecificOutput.permissionDecisionReason;
+    } catch {
+      return '';
+    }
+  };
+  const b = run(process.execPath, [SCOUT, 'brief', 'sıfır bağımlılık CLI ayrıştırıcı'], { cwd: root, env });
+  const file = b.stdout.split('\n')[0];
+  ok('brief lands under docs/oncul with an ascii slug', file === 'docs/oncul/001-sifir-bagimlilik-cli-ayristirici-girdi.md', file + b.stderr);
+  const prompt = fs.readFileSync(path.join(root, file), 'utf8');
+  ok('the brief carries its marker and its bounds', /\[\[oncul:001\]\]/.test(prompt) && /En fazla 5 arama/.test(prompt), prompt.slice(0, 80));
+  ok('the gate ignores an agent call without a marker', gate('hello', 'opus') === '');
+  const wrong = gate(prompt, 'opus');
+  ok('the gate refuses a model other than sonnet', /sonnet/.test(wrong) && !/%MODEL/.test(wrong), wrong);
+  ok('the gate refuses a prompt with things added', /nothing added/.test(gate(prompt + 'x'.repeat(6000), 'sonnet')));
+  ok('the gate lets the brief through once', gate(prompt, 'sonnet') === '');
+  const again = gate(prompt, 'sonnet');
+  ok('the second call on the same brief is refused', /already ran once/.test(again), again);
+  ok('a marker nobody armed is refused', /No brief 002/.test(gate('[[oncul:002]] go', 'sonnet')));
+  fs.writeFileSync(path.join(root, 'cevap.md'), 'a · x · MIT · 08/2026 · uyar\n' + 'y'.repeat(9000));
+  const r = run(process.execPath, [SCOUT, 'record', '--reply', 'cevap.md', '--cost', '12k token, 40 s'], { cwd: root, env });
+  ok('record files the answer next to the brief and says it cut', /docs\/oncul\/001-sifir-bagimlilik-cli-ayristirici\.md \(reply cut at 8000/.test(r.stdout), r.stdout + r.stderr);
+  const rec = fs.readFileSync(path.join(root, 'docs', 'oncul', '001-sifir-bagimlilik-cli-ayristirici.md'), 'utf8');
+  ok('the record names the cost and the cut', /12k token, 40 s/.test(rec) && /karakter kesildi/.test(rec));
+  sweep(root);
+  sweep(cfg);
+}
+
 function main() {
   const root = fixture();
   const suites = [
@@ -674,6 +710,7 @@ function main() {
     ['agency', testAgency],
     ['doctor', testDoctor],
     ['scan', testScan],
+    ['scout', testScout],
   ];
   for (const [name, fn] of suites) {
     try {

@@ -124,6 +124,7 @@ ve kayıtları listeleyen bir betik var.
 | `scripts/setup.js` | Makine ayarı: dil, zil, özel depo, projeler klasörü. |
 | `scripts/doctor.js` | Yedi kontrol: node, git, sürüm, kancalar, statusline, harita, günlükler. |
 | `scripts/scan.js` | Projenin kendisine yedi salt okunur kontrol: lisans yüzeyleri, beş dosya eşiğine karşı plan, devir boşlukları, sürüme karşı belgeler, test betiği, `trash/` atıfları, harita. Yazmaz, model çağırmaz, bağlama taşımaz; profil yalnız belge kümesini genişletir. |
+| `scripts/scout.js` | Öncül arama, istenince ve bir kez: `brief <konu>` `docs/oncul/` altına sınırlı bir öncül yazar (5 arama, 3 sayfa, 5 aday, 400 kelime) ve kapıyı kurar; öncül sonnet üstünde tek alt ajana gider; `record` cevabı 8.000 karakterde keserek dosyalar. `hooks/scout.js` kapısı aynı öncüle ikinci çağrıyı, başka modeli ya da uzatılmış istemi reddeder. |
 | `scripts/release.js` | Sürümü `.changes/` altındaki notlardan artırır, kurulum satırlarını yeniler, etiketler. |
 
 ---
@@ -207,7 +208,7 @@ olan oturum.
 
 ## Kancalar
 
-Altı olay, beş dosya, hepsi `core/hooks/` altında:
+Altı olay, altı dosya, hepsi `core/hooks/` altında:
 
 | Olay | Kanca | Söyler |
 |---|---|---|
@@ -215,6 +216,7 @@ Altı olay, beş dosya, hepsi `core/hooks/` altında:
 | `PostToolUse` | `count.js` | eşikte tek satır, bir kez; yoksa hiçbir şey |
 | `PreToolUse` | `prefs.js` | README yazılırken kendi README kurallarınız |
 | `PreToolUse` | `loop.js` | bekleme döngüsünün üst sınırı yoksa tek satır; yoksa hiçbir şey |
+| `PreToolUse` | `scout.js` | hiçbir şey; öncül bütçesini aşan ajan çağrısını reddeder |
 | `Stop` | `count.js` | hiçbir şey; statusline için diff'i tazeler |
 | `SessionEnd` | `handoff.js` | hiçbir şey; devri yazar |
 | `Notification` | `notify.js` | hiçbir şey; çalar |

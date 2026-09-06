@@ -130,5 +130,21 @@
   "handoff.rule": {
     "en": "Read task, then changed_files. Continue from the first unfinished part; do not redo or re-verify what the diff already shows.",
     "tr": "Önce task, sonra changed_files oku. İlk bitmemiş parçadan sür; diff'in gösterdiğini yeniden yapma, yeniden doğrulama."
+  },
+  "scout.unknown": {
+    "en": "No brief %ID is armed. Run scout.js brief <topic> first and send that file as the prompt.",
+    "tr": "%ID numaralı öncül hazır değil. Önce scout.js brief <konu> çalıştır, yazdığı dosyayı istem olarak ver."
+  },
+  "scout.spent": {
+    "en": "Brief %ID already ran once. Read docs/oncul/, or write a new brief.",
+    "tr": "%ID numaralı öncül bir kez koştu. docs/oncul/ altındakini oku ya da yeni öncül yaz."
+  },
+  "scout.model": {
+    "en": "A scout runs on %MODEL only. Pass model: %MODEL.",
+    "tr": "Öncül yalnız %MODEL ile koşar. model: %MODEL ver."
+  },
+  "scout.long": {
+    "en": "The prompt is longer than the brief. Send the brief file as written, nothing added.",
+    "tr": "İstem öncül dosyasından uzun. Dosyayı yazıldığı gibi ver, ekleme yapma."
   }
 }

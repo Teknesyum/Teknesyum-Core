@@ -116,7 +116,8 @@ function eklentiKur(configDizini) {
       extraKnownMarketplaces: { teknesyum: { source: { source: 'github', repo: 'Teknesyum/Teknesyum-Core' } } },
     }, null, 2)
   );
-  fs.writeFileSync(path.join(configDizini, 'CLAUDE.md'), K0);
+  const k0 = process.env.BENCH_K0 === undefined ? K0 : process.env.BENCH_K0 === '' ? '' : fs.readFileSync(process.env.BENCH_K0, 'utf8');
+  if (k0) fs.writeFileSync(path.join(configDizini, 'CLAUDE.md'), k0);
   const pazarKaynak = path.join(os.homedir(), '.claude', 'plugins', 'marketplaces', 'teknesyum');
   const pazarHedef = path.join(configDizini, 'plugins', 'marketplaces', 'teknesyum');
   if (fs.existsSync(pazarKaynak)) fs.cpSync(pazarKaynak, pazarHedef, { recursive: true });
@@ -326,6 +327,7 @@ async function koşuYap(kosu, batchId, ccVersion, bagimlar = {}) {
     tokens: null, usd: null, usdSource: null,
     kanca: null,
     varyant: process.env.BENCH_VARYANT || null,
+    k0: process.env.BENCH_K0 === undefined ? 'K0' : process.env.BENCH_K0 || 'yok',
   };
   try {
     const gorev = gorevOku(taskId, bagimlar.gorevKok);

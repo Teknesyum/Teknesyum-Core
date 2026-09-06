@@ -39,6 +39,15 @@
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/loop.js\""
           }
         ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scout.js\""
+          }
+        ]
       }
     ],
     "Stop": [

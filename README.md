@@ -131,6 +131,7 @@ is no hook behind this; it is a rule in `CLAUDE.md` and a script that lists the 
 | `scripts/setup.js` | Machine setup: language, chime, private repository, projects folder. |
 | `scripts/doctor.js` | Seven checks: node, git, version, hooks, statusline, map, logs. |
 | `scripts/scan.js` | Seven read-only checks on the project itself: license surfaces, plan against the five-file threshold, handoff holes, documents against the version, test script, `trash/` references, map. Nothing written, no model, nothing into context; the profile only widens the document set. |
+| `scripts/scout.js` | Prior-art scout, on demand and once: `brief <topic>` writes a bounded brief under `docs/oncul/` (5 searches, 3 pages, 5 candidates, 400 words) and arms the gate; the brief goes to one subagent on sonnet; `record` files the answer, cut at 8,000 characters. The gate in `hooks/scout.js` refuses a second call on the same brief, another model, or a longer prompt. |
 | `scripts/release.js` | Bumps the version from the notes left in `.changes/`, rewrites the install lines, tags. |
 
 ---
@@ -214,7 +215,7 @@ second is a session that wrote its plan, ran its tests, and has a handoff waitin
 
 ## Hooks
 
-Six events, five files, all under `core/hooks/`:
+Six events, six files, all under `core/hooks/`:
 
 | Event | Hook | Says |
 |---|---|---|
@@ -222,6 +223,7 @@ Six events, five files, all under `core/hooks/`:
 | `PostToolUse` | `count.js` | one line at the threshold, once; else nothing |
 | `PreToolUse` | `prefs.js` | your own README conventions, when a README is written |
 | `PreToolUse` | `loop.js` | one line when a wait loop has no upper bound; else nothing |
+| `PreToolUse` | `scout.js` | nothing; refuses a scout call that breaks its brief's budget |
 | `Stop` | `count.js` | nothing; refreshes the diff for the statusline |
 | `SessionEnd` | `handoff.js` | nothing; writes the handoff |
 | `Notification` | `notify.js` | nothing; rings |
