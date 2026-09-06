@@ -1,10 +1,6 @@
 <!-- lang -->
 
-[<img src="assets/badge-lang.tr.svg" alt="Türkçe seçili, switch to English" width="124" height="44">](README.md)
-
-<div align="center">
-<img src="assets/banner.tr.svg" alt="Teknesyum Core, Claude Code için bir çıkarma eklentisi." width="900">
-</div>
+[English](README.md)
 
 # Teknesyum Core
 
@@ -291,10 +287,5 @@ kurtardıysa, sponsor olmak bunu söylemenin bir yolu.
 arkadaşa önerin.
 
 <!-- signature -->
-<div align="center">
 
-<a href="https://github.com/sponsors/Teknesyum"><img src="assets/badge-sponsor.svg" alt="Support Teknesyum" height="38"></a>
-&nbsp;
-<a href="LICENSE"><img src="assets/badge-license.svg" alt="License AGPL-3.0" height="38"></a>
-
-</div>
+[Teknesyum'a destek ol](https://github.com/sponsors/Teknesyum) · [Lisans AGPL-3.0](LICENSE)

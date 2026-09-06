@@ -1,10 +1,6 @@
 <!-- lang -->
 
-[<img src="assets/badge-lang.svg" alt="English selected, switch to Türkçe" width="124" height="44">](README.tr.md)
-
-<div align="center">
-<img src="assets/banner.svg" alt="Teknesyum Core, a subtraction plugin for Claude Code." width="900">
-</div>
+[Türkçe](README.tr.md)
 
 # Teknesyum Core
 
@@ -299,10 +295,5 @@ There are free ways to help too: report the bugs you hit, write down the critici
 recommend it to a friend.
 
 <!-- signature -->
-<div align="center">
 
-<a href="https://github.com/sponsors/Teknesyum"><img src="assets/badge-sponsor.svg" alt="Support Teknesyum" height="38"></a>
-&nbsp;
-<a href="LICENSE"><img src="assets/badge-license.svg" alt="License AGPL-3.0" height="38"></a>
-
-</div>
+[Sponsor Teknesyum](https://github.com/sponsors/Teknesyum) · [License AGPL-3.0](LICENSE)
