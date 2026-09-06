@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.20.0
+
+- agency.js show leaves a seat mark; the next Stop prints it once in the chat as a systemMessage line, "Seat: <slug> read, <n> KB". The line is rendered by the client and never enters the model context (DECISIONS D13, bench/deney/banner.karar.md).
+
 ## v0.19.0
 
 - Test records come from the exit code, not the output text: a test command on PostToolUse passes, on PostToolUseFailure fails, and with empty output stays unknown. Each record carries a hash of HEAD plus the porcelain status; the statusline shows the last record as pass, fail, unknown or stale instead of a running count.
