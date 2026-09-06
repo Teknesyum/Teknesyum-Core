@@ -155,14 +155,14 @@ function sonra(ek = 'b', no = 6, baslik = 'Değişiklik sonrası: eşik 5 dosya,
     out.push('Yorum:', '',
       '- Görev 06: ipucu artık hiç gelmiyor (yeni dosya satırları eşiğe girmiyor); $ farkı n=3 ile gürültü sınırında, native r1 tek uç değer. Eşik mekanizması bu görevde sustu, bedel K0 kuralının ~200 tokenine indi.',
       '- Kanca günlüğü üç koşuda da temiz, handoff 3/3 yazıldı; bölüm 6\'daki kayıp handoff bu turda tekrarlanmadı.',
-      '- Resume: core 3/3 bitirdi, native 0/3. Devir dosyası task + kural satırıyla ikinci oturumu işe bağlıyor; native git diff\'e bakıp "çalışıyor" deyip duruyor. core ikinci oturumda üç kat harcıyor (0,33 $ ile 0,11 $) ama native hiçbir koşuda işi bitirmediği için bitmiş iş başına maliyet karşılaştırması native lehine kurulamıyor. İlk koşu bash hatasıyla atıldı (`trash/bench-calisma/devam-c-bashsiz.jsonl`), tablo yeniden koşulan üç çiftten.',
+      '- Resume: core 3/3 bitirdi, native 0/3. Devir dosyası task + kural satırıyla ikinci oturumu işe bağlıyor; native git diff\'e bakıp "çalışıyor" deyip duruyor. core ikinci oturumda üç kat harcıyor (0,33 $ ile 0,11 $) ama native hiçbir koşuda işi bitirmediği için bitmiş iş başına maliyet karşılaştırması native lehine kurulamıyor. İlk koşu bash hatasıyla atıldı (satırları trash klasörüne gitti), tablo yeniden koşulan üç çiftten.',
       '');
     return out.join('\n');
   }
   if (ek !== 'b') return out.join('\n');
   out.push('Yorum:', '',
     '- Dosya eşiği artık görev 06\'da tetiklenmiyor; onun yerine satır eşiği tetikleniyor ("' + sebepler.join('", "') + '"): görev üç yeni dosyayla ~185 satır yazıyor, eşik 150. İpucu yine her koşuda geldi, model yine "atla" dedi. n=3 ile $ farkı gürültülü (core r1 0,73 $ tek uç değer), ama kabul yine ✗. 150 satır eşiği yeni dosyalarda kaba: karar bekleyen üçüncü madde.',
-    '- Handoff\'ta task tam metinle duruyor (2000 karakter tavanı; 500 ilk denemede görevin maddelerini kesti, o koşu atıldı: `trash/bench-calisma/devam-b-500.jsonl`). core r3\'te handoff yazılmadı: oturum Write 1 + Edit 3 ile aynı dört dosyaya dokundu, SessionEnd sonrası dosya yok; sebep belirlenemedi, çünkü koşu sonunda config dizini ve kanca hata günlüğü siliniyor. Açık madde: devam.js hook-errors.log\'u saklamalı.',
+    '- Handoff\'ta task tam metinle duruyor (2000 karakter tavanı; 500 ilk denemede görevin maddelerini kesti, o koşu atıldı, satırları trash klasörüne gitti). core r3\'te handoff yazılmadı: oturum Write 1 + Edit 3 ile aynı dört dosyaya dokundu, SessionEnd sonrası dosya yok; sebep belirlenemedi, çünkü koşu sonunda config dizini ve kanca hata günlüğü siliniyor. Açık madde: devam.js hook-errors.log\'u saklamalı.',
     '- Resume kabulü bu turda ölçülemedi (yukarıdaki not). Ölçülen: core ikinci oturumda yine daha çok araç (medyan 17\'ye 7) ve iki kat maliyet; transcriptlerde handoff\'u okuyup görevi görünce işi yeniden ele alıyor, native ise git diff\'ten devam edip erken duruyor. Kabul sorusu bölüm 7\'de.',
     '');
   return out.join('\n');
@@ -201,7 +201,7 @@ function ozellik() {
   const taban07 = taban07r.length ? { usd: O.medyan(usd07), pass: taban07r.filter((r) => r.pass).length + '/' + taban07r.length } : null;
   const native07 = rows.find((r) => r.arm === 'native' && r.taskId === '07-slugify-uc-parca' && !r.dropped);
   const out = ['## 8. 0.15 parçaları tek tek geri takıldı, n=1', ''];
-  out.push('Karar kuralı koşudan önce yazıldı (`trash/plan-0.15-parcalar.md`): ünite koşusu tabanın min–max aralığında kalırsa sinyal yok, eklenmez; aralık dışında ve kabul ✓ ise n=3 ile doğrulanır; kabul ✗ ya da 1,5 kat pahalıysa reddedilir. Görev 06 tabanı bölüm 7\'nin üç core koşusu; görev 07 tabanı bu turda koşulan 0.16.1 ve native. Varyantlar `bench/varyant/`, koşturucu `bench/varyant.js` + `BENCH_EKLENTI`. Kaynak: `bench/sonuc-ozellik.jsonl`.', '');
+  out.push('Karar kuralı koşudan önce plana yazıldı (plan işi bitince trash klasörüne gitti, kural burada): ünite koşusu tabanın min–max aralığında kalırsa sinyal yok, eklenmez; aralık dışında ve kabul ✓ ise n=3 ile doğrulanır; kabul ✗ ya da 1,5 kat pahalıysa reddedilir. Görev 06 tabanı bölüm 7\'nin üç core koşusu; görev 07 tabanı bu turda koşulan 0.16.1 ve native. Varyantlar `bench/varyant/`, koşturucu `bench/varyant.js` + `BENCH_EKLENTI`. Kaynak: `bench/sonuc-ozellik.jsonl`.', '');
   out.push('Görev 06 tabanı (core 0.16.1, n=3): $ ' + usd06.map(f2).join(' / ') + ', kabul ' + taban06.filter((r) => r.pass).length + '/' + taban06.length + '.', '');
   const satirlar = [];
   for (const r of rows) {

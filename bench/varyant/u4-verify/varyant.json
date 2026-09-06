@@ -1,1 +1,1 @@
-{ "ad": "u4-verify", "aciklama": "0.15 verify-runner: Stop'ta oturumda dosya degistiyse bir kez npm test; duserse ciktinin kuyruguyla bir kez engeller", "kaynak": "trash/0.15-relay/core/scripts/verify-runner.js" }
+{ "ad": "u4-verify", "aciklama": "0.15 verify-runner: Stop'ta oturumda dosya degistiyse bir kez npm test; duserse ciktinin kuyruguyla bir kez engeller", "kaynak": "v0.15.0:core/scripts/verify-runner.js" }

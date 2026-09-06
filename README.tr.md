@@ -119,8 +119,8 @@ ve kayıtları listeleyen bir betik var.
 
 ## Ne Çıktı
 
-0.16 bir çıkarma sürümü. Şunlar eklentiden çıktı, `trash/0.15-relay/` altında duruyor ve
-`v0.15.0` etiketinden geri alınabilir:
+0.16 bir çıkarma sürümü. Şunlar eklentiden çıktı; hepsi `v0.15.0` etiketinde duruyor,
+`bench/varyant/` ölçtüğü her parçanın kaynağını oradan adlandırıyor:
 
 - sözleşme makinesi: `contract.js`, `risk.js`, `verify-runner.js`, relay'in `handoff.js`'i;
 - dokuz kanca: autoclose, closure, cue, embed, guard, notice, schema, seal, watch;

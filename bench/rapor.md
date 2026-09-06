@@ -1,6 +1,6 @@
 # Bench Raporu: Core 0.16.0 vs Native Claude Code
 
-Tarih: 2026-09-05. Claude Code 2.1.241, model claude-sonnet-5, tarife `docs/tarife.json`. Spec: Core v2 yön promptu madde 8. Ölçüm betikleri: `bench/run.js`, `bench/taban.js`, `bench/uyari.js`, `bench/devam.js`; bu rapor `bench/rapor016.js` ile üretildi.
+Tarih: 2026-09-06. Claude Code 2.1.241, model claude-sonnet-5, tarife `docs/tarife.json`. Spec: Core v2 yön promptu madde 8. Ölçüm betikleri: `bench/run.js`, `bench/taban.js`, `bench/uyari.js`, `bench/devam.js`; bu rapor `bench/rapor016.js` ile üretildi.
 
 ## 1. Taban: 100 sıradan tur, eklenti açık vs kapalı
 
@@ -115,7 +115,7 @@ Görev 06 (slugify CLI, dört parça). Birinci oturum `--max-turns 6` ile kesili
 Yorum:
 
 - Dosya eşiği artık görev 06'da tetiklenmiyor; onun yerine satır eşiği tetikleniyor ("satır değişti ve plan yok"): görev üç yeni dosyayla ~185 satır yazıyor, eşik 150. İpucu yine her koşuda geldi, model yine "atla" dedi. n=3 ile $ farkı gürültülü (core r1 0,73 $ tek uç değer), ama kabul yine ✗. 150 satır eşiği yeni dosyalarda kaba: karar bekleyen üçüncü madde.
-- Handoff'ta task tam metinle duruyor (2000 karakter tavanı; 500 ilk denemede görevin maddelerini kesti, o koşu atıldı: `trash/bench-calisma/devam-b-500.jsonl`). core r3'te handoff yazılmadı: oturum Write 1 + Edit 3 ile aynı dört dosyaya dokundu, SessionEnd sonrası dosya yok; sebep belirlenemedi, çünkü koşu sonunda config dizini ve kanca hata günlüğü siliniyor. Açık madde: devam.js hook-errors.log'u saklamalı.
+- Handoff'ta task tam metinle duruyor (2000 karakter tavanı; 500 ilk denemede görevin maddelerini kesti, o koşu atıldı, satırları trash klasörüne gitti). core r3'te handoff yazılmadı: oturum Write 1 + Edit 3 ile aynı dört dosyaya dokundu, SessionEnd sonrası dosya yok; sebep belirlenemedi, çünkü koşu sonunda config dizini ve kanca hata günlüğü siliniyor. Açık madde: devam.js hook-errors.log'u saklamalı.
 - Resume kabulü bu turda ölçülemedi (yukarıdaki not). Ölçülen: core ikinci oturumda yine daha çok araç (medyan 17'ye 7) ve iki kat maliyet; transcriptlerde handoff'u okuyup görevi görünce işi yeniden ele alıyor, native ise git diff'ten devam edip erken duruyor. Kabul sorusu bölüm 7'de.
 
 ## 7. Üç açık madde sonrası: yeni dosya satırları, kanca günlüğü, devir kuralı
@@ -156,11 +156,11 @@ Yorum:
 
 - Görev 06: ipucu artık hiç gelmiyor (yeni dosya satırları eşiğe girmiyor); $ farkı n=3 ile gürültü sınırında, native r1 tek uç değer. Eşik mekanizması bu görevde sustu, bedel K0 kuralının ~200 tokenine indi.
 - Kanca günlüğü üç koşuda da temiz, handoff 3/3 yazıldı; bölüm 6'daki kayıp handoff bu turda tekrarlanmadı.
-- Resume: core 3/3 bitirdi, native 0/3. Devir dosyası task + kural satırıyla ikinci oturumu işe bağlıyor; native git diff'e bakıp "çalışıyor" deyip duruyor. core ikinci oturumda üç kat harcıyor (0,33 $ ile 0,11 $) ama native hiçbir koşuda işi bitirmediği için bitmiş iş başına maliyet karşılaştırması native lehine kurulamıyor. İlk koşu bash hatasıyla atıldı (`trash/bench-calisma/devam-c-bashsiz.jsonl`), tablo yeniden koşulan üç çiftten.
+- Resume: core 3/3 bitirdi, native 0/3. Devir dosyası task + kural satırıyla ikinci oturumu işe bağlıyor; native git diff'e bakıp "çalışıyor" deyip duruyor. core ikinci oturumda üç kat harcıyor (0,33 $ ile 0,11 $) ama native hiçbir koşuda işi bitirmediği için bitmiş iş başına maliyet karşılaştırması native lehine kurulamıyor. İlk koşu bash hatasıyla atıldı (satırları trash klasörüne gitti), tablo yeniden koşulan üç çiftten.
 
 ## 8. 0.15 parçaları tek tek geri takıldı, n=1
 
-Karar kuralı koşudan önce yazıldı (`trash/plan-0.15-parcalar.md`): ünite koşusu tabanın min–max aralığında kalırsa sinyal yok, eklenmez; aralık dışında ve kabul ✓ ise n=3 ile doğrulanır; kabul ✗ ya da 1,5 kat pahalıysa reddedilir. Görev 06 tabanı bölüm 7'nin üç core koşusu; görev 07 tabanı bu turda koşulan 0.16.1 ve native. Varyantlar `bench/varyant/`, koşturucu `bench/varyant.js` + `BENCH_EKLENTI`. Kaynak: `bench/sonuc-ozellik.jsonl`.
+Karar kuralı koşudan önce plana yazıldı (plan işi bitince trash klasörüne gitti, kural burada): ünite koşusu tabanın min–max aralığında kalırsa sinyal yok, eklenmez; aralık dışında ve kabul ✓ ise n=3 ile doğrulanır; kabul ✗ ya da 1,5 kat pahalıysa reddedilir. Görev 06 tabanı bölüm 7'nin üç core koşusu; görev 07 tabanı bu turda koşulan 0.16.1 ve native. Varyantlar `bench/varyant/`, koşturucu `bench/varyant.js` + `BENCH_EKLENTI`. Kaynak: `bench/sonuc-ozellik.jsonl`.
 
 Görev 06 tabanı (core 0.16.1, n=3): $ 0.26 / 0.37 / 0.38, kabul 3/3.
 

@@ -125,8 +125,8 @@ is no hook behind this; it is a rule in `CLAUDE.md` and a script that lists the 
 
 ## What Went Out
 
-Version 0.16 is a subtraction release. These left the plugin and sit under
-`trash/0.15-relay/`, recoverable from the `v0.15.0` tag:
+Version 0.16 is a subtraction release. These left the plugin; the `v0.15.0`
+tag holds every one of them, and `bench/varyant/` names the source of each part it measures:
 
 - the contract machine: `contract.js`, `risk.js`, `verify-runner.js`, the relay `handoff.js`;
 - nine hooks: autoclose, closure, cue, embed, guard, notice, schema, seal, watch;

@@ -1,7 +1,7 @@
 {
   "ad": "u2-risk",
   "aciklama": "0.15 risk.js HIGH_PATHS listesi count.js RISK'e girer (package.json, Dockerfile, workflows, migrations, hooks, settings)",
-  "kaynak": "trash/0.15-relay/core/scripts/risk.js",
+  "kaynak": "v0.15.0:core/scripts/risk.js",
   "degistir": [
     {
       "dosya": "hooks/count.js",
