@@ -594,6 +594,14 @@ function testAgency() {
   ok('lean strips the emoji from headings', /^## Your Core Mission$/m.test(leanText), leanText);
   ok('show without lean is the file as it is', /secret memory/.test(call('show', 'design-ui-designer').stdout));
   ok('show names a missing slug', /not found: nope/.test(call('show', 'nope').stdout));
+  const seat = JSON.parse(fs.readFileSync(path.join(cfg, 'teknesyum', 'seat.json'), 'utf8'));
+  ok('show leaves a seat mark with the slug and the size', seat.slugs.join() === 'design-ui-designer' && seat.bytes > 20 && /^\d{4}-/.test(seat.at), JSON.stringify(seat));
+  const COUNT = path.join(CORE, 'hooks', 'count.js');
+  const first = hook(COUNT, { hook_event_name: 'Stop', session_id: 's9', cwd: CORE }, cfg);
+  const banner = first.stdout ? JSON.parse(first.stdout) : {};
+  ok('the next Stop prints the seat as a chat line, not into the context', /^Seat: design-ui-designer read, \d+\.\d KB$/.test(banner.systemMessage || '') && !first.stdout.includes('additionalContext'), first.stdout);
+  const second = hook(COUNT, { hook_event_name: 'Stop', session_id: 's9', cwd: CORE }, cfg);
+  ok('and only once', second.stdout === '', second.stdout);
   const root = fixture();
   fs.writeFileSync(path.join(root, 'ask.md'), 'Soru?');
   fs.writeFileSync(path.join(root, 'reply.md'), 'Cevap.');

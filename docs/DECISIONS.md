@@ -597,3 +597,18 @@ events discard a hook's `systemMessage` outright — never wire one there expect
 seen: `Notification`, `SessionEnd`, `StopFailure`, `PreCompact`, `PostCompact`,
 `ConfigChange`, `Elicitation`, `InstructionsLoaded`, `WorktreeCreate`, `WorktreeRemove`,
 `SubagentStart` and `SubagentStop`. See `COST-MODEL.md`.
+
+---
+
+## D14 — The seat banner, built on the free channel
+
+D11 refused a banner because the only channel then considered, `SessionStart`, feeds the
+model. D13 measured that `systemMessage` from a `Stop` hook is rendered and not fed. The
+user asked for the banner back once agency seats were in use, so it was measured a third
+time under the bench: six runs of task 06 with a probe string on every `Stop`, mean 0.38 $
+against a 0.37 $ baseline, and the probe never inside `message.content`
+(`bench/deney/banner.karar.md`, `bench/rapor.md` §11).
+
+What is built: `agency.js show` writes `teknesyum/seat.json`; `count.js` on `Stop` prints
+`Seat: <slug> read, <n> KB` once and marks it seen. One line, one fact, only after a seat
+was actually read. Other facts can join the same line later on the same terms.

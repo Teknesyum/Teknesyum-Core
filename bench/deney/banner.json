@@ -1,0 +1,7 @@
+{
+  "sonuc": "bench/banner.jsonl",
+  "soru": "Stop kancasindan systemMessage ile basilan tek satir banner bench maliyetine giriyor mu",
+  "kosullar": [
+    { "ad": "c5-banner-06", "env": { "BENCH_EKLENTI": "@c5-banner" }, "task": "06-slugify-cli", "n": 3, "taban": 0.37, "beklenti": "esit" }
+  ]
+}

@@ -127,7 +127,7 @@ files the answer.
 | `scripts/map.js .` | Import graph: hubs, cycles, orphans. `map.js who <file>` says what imports it. |
 | `scripts/log.js write` | A bug log with a fixed shape, into the project's own repository. |
 | `scripts/advice.js` | `ask <question> [--facts <file>]` writes a `??` question under `docs/netlestirme/` and arms the gate for one call on any model; `record` files the answer; `list` shows the records under `docs/danisma/`. |
-| `scripts/agency.js` | A seat from [agency-agents](https://github.com/msitarzewski/agency-agents), on demand: `fetch` clones it outside the project, `find ui` picks, `show <slug> --lean` hands the role to a subagent without its personality and metrics blocks, `record` files the exchange under `docs/danisma/`. Nothing is installed as an agent, so the roster never enters the context. |
+| `scripts/agency.js` | A seat from [agency-agents](https://github.com/msitarzewski/agency-agents), on demand: `fetch` clones it outside the project, `find ui` picks, `show <slug> --lean` hands the role to a subagent without its personality and metrics blocks, `record` files the exchange under `docs/danisma/`. `show` leaves a seat mark that the next `Stop` prints in the chat as `Seat: <slug> read, <n> KB`; the line never enters the context. Nothing is installed as an agent, so the roster never enters the context. |
 | `scripts/manset.js` | Checks a Markdown report: every number in prose must appear in the same section's table or list. |
 | `scripts/scaffold.js` | License, signature block, language link: fixed texts the model never types. |
 | `scripts/setup.js` | Machine setup: language, chime, private repository, projects folder. |
@@ -229,7 +229,7 @@ Seven events, six files, all under `core/hooks/`:
 | `PreToolUse` | `prefs.js` | your own README conventions, when a README is written |
 | `PreToolUse` | `loop.js` | one line when a wait loop has no upper bound; else nothing |
 | `PreToolUse` | `scout.js` | nothing; refuses a scout or `??` call that breaks its budget |
-| `Stop` | `count.js` | nothing; refreshes the diff for the statusline |
+| `Stop` | `count.js` | nothing in the context; refreshes the diff, and after `agency.js show` prints the seat once as a chat line |
 | `SessionEnd` | `handoff.js` | nothing; writes the handoff |
 | `Notification` | `notify.js` | nothing; rings |
 

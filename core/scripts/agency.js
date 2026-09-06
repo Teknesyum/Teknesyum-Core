@@ -102,9 +102,14 @@ function lean(text) {
   return out.join('\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
 }
 
+function seatFile() {
+  return path.join(configRoot(), 'teknesyum', 'seat.json');
+}
+
 function show(slugs, opts) {
   const all = agents();
   const parts = [];
+  const seated = [];
   for (const s of slugs) {
     const a = all.find((x) => x.slug === s || x.slug.endsWith('-' + s) || x.name.toLowerCase() === s.toLowerCase());
     if (!a) {
@@ -113,8 +118,16 @@ function show(slugs, opts) {
     }
     const text = fs.readFileSync(a.file, 'utf8');
     parts.push(opts.lean ? lean(text) : text);
+    seated.push(a.slug);
   }
-  return parts.join('\n---\n');
+  const out = parts.join('\n---\n');
+  if (seated.length) {
+    try {
+      fs.mkdirSync(path.dirname(seatFile()), { recursive: true });
+      fs.writeFileSync(seatFile(), JSON.stringify({ slugs: seated, bytes: Buffer.byteLength(out), at: new Date().toISOString() }));
+    } catch {}
+  }
+  return out;
 }
 
 function nextNumber(at) {
@@ -195,4 +208,4 @@ function main(argv) {
 }
 
 if (require.main === module) process.exit(main(process.argv.slice(2)));
-module.exports = { agents, list, find, show, lean, record, fetch, home };
+module.exports = { agents, list, find, show, lean, record, fetch, home, seatFile };

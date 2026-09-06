@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { read, write, stateFile, safe, t } = require('./lib.js');
+const { read, write, stateFile, configRoot, safe, t } = require('./lib.js');
 
 const FILE_MAX = 5;
 const DIFF_MAX = 150;
@@ -112,6 +112,14 @@ function onContext(st) {
   return speak(t('cue.context').replace('%N', String(Math.round(st.ctx))));
 }
 
+function onSeat(st) {
+  const seat = read(path.join(configRoot(), 'teknesyum', 'seat.json'));
+  if (!seat || !seat.at || seat.at === st.seat) return '';
+  st.seat = seat.at;
+  const kb = (Number(seat.bytes || 0) / 1024).toFixed(1);
+  return JSON.stringify({ systemMessage: t('banner.seat').replace('%S', (seat.slugs || []).join(', ')).replace('%K', kb) });
+}
+
 function handle(j) {
   const ev = j.hook_event_name;
   const f = file(j);
@@ -131,7 +139,10 @@ function handle(j) {
     if (!out) out = onContext(st);
   } else if (ev === 'PostToolUseFailure') {
     if (SHELLS.test(j.tool_name)) onShell(j, st, true);
-  } else if (ev === 'Stop') refresh(st);
+  } else if (ev === 'Stop') {
+    refresh(st);
+    out = onSeat(st);
+  }
   write(f, st);
   return out;
 }

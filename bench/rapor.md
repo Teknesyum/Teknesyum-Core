@@ -232,3 +232,13 @@ Base'de olup Core'da olmayan 29 parça tek tek sınıflandı: `docs/base-core-de
 | c4-lsp | 06 | 0.37 | 0.49 / 0.34 / 0.25 | 0.36 | esit | 3/3 |
 
 Toplam harcama: 4.19 $ (9 koşu). Sözdizim kancası altı koşuda hiç ateşlenmedi; LSP aracı üç koşuda hiç çağrılmadı. İkisi de girmiyor, varyant olarak duruyor.
+
+## 11. Banner: Stop kancasından systemMessage, sonnet/low, n=3+3
+
+Soru: her Stop'ta sohbete basılan tek satır banner bench maliyetine giriyor mu. Varyant `bench/varyant/c5-banner` (her Stop'ta sabit satır, içinde `TKNSYM-PROBE-7391`), deney `bench/deney/banner.json`, karar `bench/deney/banner.karar.md`, ham `bench/banner.jsonl`.
+
+| koşul | görev | taban $ | 1. tur $ | 2. tur $ | ortalama | yön | kabul |
+|---|---|---|---|---|---|---|---|
+| c5-banner | 06 | 0.37 | 0.49 / 0.31 / 0.32 | 0.31 / 0.31 / 0.53 | 0.38 | esit | 6/6 |
+
+Toplam harcama: 2.27 $ (6 koşu). İlk tur medyanı 0.32 ile "ucuz" çıkıp beklentiyle çeliştiğinden ikinci tur koşuldu; altının ortalaması tabanla eşit. Altı transcript'in hepsinde probe dizisi yalnız `hook_system_message` eki ve ham kanca çıktısı kaydında; `message.content` içinde hiçbir kayıtta yok. D13 üçüncü kez doğrulandı: satır sohbette görünür, modele gitmez. Karar: koltuk satırı 0.20.0 ile Core'a girdi (`agency.js show` iz bırakır, sonraki Stop bir kez basar).

@@ -119,7 +119,7 @@ kapısı bir kez bırakır, `record` cevabı dosyalar.
 | `scripts/map.js .` | Import grafiği: merkezler, döngüler, yetimler. `map.js who <dosya>` kimin import ettiğini söyler. |
 | `scripts/log.js write` | Sabit biçimli hata günlüğü, projenin kendi deposuna. |
 | `scripts/advice.js` | `ask <soru> [--facts <dosya>]` `??` sorusunu `docs/netlestirme/` altına yazar ve kapıyı herhangi bir modelde tek çağrı için kurar; `record` cevabı dosyalar; `list` `docs/danisma/` kayıtlarını gösterir. |
-| `scripts/agency.js` | [agency-agents](https://github.com/msitarzewski/agency-agents) deposundan istenince koltuk: `fetch` projenin dışına klonlar, `find ui` seçer, `show <slug> --lean` rolü kişilik ve ölçüt bloklarını atarak alt ajana verir, `record` alışverişi `docs/danisma/` altına yazar. Hiçbiri ajan olarak kurulmaz; liste bağlama hiç girmez. |
+| `scripts/agency.js` | [agency-agents](https://github.com/msitarzewski/agency-agents) deposundan istenince koltuk: `fetch` projenin dışına klonlar, `find ui` seçer, `show <slug> --lean` rolü kişilik ve ölçüt bloklarını atarak alt ajana verir, `record` alışverişi `docs/danisma/` altına yazar. `show` bir koltuk izi bırakır, sonraki `Stop` onu sohbette `Koltuk: <slug> okundu · <n> KB` diye basar; satır bağlama girmez. Hiçbiri ajan olarak kurulmaz; liste bağlama hiç girmez. |
 | `scripts/manset.js` | Markdown raporu denetler: düzyazıdaki her sayı aynı bölümün tablosunda ya da listesinde bulunmalı. |
 | `scripts/scaffold.js` | Lisans, imza bloğu, dil linki: modelin asla yazmadığı sabit metinler. |
 | `scripts/setup.js` | Makine ayarı: dil, zil, özel depo, projeler klasörü. |
@@ -221,7 +221,7 @@ Yedi olay, altı dosya, hepsi `core/hooks/` altında:
 | `PreToolUse` | `prefs.js` | README yazılırken kendi README kurallarınız |
 | `PreToolUse` | `loop.js` | bekleme döngüsünün üst sınırı yoksa tek satır; yoksa hiçbir şey |
 | `PreToolUse` | `scout.js` | hiçbir şey; bütçesini aşan öncül ya da `??` çağrısını reddeder |
-| `Stop` | `count.js` | hiçbir şey; statusline için diff'i tazeler |
+| `Stop` | `count.js` | bağlama hiçbir şey; diff'i tazeler, `agency.js show` sonrası koltuğu bir kez sohbet satırı olarak basar |
 | `SessionEnd` | `handoff.js` | hiçbir şey; devri yazar |
 | `Notification` | `notify.js` | hiçbir şey; çalar |
 

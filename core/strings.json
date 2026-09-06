@@ -139,6 +139,10 @@
     "en": "Context %N%. Fill decisions and next_action in .claude/handoff.md.",
     "tr": "Bağlam %%N. .claude/handoff.md içinde decisions ve next_action doldur."
   },
+  "banner.seat": {
+    "en": "Seat: %S read, %K KB",
+    "tr": "Koltuk: %S okundu · %K KB"
+  },
   "cue.resume": {
     "en": "Resume: .claude/handoff.md",
     "tr": "Devam: .claude/handoff.md"
