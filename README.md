@@ -130,6 +130,7 @@ is no hook behind this; it is a rule in `CLAUDE.md` and a script that lists the 
 | `scripts/scaffold.js` | License, signature block, language link: fixed texts the model never types. |
 | `scripts/setup.js` | Machine setup: language, chime, private repository, projects folder. |
 | `scripts/doctor.js` | Seven checks: node, git, version, hooks, statusline, map, logs. |
+| `scripts/scan.js` | Seven read-only checks on the project itself: license surfaces, plan against the five-file threshold, handoff holes, documents against the version, test script, `trash/` references, map. Nothing written, no model, nothing into context; the profile only widens the document set. |
 | `scripts/release.js` | Bumps the version from the notes left in `.changes/`, rewrites the install lines, tags. |
 
 ---

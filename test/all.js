@@ -604,6 +604,57 @@ function testDoctor() {
   ok('doctor runs the seven checks that are left', names === 'node,git,version,hooks,statusline,map,logs', names + ' ' + r.stderr);
 }
 
+function testScan() {
+  const SCAN = path.join(CORE, 'scripts', 'scan.js');
+  const root = fixture();
+  const cfg = home();
+  const env = { ...process.env, CLAUDE_CONFIG_DIR: cfg };
+  const scan = (...args) => {
+    const r = run(process.execPath, [SCAN, '--json', ...args], { cwd: root, env });
+    let out = { rows: [] };
+    try {
+      out = JSON.parse(r.stdout);
+    } catch {}
+    return { status: r.status, profile: out.profile, rows: Object.fromEntries(out.rows.map((x) => [x.name, x])), raw: r.stdout + r.stderr };
+  };
+  let s = scan();
+  ok('scan names the seven checks', Object.keys(s.rows).join(',') === 'license,plan,handoff,docs,tests,trash,map', s.raw);
+  ok('scan defaults to normal when config has no profile', s.profile === 'normal', s.profile);
+  ok('scan takes the profile from the argument', scan('eco').profile === 'eco');
+  ok('a bare repo is short on license', s.rows.license.ok === false && /no LICENSE/.test(s.rows.license.measure), s.rows.license.measure);
+  fs.writeFileSync(path.join(root, 'LICENSE'), 'GNU AFFERO GENERAL PUBLIC LICENSE\nVersion 3\n');
+  fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({ name: 'x', version: '1.2.3', license: 'MIT', scripts: { test: 'node t.js' } }));
+  s = scan();
+  ok('license surfaces that disagree are named', s.rows.license.ok === false && /package\.json says mit/.test(s.rows.license.measure), s.rows.license.measure);
+  fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({ name: 'x', version: '1.2.3', license: 'AGPL-3.0-or-later', scripts: { test: 'node t.js' } }));
+  for (let i = 0; i < 5; i += 1) fs.writeFileSync(path.join(root, 'src', 'f' + i + '.js'), 'module.exports = ' + i + ';\n');
+  run('git', ['add', '-A'], { cwd: root });
+  run('git', ['commit', '-qm', 'five'], { cwd: root });
+  for (let i = 0; i < 5; i += 1) fs.writeFileSync(path.join(root, 'src', 'f' + i + '.js'), 'module.exports = ' + (i + 10) + ';\n');
+  s = scan();
+  ok('five changed files without a plan fall short', s.rows.plan.ok === false && /5 files/.test(s.rows.plan.measure), s.rows.plan.measure);
+  fs.mkdirSync(path.join(root, 'docs'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'docs', 'plan.md'), '# plan\n');
+  fs.mkdirSync(path.join(root, '.claude'), { recursive: true });
+  fs.writeFileSync(path.join(root, '.claude', 'handoff.md'), '## decisions\n(fill)\n\n## next_action\ndone\n');
+  fs.writeFileSync(path.join(root, 'README.md'), '# x\n\ncurl .../v1.2.3/install.sh\n');
+  s = scan('eco');
+  ok('a plan on disk clears the plan check', s.rows.plan.ok === true && /plan on disk/.test(s.rows.plan.measure), s.rows.plan.measure);
+  ok('a (fill) hole in the handoff is named', s.rows.handoff.ok === false && /decisions/.test(s.rows.handoff.measure) && !/next_action/.test(s.rows.handoff.measure), s.rows.handoff.measure);
+  ok('eco reads only the README', s.rows.docs.ok === true && /1 documents/.test(s.rows.docs.measure), s.rows.docs.measure);
+  s = scan('normal');
+  ok('normal wants a changelog too', s.rows.docs.ok === false && /CHANGELOG\.md is missing/.test(s.rows.docs.measure), s.rows.docs.measure);
+  fs.writeFileSync(path.join(root, 'README.md'), '# x\n\ncurl .../v1.0.0/install.sh\n');
+  s = scan('eco');
+  ok('an install line on an old tag is named', s.rows.docs.ok === false && /v1\.0\.0, not v1\.2\.3/.test(s.rows.docs.measure), s.rows.docs.measure);
+  ok('the license check is quiet once surfaces agree', s.rows.license.ok === true, s.rows.license.measure);
+  ok('exit is 1 while anything is short', s.status === 1);
+  const help = run(process.execPath, [SCAN, '--help'], { cwd: root, env });
+  ok('help says nothing is written and no model runs', /Nothing is written, no model runs/.test(help.stdout), help.stdout);
+  sweep(root);
+  sweep(cfg);
+}
+
 function main() {
   const root = fixture();
   const suites = [
@@ -622,6 +673,7 @@ function main() {
     ['stale processes', testProcs],
     ['agency', testAgency],
     ['doctor', testDoctor],
+    ['scan', testScan],
   ];
   for (const [name, fn] of suites) {
     try {
