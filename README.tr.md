@@ -122,6 +122,7 @@ ve kayıtları listeleyen bir betik var.
 | `scripts/map.js .` | Import grafiği: merkezler, döngüler, yetimler. `map.js who <dosya>` kimin import ettiğini söyler. |
 | `scripts/log.js write` | Sabit biçimli hata günlüğü, projenin kendi deposuna. |
 | `scripts/advice.js list` | `docs/danisma/` altındaki danışma kayıtları. |
+| `scripts/agency.js` | [agency-agents](https://github.com/msitarzewski/agency-agents) deposundan istenince koltuk: `fetch` projenin dışına klonlar, `find ui` seçer, `show <slug> --lean` rolü kişilik ve ölçüt bloklarını atarak alt ajana verir, `record` alışverişi `docs/danisma/` altına yazar. Hiçbiri ajan olarak kurulmaz; liste bağlama hiç girmez. |
 | `scripts/manset.js` | İsterseniz manşet satırı. |
 | `scripts/scaffold.js` | Lisans, imza bloğu, dil linki: modelin asla yazmadığı sabit metinler. |
 | `scripts/setup.js` | Makine ayarı: dil, zil, özel depo, projeler klasörü. |

@@ -129,6 +129,7 @@ is no hook behind this; it is a rule in `CLAUDE.md` and a script that lists the 
 | `scripts/map.js .` | Import graph: hubs, cycles, orphans. `map.js who <file>` says what imports it. |
 | `scripts/log.js write` | A bug log with a fixed shape, into the project's own repository. |
 | `scripts/advice.js list` | The consultation records under `docs/danisma/`. |
+| `scripts/agency.js` | A seat from [agency-agents](https://github.com/msitarzewski/agency-agents), on demand: `fetch` clones it outside the project, `find ui` picks, `show <slug> --lean` hands the role to a subagent without its personality and metrics blocks, `record` files the exchange under `docs/danisma/`. Nothing is installed as an agent, so the roster never enters the context. |
 | `scripts/manset.js` | The banner line, if you want one. |
 | `scripts/scaffold.js` | License, signature block, language link: fixed texts the model never types. |
 | `scripts/setup.js` | Machine setup: language, chime, private repository, projects folder. |

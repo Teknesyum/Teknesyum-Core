@@ -557,6 +557,43 @@ function testProcs() {
   sweep(cfg);
 }
 
+function testAgency() {
+  const AGENCY = path.join(CORE, 'scripts', 'agency.js');
+  const cfg = home();
+  const at = path.join(cfg, 'teknesyum', 'agency');
+  fs.mkdirSync(path.join(at, 'design'), { recursive: true });
+  fs.mkdirSync(path.join(at, 'strategy'), { recursive: true });
+  fs.writeFileSync(path.join(at, 'design', 'design-ui-designer.md'), '---\nname: UI Designer\ndescription: Expert UI designer for interfaces\ncolor: purple\n---\n\n# UI Designer Agent Personality\n\nYou are **UI Designer**.\n\n## 🧠 Your Identity & Memory\n\nsecret memory\n\n## 🎯 Your Core Mission\n\nmake it consistent\n\n## 🎯 Your Success Metrics\n\nwishes\n');
+  fs.writeFileSync(path.join(at, 'design', 'design-ux-researcher.md'), '---\nname: UX Researcher\ndescription: Interviews and usability studies\n---\n\n# UX\n\n## 🎯 Your Core Mission\n\nask users\n');
+  fs.writeFileSync(path.join(at, 'strategy', 'playbook.md'), '---\nname: Not An Agent\n---\n');
+  const env = { ...process.env, CLAUDE_CONFIG_DIR: cfg };
+  const call = (...a) => run(process.execPath, [AGENCY, ...a], { cwd: CORE, env });
+  const listed = call('list').stdout;
+  ok('list names every agent once', /design-ui-designer  UI Designer/.test(listed) && /design-ux-researcher/.test(listed) && !/playbook/.test(listed), listed);
+  ok('list takes a division', call('list', 'design').stdout.split('\n').filter(Boolean).length === 2);
+  ok('find ranks the name hit first', /^design-ui-designer/.test(call('find', 'ui').stdout), call('find', 'ui').stdout);
+  ok('find says when nothing matches', /nothing matches/.test(call('find', 'zzz').stdout));
+  const leanText = call('show', 'ui-designer', '--lean').stdout;
+  ok('lean keeps the mission and drops memory and metrics', /make it consistent/.test(leanText) && !/secret memory/.test(leanText) && !/wishes/.test(leanText) && !/^---/.test(leanText), leanText);
+  ok('lean strips the emoji from headings', /^## Your Core Mission$/m.test(leanText), leanText);
+  ok('show without lean is the file as it is', /secret memory/.test(call('show', 'design-ui-designer').stdout));
+  ok('show names a missing slug', /not found: nope/.test(call('show', 'nope').stdout));
+  const root = fixture();
+  fs.writeFileSync(path.join(root, 'ask.md'), 'Soru?');
+  fs.writeFileSync(path.join(root, 'reply.md'), 'Cevap.');
+  const rec = run(process.execPath, [AGENCY, 'record', '--topic', 'Buton rengi', '--agents', 'design-ui-designer', '--ask', 'ask.md', '--reply', 'reply.md', '--cost', '0.04 $'], { cwd: root, env });
+  const file = path.join(root, rec.stdout.trim());
+  const body = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
+  ok('record writes the numbered file under docs/danisma', /docs[\\/]danisma[\\/]001-buton-rengi\.md/.test(rec.stdout), rec.stdout);
+  ok('record keeps both sides verbatim', /## Girdi\n\nSoru\?/.test(body) && /## Donen\n\nCevap\./.test(body) && /danisilan: agency\/design-ui-designer/.test(body) && /maliyet: 0\.04 \$/.test(body), body);
+  const empty = home();
+  const none = run(process.execPath, [AGENCY, 'list'], { cwd: CORE, env: { ...process.env, CLAUDE_CONFIG_DIR: empty } });
+  ok('without the repo it says how to fetch', none.status === 1 && /agency\.js fetch/.test(none.stdout), none.stdout);
+  sweep(root);
+  sweep(cfg);
+  sweep(empty);
+}
+
 function testDoctor() {
   const r = run(process.execPath, [path.join(CORE, 'scripts', 'doctor.js'), '--json'], { cwd: path.resolve(CORE, '..') });
   let rows = [];
@@ -583,6 +620,7 @@ function main() {
     ['chime', testChime],
     ['loop gate', testLoop],
     ['stale processes', testProcs],
+    ['agency', testAgency],
     ['doctor', testDoctor],
   ];
   for (const [name, fn] of suites) {
