@@ -51,4 +51,17 @@ Aynı yük, on tekrar, medyan; `bench/gecikme.md`. Boş `node -e 0` 33 ms.
 
 ## Bench sonucu
 
-(deney sürüyor; `bench/deney/base-fark.karar.md` dolunca buraya taşınır)
+Deney dosyası `bench/deney/base-fark.json`, karar `bench/deney/base-fark.karar.md`, ham `bench/base-fark.jsonl`. Koltuk sonnet/low, n=3, hiçbir koşul beklentiyle çelişmedi, ikinci tur koşulmadı. 4.19 $ (9 koşu).
+
+| koşul | görev | taban | 1. tur $ | ortalama | yön | kabul | kanca ateşlendi |
+|---|---|---|---|---|---|---|---|
+| c3-sozdizimi | 06 | 0.37 | 0.36 / 0.30 / 0.35 | 0.34 | esit | 3/3 | 0 |
+| c3-sozdizimi | 07 | 0.74 | 0.60 / 0.77 / 0.72 | 0.70 | esit | 3/3 | 0 |
+| c4-lsp | 06 | 0.37 | 0.49 / 0.34 / 0.25 | 0.36 | esit | 3/3 | LSP aracı 0 çağrı |
+
+Karar:
+
+- 17 sözdizim denetimi: altı koşuda model bir kez bile bozuk dosya yazmadı, satır hiç girmedi; maliyet 0, sinyal 0. Girmiyor, `bench/varyant/c3-sozdizimi` altında duruyor. Bozuk yazımın sık olduğu bir görev çıkarsa aynı dosyayla tek komut.
+- 18 .lsp.json: üç koşuda LSP aracı hiç çağrılmadı, maliyet gürültü içinde. Girmiyor; kullanıcının makinesinde typescript-lsp resmi eklentisi zaten kayıtlı, ikinci kayıt uyarı üretir.
+
+Sonuç: Base ile Core arasındaki 29 farkın 13'ü daha önce ölçülmüş, 2'si bu turda ölçüldü, 14'ü gerekçesiyle ölçülmeden atlandı. Ölçülüp Core'a giren parça yok.

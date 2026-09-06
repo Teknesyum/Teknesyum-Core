@@ -220,3 +220,15 @@ Yorum:
 - c1-sessiz K0 altında 0.70 $, taban aralığı içinde. K0 altında ipucu zaten ateşlenmediğinden fark beklenmiyordu, gelmedi; n=1 yeterli.
 - c2-kucuk ilk turda ucuz (0.32), ikinci turda bir koşu 0.59 $ ile taban aralığının dışına çıktı; altının ortalaması 0.35, tabanla eşit. Satırın etkisi görev 06'da ölçülemez: iki dosyalık iş, eşik dolmuyor. Beklenti (pahalı) tutmadı, ucuzluk da ikinci turda kayboldu.
 - Karar: plan ipucu varsayılan olarak açık kalır. "Küçük iş" satırı K0'da kalır; etkisi eşik dolan görevde ölçülmedi, bu bench'te sinyal yok.
+
+## 10. Base farkı denetimi: sözdizim denetimi ve .lsp.json, sonnet/low, n=3
+
+Base'de olup Core'da olmayan 29 parça tek tek sınıflandı: `docs/base-core-denetim.md`. Daha ucuz sürümü yazılamayan ve pahalılığı bilinmeyen iki parça ölçüldü; kanca gecikmeleri model dışı ölçüldü (`bench/gecikme.md`: Bash başına Base 154 ms, Core 74 ms; Write başına 176 / 104 ms). Deney `bench/deney/base-fark.json`, karar `bench/deney/base-fark.karar.md`, ham `bench/base-fark.jsonl`.
+
+| koşul | görev | taban $ | 1. tur $ | ortalama | yön | kabul |
+|---|---|---|---|---|---|---|
+| c3-sozdizimi | 06 | 0.37 | 0.36 / 0.30 / 0.35 | 0.34 | esit | 3/3 |
+| c3-sozdizimi | 07 | 0.74 | 0.60 / 0.77 / 0.72 | 0.70 | esit | 3/3 |
+| c4-lsp | 06 | 0.37 | 0.49 / 0.34 / 0.25 | 0.36 | esit | 3/3 |
+
+Toplam harcama: 4.19 $ (9 koşu). Sözdizim kancası altı koşuda hiç ateşlenmedi; LSP aracı üç koşuda hiç çağrılmadı. İkisi de girmiyor, varyant olarak duruyor.
