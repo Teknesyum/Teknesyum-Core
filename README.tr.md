@@ -288,5 +288,10 @@ kurtardıysa, sponsor olmak bunu söylemenin bir yolu.
 arkadaşa önerin.
 
 <!-- signature -->
+<div align="center">
 
-[Teknesyum'a destek ol](https://github.com/sponsors/Teknesyum) · [Lisans AGPL-3.0](LICENSE)
+<a href="https://github.com/sponsors/Teknesyum"><img src="assets/badge-sponsor.svg" alt="Support Teknesyum" height="38"></a>
+&nbsp;
+<a href="LICENSE"><img src="assets/badge-license.svg" alt="License AGPL-3.0" height="38"></a>
+
+</div>
