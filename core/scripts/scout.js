@@ -72,22 +72,7 @@ function brief(root, topic) {
   return { id, file: path.relative(root, file).split(path.sep).join('/') };
 }
 
-function gate(j) {
-  if (j.tool_name !== 'Agent') return null;
-  const input = j.tool_input || {};
-  const id = idOf(input.prompt);
-  if (!id) return null;
-  const st = lib.read(stateFile()) || {};
-  const deny = (why) => ({
-    hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: why },
-  });
-  if (st.id !== id) return deny(lib.t('scout.unknown').replace('%ID', id));
-  if (st.spent) return deny(lib.t('scout.spent').replace('%ID', id));
-  if (String(input.model || '') !== MODEL) return deny(lib.t('scout.model').split('%MODEL').join(MODEL));
-  if (String(input.prompt).length > 6000) return deny(lib.t('scout.long'));
-  lib.write(stateFile(), { ...st, spent: true, spentAt: new Date().toISOString() });
-  return null;
-}
+const gate = lib.makeGate({ mark: MARK, state: 'scout', model: MODEL, max: 6000 });
 
 function record(root, o) {
   const st = lib.read(stateFile()) || {};

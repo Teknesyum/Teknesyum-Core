@@ -87,6 +87,22 @@
     "en": "tests",
     "tr": "test"
   },
+  "line.pass": {
+    "en": "pass",
+    "tr": "geçti"
+  },
+  "line.fail": {
+    "en": "fail",
+    "tr": "kaldı"
+  },
+  "line.unknown": {
+    "en": "unknown",
+    "tr": "bilinmiyor"
+  },
+  "line.stale": {
+    "en": "stale",
+    "tr": "bayat"
+  },
   "line.handoff": {
     "en": "handoff",
     "tr": "devir"
@@ -146,5 +162,13 @@
   "scout.long": {
     "en": "The prompt is longer than the brief. Send the brief file as written, nothing added.",
     "tr": "İstem öncül dosyasından uzun. Dosyayı yazıldığı gibi ver, ekleme yapma."
+  },
+  "advice.unknown": {
+    "en": "No question %ID is armed. Run advice.js ask <question> first and send that file as the prompt.",
+    "tr": "%ID numaralı soru hazır değil. Önce advice.js ask <soru> çalıştır, yazdığı dosyayı istem olarak ver."
+  },
+  "advice.spent": {
+    "en": "Question %ID already went out once. Read docs/netlestirme/, or ask a new one.",
+    "tr": "%ID numaralı soru bir kez gitti. docs/netlestirme/ altındakini oku ya da yeni soru yaz."
   }
 }

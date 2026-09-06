@@ -8,7 +8,6 @@ const DIFF_MAX = 150;
 const CTX_MAX = 60;
 const RISK = /(^|\/)(migrations?\/|\.github\/|dockerfile$)|auth|secur|config|\.lock$|-lock\.json$/i;
 const TEST = /\b(npm|pnpm|yarn|bun)\s+(run\s+)?test\b|\bnpx\s+(ava|jest|mocha|vitest)\b|\bpytest\b|\bgo\s+test\b|\bcargo\s+test\b|\bdotnet\s+test\b|\bnode\s+\S*test\S*\.m?js\b/i;
-const FAIL = /(\d+\s+failed|\bFAIL\b|Error:|exit code [1-9]|npm ERR|Traceback)/;
 const EDITS = /^(Write|Edit|NotebookEdit)$/;
 const SHELLS = /^(Bash|PowerShell)$/;
 
@@ -88,11 +87,20 @@ function onEdit(j, st) {
   return speak(why + ' ' + t('cue.plan'));
 }
 
-function onShell(j, st) {
+function tree(cwd) {
+  const r = spawnSync('git', ['-C', cwd, 'status', '--porcelain', '--branch'], { encoding: 'utf8', windowsHide: true, timeout: 10000 });
+  if (r.error || r.status !== 0) return '';
+  const head = spawnSync('git', ['-C', cwd, 'rev-parse', 'HEAD'], { encoding: 'utf8', windowsHide: true, timeout: 10000 });
+  return require('crypto').createHash('sha1').update(String(head.stdout || '') + String(r.stdout || '')).digest('hex').slice(0, 12);
+}
+
+function onShell(j, st, failed) {
   const cmd = String((j.tool_input && j.tool_input.command) || '');
   if (!TEST.test(cmd)) return '';
-  const text = typeof j.tool_response === 'string' ? j.tool_response : JSON.stringify(j.tool_response || '');
-  st.tests.push({ cmd: cmd.slice(0, 120), ok: !FAIL.test(text), at: new Date().toISOString() });
+  const res = j.tool_response || {};
+  const out = typeof res === 'string' ? res : String(res.stdout || '') + String(res.stderr || '');
+  const ok = failed ? false : out.trim() ? true : null;
+  st.tests.push({ cmd: cmd.slice(0, 120), ok, at: new Date().toISOString(), tree: tree(st.cwd) });
   st.tests = st.tests.slice(-8);
   return '';
 }
@@ -121,6 +129,8 @@ function handle(j) {
     if (EDITS.test(j.tool_name)) out = onEdit(j, st);
     else if (SHELLS.test(j.tool_name)) out = onShell(j, st);
     if (!out) out = onContext(st);
+  } else if (ev === 'PostToolUseFailure') {
+    if (SHELLS.test(j.tool_name)) onShell(j, st, true);
   } else if (ev === 'Stop') refresh(st);
   write(f, st);
   return out;
@@ -143,4 +153,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { handle, reason, file, FILE_MAX, DIFF_MAX, CTX_MAX, RISK, TEST };
+module.exports = { handle, reason, file, tree, FILE_MAX, DIFF_MAX, CTX_MAX, RISK, TEST };

@@ -166,12 +166,23 @@ function testCountTests() {
   const sh = (command, response) =>
     hook(COUNT, { hook_event_name: 'PostToolUse', tool_name: 'Bash', session_id: 's1', cwd: root, tool_input: { command }, tool_response: response }, cfg);
   ok('a plain command is silent', sh('ls', 'a b c').stdout === '');
-  sh('npm test', '12 passing');
-  sh('npx jest', '1 failed, 3 passed');
+  sh('npm test', { stdout: '12 passing', stderr: '' });
+  hook(COUNT, { hook_event_name: 'PostToolUseFailure', tool_name: 'Bash', session_id: 's1', cwd: root, tool_input: { command: 'npx jest' }, error: '1 failed, 3 passed' }, cfg);
+  sh('pytest', { stdout: '', stderr: '' });
   sh('git status', 'clean');
   const st = stateOf(cfg);
-  ok('test commands are recorded, others are not', st.tests.length === 2, JSON.stringify(st.tests));
-  ok('the outcome is read from the output', st.tests[0].ok === true && st.tests[1].ok === false, JSON.stringify(st.tests));
+  ok('test commands are recorded, others are not', st.tests.length === 3, JSON.stringify(st.tests));
+  ok('the outcome is the exit code, not the text: exit 0 passes, a failed call fails, silence is unknown', st.tests[0].ok === true && st.tests[1].ok === false && st.tests[2].ok === null, JSON.stringify(st.tests));
+  ok('each record carries the tree hash of the moment', /^[0-9a-f]{12}$/.test(st.tests[0].tree) && st.tests[0].tree === st.tests[1].tree, JSON.stringify(st.tests));
+  const line = () =>
+    run(process.execPath, [STATUSLINE], {
+      cwd: root,
+      input: JSON.stringify({ session_id: 's1', workspace: { current_dir: root }, context_window: { used_percentage: 10 } }),
+      env: { ...process.env, CLAUDE_CONFIG_DIR: cfg, NO_COLOR: '1' },
+    }).stdout;
+  ok('the statusline shows the last record', /tests unknown/.test(line()), line());
+  fs.writeFileSync(path.join(root, 'src', 'ok.js'), 'module.exports = 3;\n');
+  ok('and calls it stale once the tree moved', /tests stale/.test(line()), line());
   sweep(root);
   sweep(cfg);
 }
@@ -187,6 +198,9 @@ function testHandoff() {
     JSON.stringify({ type: 'assistant', message: { role: 'assistant', content: [{ type: 'text', text: 'ok' }] } }),
     JSON.stringify({ type: 'user', message: { role: 'user', content: [{ type: 'tool_result', content: 'x' }] } }),
     JSON.stringify({ type: 'user', message: { role: 'user', content: 'second prompt' } }),
+    JSON.stringify({ type: 'user', message: { role: 'user', content: 'third\nprompt' } }),
+    JSON.stringify({ type: 'user', message: { role: 'user', content: 'fourth prompt' } }),
+    JSON.stringify({ type: 'user', message: { role: 'user', content: 'fifth prompt' } }),
   ].join('\n') + '\n');
   hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 's1', cwd: root, transcript_path: transcript }, cfg);
   ok('the session start files the transcript path into state', stateOf(cfg).transcript === transcript, stateOf(cfg).transcript);
@@ -206,6 +220,8 @@ function testHandoff() {
   ok('plan is answered', /## plan\nnone/.test(body), body);
   ok('task is the first user prompt of the session, stripped of tags', /## task\nadd a --dry flag to the cli\n/.test(body), body);
   ok('firstPrompt skips meta and tool results and cuts at 2000', handoff.firstPrompt(transcript) === 'add a --dry flag to the cli' && handoff.firstPrompt('nope') === '' && handoff.firstPrompt.length === 1);
+  ok('steer holds the last three later prompts, one line each', /## steer\n- third prompt\n- fourth prompt\n- fifth prompt\n/.test(body) && handoff.steer('nope') === '', body);
+  ok('the test record in the handoff names the exit-code outcome', /npm test` — pass /.test(body), body);
   ok('decisions and next_action are left to the model', /## decisions\n\(fill\)/.test(body) && /## next_action\n\(fill\)/.test(body), body);
 
   fs.writeFileSync(file, body.replace('## decisions\n(fill)', '## decisions\nkeep the cache').replace('## next_action\n(fill)', '## next_action\nrun the bench'));
@@ -261,7 +277,7 @@ function testContextCue() {
 function testWiring() {
   const hooks = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8')).hooks;
   const events = Object.keys(hooks).sort().join(',');
-  ok('exactly the six events are wired', events === 'Notification,PostToolUse,PreToolUse,SessionEnd,SessionStart,Stop', events);
+  ok('exactly the seven events are wired', events === 'Notification,PostToolUse,PostToolUseFailure,PreToolUse,SessionEnd,SessionStart,Stop', events);
   for (const ev of Object.keys(hooks))
     for (const g of hooks[ev])
       for (const h of g.hooks) {
@@ -687,6 +703,21 @@ function testScout() {
   ok('record files the answer next to the brief and says it cut', /docs\/oncul\/001-sifir-bagimlilik-cli-ayristirici\.md \(reply cut at 8000/.test(r.stdout), r.stdout + r.stderr);
   const rec = fs.readFileSync(path.join(root, 'docs', 'oncul', '001-sifir-bagimlilik-cli-ayristirici.md'), 'utf8');
   ok('the record names the cost and the cut', /12k token, 40 s/.test(rec) && /karakter kesildi/.test(rec));
+
+  const ADVICE = path.join(CORE, 'scripts', 'advice.js');
+  fs.writeFileSync(path.join(root, 'olgular.md'), '- bench 06 tabanı 0.37 $');
+  const q = run(process.execPath, [ADVICE, 'ask', 'planı mı kesmeli yoksa ölçmeli mi', '--facts', 'olgular.md'], { cwd: root, env });
+  const qfile = q.stdout.split('\n')[0];
+  ok('ask lands under docs/netlestirme with an ascii slug', qfile === 'docs/netlestirme/001-plani-mi-kesmeli-yoksa-olcmeli-mi-girdi.md', qfile + q.stderr);
+  const qprompt = fs.readFileSync(path.join(root, qfile), 'utf8');
+  ok('the question carries its marker, the question and the facts', /\[\[netlestirme:001\]\]/.test(qprompt) && /ölçmeli mi/.test(qprompt) && /0\.37/.test(qprompt), qprompt.slice(0, 120));
+  ok('the same gate lets the question out once on any model', gate(qprompt, 'opus') === '');
+  const qagain = gate(qprompt, 'opus');
+  ok('and refuses the second call on it', /went out once/.test(qagain), qagain);
+  ok('a question nobody armed is refused', /No question 002/.test(gate('[[netlestirme:002]] go', 'opus')));
+  fs.writeFileSync(path.join(root, 'cevap2.md'), 'net');
+  const qr = run(process.execPath, [ADVICE, 'record', '--reply', 'cevap2.md', '--cost', '3k token, 20 s'], { cwd: root, env });
+  ok('record files the answer next to the question', qr.stdout.trim() === 'docs/netlestirme/001-plani-mi-kesmeli-yoksa-olcmeli-mi.md' && /3k token/.test(fs.readFileSync(path.join(root, 'docs', 'netlestirme', '001-plani-mi-kesmeli-yoksa-olcmeli-mi.md'), 'utf8')), qr.stdout + qr.stderr);
   sweep(root);
   sweep(cfg);
 }

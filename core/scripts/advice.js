@@ -1,17 +1,15 @@
 const fs = require('fs');
 const path = require('path');
-const { read, write, safe } = require('../hooks/lib.js');
+const lib = require('../hooks/lib.js');
 
 const DIR = 'docs/danisma';
-const PENDING = '_pending.json';
-const TAIL = 2 * 1024 * 1024;
+const ASK_DIR = 'docs/netlestirme';
+const MARK = '[[netlestirme:';
+const PROMPT_MAX = 12000;
+const REPLY_MAX = 12000;
 
 function dir(root) {
   return path.join(root, DIR);
-}
-
-function pendingFile(relay) {
-  return path.join(dir(relay), PENDING);
 }
 
 function slugOf(text) {
@@ -38,119 +36,6 @@ function nextNumber(at) {
   return top + 1;
 }
 
-function lastReply(transcript) {
-  let body = '';
-  try {
-    const size = fs.statSync(transcript).size;
-    const fd = fs.openSync(transcript, 'r');
-    const from = Math.max(0, size - TAIL);
-    const buf = Buffer.alloc(size - from);
-    fs.readSync(fd, buf, 0, buf.length, from);
-    fs.closeSync(fd);
-    body = buf.toString('utf8');
-  } catch {
-    return '';
-  }
-  const lines = body.split('\n');
-  for (let i = lines.length - 1; i >= 0; i--) {
-    let row = null;
-    try {
-      row = JSON.parse(lines[i]);
-    } catch {
-      continue;
-    }
-    if (!row || row.type !== 'assistant') continue;
-    const content = row.message && row.message.content;
-    if (!Array.isArray(content)) continue;
-    const text = content
-      .filter((b) => b && b.type === 'text' && b.text)
-      .map((b) => b.text)
-      .join('\n')
-      .trim();
-    if (text) return text;
-  }
-  return '';
-}
-
-function open(relay, o) {
-  const at = dir(relay);
-  try {
-    fs.mkdirSync(at, { recursive: true });
-  } catch {
-    return '';
-  }
-  const n = nextNumber(at);
-  const name = String(n).padStart(3, '0') + '-' + safe(slugOf(o.topic || o.model)) + '.md';
-  const file = path.join(at, name);
-  const body = [
-    '# ' + (o.topic || 'Danisma'),
-    '',
-    '- soran: ' + (o.asker || 'T0'),
-    '- danisilan: ' + (o.model || '') + (o.effort ? '/' + o.effort : ''),
-    '- tarih: ' + new Date().toISOString().slice(0, 10),
-    '',
-    '## Sorulan',
-    '',
-    String(o.prompt || '').trim(),
-    '',
-    '## Donen',
-    '',
-    '_cevap bekleniyor_',
-    '',
-  ].join('\n');
-  try {
-    fs.writeFileSync(file, body);
-  } catch {
-    return '';
-  }
-  const cur = read(pendingFile(relay));
-  const list = Array.isArray(cur) ? cur : [];
-  list.push({ file: name, model: String(o.model || ''), effort: String(o.effort || ''), toolUseId: String(o.toolUseId || ''), runId: '', at: Date.now() });
-  write(pendingFile(relay), list.slice(-8));
-  return name;
-}
-
-function bind(relay, toolUseId, runId) {
-  if (!toolUseId || !runId) return false;
-  const cur = read(pendingFile(relay));
-  const list = Array.isArray(cur) ? cur : [];
-  const matches = list.filter((x) => x.toolUseId === String(toolUseId));
-  if (matches.length !== 1) return false;
-  matches[0].runId = String(runId);
-  write(pendingFile(relay), list);
-  return true;
-}
-
-function close(relay, model, transcript, runId) {
-  const cur = read(pendingFile(relay));
-  const list = Array.isArray(cur) ? cur : [];
-  if (!list.length) return '';
-  if (!runId) return '';
-  const matches = list.filter((x) => x.runId === String(runId));
-  if (matches.length !== 1) return '';
-  const i = list.indexOf(matches[0]);
-  const entry = list[i];
-  const reply = lastReply(transcript);
-  if (!reply) return '';
-  const file = path.join(dir(relay), entry.file);
-  let body = '';
-  try {
-    body = fs.readFileSync(file, 'utf8');
-  } catch {
-    list.splice(i, 1);
-    write(pendingFile(relay), list);
-    return '';
-  }
-  try {
-    fs.writeFileSync(file, body.replace('_cevap bekleniyor_', reply.trim()));
-  } catch {
-    return '';
-  }
-  list.splice(i, 1);
-  write(pendingFile(relay), list);
-  return entry.file;
-}
-
 function list(relay) {
   let names = [];
   try {
@@ -161,6 +46,64 @@ function list(relay) {
   return names.sort();
 }
 
+function ascii(text) {
+  return String(text || '').replace(/[çÇ]/g, 'c').replace(/[ğĞ]/g, 'g').replace(/[ıİ]/g, 'i').replace(/[öÖ]/g, 'o').replace(/[şŞ]/g, 's').replace(/[üÜ]/g, 'u');
+}
+
+function askText(id, question, facts) {
+  return [
+    MARK + id + ']]',
+    '',
+    '# Netleştirme: ' + question.split('\n')[0].slice(0, 80),
+    '',
+    'İşe başlamadan önce soruyu keskinleştir. Görüş verme, plan yazma, kod yazma.',
+    'Yalnız şunu döndür: soruda belirsiz kalan yerler, her biri için tek satırlık bir netleştirme sorusu, en fazla beş. Belirsizlik yoksa "net" yaz.',
+    '',
+    '## Soru',
+    '',
+    question,
+    '',
+    '## Elde olan olgular',
+    '',
+    facts || '- yok',
+    '',
+  ].join('\n');
+}
+
+function ask(root, question, facts) {
+  if (!question) throw new Error('question is empty');
+  const at = path.join(root, ASK_DIR);
+  fs.mkdirSync(at, { recursive: true });
+  const id = String(nextNumber(at)).padStart(3, '0');
+  const slug = slugOf(ascii(question));
+  const file = path.join(at, id + '-' + slug + '-girdi.md');
+  fs.writeFileSync(file, askText(id, question, facts));
+  lib.write(lib.stateFile('advice'), { id, slug, question, at: new Date().toISOString(), spent: false, session: lib.sessionId() });
+  return { id, file: path.relative(root, file).split(path.sep).join('/') };
+}
+
+const gate = lib.makeGate({ mark: MARK, state: 'advice', model: '', max: PROMPT_MAX });
+
+function record(root, o) {
+  const st = lib.read(lib.stateFile('advice')) || {};
+  const id = o.id || st.id;
+  if (!id) throw new Error('no question to record against');
+  const at = path.join(root, ASK_DIR);
+  const input = fs.readdirSync(at).find((n) => n.startsWith(id + '-') && n.endsWith('-girdi.md'));
+  if (!input) throw new Error('no question ' + id + ' under ' + ASK_DIR);
+  let reply = o.reply ? fs.readFileSync(o.reply, 'utf8').trim() : '';
+  const cut = reply.length > REPLY_MAX;
+  if (cut) reply = reply.slice(0, REPLY_MAX) + '\n\n[' + (reply.length - REPLY_MAX) + ' karakter kesildi]';
+  const file = path.join(at, input.replace(/-girdi\.md$/, '.md'));
+  fs.writeFileSync(file, ['# Netleştirme: ' + (st.question || id).split('\n')[0].slice(0, 80), '', '- tarih: ' + new Date().toISOString().slice(0, 10), '- girdi: ' + input, '- maliyet: ' + (o.cost || '-'), '', '## Dönen', '', reply, ''].join('\n'));
+  return { file: path.relative(root, file).split(path.sep).join('/'), cut };
+}
+
+function arg(argv, flag) {
+  const i = argv.indexOf(flag);
+  return i === -1 || i === argv.length - 1 ? '' : argv[i + 1];
+}
+
 function main(argv) {
   const cmd = argv[0];
   const root = process.cwd();
@@ -169,10 +112,35 @@ function main(argv) {
     process.stdout.write(rows.length ? rows.join('\n') + '\n' : 'nothing recorded\n');
     return 0;
   }
-  process.stdout.write('usage: advice.js list\n');
+  if (cmd === 'ask') {
+    const facts = arg(argv, '--facts');
+    const r = ask(root, argv.slice(1).filter((x, i, all) => !x.startsWith('--') && all[i - 1] !== '--facts').join(' ').trim(), facts ? fs.readFileSync(facts, 'utf8').trim() : '');
+    process.stdout.write(r.file + '\n\nGive the Agent tool the file above as the prompt, verbatim. The gate lets it through once; a second call on the same question or a longer prompt is refused.\nThen: advice.js record --reply <file with the answer> --cost "<tokens, seconds>"\n');
+    return 0;
+  }
+  if (cmd === 'record') {
+    const r = record(root, { id: arg(argv, '--id'), reply: arg(argv, '--reply'), cost: arg(argv, '--cost') });
+    process.stdout.write(r.file + (r.cut ? ' (reply cut at ' + REPLY_MAX + ' characters)' : '') + '\n');
+    return 0;
+  }
+  process.stdout.write([
+    'advice.js list                                   the consultation records under ' + DIR + '/',
+    'advice.js ask <question> [--facts <file>]        write a ?? question under ' + ASK_DIR + '/, arm the gate for one call',
+    'advice.js record --reply <file> [--cost <s>]     file the answer next to the question, cut at ' + REPLY_MAX + ' characters',
+    '',
+    'The PreToolUse gate in hooks/scout.js lets each question out once; the model is yours to pick.',
+    'Nothing runs unless you ask, and nothing here enters the context on an ordinary turn.',
+  ].join('\n') + '\n');
   return 1;
 }
 
-if (require.main === module) process.exit(main(process.argv.slice(2)));
+if (require.main === module) {
+  try {
+    process.exit(main(process.argv.slice(2)));
+  } catch (e) {
+    process.stderr.write(String((e && e.message) || e) + '\n');
+    process.exit(1);
+  }
+}
 
-module.exports = { open, bind, close, list, lastReply, slugOf, DIR };
+module.exports = { ask, askText, gate, record, list, slugOf, DIR, ASK_DIR, MARK, REPLY_MAX };

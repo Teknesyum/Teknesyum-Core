@@ -41,13 +41,16 @@ function workPart(st, cwd) {
   }
   const parts = [names.length + ' ' + t('line.files') + ' ' + paint(C.green, '+' + adds) + paint(C.red, '-' + dels)];
   parts.push(fs.existsSync(path.join(cwd, 'docs', 'plan.md')) ? paint(C.green, t('line.plan')) : paint(C.dim, t('line.noPlan')));
-  const tests = st.tests || [];
-  if (tests.length) {
-    const ok = tests.filter((x) => x.ok).length;
-    const bad = tests.length - ok;
-    parts.push(t('line.tests') + ' ' + paint(C.green, ok + '✓') + (bad ? ' ' + paint(C.red, bad + '✗') : ''));
-  }
   return parts;
+}
+
+function testPart(st, cwd) {
+  const last = ((st && st.tests) || []).slice(-1)[0];
+  if (!last) return [];
+  const stale = last.tree && last.tree !== require('../hooks/count.js').tree(cwd);
+  const word = stale ? t('line.stale') : last.ok === true ? t('line.pass') : last.ok === false ? t('line.fail') : t('line.unknown');
+  const colour = stale || last.ok === null ? C.dim : last.ok ? C.green : C.red;
+  return [t('line.tests') + ' ' + paint(colour, word)];
 }
 
 function hookErrors() {
@@ -65,6 +68,7 @@ function build(input) {
   const ctx = contextPart(Number(input && input.context_window && input.context_window.used_percentage) || Number(st && st.ctx));
   if (ctx) parts.push(ctx);
   parts.push(...workPart(st, cwd));
+  parts.push(...testPart(st, cwd));
   if (fs.existsSync(path.join(cwd, '.claude', 'handoff.md'))) parts.push(paint(C.yellow, t('line.handoff')));
   const logs = openLogCount();
   if (logs) parts.push(paint(C.yellow, logs + ' ' + t('line.logs')));

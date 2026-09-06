@@ -289,7 +289,30 @@ function envPinned(name, probe = {}) {
   return false;
 }
 
+function makeGate(o) {
+  const mark = o.mark.replace(/[[\]]/g, '\\$&') + '(\\d{3})\\]\\]';
+  return function gate(j) {
+    if (j.tool_name !== 'Agent') return null;
+    const input = j.tool_input || {};
+    const m = new RegExp(mark).exec(String(input.prompt || ''));
+    if (!m) return null;
+    const id = m[1];
+    const file = stateFile(o.state);
+    const st = read(file) || {};
+    const deny = (why) => ({
+      hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: why },
+    });
+    if (st.id !== id) return deny(t(o.state + '.unknown').replace('%ID', id));
+    if (st.spent) return deny(t(o.state + '.spent').replace('%ID', id));
+    if (o.model && String(input.model || '') !== o.model) return deny(t(o.state + '.model').split('%MODEL').join(o.model));
+    if (String(input.prompt).length > o.max) return deny(t('scout.long'));
+    write(file, { ...st, spent: true, spentAt: new Date().toISOString() });
+    return null;
+  };
+}
+
 module.exports = {
+  makeGate,
   envPinned,
   home,
   configRoot,

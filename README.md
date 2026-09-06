@@ -96,8 +96,9 @@ When the context passes sixty percent, or when the session ends, `.claude/handof
 written by the machine. It opens with one rule line - read the task, then the changed files,
 continue from the first unfinished part, do not redo what the diff already shows - and then
 carries `task`, the session's first prompt read from the transcript; `changed_files` from
-`git diff --stat`; `tests_run` from the commands the hook saw and how they exited; and
-`plan` if there is one. Two sections are left for the model, `decisions` and `next_action`,
+`git diff --stat`; `tests_run` from the commands the hook saw, their exit code and the tree
+hash of that moment; `steer`, the last three prompts after the first; and `plan` if there is
+one. Two sections are left for the model, `decisions` and `next_action`,
 and one line asks for them at the threshold:
 
 > Context 64%. Fill decisions and next_action in .claude/handoff.md.
@@ -115,8 +116,9 @@ silence for everything that does not need you. Off with one setting.
 
 A prompt that starts with `??` is a request to sharpen the question before any work starts:
 the model gathers the facts it already has, puts them in front of a consulting seat, and
-saves the exchange verbatim under `docs/danisma/` with the round's cost on one line. There
-is no hook behind this; it is a rule in `CLAUDE.md` and a script that lists the records.
+saves the exchange verbatim under `docs/netlestirme/` with the round's cost on one line.
+`advice.js ask` writes the question, the gate in `hooks/scout.js` lets it out once, `record`
+files the answer.
 
 ### Tools that only run when called
 
@@ -124,7 +126,7 @@ is no hook behind this; it is a rule in `CLAUDE.md` and a script that lists the 
 |---|---|
 | `scripts/map.js .` | Import graph: hubs, cycles, orphans. `map.js who <file>` says what imports it. |
 | `scripts/log.js write` | A bug log with a fixed shape, into the project's own repository. |
-| `scripts/advice.js list` | The consultation records under `docs/danisma/`. |
+| `scripts/advice.js` | `ask <question> [--facts <file>]` writes a `??` question under `docs/netlestirme/` and arms the gate for one call on any model; `record` files the answer; `list` shows the records under `docs/danisma/`. |
 | `scripts/agency.js` | A seat from [agency-agents](https://github.com/msitarzewski/agency-agents), on demand: `fetch` clones it outside the project, `find ui` picks, `show <slug> --lean` hands the role to a subagent without its personality and metrics blocks, `record` files the exchange under `docs/danisma/`. Nothing is installed as an agent, so the roster never enters the context. |
 | `scripts/manset.js` | The banner line, if you want one. |
 | `scripts/scaffold.js` | License, signature block, language link: fixed texts the model never types. |
@@ -203,27 +205,30 @@ the ~200 tokens per turn in the table above.
 ## What It Looks Like In Use
 
 ```
-Teknesyum ▸ my-app · context 41% · 3 files +82-14 · no plan · tests 1✓
-Teknesyum ▸ my-app · context 67% · 6 files +240-31 · plan · tests 2✓ 1✗ · handoff
+Teknesyum ▸ my-app · context 41% · 3 files +82-14 · no plan · tests pass
+Teknesyum ▸ my-app · context 67% · 6 files +240-31 · plan · tests stale · handoff
 ```
 
 The first line is a session below every threshold: nothing has been said to the model. The
-second is a session that wrote its plan, ran its tests, and has a handoff waiting for the
-`decisions` and `next_action` lines.
+second is a session that wrote its plan, ran its tests, edited since (so the last record is
+stale), and has a handoff waiting for the `decisions` and `next_action` lines. The test word
+is the last record only: pass or fail from the exit code, unknown when the run printed
+nothing, stale when HEAD or the working tree moved after it.
 
 ---
 
 ## Hooks
 
-Six events, six files, all under `core/hooks/`:
+Seven events, six files, all under `core/hooks/`:
 
 | Event | Hook | Says |
 |---|---|---|
 | `SessionStart` | `count.js` | `Resume: .claude/handoff.md` if one exists, else nothing |
 | `PostToolUse` | `count.js` | one line at the threshold, once; else nothing |
+| `PostToolUseFailure` | `count.js` | nothing; files a failed test command |
 | `PreToolUse` | `prefs.js` | your own README conventions, when a README is written |
 | `PreToolUse` | `loop.js` | one line when a wait loop has no upper bound; else nothing |
-| `PreToolUse` | `scout.js` | nothing; refuses a scout call that breaks its brief's budget |
+| `PreToolUse` | `scout.js` | nothing; refuses a scout or `??` call that breaks its budget |
 | `Stop` | `count.js` | nothing; refreshes the diff for the statusline |
 | `SessionEnd` | `handoff.js` | nothing; writes the handoff |
 | `Notification` | `notify.js` | nothing; rings |
@@ -240,7 +245,8 @@ Only `count.js` can write into the context, and the test suite checks that it is
   map.md               import graph
 docs/
   plan.md              the plan the hook asks for, when it asks
-  danisma/             consultation records from ?? turns
+  netlestirme/         ?? questions and their answers
+  danisma/             consultation records
 bench/
   rapor.md             the report behind the table above
   varyant/             the removed parts, ready to be measured again

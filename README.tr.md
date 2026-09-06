@@ -91,7 +91,8 @@ Bağlam yüzde altmışı geçince ya da oturum bitince `.claude/handoff.md` mak
 yazılır. Tek satır kuralla açılır - önce task'ı, sonra değişen dosyaları oku, ilk bitmemiş
 parçadan sür, diff'in gösterdiğini yeniden yapma - ve sonra şunları taşır: `task`, oturumun
 ilk istemi, transkriptten; `changed_files`, `git diff --stat`'tan; `tests_run`, kancanın
-gördüğü komutlar ve nasıl çıktıkları; varsa `plan`. İki bölüm modele bırakılır, `decisions`
+gördüğü komutlar, çıkış kodları ve o anın ağaç karması; `steer`, ilkinden sonraki son üç
+istem; varsa `plan`. İki bölüm modele bırakılır, `decisions`
 ve `next_action`; eşikte tek satır onları ister:
 
 > Bağlam %64. .claude/handoff.md içinde decisions ve next_action doldur.
@@ -108,8 +109,8 @@ için sessizlik. Tek ayarla kapanır.
 
 `??` ile başlayan istem, işe başlamadan önce soruyu keskinleştirme isteğidir: model elindeki
 olguları toplar, bir danışma koltuğunun önüne koyar ve alışverişi turun maliyetiyle birlikte
-`docs/danisma/` altına olduğu gibi kaydeder. Arkasında kanca yok; `CLAUDE.md`'de bir kural
-ve kayıtları listeleyen bir betik var.
+`docs/netlestirme/` altına olduğu gibi kaydeder. `advice.js ask` soruyu yazar, `hooks/scout.js`
+kapısı bir kez bırakır, `record` cevabı dosyalar.
 
 ### Yalnız çağrılınca çalışan araçlar
 
@@ -117,7 +118,7 @@ ve kayıtları listeleyen bir betik var.
 |---|---|
 | `scripts/map.js .` | Import grafiği: merkezler, döngüler, yetimler. `map.js who <dosya>` kimin import ettiğini söyler. |
 | `scripts/log.js write` | Sabit biçimli hata günlüğü, projenin kendi deposuna. |
-| `scripts/advice.js list` | `docs/danisma/` altındaki danışma kayıtları. |
+| `scripts/advice.js` | `ask <soru> [--facts <dosya>]` `??` sorusunu `docs/netlestirme/` altına yazar ve kapıyı herhangi bir modelde tek çağrı için kurar; `record` cevabı dosyalar; `list` `docs/danisma/` kayıtlarını gösterir. |
 | `scripts/agency.js` | [agency-agents](https://github.com/msitarzewski/agency-agents) deposundan istenince koltuk: `fetch` projenin dışına klonlar, `find ui` seçer, `show <slug> --lean` rolü kişilik ve ölçüt bloklarını atarak alt ajana verir, `record` alışverişi `docs/danisma/` altına yazar. Hiçbiri ajan olarak kurulmaz; liste bağlama hiç girmez. |
 | `scripts/manset.js` | İsterseniz manşet satırı. |
 | `scripts/scaffold.js` | Lisans, imza bloğu, dil linki: modelin asla yazmadığı sabit metinler. |
@@ -196,27 +197,30 @@ başına ~200 token.
 ## Kullanımda Nasıl Görünür
 
 ```
-Teknesyum ▸ my-app · bağlam %41 · 3 dosya +82-14 · plan yok · test 1✓
-Teknesyum ▸ my-app · bağlam %67 · 6 dosya +240-31 · plan · test 2✓ 1✗ · devir
+Teknesyum ▸ my-app · bağlam %41 · 3 dosya +82-14 · plan yok · test geçti
+Teknesyum ▸ my-app · bağlam %67 · 6 dosya +240-31 · plan · test bayat · devir
 ```
 
 İlk satır her eşiğin altındaki bir oturum: modele hiçbir şey söylenmemiş. İkincisi planını
-yazmış, testlerini koşmuş ve `decisions` ile `next_action` satırlarını bekleyen bir devri
-olan oturum.
+yazmış, testlerini koşmuş, sonra dosya değiştirmiş (son kayıt bayat) ve `decisions` ile
+`next_action` satırlarını bekleyen bir devri olan oturum. Test sözcüğü yalnız son kayıttır:
+çıkış kodundan geçti ya da kaldı, koşu hiçbir şey basmadıysa bilinmiyor, HEAD ya da çalışma
+ağacı sonradan değiştiyse bayat.
 
 ---
 
 ## Kancalar
 
-Altı olay, altı dosya, hepsi `core/hooks/` altında:
+Yedi olay, altı dosya, hepsi `core/hooks/` altında:
 
 | Olay | Kanca | Söyler |
 |---|---|---|
 | `SessionStart` | `count.js` | varsa `Devam: .claude/handoff.md`, yoksa hiçbir şey |
 | `PostToolUse` | `count.js` | eşikte tek satır, bir kez; yoksa hiçbir şey |
+| `PostToolUseFailure` | `count.js` | hiçbir şey; kalan test komutunu kaydeder |
 | `PreToolUse` | `prefs.js` | README yazılırken kendi README kurallarınız |
 | `PreToolUse` | `loop.js` | bekleme döngüsünün üst sınırı yoksa tek satır; yoksa hiçbir şey |
-| `PreToolUse` | `scout.js` | hiçbir şey; öncül bütçesini aşan ajan çağrısını reddeder |
+| `PreToolUse` | `scout.js` | hiçbir şey; bütçesini aşan öncül ya da `??` çağrısını reddeder |
 | `Stop` | `count.js` | hiçbir şey; statusline için diff'i tazeler |
 | `SessionEnd` | `handoff.js` | hiçbir şey; devri yazar |
 | `Notification` | `notify.js` | hiçbir şey; çalar |
@@ -233,7 +237,8 @@ Bağlama yalnız `count.js` yazabilir; test takımı tek olduğunu denetler.
   map.md               import grafiği
 docs/
   plan.md              kancanın istediği plan, istediğinde
-  danisma/             ?? turlarının danışma kayıtları
+  netlestirme/         ?? soruları ve cevapları
+  danisma/             danışma kayıtları
 bench/
   rapor.md             yukarıdaki tablonun arkasındaki rapor
   varyant/             çıkan parçalar, yeniden ölçülmeye hazır

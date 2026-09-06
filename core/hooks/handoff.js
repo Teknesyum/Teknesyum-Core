@@ -17,9 +17,10 @@ function section(body, name) {
   return text && text !== FILL ? text : '';
 }
 
-function firstPrompt(transcript) {
+function prompts(transcript) {
   let raw = '';
-  try { raw = fs.readFileSync(String(transcript || ''), 'utf8'); } catch { return ''; }
+  try { raw = fs.readFileSync(String(transcript || ''), 'utf8'); } catch { return []; }
+  const out = [];
   for (const line of raw.split('\n')) {
     if (!line.includes('"user"')) continue;
     let j;
@@ -29,15 +30,23 @@ function firstPrompt(transcript) {
     const text = typeof c === 'string' ? c : Array.isArray(c) ? c.filter((x) => x && x.type === 'text').map((x) => x.text).join('\n') : '';
     const clean = text.replace(/<[^>]+>[\s\S]*?<\/[^>]+>/g, '').trim();
     if (!clean) continue;
-    return clean.length > 2000 ? clean.slice(0, 2000) + '…' : clean;
+    out.push(clean.length > 2000 ? clean.slice(0, 2000) + '…' : clean);
   }
-  return '';
+  return out;
+}
+
+function firstPrompt(transcript) {
+  return prompts(transcript)[0] || '';
+}
+
+function steer(transcript) {
+  return prompts(transcript).slice(1).slice(-3).map((p) => '- ' + p.replace(/\n+/g, ' ').slice(0, 300)).join('\n');
 }
 
 function render(cwd, st, old) {
   const stat = git(cwd, ['diff', '--stat', 'HEAD']) || '(no diff)';
   const untracked = git(cwd, ['ls-files', '--others', '--exclude-standard']);
-  const tests = (st.tests || []).map((x) => '- `' + x.cmd + '` — ' + (x.ok ? 'ok' : 'fail') + ' ' + String(x.at).slice(0, 16)).join('\n') || '- none';
+  const tests = (st.tests || []).map((x) => '- `' + x.cmd + '` — ' + (x.ok === true ? 'pass' : x.ok === false ? 'fail' : 'unknown') + ' ' + String(x.at).slice(0, 16) + (x.tree ? ' tree ' + x.tree : '')).join('\n') || '- none';
   const plan = fs.existsSync(path.join(cwd, 'docs', 'plan.md')) ? 'docs/plan.md' : 'none';
   return [
     '# Handoff — ' + new Date().toISOString().slice(0, 16).replace('T', ' '),
@@ -55,6 +64,9 @@ function render(cwd, st, old) {
     '',
     '## task',
     section(old, 'task') || firstPrompt(st.transcript) || FILL,
+    '',
+    '## steer',
+    steer(st.transcript) || section(old, 'steer') || '- none',
     '',
     '## decisions',
     section(old, 'decisions') || FILL,
@@ -98,4 +110,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { generate, render, section, firstPrompt, handle, FILE, FILL };
+module.exports = { generate, render, section, firstPrompt, steer, handle, FILE, FILL };

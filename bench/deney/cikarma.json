@@ -1,0 +1,10 @@
+{
+  "sonuc": "bench/cikarma.jsonl",
+  "soru": "Plan ipucu kapatilirsa ve K0'daki Kucuk is satiri cikarilirsa maliyet ne olur",
+  "kosullar": [
+    { "ad": "k0siz-cue", "env": { "BENCH_K0": "" }, "task": "07-slugify-uc-parca", "n": 3, "taban": 0.74, "beklenti": "esit" },
+    { "ad": "k0siz-sessiz", "env": { "BENCH_K0": "", "BENCH_EKLENTI": "@c1-sessiz" }, "task": "07-slugify-uc-parca", "n": 3, "taban": "@k0siz-cue", "beklenti": "ucuz" },
+    { "ad": "c1-sessiz", "env": { "BENCH_EKLENTI": "@c1-sessiz" }, "task": "07-slugify-uc-parca", "n": 1, "taban": 0.74, "beklenti": "esit" },
+    { "ad": "c2-kucuk", "env": { "BENCH_K0": "bench/k0/kucuksuz.md" }, "task": "06-slugify-cli", "n": 3, "taban": 0.37, "beklenti": "pahali" }
+  ]
+}
