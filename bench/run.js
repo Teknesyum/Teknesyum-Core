@@ -78,7 +78,7 @@ function gorevOku(taskId, gorevKok) {
   const eslesme = metin.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
   if (!eslesme) throw new Error('gorev frontmatter eksik: ' + gorevYolu + ' -> "---" ile baslayan repo/sha bloklu bir onbaslik bekleniyor');
   const on = {};
-  for (const satir of eslesme[1].split('\n')) {
+  for (const satir of eslesme[1].split(/\r?\n/)) {
     const kv = satir.match(/^(\w+):\s*(.+)$/);
     if (kv) on[kv[1]] = kv[2].trim();
   }

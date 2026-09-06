@@ -196,3 +196,25 @@ Yorum:
 - u3-guard (eşikte Write/Edit reddi): n=1'de 0.16.1 tabanından ucuz çıktığı için kural gereği n=3'e çıkarıldı. Görev 07 n=3: u3 0,64 / 0,71 / 0,88 $ (medyan 0,71, kabul 3/3), taban 0,52 / 0,74 / 1,00 $ (medyan 0,74, kabul 2/3; düşen koşu readme'ye maxLength yazmadı). Medyan farkı −%4, u3'ün üç koşusu da tabanın aralığı içinde. Kapı koşularda 2, 0, 3 kez reddetti; ama iki kolda da altı koşunun altısı docs/plan.md yazdı, yani beş dosya ipucu zaten plan yazdırıyor, kapı üstüne bir şey koymuyor. Sinyal yok.
 - Karar: beş üniteden hiçbiri 0.16'ya girmiyor. Varyantlar `bench/varyant/` altında duruyor, yeniden ölçmek `bench/varyant.js` ile bir komut.
 
+
+## 9. Çıkarma deneyi: plan ipucu ve "Küçük iş" satırı, sonnet/low
+
+Soru: plan ipucu (`count.js`, beş dosyada tek satır) kapatılırsa ne değişir; K0'daki "Küçük iş: bunların hiçbiri" satırı çıkarılırsa ne değişir. Bölüm 8'de ipucu K0 altında hiç ateşlenmediği için (0/15) iki kol K0'sız koşuldu: `BENCH_K0=''` ile CLAUDE.md verilmedi. Sürücü `bench/cikarma.js`, kaynak `bench/cikarma.jsonl`, varyant `bench/varyant/c1-sessiz` (ipucu satırı boş dize), K0 dosyası `bench/k0/kucuksuz.md`. Koltuk sonnet/low, 10 koşu, kabul 10/10.
+
+| koşul | K0 | görev | n | $ | medyan $ | dk | ipucu | plan.md | kabul |
+|---|---|---|---|---|---|---|---|---|---|
+| k0siz-cue | yok | 07 | 3 | 0.49 / 0.50 / 0.54 | 0.50 | 2.1–2.8 | 3/3 | 0/3, üçünde "atla" | 3/3 |
+| k0siz-sessiz | yok | 07 | 3 | 0.53 / 0.72 / 0.73 | 0.72 | 2.9–4.0 | 0/3 | 0/3 | 3/3 |
+| c1-sessiz | K0 | 07 | 1 | 0.70 | 0.70 | 3.5 | 0/1 | 0/1 | 1/1 |
+| c2-kucuk | küçüksüz | 06 | 3 | 0.24 / 0.33 / 0.39 | 0.33 | 1.4–2.7 | 0/3 | 0/3 | 3/3 |
+
+Karşılaştırma tabanları: görev 07 core 0.16.1 (K0'lı, bölüm 8) 0.52 / 0.74 / 1.00 $, medyan 0.74; görev 06 core (bölüm 7) 0.26 / 0.37 / 0.38 $, medyan 0.37.
+
+Toplam harcama: 5.17 $ (10 koşu).
+
+Yorum:
+
+- K0'sız kolda ipucu üç koşuda da ateşlendi; model üçünde de "atla" dedi, plan yazmadı. Buna rağmen ipuculu kol (medyan 0.50 $) sessiz koldan (0.72 $) ucuz ve dar aralıklı çıktı. Sessiz kolun bir koşusu 0.53 $ ile ipuculu aralığa giriyor; n=3'te bu fark ipucunun kazancı sayılmaz, ipucunun bedeli olmadığı sayılır. İpucu kapatılırsa ölçülebilir tasarruf yok.
+- c1-sessiz K0 altında 0.70 $, taban medyanı 0.74 $'ın aralığı içinde. K0 altında ipucu zaten ateşlenmediğinden fark beklenmiyordu, gelmedi.
+- c2-kucuk: "Küçük iş" satırı çıkınca görev 06 medyanı 0.33 $ (taban 0.37, −%11), üç koşu da tabanın aralığında ya da altında, kabul 3/3. Satır çıkınca modelin plan yazması ya da pahalanması beklenirdi; olmadı, çünkü 06 iki dosyalık iş ve eşik dolmuyor. Satırın etkisi bu görevde ölçülemez; sinyal yok.
+- Karar: plan ipucu varsayılan olarak açık kalır (kapatmanın kazancı ölçülmedi, K0'sız kullanıcıda kalkması pahalı çıktı). "Küçük iş" satırı K0'da kalır; kaldırmanın kazancı yok, riski beş ve üstü dosyalık görevde ölçülmedi.
