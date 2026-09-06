@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.16.3
+
+- Statusline counts processes the session spawned through a shell that have run for more than thirty minutes and chimes once; a PreToolUse hook denies wait loops with no upper bound and says how to bound them
+
 ## v0.16.2
 
 - README rewritten with the bench table first and a What Went Out section; stale 0.15.0 plugin cache removed so no worker seat without role files appears in the agent list; stale consultation record cleared
