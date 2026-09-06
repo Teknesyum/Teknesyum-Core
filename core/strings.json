@@ -95,6 +95,18 @@
     "en": "hook errors",
     "tr": "kanca hatası"
   },
+  "line.procs": {
+    "en": "processes",
+    "tr": "süreç"
+  },
+  "line.min": {
+    "en": "min",
+    "tr": "dk"
+  },
+  "loop.bound": {
+    "en": "This wait loop has no upper bound and would sit forever if what it waits for never comes. Give it one and run it again: wrap it in timeout, or count the iterations. Pick the bound from the job, a ninety-minute job gets ninety minutes.",
+    "tr": "Bu bekleme döngüsünün üst sınırı yok; beklediği şey gelmezse sonsuza kadar asılı kalır. Sınır koyup yeniden koş: timeout ile sar ya da döngüyü say. Sınırı işten seç, doksan dakikalık iş doksan dakika alır."
+  },
   "cue.files": {
     "en": "files touched",
     "tr": "dosyaya dokunuldu"

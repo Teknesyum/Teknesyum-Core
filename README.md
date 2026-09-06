@@ -80,6 +80,20 @@ plan exists, the tests the session ran and how many failed, the context percenta
 a handoff is waiting, open bug logs, and hook errors if any. Plain text, no colours or
 measures invented here.
 
+It also counts processes the session spawned through a shell that have been running for
+more than thirty minutes: `⏳ 2 processes 40 min`. The count is refreshed by a detached
+process at most once a minute, so the statusline never waits on it, and the chime rings
+once when the first stale process appears. Nothing is stopped; a ninety-minute job is
+allowed to take ninety minutes, the line only says it is still there.
+
+### Bound
+
+Before every `Bash` and `PowerShell` call the hook looks for a wait loop with no upper
+bound: `until` or `while` around a `sleep`, with no `timeout`, no counter, no deadline.
+Such a loop sits forever when what it waits for never comes. The call is denied with one
+line that says how to bound it; the model picks the bound from the job and runs again.
+Everything else passes without a byte.
+
 ### Handoff
 
 When the context passes sixty percent, or when the session ends, `.claude/handoff.md` is
@@ -202,13 +216,14 @@ second is a session that wrote its plan, ran its tests, and has a handoff waitin
 
 ## Hooks
 
-Six events, four files, all under `core/hooks/`:
+Six events, five files, all under `core/hooks/`:
 
 | Event | Hook | Says |
 |---|---|---|
 | `SessionStart` | `count.js` | `Resume: .claude/handoff.md` if one exists, else nothing |
 | `PostToolUse` | `count.js` | one line at the threshold, once; else nothing |
 | `PreToolUse` | `prefs.js` | your own README conventions, when a README is written |
+| `PreToolUse` | `loop.js` | one line when a wait loop has no upper bound; else nothing |
 | `Stop` | `count.js` | nothing; refreshes the diff for the statusline |
 | `SessionEnd` | `handoff.js` | nothing; writes the handoff |
 | `Notification` | `notify.js` | nothing; rings |

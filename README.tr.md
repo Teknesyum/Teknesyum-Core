@@ -76,6 +76,19 @@ Statusline aynı durumu okur: dokunulan dosyalar eklenen ve silinen satırlarla,
 oturumun koştuğu testler ve kaçının düştüğü, bağlam yüzdesi, bekleyen devir var mı, açık
 hata günlükleri, varsa kanca hataları. Düz metin; burada renk ya da ölçü uydurulmaz.
 
+Oturumun kabuk üzerinden başlattığı ve otuz dakikadan uzun süredir çalışan süreçleri de
+sayar: `⏳ 2 süreç 40 dk`. Sayımı ayrık bir süreç en çok dakikada bir tazeler, statusline
+onu hiç beklemez; ilk takılı süreç göründüğünde zil bir kez çalar. Hiçbir şey durdurulmaz;
+doksan dakikalık iş doksan dakika alabilir, satır yalnız hâlâ orada olduğunu söyler.
+
+### Sınırlar
+
+Her `Bash` ve `PowerShell` çağrısından önce kanca üst sınırı olmayan bekleme döngüsü arar:
+`sleep` çevresinde `until` ya da `while`, `timeout` yok, sayaç yok, son tarih yok. Böyle bir
+döngü beklediği şey gelmezse sonsuza kadar asılı kalır. Çağrı, nasıl sınırlanacağını söyleyen
+tek satırla reddedilir; sınırı model işten seçer ve yeniden koşar. Gerisi tek bayt yazılmadan
+geçer.
+
 ### Devreder
 
 Bağlam yüzde altmışı geçince ya da oturum bitince `.claude/handoff.md` makine tarafından
@@ -196,13 +209,14 @@ olan oturum.
 
 ## Kancalar
 
-Altı olay, dört dosya, hepsi `core/hooks/` altında:
+Altı olay, beş dosya, hepsi `core/hooks/` altında:
 
 | Olay | Kanca | Söyler |
 |---|---|---|
 | `SessionStart` | `count.js` | varsa `Devam: .claude/handoff.md`, yoksa hiçbir şey |
 | `PostToolUse` | `count.js` | eşikte tek satır, bir kez; yoksa hiçbir şey |
 | `PreToolUse` | `prefs.js` | README yazılırken kendi README kurallarınız |
+| `PreToolUse` | `loop.js` | bekleme döngüsünün üst sınırı yoksa tek satır; yoksa hiçbir şey |
 | `Stop` | `count.js` | hiçbir şey; statusline için diff'i tazeler |
 | `SessionEnd` | `handoff.js` | hiçbir şey; devri yazar |
 | `Notification` | `notify.js` | hiçbir şey; çalar |

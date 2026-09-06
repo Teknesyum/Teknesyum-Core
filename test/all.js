@@ -491,6 +491,72 @@ function testChime() {
   sweep(root);
 }
 
+function testLoop() {
+  const LOOP = path.join(CORE, 'hooks', 'loop.js');
+  const call = (tool, command) =>
+    run(process.execPath, [LOOP], { cwd: CORE, input: JSON.stringify({ tool_name: tool, tool_input: { command } }), env: { ...process.env, CLAUDE_CONFIG_DIR: home() } });
+  const deny = (r) => {
+    try {
+      return JSON.parse(r.stdout).hookSpecificOutput.permissionDecision === 'deny';
+    } catch {
+      return false;
+    }
+  };
+  const forever = call('Bash', 'until grep -qE "passed|failed" out.txt; do sleep 5; done; tail -4 out.txt');
+  ok('an until loop with no bound is denied', forever.status === 0 && deny(forever), forever.stdout);
+  ok('the denial explains how to bound it', /timeout/.test(forever.stdout), forever.stdout);
+  ok('a while true loop is denied too', deny(call('Bash', 'while true; do sleep 10; done')));
+  ok('a PowerShell wait loop is denied', deny(call('PowerShell', 'while (-not (Test-Path out.txt)) { Start-Sleep 5 }')));
+  ok('timeout makes it pass', !deny(call('Bash', 'timeout 5400 bash -c "until grep -q passed out.txt; do sleep 5; done"')));
+  ok('a counter makes it pass', !deny(call('Bash', 'i=0; until grep -q passed out.txt || [ $i -ge 60 ]; do sleep 5; i=$((i+1)); done')));
+  ok('a Get-Date deadline makes it pass', !deny(call('PowerShell', '$end = (Get-Date).AddMinutes(90); while ((Get-Date) -lt $end -and -not (Test-Path out.txt)) { Start-Sleep 5 }')));
+  ok('a while read loop is not a wait', !deny(call('Bash', 'while read l; do echo $l; sleep 1; done < list.txt')));
+  ok('a plain command passes', !deny(call('Bash', 'npm test --silent && git status')));
+  ok('a Write is not looked at', !deny(call('Write', 'until x; do sleep 1; done')));
+  const junk = run(process.execPath, [LOOP], { cwd: CORE, input: '{nope', env: { ...process.env, CLAUDE_CONFIG_DIR: home() } });
+  ok('bad input exits quietly', junk.status === 0 && junk.stdout === '');
+}
+
+function testProcs() {
+  const procs = require(path.join(CORE, 'scripts', 'procs.js'));
+  const now = 10 * 60 * 60 * 1000;
+  const h = (min) => now - min * 60000;
+  const rows = [
+    { pid: 1, ppid: 0, name: 'explorer.exe', start: h(600) },
+    { pid: 10, ppid: 1, name: 'claude.exe', start: h(500) },
+    { pid: 11, ppid: 10, name: 'node.exe', start: h(500) },
+    { pid: 20, ppid: 10, name: 'bash.exe', start: h(400) },
+    { pid: 21, ppid: 20, name: 'bash.exe', start: h(400) },
+    { pid: 22, ppid: 21, name: 'python.exe', start: h(399) },
+    { pid: 23, ppid: 21, name: 'conhost.exe', start: h(399) },
+    { pid: 30, ppid: 10, name: 'bash.exe', start: h(3) },
+    { pid: 40, ppid: 1, name: 'bash.exe', start: h(900) },
+    { pid: 50, ppid: 10, name: 'powershell.exe', start: h(45) },
+  ];
+  const hits = procs.stale(rows, now);
+  const pids = hits.map((x) => x.pid).sort((a, b) => a - b).join(',');
+  ok('a shell under claude and what it spawned count once old', pids === '20,21,22,50', pids);
+  ok('an MCP server straight under claude does not count', !hits.some((x) => x.pid === 11));
+  ok('a young shell does not count', !hits.some((x) => x.pid === 30));
+  ok('a shell outside claude does not count', !hits.some((x) => x.pid === 40));
+  ok('the oldest comes first in minutes', hits[0].minutes === 400, JSON.stringify(hits[0]));
+  ok('nothing stale gives an empty list', procs.stale([{ pid: 10, ppid: 1, name: 'claude', start: h(500) }], now).length === 0);
+
+  const root = fixture();
+  const cfg = home();
+  fs.writeFileSync(path.join(cfg, 'teknesyum', 'procs.json'), JSON.stringify({ at: Date.now(), count: 3, oldest: 40, names: ['bash.exe'] }));
+  const line = (extra) =>
+    run(process.execPath, [STATUSLINE], { cwd: root, input: JSON.stringify({ workspace: { current_dir: root } }), env: { ...process.env, CLAUDE_CONFIG_DIR: cfg, NO_COLOR: '1', TEKNESYUM_PROCS_OFF: '', ...extra } }).stdout;
+  ok('the statusline shows the stale count', /⏳ 3 processes 40 min/.test(line()), line());
+  fs.writeFileSync(path.join(cfg, 'teknesyum', 'config.json'), JSON.stringify({ lang: 'tr' }));
+  ok('and says it in Turkish', /⏳ 3 süreç 40 dk/.test(line()), line());
+  fs.writeFileSync(path.join(cfg, 'teknesyum', 'config.json'), '{}');
+  fs.writeFileSync(path.join(cfg, 'teknesyum', 'procs.json'), JSON.stringify({ at: Date.now(), count: 0, oldest: 0, names: [] }));
+  ok('zero stays off the line', !/⏳/.test(line()), line());
+  sweep(root);
+  sweep(cfg);
+}
+
 function testDoctor() {
   const r = run(process.execPath, [path.join(CORE, 'scripts', 'doctor.js'), '--json'], { cwd: path.resolve(CORE, '..') });
   let rows = [];
@@ -515,6 +581,8 @@ function main() {
     ['scaffold', testScaffold],
     ['map guards', testMapGuards],
     ['chime', testChime],
+    ['loop gate', testLoop],
+    ['stale processes', testProcs],
     ['doctor', testDoctor],
   ];
   for (const [name, fn] of suites) {

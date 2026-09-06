@@ -178,10 +178,13 @@ Görev 06 tabanı (core 0.16.1, n=3): $ 0.26 / 0.37 / 0.38, kabul 3/3.
 | taban-0.16.1 | 07 | core | ✗ | 0.74 | 4.04 | 0 | 0 | - | - |
 | taban-0.16.1 | 07 | core | ✓ | 0.52 | 3.25 | 0 | 0 | - | - |
 | u3-guard | 07 | core | ✓ | 0.71 | 3.43 | 0 | 0 | -4.2% | sinyal yok |
+| u5-kapi | 06 | core | ✓ | 0.40 | 2.26 | 0 | 0 | 9.7% | pahalı, sinyal yok |
+| u5-kapi | 06 | core | ✓ | 0.35 | 2.08 | 0 | 0 | -5.8% | sinyal yok |
+| u5-kapi | 06 | core | ✓ | 0.35 | 2.09 | 0 | 0 | -4.0% | sinyal yok |
 
 Görev 07 native: 0.64 $, kabul ✓; core 0.16.1 (n=3): $ 0.52 / 0.74 / 1.00, kabul 2/3. Görev 06 tabanına göre kolon 06 satırlarında bölüm 7 medyanı, 07 satırlarında bu turun 0.16.1 medyanı.
 
-Toplam harcama: 12.53 $ (12 koşu).
+Toplam harcama: 13.63 $ (15 koşu).
 
 Yorum:
 
@@ -189,6 +192,7 @@ Yorum:
 - u1-cue (her istemde sayım satırı): 0,51 $, taban aralığının (0,26–0,38) üstünde ama 1,5 katın altında; pahalı, sinyal yok. `-p` koşusunda istem bir kez geldiği için satır bir kez girdi; çok turlu oturumdaki tur başı bedeli bu bench'te ölçülemez, tek satır ~30 token.
 - u2-risk (package.json dahil geniş risk listesi): ipucu package.json'da ateşlendi, model "atla" dedi, 0,43 $ (aralık üstü, +%18). Sinyal yok; ipucu davranışı değiştirmedi, yalnız bir tur ekledi.
 - u4-verify (Stop'ta bir kez npm test): 0,55 $ (aralık üstü, +%51, 1,5 katın hemen üstünde, kural gereği ret). Kanca testi koştu, geçti, hiçbir şeyi engellemedi; bench görevlerinde iki kolun kabulü zaten 3/3 olduğu için kazanç ölçülebilir değil.
+- u5-kapi (0.16.3: sınırsız bekleme döngüsü reddi + statusline süreç sayacı): görev 06 n=3, 0,40 / 0,35 / 0,35 $ (medyan 0,35; taban medyanı 0,37, −%5), kabul 3/3. Kapı üç koşuda da ateşlenmedi, görevde sleep döngüsü yok; sayaç bağlama yazmaz. İlk koşu 0,40 $ ile aralığın 0,02 üstünde çıktığı için n=3 tamamlandı, üçünün medyanı aralık içinde. Sinyal yok, maliyet yok: girdi.
 - u3-guard (eşikte Write/Edit reddi): n=1'de 0.16.1 tabanından ucuz çıktığı için kural gereği n=3'e çıkarıldı. Görev 07 n=3: u3 0,64 / 0,71 / 0,88 $ (medyan 0,71, kabul 3/3), taban 0,52 / 0,74 / 1,00 $ (medyan 0,74, kabul 2/3; düşen koşu readme'ye maxLength yazmadı). Medyan farkı −%4, u3'ün üç koşusu da tabanın aralığı içinde. Kapı koşularda 2, 0, 3 kez reddetti; ama iki kolda da altı koşunun altısı docs/plan.md yazdı, yani beş dosya ipucu zaten plan yazdırıyor, kapı üstüne bir şey koymuyor. Sinyal yok.
 - Karar: beş üniteden hiçbiri 0.16'ya girmiyor. Varyantlar `bench/varyant/` altında duruyor, yeniden ölçmek `bench/varyant.js` ile bir komut.
 

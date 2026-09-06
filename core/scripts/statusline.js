@@ -70,7 +70,18 @@ function build(input) {
   if (logs) parts.push(paint(C.yellow, logs + ' ' + t('line.logs')));
   const errs = hookErrors();
   if (errs) parts.push(paint(C.red, errs + ' ' + t('line.hookErrors')));
+  const procs = stuck(cwd);
+  if (procs) parts.push(paint(C.yellow, '⏳ ' + procs.count + ' ' + t('line.procs') + ' ' + procs.oldest + ' ' + t('line.min')));
   return parts.join(' ' + paint(C.dim, '·') + ' ');
+}
+
+function stuck(cwd) {
+  if (process.env.TEKNESYUM_PROCS_OFF) return null;
+  try {
+    return require('./procs.js').peek(cwd);
+  } catch {
+    return null;
+  }
 }
 
 function main() {
