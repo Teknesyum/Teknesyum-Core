@@ -1,6 +1,6 @@
 <!-- lang -->
 
-[Türkçe](README.tr.md)
+[<img src="assets/badge-lang.svg" alt="English selected, switch to Türkçe" width="124" height="44">](README.tr.md)
 
 # Teknesyum Core
 
