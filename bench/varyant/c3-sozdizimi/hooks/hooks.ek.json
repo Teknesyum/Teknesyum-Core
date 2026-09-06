@@ -1,0 +1,1 @@
+{ "hooks": { "PostToolUse": [ { "matcher": "Write|Edit|NotebookEdit", "hooks": [ { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/sozdizimi.js\"" } ] } ] } }

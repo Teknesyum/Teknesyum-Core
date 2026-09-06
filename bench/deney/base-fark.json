@@ -1,0 +1,9 @@
+{
+  "sonuc": "bench/base-fark.jsonl",
+  "soru": "Base'de olup Core'da olmayan, daha ucuz surumu yazilamayan iki parca: yazim sonrasi sozdizim denetimi ve .lsp.json kaydi",
+  "kosullar": [
+    { "ad": "c3-sozdizimi-06", "env": { "BENCH_EKLENTI": "@c3-sozdizimi" }, "task": "06-slugify-cli", "n": 3, "taban": 0.37, "beklenti": "esit" },
+    { "ad": "c3-sozdizimi-07", "env": { "BENCH_EKLENTI": "@c3-sozdizimi" }, "task": "07-slugify-uc-parca", "n": 3, "taban": 0.74, "beklenti": "esit" },
+    { "ad": "c4-lsp-06", "env": { "BENCH_EKLENTI": "@c4-lsp" }, "task": "06-slugify-cli", "n": 3, "taban": 0.37, "beklenti": "esit" }
+  ]
+}
