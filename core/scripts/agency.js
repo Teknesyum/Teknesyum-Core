@@ -10,7 +10,7 @@ const DROP = /identity & memory|communication style|learning & memory|success me
 const RECORDS = 'docs/danisma';
 
 function home() {
-  return process.env.TEKNESYUM_AGENCY || path.join(configRoot(), 'teknesyum', 'agency');
+  return process.env.TEKNESYUM_AGENCY || path.join(require('./kutuphane.js').home(), 'agency');
 }
 
 function git(args, cwd) {
@@ -20,6 +20,11 @@ function git(args, cwd) {
 
 function fetch() {
   const at = home();
+  const old = path.join(configRoot(), 'teknesyum', 'agency');
+  if (!fs.existsSync(at) && fs.existsSync(path.join(old, '.git'))) {
+    fs.mkdirSync(path.dirname(at), { recursive: true });
+    fs.renameSync(old, at);
+  }
   if (fs.existsSync(path.join(at, '.git'))) {
     const r = git(['pull', '-q', '--ff-only'], at);
     return r.ok ? 'updated ' + at : 'pull failed: ' + r.out.trim();

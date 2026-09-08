@@ -1,0 +1,11 @@
+{
+  "raflar": [
+    {
+      "slug": "agency",
+      "url": "https://github.com/msitarzewski/agency-agents.git",
+      "kind": "agents",
+      "skip": ["integrations", "strategy", "examples", "scripts"],
+      "license": "MIT"
+    }
+  ]
+}

@@ -114,11 +114,13 @@ silence for everything that does not need you. Off with one setting.
 
 ### Consult
 
-A prompt that starts with `??` is a request to sharpen the question before any work starts:
-the model gathers the facts it already has, puts them in front of a consulting seat, and
-saves the exchange verbatim under `docs/netlestirme/` with the round's cost on one line.
-`advice.js ask` writes the question, the gate in `hooks/scout.js` lets it out once, `record`
-files the answer.
+A prompt that starts with `??` opens the library first. `kutuphane.js find` scores the
+catalog by words, with no model call; when a book fits, the model reads at most three of them
+lean, names the source on one line and works with that expertise. When nothing fits it says
+so and carries on. The library lives outside the project and nothing reads it on an ordinary
+turn, so it costs nothing until `??` is typed. The word `netleştir` asks instead to sharpen
+the question: `advice.js ask` writes it under `docs/netlestirme/`, the gate in
+`hooks/scout.js` lets it out once, `record` files the answer.
 
 ### Tools that only run when called
 
@@ -127,7 +129,8 @@ files the answer.
 | `scripts/map.js .` | Import graph: hubs, cycles, orphans. `map.js who <file>` says what imports it. |
 | `scripts/log.js write` | A bug log with a fixed shape, into the project's own repository. |
 | `scripts/advice.js` | `ask <question> [--facts <file>]` writes a `??` question under `docs/netlestirme/` and arms the gate for one call on any model; `record` files the answer; `list` shows the records under `docs/danisma/`. |
-| `scripts/agency.js` | A seat from [agency-agents](https://github.com/msitarzewski/agency-agents), on demand: `fetch` clones it outside the project, `find ui` picks, `show <slug> --lean` hands the role to a subagent without its personality and metrics blocks, `record` files the exchange under `docs/danisma/`. `show` leaves a seat mark that the next `Stop` prints in the chat as `Seat: <slug> read, <n> KB`; the line never enters the context. Nothing is installed as an agent, so the roster never enters the context. |
+| `scripts/kutuphane.js` | The library: shelves cloned outside the project (`fetch`), a catalog built from front matter or the first heading and paragraph, `find <words>` scored without a model, `show <slug…> --lean` capped at three books and 48 KB, `record` under `docs/danisma/`. Shelves come from `core/kutuphane.json` plus `raf add <slug> <url> --kind agents|skills|prompts|docs`; the kind decides what counts as a book. Nothing is installed, so no shelf ever enters the context. |
+| `scripts/agency.js` | A seat from [agency-agents](https://github.com/msitarzewski/agency-agents), on demand: now the `agency` shelf of the library, same commands: `find ui` picks, `show <slug> --lean` hands the role to a subagent without its personality and metrics blocks, `record` files the exchange under `docs/danisma/`. `show` leaves a seat mark that the next `Stop` prints in the chat as `Seat: <slug> read, <n> KB`; the line never enters the context. Nothing is installed as an agent, so the roster never enters the context. |
 | `scripts/manset.js` | Checks a Markdown report: every number in prose must appear in the same section's table or list. |
 | `scripts/scaffold.js` | License, signature block, language link: fixed texts the model never types. |
 | `scripts/setup.js` | Machine setup: language, chime, private repository, projects folder. |
@@ -228,7 +231,7 @@ Seven events, six files, all under `core/hooks/`:
 | `PostToolUseFailure` | `count.js` | nothing; files a failed test command |
 | `PreToolUse` | `prefs.js` | your own README conventions, when a README is written |
 | `PreToolUse` | `loop.js` | one line when a wait loop has no upper bound; else nothing |
-| `PreToolUse` | `scout.js` | nothing; refuses a scout or `??` call that breaks its budget |
+| `PreToolUse` | `scout.js` | nothing; refuses a scout or `netleştir` call that breaks its budget |
 | `Stop` | `count.js` | nothing in the context; refreshes the diff, and after `agency.js show` prints the seat once as a chat line |
 | `SessionEnd` | `handoff.js` | nothing; writes the handoff |
 | `Notification` | `notify.js` | nothing; rings |

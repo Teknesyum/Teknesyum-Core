@@ -107,10 +107,12 @@ için sessizlik. Tek ayarla kapanır.
 
 ### Danışır
 
-`??` ile başlayan istem, işe başlamadan önce soruyu keskinleştirme isteğidir: model elindeki
-olguları toplar, bir danışma koltuğunun önüne koyar ve alışverişi turun maliyetiyle birlikte
-`docs/netlestirme/` altına olduğu gibi kaydeder. `advice.js ask` soruyu yazar, `hooks/scout.js`
-kapısı bir kez bırakır, `record` cevabı dosyalar.
+`??` ile başlayan istem önce kütüphaneyi açar. `kutuphane.js find` kataloğu kelimeyle puanlar,
+model çağrısı yok; uyan kitap varsa model en çok üçünü lean okur, kaynağı tek satırda söyler
+ve o uzmanlıkla çalışır. Uyan yoksa bunu söyler, devam eder. Kütüphane projenin dışında durur,
+sıradan turda kimse okumaz; `??` yazılana kadar bedeli sıfırdır. `netleştir` sözcüğü ise
+soruyu keskinleştirme isteğidir: `advice.js ask` soruyu `docs/netlestirme/` altına yazar,
+`hooks/scout.js` kapısı bir kez bırakır, `record` cevabı dosyalar.
 
 ### Yalnız çağrılınca çalışan araçlar
 
@@ -119,7 +121,8 @@ kapısı bir kez bırakır, `record` cevabı dosyalar.
 | `scripts/map.js .` | Import grafiği: merkezler, döngüler, yetimler. `map.js who <dosya>` kimin import ettiğini söyler. |
 | `scripts/log.js write` | Sabit biçimli hata günlüğü, projenin kendi deposuna. |
 | `scripts/advice.js` | `ask <soru> [--facts <dosya>]` `??` sorusunu `docs/netlestirme/` altına yazar ve kapıyı herhangi bir modelde tek çağrı için kurar; `record` cevabı dosyalar; `list` `docs/danisma/` kayıtlarını gösterir. |
-| `scripts/agency.js` | [agency-agents](https://github.com/msitarzewski/agency-agents) deposundan istenince koltuk: `fetch` projenin dışına klonlar, `find ui` seçer, `show <slug> --lean` rolü kişilik ve ölçüt bloklarını atarak alt ajana verir, `record` alışverişi `docs/danisma/` altına yazar. `show` bir koltuk izi bırakır, sonraki `Stop` onu sohbette `Koltuk: <slug> okundu · <n> KB` diye basar; satır bağlama girmez. Hiçbiri ajan olarak kurulmaz; liste bağlama hiç girmez. |
+| `scripts/kutuphane.js` | Kütüphane: raflar projenin dışına klonlanır (`fetch`), katalog frontmatter'dan ya da ilk başlık ve paragraftan kurulur, `find <kelimeler>` modelsiz puanlar, `show <slug…> --lean` üç kitap ve 48 KB ile sınırlı, `record` `docs/danisma/` altına yazar. Raflar `core/kutuphane.json` ile gelir, `raf add <slug> <url> --kind agents|skills|prompts|docs` ekler; tür neyin kitap sayılacağını seçer. Hiçbiri kurulmaz, hiçbir raf bağlama girmez. |
+| `scripts/agency.js` | [agency-agents](https://github.com/msitarzewski/agency-agents) deposu artık kütüphanenin `agency` rafı, komutlar aynı: `find ui` seçer, `show <slug> --lean` rolü kişilik ve ölçüt bloklarını atarak alt ajana verir, `record` alışverişi `docs/danisma/` altına yazar. `show` bir koltuk izi bırakır, sonraki `Stop` onu sohbette `Koltuk: <slug> okundu · <n> KB` diye basar; satır bağlama girmez. Hiçbiri ajan olarak kurulmaz; liste bağlama hiç girmez. |
 | `scripts/manset.js` | Markdown raporu denetler: düzyazıdaki her sayı aynı bölümün tablosunda ya da listesinde bulunmalı. |
 | `scripts/scaffold.js` | Lisans, imza bloğu, dil linki: modelin asla yazmadığı sabit metinler. |
 | `scripts/setup.js` | Makine ayarı: dil, zil, özel depo, projeler klasörü. |
@@ -220,7 +223,7 @@ Yedi olay, altı dosya, hepsi `core/hooks/` altında:
 | `PostToolUseFailure` | `count.js` | hiçbir şey; kalan test komutunu kaydeder |
 | `PreToolUse` | `prefs.js` | README yazılırken kendi README kurallarınız |
 | `PreToolUse` | `loop.js` | bekleme döngüsünün üst sınırı yoksa tek satır; yoksa hiçbir şey |
-| `PreToolUse` | `scout.js` | hiçbir şey; bütçesini aşan öncül ya da `??` çağrısını reddeder |
+| `PreToolUse` | `scout.js` | hiçbir şey; bütçesini aşan öncül ya da `netleştir` çağrısını reddeder |
 | `Stop` | `count.js` | bağlama hiçbir şey; diff'i tazeler, `agency.js show` sonrası koltuğu bir kez sohbet satırı olarak basar |
 | `SessionEnd` | `handoff.js` | hiçbir şey; devri yazar |
 | `Notification` | `notify.js` | hiçbir şey; çalar |

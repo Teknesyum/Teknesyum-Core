@@ -576,7 +576,7 @@ function testProcs() {
 function testAgency() {
   const AGENCY = path.join(CORE, 'scripts', 'agency.js');
   const cfg = home();
-  const at = path.join(cfg, 'teknesyum', 'agency');
+  const at = path.join(cfg, 'teknesyum', 'kutuphane', 'agency');
   fs.mkdirSync(path.join(at, 'design'), { recursive: true });
   fs.mkdirSync(path.join(at, 'strategy'), { recursive: true });
   fs.writeFileSync(path.join(at, 'design', 'design-ui-designer.md'), '---\nname: UI Designer\ndescription: Expert UI designer for interfaces\ncolor: purple\n---\n\n# UI Designer Agent Personality\n\nYou are **UI Designer**.\n\n## 🧠 Your Identity & Memory\n\nsecret memory\n\n## 🎯 Your Core Mission\n\nmake it consistent\n\n## 🎯 Your Success Metrics\n\nwishes\n');
@@ -613,6 +613,70 @@ function testAgency() {
   const empty = home();
   const none = run(process.execPath, [AGENCY, 'list'], { cwd: CORE, env: { ...process.env, CLAUDE_CONFIG_DIR: empty } });
   ok('without the repo it says how to fetch', none.status === 1 && /agency\.js fetch/.test(none.stdout), none.stdout);
+  sweep(root);
+  sweep(cfg);
+  sweep(empty);
+}
+
+function testKutuphane() {
+  const LIB = path.join(CORE, 'scripts', 'kutuphane.js');
+  const cfg = home();
+  const at = path.join(cfg, 'teknesyum', 'kutuphane');
+  fs.mkdirSync(path.join(at, 'agency', 'design'), { recursive: true });
+  fs.mkdirSync(path.join(at, 'agency', 'strategy'), { recursive: true });
+  fs.mkdirSync(path.join(at, 'skillpack', 'skills', 'tdd'), { recursive: true });
+  fs.mkdirSync(path.join(at, 'skillpack', 'skills', 'review'), { recursive: true });
+  fs.mkdirSync(path.join(at, 'notes', 'guides'), { recursive: true });
+  fs.writeFileSync(path.join(at, 'agency', 'design', 'design-ui-designer.md'), '---\nname: UI Designer\ndescription: Expert UI designer for interfaces\n---\n\n# UI Designer\n\n## 🧠 Your Identity & Memory\n\nsecret memory\n\n## 🎯 Your Core Mission\n\nmake it consistent\n');
+  fs.writeFileSync(path.join(at, 'agency', 'strategy', 'playbook.md'), '---\nname: Not A Book\n---\n');
+  fs.writeFileSync(path.join(at, 'agency', 'README.md'), '# Agency\n\nno frontmatter, not an agent\n');
+  fs.writeFileSync(path.join(at, 'skillpack', 'skills', 'tdd', 'SKILL.md'), '---\nname: test-driven-development\ndescription: Write the failing test first\n---\n\n# TDD\n\nred green refactor\n');
+  fs.writeFileSync(path.join(at, 'skillpack', 'skills', 'tdd', 'notes.md'), '# Not a skill\n\nskipped\n');
+  fs.writeFileSync(path.join(at, 'skillpack', 'skills', 'review', 'SKILL.md'), '---\nname: code-review\ndescription: Review a diff for bugs\n---\n\nlook twice\n');
+  fs.writeFileSync(path.join(at, 'notes', 'guides', 'tokens.md'), '# Token Budget Guide\n\nCount before you spend.\n\nMore text.\n');
+  fs.writeFileSync(path.join(at, 'notes', 'README.md'), '# Notes\n\nfront page, not a book\n');
+  fs.writeFileSync(path.join(at, 'raflar.json'), JSON.stringify({ raflar: [{ slug: 'skillpack', url: 'x', kind: 'skills' }, { slug: 'notes', url: 'y', kind: 'docs' }] }));
+  const env = { ...process.env, CLAUDE_CONFIG_DIR: cfg };
+  const call = (...a) => run(process.execPath, [LIB, ...a], { cwd: CORE, env });
+  const shelves = call('raf', 'list').stdout;
+  ok('raf list merges the plugin shelves with the user file', /^agency  agents/m.test(shelves) && /^skillpack  skills/m.test(shelves) && /^notes  docs/m.test(shelves), shelves);
+  const listed = call('list').stdout;
+  ok('list keeps only the books each kind allows', /agency\/design\/design-ui-designer  UI Designer/.test(listed) && /skillpack\/skills\/tdd  test-driven-development/.test(listed) && /notes\/guides\/tokens  Token Budget Guide - Count before you spend\./.test(listed) && !/playbook|README|notes\.md|Not a skill/.test(listed), listed);
+  ok('list takes a shelf', call('list', 'skillpack').stdout.split('\n').filter(Boolean).length === 2);
+  const cat = JSON.parse(fs.readFileSync(path.join(at, 'katalog.json'), 'utf8'));
+  ok('the catalog is written once and carries the sizes', cat.books.length === 4 && cat.shelves === 3 && cat.books.every((b) => b.bytes > 0), JSON.stringify(cat).slice(0, 200));
+  ok('find ranks the name hit first', /^skillpack\/skills\/tdd/.test(call('find', 'tdd').stdout), call('find', 'tdd').stdout);
+  ok('find reaches the description', /notes\/guides\/tokens/.test(call('find', 'spend').stdout), call('find', 'spend').stdout);
+  ok('find says when nothing matches', /nothing matches/.test(call('find', 'zzz').stdout));
+  const leanText = call('show', 'ui-designer', '--lean').stdout;
+  ok('show finds a book by its tail and lean drops the memory block', /make it consistent/.test(leanText) && !/secret memory/.test(leanText) && !/^---/.test(leanText), leanText);
+  ok('show finds a skill by its folder', /red green refactor/.test(call('show', 'tdd').stdout));
+  ok('show names a missing slug', /not found: nope/.test(call('show', 'nope').stdout));
+  ok('show refuses more than three books', /^cap: 3 books/.test(call('show', 'a', 'b', 'c', 'd').stdout), call('show', 'a', 'b', 'c', 'd').stdout);
+  fs.writeFileSync(path.join(at, 'notes', 'guides', 'big.md'), '# Big\n\n' + 'x'.repeat(50 * 1024) + '\n');
+  fs.unlinkSync(path.join(at, 'katalog.json'));
+  ok('show refuses past 48 KB', /^cap: 48 KB/.test(call('show', 'big').stdout), call('show', 'big').stdout);
+  const seat = JSON.parse(fs.readFileSync(path.join(cfg, 'teknesyum', 'seat.json'), 'utf8'));
+  ok('show leaves the seat mark with the shelf in the slug', seat.slugs.join() === 'skillpack/skills/tdd' && seat.bytes > 10, JSON.stringify(seat));
+  const added = call('raf', 'add', 'extra', 'https://example.invalid/x.git', '--kind', 'prompts', '--scan', 'patterns').stdout;
+  const mine = JSON.parse(fs.readFileSync(path.join(at, 'raflar.json'), 'utf8'));
+  ok('raf add writes the user file and says how to fetch', /added extra \(prompts\)/.test(added) && mine.raflar.some((r) => r.slug === 'extra' && r.scan.join() === 'patterns'), added);
+  const root = fixture();
+  fs.writeFileSync(path.join(root, 'ask.md'), 'Soru?');
+  fs.writeFileSync(path.join(root, 'reply.md'), 'Cevap.');
+  const rec = run(process.execPath, [LIB, 'record', '--topic', 'Test once', '--books', 'skillpack/skills/tdd', '--ask', 'ask.md', '--reply', 'reply.md'], { cwd: root, env });
+  const body = fs.readFileSync(path.join(root, rec.stdout.trim()), 'utf8');
+  ok('record files under docs/danisma with the books named', /docs[\\/]danisma[\\/]001-test-once\.md/.test(rec.stdout) && /danisilan: kutuphane\/skillpack\/skills\/tdd/.test(body) && /## Donen\n\nCevap\./.test(body), body);
+  const oldAgency = path.join(cfg, 'teknesyum', 'agency');
+  fs.rmSync(path.join(at, 'agency'), { recursive: true, force: true });
+  fs.mkdirSync(path.join(oldAgency, '.git'), { recursive: true });
+  fs.mkdirSync(path.join(oldAgency, 'design'), { recursive: true });
+  fs.writeFileSync(path.join(oldAgency, 'design', 'design-ui-designer.md'), '---\nname: UI Designer\ndescription: moved\n---\n\n# UI\n');
+  fs.unlinkSync(path.join(at, 'katalog.json'));
+  ok('the old agency clone moves under the library on the next build', /agency\/design\/design-ui-designer/.test(call('list', 'agency').stdout) && !fs.existsSync(oldAgency), call('list', 'agency').stdout);
+  const empty = home();
+  const none = run(process.execPath, [LIB, 'list'], { cwd: CORE, env: { ...process.env, CLAUDE_CONFIG_DIR: empty } });
+  ok('without books it says how to fetch', none.status === 1 && /kutuphane\.js fetch/.test(none.stdout), none.stdout);
   sweep(root);
   sweep(cfg);
   sweep(empty);
@@ -747,6 +811,7 @@ function main() {
     ['loop gate', testLoop],
     ['stale processes', testProcs],
     ['agency', testAgency],
+    ['library', testKutuphane],
     ['doctor', testDoctor],
     ['scan', testScan],
     ['scout', testScout],

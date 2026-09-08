@@ -19,6 +19,11 @@ Aynı anda tek madde açık kalır.
 
 ## Açık maddeler
 
+- [ ] **Kütüphane (2026-09-08).** Agency tek raf; onlarca raf içeren kütüphane, sıradan
+      turda sıfır. `??` = kütüphanede işe yarayan var mı bak, varsa derin oku, o uzman gibi
+      davran; bedeli yalnız `??` yazan öder. 100+ repo taranır, işe yarama ihtimali olanlar
+      derin okunur, girenler raf olur. Graphify kararı ölçüyle (docs/plan.md).
+
 - [ ] **`problems.log`'un `shell` satırlarını oku (7 Eylül 2026'dan sonra).** `owns` dışına
       yazan kabuk çağrıları 0.11.0'dan beri yalnız günlüğe düşüyor. 2-3 günlük kayıt
       birikince bak: dışarı düşenlerin yüzde kaçı gerçek sızıntı, yüzde kaçı lock/snapshot/
