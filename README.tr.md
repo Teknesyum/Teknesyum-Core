@@ -158,13 +158,13 @@ her zamanki gibi kendi seçiyor. Çıkan parça, onun yerine seçen makineydi.
 ### Windows - tek satır
 
 ```powershell
-irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.23.0/install.ps1 | iex
+irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.24.0/install.ps1 | iex
 ```
 
 ### macOS / Linux - tek satır
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.23.0/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.24.0/install.sh | bash
 ```
 
 **Sonra Claude Code'u yeniden başlatın.** Kancalar oturum ortasında yüklenir; masaüstü

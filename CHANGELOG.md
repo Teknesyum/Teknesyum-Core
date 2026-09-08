@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.24.0
+
+- aa prefix opens the agency seats; nineteen shelves from the market scan (33 shelves, 1890 books); build order in plan section E
+
 ## v0.23.0
 
 - Shelves stay fresh: kutuphane.js stale lists each shelf's age, fetch all --stale 7 pulls only the old ones, and SessionStart starts that once a day in the background at zero tokens.
