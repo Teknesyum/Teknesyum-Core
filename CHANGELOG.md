@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.21.0
+
+- fourteen shelves ship with the library: 400 repos scanned by metadata, 33 read deep, 13 accepted (1038 books, find in about 100 ms, zero tokens on an ordinary turn); the scan, the notes and the decisions live under docs/kutuphane
+- kutuphane.js: a library of shelves cloned outside the project, catalog without a model, find/show --lean capped at three books and 48 KB, raf add; agency becomes the agency shelf; ?? opens the library first and netleştir asks for the sharpened question
+
 ## v0.20.0
 
 - agency.js show leaves a seat mark; the next Stop prints it once in the chat as a systemMessage line, "Seat: <slug> read, <n> KB". The line is rendered by the client and never enters the model context (DECISIONS D13, bench/deney/banner.karar.md).
