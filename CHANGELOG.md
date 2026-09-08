@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.22.0
+
+- Private shelf: pp reads the owner's books from ~/.claude/teknesyum-private, push private commits them; ?? and ++ go through the new UserPromptSubmit hook mod.js with Turkish synonyms and whole-word find; SessionStart names the first open plan step.
+
 ## v0.21.0
 
 - fourteen shelves ship with the library: 400 repos scanned by metadata, 33 read deep, 13 accepted (1038 books, find in about 100 ms, zero tokens on an ordinary turn); the scan, the notes and the decisions live under docs/kutuphane
