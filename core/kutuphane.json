@@ -1,11 +1,18 @@
 {
   "raflar": [
-    {
-      "slug": "agency",
-      "url": "https://github.com/msitarzewski/agency-agents.git",
-      "kind": "agents",
-      "skip": ["integrations", "strategy", "examples", "scripts"],
-      "license": "MIT"
-    }
+    { "slug": "agency", "url": "https://github.com/msitarzewski/agency-agents.git", "kind": "agents", "skip": ["integrations", "strategy", "examples", "scripts"], "license": "MIT" },
+    { "slug": "avoid-ai-writing", "url": "https://github.com/conorbronsdon/avoid-ai-writing.git", "kind": "skills", "scan": ["skills"], "license": "MIT" },
+    { "slug": "claude-code-everything", "url": "https://github.com/wesammustafa/Claude-Code-Everything-You-Need-to-Know.git", "kind": "agents", "scan": [".claude/agents", "specialized-agents/system-prompts"], "license": "MIT" },
+    { "slug": "claude-code-guide", "url": "https://github.com/zebbern/claude-code-guide.git", "kind": "skills", "scan": ["skills"], "license": "MIT" },
+    { "slug": "claude-plugins-official", "url": "https://github.com/anthropics/claude-plugins-official.git", "kind": "agents", "scan": ["plugins"], "skip": ["external_plugins"], "license": "Apache-2.0" },
+    { "slug": "diagram-design", "url": "https://github.com/cathrynlavery/diagram-design.git", "kind": "skills", "scan": ["skills"], "license": "MIT" },
+    { "slug": "ecc", "url": "https://github.com/affaan-m/ECC.git", "kind": "skills", "scan": ["skills"], "license": "MIT" },
+    { "slug": "expo-skills", "url": "https://github.com/expo/skills.git", "kind": "skills", "scan": ["plugins"], "license": "MIT" },
+    { "slug": "frontend-slides", "url": "https://github.com/zarazhangrui/frontend-slides.git", "kind": "skills", "scan": ["plugins"], "skip": ["bold-template-pack"], "license": "MIT" },
+    { "slug": "huggingface-skills", "url": "https://github.com/huggingface/skills.git", "kind": "skills", "scan": ["skills", "hf-mcp"], "license": "Apache-2.0" },
+    { "slug": "microsoft-skills", "url": "https://github.com/microsoft/skills.git", "kind": "skills", "scan": [".github/plugins"], "skip": ["references"], "license": "MIT" },
+    { "slug": "naming", "url": "https://github.com/glacierphonk/naming.git", "kind": "skills", "skip": ["scripts"], "license": "MIT" },
+    { "slug": "superpowers-lab", "url": "https://github.com/obra/superpowers-lab.git", "kind": "skills", "scan": ["skills"], "license": "MIT" },
+    { "slug": "trailofbits-skills", "url": "https://github.com/trailofbits/skills.git", "kind": "skills", "scan": ["plugins"], "skip": ["evals", "assets"], "license": "CC-BY-SA-4.0" }
   ]
 }
