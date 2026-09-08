@@ -24,6 +24,6 @@ altında md; depo `Teknesyum/Teknesyum-Private`. Kapı: aynanın uzak deposu sah
 ## C. Raflar güncel kalsın
 
 - [x] `kutuphane.js stale`, `fetch --stale <gün>`, SessionStart günde bir arka plan çekme (0 token).
-- [ ] 0.23.0 kes, laptop eklentisini güncelle.
+- [x] 0.23.0 kes, laptop eklentisini güncelle.
 
 Bedel ölçüldü: sıradan tur 0 B; `??` 1726 B; `pp` 3738 B; kanca ~170 ms.
