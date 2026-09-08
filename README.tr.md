@@ -25,6 +25,8 @@ config ile 2026-09-05 ve 2026-09-06'da ölçüldü. Yöntem, tablolar ve ham sat
 | Sökülen 0.15 makinesi olduğu gibi geri takıldı | - | 4-8 kat maliyet, 7-15 ajan çağrısı, aynı kabul |
 | Sökülen her 0.15 parçası tek başına geri takıldı | - | taban aralığının içinde ya da üstünde, kabulün görebildiği hiçbir şey yok |
 
+Tablo Core 0.16.0 üzerinde ölçüldü; kanca yüzeyi v0.16.1'de ve v0.24.0'a kadar yeniden değişti (`count.js`, `handoff.js`, `mod.js`, `scout.js`, `loop.js`), tablo yeniden ölçülmedi.
+
 Tek nefeste: hiçbir şeyin olmadığı turda Core'un bedeli sıfır. Görevde Core, düz Claude
 Code ne tutuyorsa onu tutuyor. Satın aldığı tek şey kesilip yeniden alınabilen oturum;
 para oraya gidiyor, çünkü ikinci oturum "iyi görünüyor" demek yerine işi yapıyor.
@@ -134,7 +136,7 @@ soruyu keskinleştirme isteğidir: `advice.js ask` soruyu `docs/netlestirme/` al
 | `scripts/doctor.js` | Yedi kontrol: node, git, sürüm, kancalar, statusline, harita, günlükler. |
 | `scripts/scan.js` | Projenin kendisine yedi salt okunur kontrol: lisans yüzeyleri, beş dosya eşiğine karşı plan, devir boşlukları, sürüme karşı belgeler, test betiği, `trash/` atıfları, harita. Yazmaz, model çağırmaz, bağlama taşımaz; profil yalnız belge kümesini genişletir. |
 | `scripts/scout.js` | Öncül arama, istenince ve bir kez: `brief <konu>` `docs/oncul/` altına sınırlı bir öncül yazar (5 arama, 3 sayfa, 5 aday, 400 kelime) ve kapıyı kurar; öncül sonnet üstünde tek alt ajana gider; `record` cevabı 8.000 karakterde keserek dosyalar. `hooks/scout.js` kapısı aynı öncüle ikinci çağrıyı, başka modeli ya da uzatılmış istemi reddeder. |
-| `scripts/release.js` | Sürümü `.changes/` altındaki notlardan artırır, kurulum satırlarını yeniler, etiketler. |
+| `scripts/release.js` | Sürümü `.changes/` altındaki notlardan artırır, kurulum satırlarını yeniler, etiketler; `publish` GitHub sürümünü `vX.Y.Z` başlığıyla açar, iki kurucuyu `.sha256` dosyalarıyla yükler. |
 
 ---
 
@@ -170,8 +172,9 @@ curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.24.0/in
 **Sonra Claude Code'u yeniden başlatın.** Kancalar oturum ortasında yüklenir; masaüstü
 istemci ürettiklerini yeniden başlamadan çizmez.
 
-İki tek satır da bir etikete bakar, asla `main`'e değil. Her sürüm iki kurucunun da
-SHA-256'sını yayınlar.
+İki tek satır da bir etikete bakar, asla `main`'e değil. v0.24.0'dan itibaren her sürüm dört
+asset taşır: `install.ps1`, `install.sh`, `install.ps1.sha256` ve `install.sh.sha256`; her
+`.sha256` dosyası `<hex>  <dosya>` satırını tutar, `sha256sum -c` biçimi.
 
 **Gereken:** Claude Code, git, Node.js.
 

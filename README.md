@@ -25,6 +25,8 @@ effort), clean config, 2026-09-05 and 2026-09-06. Method, tables and raw rows ar
 | The removed 0.15 machinery put back whole | - | 4-8x the cost, 7-15 agent calls, same acceptance |
 | Each removed 0.15 part put back alone | - | inside or above the baseline range, nothing the acceptance could see |
 
+The table was measured on Core 0.16.0; the hook surface changed in v0.16.1 and again through v0.24.0 (`count.js`, `handoff.js`, `mod.js`, `scout.js`, `loop.js`), and the table is not re-measured.
+
 What that says in one breath: on a turn where nothing happens, Core costs nothing. On a
 task, Core costs what plain Claude Code costs. The one thing it buys is a session that can
 be cut and picked up again; that is where the money goes, and it goes there because the
@@ -141,7 +143,7 @@ the question: `advice.js ask` writes it under `docs/netlestirme/`, the gate in
 | `scripts/doctor.js` | Seven checks: node, git, version, hooks, statusline, map, logs. |
 | `scripts/scan.js` | Seven read-only checks on the project itself: license surfaces, plan against the five-file threshold, handoff holes, documents against the version, test script, `trash/` references, map. Nothing written, no model, nothing into context; the profile only widens the document set. |
 | `scripts/scout.js` | Prior-art scout, on demand and once: `brief <topic>` writes a bounded brief under `docs/oncul/` (5 searches, 3 pages, 5 candidates, 400 words) and arms the gate; the brief goes to one subagent on sonnet; `record` files the answer, cut at 8,000 characters. The gate in `hooks/scout.js` refuses a second call on the same brief, another model, or a longer prompt. |
-| `scripts/release.js` | Bumps the version from the notes left in `.changes/`, rewrites the install lines, tags. |
+| `scripts/release.js` | Bumps the version from the notes left in `.changes/`, rewrites the install lines, tags; `publish` creates the GitHub release titled `vX.Y.Z` and uploads both installers with their `.sha256` files. |
 
 ---
 
@@ -177,8 +179,9 @@ curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.24.0/in
 **Restart Claude Code afterwards.** Hooks reload mid-session; the desktop client does not
 redraw what they produce until it restarts.
 
-Both one-liners point at a tag, never at `main`. Every release publishes the SHA-256 of both
-installers.
+Both one-liners point at a tag, never at `main`. From v0.24.0 on, every release carries four
+assets: `install.ps1`, `install.sh`, `install.ps1.sha256` and `install.sh.sha256`; each
+`.sha256` file holds `<hex>  <file>`, the `sha256sum -c` shape.
 
 **Needed:** Claude Code, git, Node.js.
 

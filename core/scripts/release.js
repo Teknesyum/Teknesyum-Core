@@ -1,4 +1,6 @@
 const fs = require('fs');
+const os = require('os');
+const crypto = require('crypto');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
@@ -6,6 +8,7 @@ const argv = process.argv.slice(2);
 const ROOT = path.resolve(__dirname, '..', '..');
 const NOTES = path.join(ROOT, '.changes');
 const BUMPS = ['patch', 'minor', 'major'];
+const INSTALLERS = ['install.ps1', 'install.sh'];
 
 function arg(name) {
   const i = argv.indexOf('--' + name);
@@ -18,6 +21,19 @@ function git(args) {
     windowsHide: true,
     timeout: 60000,
     maxBuffer: 8 * 1024 * 1024,
+  });
+  return { ok: !r.error && r.status === 0, out: String(r.stdout || '').trim(), err: String(r.stderr || '').trim() };
+}
+
+function gh(args, opts) {
+  const r = spawnSync('gh', args, {
+    cwd: ROOT,
+    encoding: 'utf8',
+    windowsHide: true,
+    timeout: 120000,
+    maxBuffer: 8 * 1024 * 1024,
+    shell: process.platform === 'win32',
+    input: opts && opts.input,
   });
   return { ok: !r.error && r.status === 0, out: String(r.stdout || '').trim(), err: String(r.stderr || '').trim() };
 }
@@ -86,6 +102,64 @@ function stampPins(version) {
     }
   }
   return touched;
+}
+
+function assets(version, dir) {
+  const tag = 'v' + version;
+  const files = [];
+  for (const f of INSTALLERS) {
+    const r = spawnSync('git', ['-C', ROOT, 'show', tag + ':' + f], { windowsHide: true, timeout: 60000, maxBuffer: 8 * 1024 * 1024 });
+    if (r.error || r.status !== 0) throw new Error(f + ' is not in tag ' + tag);
+    const hex = crypto.createHash('sha256').update(r.stdout).digest('hex');
+    fs.writeFileSync(path.join(dir, f), r.stdout);
+    fs.writeFileSync(path.join(dir, f + '.sha256'), hex + '  ' + f + '\n', 'utf8');
+    files.push(f, f + '.sha256');
+  }
+  return files;
+}
+
+function notesFor(version) {
+  let body = '';
+  try {
+    body = fs.readFileSync(path.join(ROOT, 'CHANGELOG.md'), 'utf8');
+  } catch {
+    return '';
+  }
+  const head = '## v' + version;
+  const lines = body.split('\n');
+  const i = lines.findIndex((l) => l.trim() === head);
+  if (i < 0) return '';
+  const out = [];
+  for (const l of lines.slice(i + 1)) {
+    if (/^## /.test(l)) break;
+    out.push(l);
+  }
+  return out.join('\n').trim();
+}
+
+function publish() {
+  const version = arg('version') || current();
+  const tag = 'v' + version;
+  if (!git(['rev-parse', '-q', '--verify', 'refs/tags/' + tag]).ok) return say([tag + ' is not a tag here. Cut it first.'], 1);
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'teknesyum-release-'));
+  let files;
+  try {
+    files = assets(version, dir);
+  } catch (e) {
+    return say([String(e.message || e)], 1);
+  }
+  const has = gh(['release', 'view', tag, '--json', 'tagName']);
+  if (!has.ok) {
+    const c = gh(['release', 'create', tag, '--title', tag, '--notes-file', '-'], { input: notesFor(version) + '\n' });
+    if (!c.ok) return say(['gh release create failed:', c.err], 1);
+  } else {
+    const e = gh(['release', 'edit', tag, '--title', tag]);
+    if (!e.ok) return say(['gh release edit failed:', e.err], 1);
+  }
+  const u = gh(['release', 'upload', tag, '--clobber'].concat(files.map((f) => path.join(dir, f))));
+  if (!u.ok) return say(['gh release upload failed:', u.err], 1);
+  fs.rmSync(dir, { recursive: true, force: true });
+  return say([tag + ' is published with ' + files.join(', ') + '.']);
 }
 
 function changelog(version, entries) {
@@ -175,6 +249,7 @@ function cut() {
     '',
     'Publish it with:',
     '  git push origin main --follow-tags',
+    '  node <plugin>/scripts/release.js publish',
   ]);
 }
 
@@ -182,6 +257,7 @@ function main() {
   const cmd = argv[0];
   if (cmd === 'note') return note();
   if (cmd === 'cut') return cut();
+  if (cmd === 'publish') return publish();
   if (cmd === 'status' || !cmd) return status();
   return say([
     'release.js - the version is decided by notes, not by memory',
@@ -191,8 +267,11 @@ function main() {
     '  status              what the next version would be and why',
     '  cut [--dry]         stamp both manifests, the install lines and the changelog,',
     '                      then commit and tag',
+    '  publish [--version X.Y.Z]',
+    '                      create the GitHub release titled vX.Y.Z from the changelog,',
+    '                      upload install.ps1, install.sh and their .sha256 files',
   ]);
 }
 
 if (require.main === module) main();
-module.exports = { notes, next, stampPins };
+module.exports = { notes, next, stampPins, assets, notesFor };
