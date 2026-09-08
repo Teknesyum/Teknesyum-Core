@@ -277,7 +277,7 @@ function testContextCue() {
 function testWiring() {
   const hooks = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8')).hooks;
   const events = Object.keys(hooks).sort().join(',');
-  ok('exactly the seven events are wired', events === 'Notification,PostToolUse,PostToolUseFailure,PreToolUse,SessionEnd,SessionStart,Stop', events);
+  ok('exactly the eight events are wired', events === 'Notification,PostToolUse,PostToolUseFailure,PreToolUse,SessionEnd,SessionStart,Stop,UserPromptSubmit', events);
   for (const ev of Object.keys(hooks))
     for (const g of hooks[ev])
       for (const h of g.hooks) {
@@ -293,7 +293,7 @@ function testWiring() {
   const lib = fs.readFileSync(path.join(CORE, 'hooks', 'lib.js'), 'utf8');
   ok('lib.js no longer knows about the relay', !/relayRoot|liveDir|ensureRelay/.test(lib));
   const speakers = fs.readdirSync(path.join(CORE, 'hooks')).filter((f) => /\.js$/.test(f) && fs.readFileSync(path.join(CORE, 'hooks', f), 'utf8').includes('additionalContext'));
-  ok('only count.js writes into the context', speakers.join(',') === 'count.js', speakers.join(','));
+  ok('only count.js and mod.js write into the context', speakers.join(',') === 'count.js,mod.js', speakers.join(','));
   const pkg = JSON.parse(fs.readFileSync(path.resolve(CORE, '..', 'package.json'), 'utf8'));
   const plug = JSON.parse(fs.readFileSync(path.join(CORE, '.claude-plugin', 'plugin.json'), 'utf8'));
   const market = JSON.parse(fs.readFileSync(path.resolve(CORE, '..', '.claude-plugin', 'marketplace.json'), 'utf8'));
@@ -682,6 +682,58 @@ function testKutuphane() {
   sweep(empty);
 }
 
+function testPrivate() {
+  const LIB = path.join(CORE, 'scripts', 'kutuphane.js');
+  const MOD = path.join(CORE, 'hooks', 'mod.js');
+  const cfg = home();
+  const at = path.join(cfg, 'teknesyum', 'kutuphane');
+  fs.mkdirSync(path.join(at, 'agency', 'design'), { recursive: true });
+  fs.writeFileSync(path.join(at, 'agency', 'design', 'design-ui-designer.md'), '---\nname: UI Designer\ndescription: Expert UI designer for interfaces\n---\n\n# UI Designer\n\nmake it consistent\n');
+  fs.writeFileSync(path.join(at, 'agency', 'design', 'guide-builder.md'), '---\nname: Guide Builder\ndescription: builds guides that require nothing\n---\n\n# Guide\n');
+  const env = { ...process.env, CLAUDE_CONFIG_DIR: cfg };
+  const call = (...a) => run(process.execPath, [LIB, ...a], { cwd: CORE, env });
+  const ui = call('find', 'ui').stdout;
+  ok('find matches whole words only, so ui does not hit guide', /design-ui-designer/.test(ui) && !/guide-builder/.test(ui), ui);
+  const tr = call('find', 'tasarımı', 'denetle').stdout;
+  ok('find reads Turkish through the synonym table', /design-ui-designer/.test(tr), tr);
+  ok('no private shelf without the clone', !/^private/m.test(call('raf', 'list').stdout));
+  const priv = path.join(cfg, 'teknesyum-private');
+  fs.mkdirSync(path.join(priv, '.git'), { recursive: true });
+  fs.mkdirSync(path.join(priv, 'private', 'tercihler'), { recursive: true });
+  fs.writeFileSync(path.join(priv, '.git', 'config'), '[remote "origin"]\n\turl = https://github.com/Teknesyum/Teknesyum-Private.git\n');
+  fs.writeFileSync(path.join(priv, 'private', 'kimlik.md'), '# Kimlik\n\nAd: Teknesyum. Türkçe konuş.\n');
+  fs.writeFileSync(path.join(priv, 'private', 'tercihler', 'ui.md'), '# Arayüz\n\nteknesyum-ui token dışına çıkma.\n');
+  fs.unlinkSync(path.join(at, 'katalog.json'));
+  const listed = call('raf', 'list').stdout;
+  ok('the private shelf appears first once the owner clone is there', /^private  docs  \(private\)/m.test(listed), listed);
+  const found = call('find', 'ui').stdout;
+  ok('private books outrank the library on a tie', /^private\/tercihler\/ui/.test(found), found);
+  const mod = (prompt, c) => run(process.execPath, [MOD], { cwd: CORE, input: JSON.stringify({ hook_event_name: 'UserPromptSubmit', prompt, cwd: CORE }), env: { ...process.env, CLAUDE_CONFIG_DIR: c || cfg } });
+  ok('an ordinary prompt gets nothing from mod.js', mod('hello there').stdout === '');
+  const q = JSON.parse(mod('?? ui tasarım denetle').stdout).hookSpecificOutput;
+  ok('?? injects the library hits with the read instruction', q.hookEventName === 'UserPromptSubmit' && /show <slug> --lean/.test(q.additionalContext) && /design-ui-designer/.test(q.additionalContext), q.additionalContext);
+  ok('++ is the same key', /design-ui-designer/.test(JSON.parse(mod('++ ui').stdout).hookSpecificOutput.additionalContext));
+  const p = JSON.parse(mod('pp hangi dili konuşuyoruz').stdout).hookSpecificOutput.additionalContext;
+  ok('pp injects the private books whole with the banner rule', /◆ Teknesyum/.test(p) && /Türkçe konuş/.test(p) && /token dışına/.test(p) && /push private/.test(p), p);
+  const seat = JSON.parse(fs.readFileSync(path.join(cfg, 'teknesyum', 'seat.json'), 'utf8'));
+  ok('pp leaves a private seat mark', seat.private === true && seat.slugs.join() === 'private/kimlik,private/tercihler/ui', JSON.stringify(seat));
+  const stop = hook(COUNT, { hook_event_name: 'Stop', session_id: 'pv', cwd: CORE }, cfg).stdout;
+  ok('Stop shows the private banner without the shelf prefix', /Teknesyum/.test(stop) && /kimlik, tercihler\/ui/.test(stop) && !/private\//.test(stop), stop);
+  const bare = home();
+  ok('pp says so when the shelf is missing', /private shelf on this machine|özel raf yok/.test(JSON.parse(mod('pp x', bare).stdout).hookSpecificOutput.additionalContext));
+  ok('push refuses off the owner machine', /no private shelf/.test(run(process.execPath, [LIB, 'push'], { cwd: CORE, env: { ...process.env, CLAUDE_CONFIG_DIR: bare } }).stdout));
+  const root = fixture();
+  fs.mkdirSync(path.join(root, 'docs'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'docs', 'plan.md'), '# Plan\n\n- [x] **Birinci.** hazır\n- [ ] **İkinci adım.** sıra bunda\n- [ ] Üçüncü\n');
+  const start = hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 'st', cwd: root }, cfg).stdout;
+  ok('SessionStart names the first open plan step', /2\/3/.test(start) && /İkinci adım\./.test(start) && !/\*\*/.test(start), start);
+  fs.writeFileSync(path.join(root, 'docs', 'plan.md'), '# Plan\n\n- [x] one\n- [x] two\n');
+  ok('a finished plan says nothing', hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 'st', cwd: root }, cfg).stdout === '');
+  sweep(root);
+  sweep(cfg);
+  sweep(bare);
+}
+
 function testDoctor() {
   const r = run(process.execPath, [path.join(CORE, 'scripts', 'doctor.js'), '--json'], { cwd: path.resolve(CORE, '..') });
   let rows = [];
@@ -812,6 +864,7 @@ function main() {
     ['stale processes', testProcs],
     ['agency', testAgency],
     ['library', testKutuphane],
+    ['private shelf', testPrivate],
     ['doctor', testDoctor],
     ['scan', testScan],
     ['scout', testScout],

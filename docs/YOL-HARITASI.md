@@ -19,6 +19,13 @@ Aynı anda tek madde açık kalır.
 
 ## Açık maddeler
 
+- [x] **Özel raf ve önek kancası (2026-09-08, v0.22.0).** `~/.claude/teknesyum-private/private/`
+      sahibin kitapları; `pp` bütün okur, `push private` iter, banner `◆ Teknesyum · özel raf`.
+      `??` = `++`, kanca (`hooks/mod.js`) bulguları o tura koyar; Türkçe eşanlam, tam kelime.
+      Plan kutuları: `docs/plan.md`deki ilk açık `- [ ]` SessionStart'ta tek satır.
+- [ ] **`ss` / `aa` önekleri.** Karar bekliyor: `aa` = agency koltuklarına danış (find +
+      alt ajan + record), `ss` = önce beceri rafları. Her biri mod.js'e bir önek + bir metin,
+      ~1 $. Ölçü: bir hafta `??` kullanımından sonra gerek kalıyor mu.
 - [x] **Kütüphane (2026-09-08, v0.21.0).** Agency tek raf; onlarca raf içeren kütüphane, sıradan
       turda sıfır. `??` = kütüphanede işe yarayan var mı bak, varsa derin oku, o uzman gibi
       davran; bedeli yalnız `??` yazan öder. 100+ repo taranır, işe yarama ihtimali olanlar

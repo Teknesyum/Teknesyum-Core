@@ -117,7 +117,19 @@ function onSeat(st) {
   if (!seat || !seat.at || seat.at === st.seat) return '';
   st.seat = seat.at;
   const kb = (Number(seat.bytes || 0) / 1024).toFixed(1);
-  return JSON.stringify({ systemMessage: t('banner.seat').replace('%S', (seat.slugs || []).join(', ')).replace('%K', kb) });
+  const names = (seat.slugs || []).map((s) => (seat.private ? s.replace(/^private\//, '') : s));
+  return JSON.stringify({ systemMessage: t(seat.private ? 'banner.private' : 'banner.seat').replace('%S', names.join(', ')).replace('%K', kb) });
+}
+
+function step(cwd) {
+  let text = '';
+  try { text = fs.readFileSync(path.join(cwd, 'docs', 'plan.md'), 'utf8'); } catch { return ''; }
+  const boxes = text.split(/\r?\n/).filter((l) => /^\s*[-*]\s+\[[ xX]\]/.test(l));
+  if (!boxes.length) return '';
+  const i = boxes.findIndex((l) => /\[ \]/.test(l));
+  if (i === -1) return '';
+  const label = boxes[i].replace(/^\s*[-*]\s+\[ \]\s*/, '').replace(/\*\*/g, '').slice(0, 100);
+  return t('cue.step').replace('%I', String(i + 1)).replace('%N', String(boxes.length)).replace('%T', label);
 }
 
 function handle(j) {
@@ -126,8 +138,12 @@ function handle(j) {
   if (ev === 'SessionStart') {
     const st = read(f);
     if (!st || j.source === 'startup' || j.source === 'clear') write(f, fresh(j));
-    if (j.source !== 'compact' && fs.existsSync(path.join(j.cwd || process.cwd(), '.claude', 'handoff.md'))) return t('cue.resume') + '\n';
-    return '';
+    const cwd = j.cwd || process.cwd();
+    const lines = [];
+    if (j.source !== 'compact' && fs.existsSync(path.join(cwd, '.claude', 'handoff.md'))) lines.push(t('cue.resume'));
+    const s = step(cwd);
+    if (s) lines.push(s);
+    return lines.length ? lines.join('\n') + '\n' : '';
   }
   const st = read(f) || fresh(j);
   if (j.cwd) st.cwd = j.cwd;
@@ -164,4 +180,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { handle, reason, file, tree, FILE_MAX, DIFF_MAX, CTX_MAX, RISK, TEST };
+module.exports = { handle, reason, file, tree, step, FILE_MAX, DIFF_MAX, CTX_MAX, RISK, TEST };

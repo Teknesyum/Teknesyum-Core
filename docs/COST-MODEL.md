@@ -98,6 +98,12 @@ write context at all:
 | `SessionStart` | once per session, including the one that resumes after compaction (`source: "compact"`) | open contracts or an unended, unstale live record exist | ~25 tok, **S** |
 | `UserPromptSubmit` | every turn | the prompt matches the bug-log phrase | 0 on every other turn, **Z→O** |
 
+Second exception, 0.22.0: `mod.js` on `UserPromptSubmit`. It writes only when the prompt
+starts with `??` / `++` (library hits, measured 1.7 KB) or `pp` (private books, 3.7 KB,
+8 KB cap), and the user typed the key on purpose; every other turn it writes nothing. Its
+`SessionStart` sibling in `count.js` adds one line (~20 tokens) while `docs/plan.md` has an
+open checkbox step. Wall clock of the hook: ~170 ms on a plain prompt, ~200 ms on a key.
+
 `PostCompact` was registered and is not any more. The event fires, but plain stdout reaches
 the model on `SessionStart`, `UserPromptSubmit` and `UserPromptExpansion` only; anywhere
 else it goes to the debug log. `SessionStart` already fires after compaction, so the branch

@@ -174,5 +174,37 @@
   "advice.spent": {
     "en": "Question %ID already went out once. Read docs/netlestirme/, or ask a new one.",
     "tr": "%ID numaralı soru bir kez gitti. docs/netlestirme/ altındakini oku ya da yeni soru yaz."
+  },
+  "banner.private": {
+    "en": "Teknesyum · private shelf: %S · %K KB",
+    "tr": "Teknesyum · özel raf: %S · %K KB"
+  },
+  "cue.step": {
+    "en": "Plan step %I/%N: %T",
+    "tr": "Plan adım %I/%N: %T"
+  },
+  "mod.library": {
+    "en": "Library first. Matches below (name, then description). Read at most three with %C, name the source on one line, work with that expertise. If none fits, say so and carry on.",
+    "tr": "Önce kütüphane. Aşağıda uyanlar (ad, sonra açıklama). En çok üçünü %C ile oku, kaynağı tek satır söyle, o uzmanlıkla çalış. Uyan yoksa \"kütüphanede yok\" de, normal devam et."
+  },
+  "mod.none": {
+    "en": "Nothing matches in the catalog.",
+    "tr": "Katalogda uyan yok."
+  },
+  "mod.notOwner": {
+    "en": "No private shelf on this machine; answer normally.",
+    "tr": "Bu makinede özel raf yok; normal cevap ver."
+  },
+  "mod.empty": {
+    "en": "The private shelf is empty: %D. Ask what to record, write it there as .md, then run the push.",
+    "tr": "Özel raf boş: %D. Ne kaydedileceğini sor, oraya .md yaz, sonra push çalıştır."
+  },
+  "mod.private": {
+    "en": "Private mode. Open the reply with the line \"◆ Teknesyum · private shelf\" and close it with the books you used. The books below are the owner's identity and preferences: apply them, never ask the owner to repeat them. When a preference changes or a new one appears, edit the matching file under %D and run: %C",
+    "tr": "Özel mod. Cevabın ilk satırı \"◆ Teknesyum · özel raf\" olsun, son satırı kullandığın kitaplar. Aşağıdaki kitaplar sahibin kimliği ve tercihleri: uygula, sahibine kendini anlattırma. Bir tercih değişir ya da yenisi çıkarsa %D altındaki ilgili dosyayı düzenle ve çalıştır: %C"
+  },
+  "mod.big": {
+    "en": "The shelf is over %K KB, so only the list is here; read what you need with show.",
+    "tr": "Raf %K KB üstünde, burada yalnız liste var; gerekeni show ile oku."
   }
 }

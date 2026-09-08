@@ -10,9 +10,75 @@ const DROP = /identity & memory|communication style|learning & memory|success me
 const MAX_BOOKS = 3;
 const MAX_BYTES = 48 * 1024;
 const KINDS = ['agents', 'skills', 'prompts', 'docs'];
+const PRIVATE = 'private';
+const PRIVATE_REMOTE = /teknesyum-ozel|teknesyum-private/i;
+const PRIVATE_MAX = 8 * 1024;
+const SYN = {
+  tasarim: 'design ui',
+  arayuz: 'ui interface',
+  denet: 'review audit',
+  incele: 'review',
+  gozden: 'review',
+  gorsel: 'visual design',
+  yazi: 'writing',
+  yazim: 'writing',
+  metin: 'writing copy',
+  test: 'test testing',
+  guvenlik: 'security',
+  veri: 'data',
+  hata: 'bug debug',
+  performans: 'performance',
+  belge: 'docs documentation',
+  dagit: 'deploy',
+  pazarlama: 'marketing',
+  satis: 'sales',
+  urun: 'product',
+  musteri: 'customer',
+  fiyat: 'pricing',
+  ucret: 'pricing',
+  mimari: 'architecture',
+  sunum: 'slides presentation',
+  isim: 'naming',
+  adlandir: 'naming',
+  erisilebilir: 'accessibility',
+  mobil: 'mobile',
+  onyuz: 'frontend',
+  arkayuz: 'backend',
+  komut: 'cli command',
+  betik: 'script',
+  planla: 'plan planning',
+  strateji: 'strategy',
+  hukuk: 'legal',
+  finans: 'finance',
+  arastir: 'research',
+  yapay: 'ai llm',
+  ajan: 'agent',
+};
 
 function home() {
   return process.env.TEKNESYUM_KUTUPHANE || path.join(configRoot(), 'teknesyum', 'kutuphane');
+}
+
+function privateRoot() {
+  return process.env.TEKNESYUM_PRIVATE || path.join(configRoot(), 'teknesyum-private');
+}
+
+function privateDir() {
+  return path.join(privateRoot(), PRIVATE);
+}
+
+function owner() {
+  let cfg = '';
+  try {
+    cfg = fs.readFileSync(path.join(privateRoot(), '.git', 'config'), 'utf8');
+  } catch {
+    return false;
+  }
+  return PRIVATE_REMOTE.test(cfg) && fs.existsSync(privateDir());
+}
+
+function privateShelf() {
+  return { slug: PRIVATE, url: '(private)', kind: 'docs' };
 }
 
 function userFile() {
@@ -34,8 +100,9 @@ function readJson(file, fallback) {
 function shelves() {
   const base = readJson(path.join(__dirname, '..', 'kutuphane.json'), { raflar: [] }).raflar || [];
   const mine = readJson(userFile(), { raflar: [] }).raflar || [];
-  const out = [];
+  const out = owner() ? [privateShelf()] : [];
   for (const r of base.concat(mine)) {
+    if (r.slug === PRIVATE) continue;
     const i = out.findIndex((x) => x.slug === r.slug);
     if (i === -1) out.push(r);
     else out[i] = r;
@@ -44,7 +111,7 @@ function shelves() {
 }
 
 function shelfDir(slug) {
-  return path.join(home(), slug);
+  return slug === PRIVATE ? privateDir() : path.join(home(), slug);
 }
 
 function migrate() {
@@ -64,6 +131,10 @@ function git(args, cwd) {
 }
 
 function fetchOne(r) {
+  if (r.slug === PRIVATE) {
+    const p = git(['pull', '-q', '--ff-only'], privateRoot());
+    return PRIVATE + ': ' + (p.ok ? 'updated' : 'pull failed: ' + p.out.trim());
+  }
   const at = shelfDir(r.slug);
   if (fs.existsSync(path.join(at, '.git'))) {
     const p = git(['pull', '-q', '--ff-only'], at);
@@ -83,6 +154,32 @@ function fetch(which) {
   const cat = build();
   lines.push(cat.books.length + ' books in ' + cat.shelves + ' shelves -> ' + catalogFile());
   return lines;
+}
+
+function push() {
+  if (!owner()) return ['no private shelf on this machine'];
+  const root = privateRoot();
+  git(['add', '-A', PRIVATE], root);
+  const st = git(['status', '--porcelain', '--', PRIVATE], root);
+  if (!st.out.trim()) return [PRIVATE + ': nothing to push'];
+  const c = git(['commit', '-q', '-m', 'Private shelf ' + new Date().toISOString().slice(0, 16).replace('T', ' ')], root);
+  if (!c.ok) return [PRIVATE + ': commit failed: ' + c.out.trim()];
+  const p = git(['push', '-q'], root);
+  build();
+  return [PRIVATE + ': ' + (p.ok ? 'pushed' : 'push failed: ' + p.out.trim())];
+}
+
+function privateBooks() {
+  if (!owner()) return [];
+  const out = [];
+  let bytes = 0;
+  for (const f of walk(privateDir(), [], []).sort()) {
+    const rel = path.relative(privateDir(), f).split(path.sep).join('/');
+    const text = fs.readFileSync(f, 'utf8');
+    bytes += Buffer.byteLength(text);
+    out.push({ slug: PRIVATE + '/' + rel.replace(/\.md$/i, ''), file: rel, text, bytes: Buffer.byteLength(text) });
+  }
+  return bytes > PRIVATE_MAX ? out.map((b) => ({ ...b, text: '' })) : out;
 }
 
 function front(text) {
@@ -188,17 +285,37 @@ function list(raf) {
   return catalog().books.filter((b) => !raf || b.raf === raf).map(row);
 }
 
+function ascii(s) {
+  return String(s).toLowerCase().replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c').replace(/İ/g, 'i');
+}
+
+function expand(words) {
+  const out = new Set();
+  for (const w of words) {
+    const a = ascii(w).replace(/[^a-z0-9]/g, '');
+    if (a.length < 2) continue;
+    out.add(a);
+    for (const k of Object.keys(SYN)) if (a.startsWith(k)) for (const s of SYN[k].split(' ')) out.add(s);
+  }
+  return [...out];
+}
+
+function hit(text, term) {
+  return new RegExp('(^|[^a-z0-9])' + term + '(?![a-z0-9])').test(text);
+}
+
 function find(words) {
-  const terms = words.map((w) => w.toLowerCase()).filter((w) => w.length > 1);
+  const terms = expand(words);
   if (!terms.length) return [];
   const scored = catalog().books.map((b) => {
-    const hay = (b.slug + ' ' + b.name).toLowerCase();
-    const soft = (b.description + ' ' + b.tags).toLowerCase();
+    const hay = ascii(b.slug.replace(/[-_/]/g, ' ') + ' ' + b.name);
+    const soft = ascii(b.description + ' ' + b.tags);
     let score = 0;
     for (const t of terms) {
-      if (hay.includes(t)) score += 3;
-      if (soft.includes(t)) score += 1;
+      if (hit(hay, t)) score += 3;
+      if (hit(soft, t)) score += 1;
     }
+    if (score && b.raf === PRIVATE) score += 2;
     return { b, score };
   });
   return scored.filter((x) => x.score > 0).sort((x, y) => y.score - x.score || x.b.bytes - y.b.bytes).slice(0, 10).map((x) => row(x.b));
@@ -324,13 +441,17 @@ function arg(argv, flag) {
 }
 
 function usage() {
-  return 'kutuphane.js fetch [raf|all] | raf list | raf add <slug> <url> [--kind agents|skills|prompts|docs] [--scan a,b] [--skip a,b] | list [raf] | find <words> | show <slug...> [--lean] | record --topic T --books a,b --ask f --reply f [--cost c]';
+  return 'kutuphane.js fetch [raf|all] | push private | raf list | raf add <slug> <url> [--kind agents|skills|prompts|docs] [--scan a,b] [--skip a,b] | list [raf] | find <words> | show <slug...> [--lean] | record --topic T --books a,b --ask f --reply f [--cost c]';
 }
 
 function main(argv) {
   const cmd = argv[0];
   if (cmd === 'fetch') {
     console.log(fetch(argv[1]).join('\n'));
+    return 0;
+  }
+  if (cmd === 'push') {
+    console.log(push().join('\n'));
     return 0;
   }
   if (cmd === 'raf') {
@@ -369,4 +490,4 @@ function main(argv) {
 }
 
 if (require.main === module) process.exit(main(process.argv.slice(2)));
-module.exports = { home, shelves, shelfDir, fetch, build, catalog, list, find, show, lean, record, addShelf, seatFile, MAX_BOOKS, MAX_BYTES };
+module.exports = { home, shelves, shelfDir, fetch, push, build, catalog, list, find, show, lean, record, addShelf, seatFile, owner, privateRoot, privateDir, privateBooks, expand, PRIVATE, PRIVATE_MAX, MAX_BOOKS, MAX_BYTES };

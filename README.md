@@ -114,11 +114,15 @@ silence for everything that does not need you. Off with one setting.
 
 ### Consult
 
-A prompt that starts with `??` opens the library first. `kutuphane.js find` scores the
-catalog by words, with no model call; when a book fits, the model reads at most three of them
-lean, names the source on one line and works with that expertise. When nothing fits it says
-so and carries on. The library lives outside the project and nothing reads it on an ordinary
-turn, so it costs nothing until `??` is typed. The word `netleştir` asks instead to sharpen
+A prompt that starts with `??` or `++` opens the library first. The `hooks/mod.js` hook
+runs `kutuphane.js find` on the words, with no model call, and puts up to eight hits and a
+three-line rule into that turn's context; the model reads at most three books lean, names the
+source on one line and works with that expertise. Turkish words are folded and mapped to the
+English catalog, and matches are whole words. A prompt that starts with `pp` opens the
+private shelf instead: the owner's own books under `~/.claude/teknesyum-private/private/`,
+whole (8 KB cap), with the answer banner `◆ Teknesyum · özel raf`; the shelf exists only
+when that mirror's remote is the owner's, so on any other machine `pp` says so and stops.
+An ordinary turn gets nothing from either. The word `netleştir` asks instead to sharpen
 the question: `advice.js ask` writes it under `docs/netlestirme/`, the gate in
 `hooks/scout.js` lets it out once, `record` files the answer.
 
@@ -129,7 +133,7 @@ the question: `advice.js ask` writes it under `docs/netlestirme/`, the gate in
 | `scripts/map.js .` | Import graph: hubs, cycles, orphans. `map.js who <file>` says what imports it. |
 | `scripts/log.js write` | A bug log with a fixed shape, into the project's own repository. |
 | `scripts/advice.js` | `ask <question> [--facts <file>]` writes a `??` question under `docs/netlestirme/` and arms the gate for one call on any model; `record` files the answer; `list` shows the records under `docs/danisma/`. |
-| `scripts/kutuphane.js` | The library: shelves cloned outside the project (`fetch`), a catalog built from front matter or the first heading and paragraph, `find <words>` scored without a model, `show <slug…> --lean` capped at three books and 48 KB, `record` under `docs/danisma/`. Fourteen shelves ship in `core/kutuphane.json` (1038 books, MIT, Apache-2.0 and CC BY-SA 4.0; the picks are in `docs/kutuphane/`), plus `raf add <slug> <url> --kind agents|skills|prompts|docs`; the kind decides what counts as a book. Nothing is installed, so no shelf ever enters the context. |
+| `scripts/kutuphane.js` | The library: shelves cloned outside the project (`fetch`), a catalog built from front matter or the first heading and paragraph, `find <words>` scored without a model, `show <slug…> --lean` capped at three books and 48 KB, `record` under `docs/danisma/`, `push private` commits and pushes the private shelf. Fourteen shelves ship in `core/kutuphane.json` (1038 books, MIT, Apache-2.0 and CC BY-SA 4.0; the picks are in `docs/kutuphane/`), plus `raf add <slug> <url> --kind agents|skills|prompts|docs`; the kind decides what counts as a book. Nothing is installed, so no shelf ever enters the context. |
 | `scripts/agency.js` | A seat from [agency-agents](https://github.com/msitarzewski/agency-agents), on demand: now the `agency` shelf of the library, same commands: `find ui` picks, `show <slug> --lean` hands the role to a subagent without its personality and metrics blocks, `record` files the exchange under `docs/danisma/`. `show` leaves a seat mark that the next `Stop` prints in the chat as `Seat: <slug> read, <n> KB`; the line never enters the context. Nothing is installed as an agent, so the roster never enters the context. |
 | `scripts/manset.js` | Checks a Markdown report: every number in prose must appear in the same section's table or list. |
 | `scripts/scaffold.js` | License, signature block, language link: fixed texts the model never types. |
@@ -226,7 +230,8 @@ Seven events, six files, all under `core/hooks/`:
 
 | Event | Hook | Says |
 |---|---|---|
-| `SessionStart` | `count.js` | `Resume: .claude/handoff.md` if one exists, else nothing |
+| `SessionStart` | `count.js` | `Resume: .claude/handoff.md` if one exists; the first open `- [ ]` step of `docs/plan.md` if one exists; else nothing |
+| `UserPromptSubmit` | `mod.js` | library hits on `??` / `++`, private books on `pp`; else nothing |
 | `PostToolUse` | `count.js` | one line at the threshold, once; else nothing |
 | `PostToolUseFailure` | `count.js` | nothing; files a failed test command |
 | `PreToolUse` | `prefs.js` | your own README conventions, when a README is written |
@@ -236,7 +241,7 @@ Seven events, six files, all under `core/hooks/`:
 | `SessionEnd` | `handoff.js` | nothing; writes the handoff |
 | `Notification` | `notify.js` | nothing; rings |
 
-Only `count.js` can write into the context, and the test suite checks that it is the only one.
+Only `count.js` and `mod.js` can write into the context, and the test suite checks that they are the only ones. Measured: an ordinary turn 0 bytes, `??` about 1.7 KB, `pp` about 3.7 KB.
 
 ---
 
