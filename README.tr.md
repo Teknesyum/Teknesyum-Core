@@ -113,8 +113,9 @@ bağlamına girer; model en çok üç kitabı lean okur, kaynağı tek satırda 
 çalışır. Türkçe kelimeler İngilizce kataloğa çevrilir, eşleşme tam kelimedir. `pp` ile
 başlayan istem ise özel rafı açar: sahibin kendi kitapları, `~/.claude/teknesyum-private/private/`
 altında, bütün (8 KB tavan), cevap bandı `◆ Teknesyum · özel raf`; raf yalnız o aynanın
-uzak deposu sahibinse vardır, başka makinede `pp` bunu söyler ve durur. Sıradan tur ikisinden
-de hiçbir şey almaz. `netleştir` sözcüğü ise
+uzak deposu sahibinse vardır, başka makinede `pp` bunu söyler ve durur. `aa` ile başlayan istem ajansı açar: kelimeler `agency.js find`e gider, en çok üç koltuk ve bir kural
+bağlama girer; model koltuğu lean okur, soruyla birlikte Türkçe bir alt ajana verir, cevabı `docs/danisma/`
+altına kaydeder. Sıradan tur hiçbirinden bir şey almaz. `netleştir` sözcüğü ise
 soruyu keskinleştirme isteğidir: `advice.js ask` soruyu `docs/netlestirme/` altına yazar,
 `hooks/scout.js` kapısı bir kez bırakır, `record` cevabı dosyalar.
 
@@ -125,7 +126,7 @@ soruyu keskinleştirme isteğidir: `advice.js ask` soruyu `docs/netlestirme/` al
 | `scripts/map.js .` | Import grafiği: merkezler, döngüler, yetimler. `map.js who <dosya>` kimin import ettiğini söyler. |
 | `scripts/log.js write` | Sabit biçimli hata günlüğü, projenin kendi deposuna. |
 | `scripts/advice.js` | `ask <soru> [--facts <dosya>]` `??` sorusunu `docs/netlestirme/` altına yazar ve kapıyı herhangi bir modelde tek çağrı için kurar; `record` cevabı dosyalar; `list` `docs/danisma/` kayıtlarını gösterir. |
-| `scripts/kutuphane.js` | Kütüphane: raflar projenin dışına klonlanır (`fetch`), katalog frontmatter'dan ya da ilk başlık ve paragraftan kurulur, `find <kelimeler>` modelsiz puanlar, `show <slug…> --lean` üç kitap ve 48 KB ile sınırlı, `record` `docs/danisma/` altına yazar, `push private` özel rafı commit'ler ve iter, `stale [gün]` her rafın kaç gün önce çekildiğini listeler, `fetch all --stale 7` yalnız ondan eskileri çeker. On dört raf `core/kutuphane.json` ile gelir (1038 kitap, MIT, Apache-2.0 ve CC BY-SA 4.0; seçim `docs/kutuphane/` altında; 8 Eylül 2026 piyasa taraması, 1000 depo, 963 okundu, 93 Al, `docs/kutuphane/piyasa-2026-09-08.md`), `raf add <slug> <url> --kind agents|skills|prompts|docs` ekler; tür neyin kitap sayılacağını seçer. Hiçbiri kurulmaz, hiçbir raf bağlama girmez. |
+| `scripts/kutuphane.js` | Kütüphane: raflar projenin dışına klonlanır (`fetch`), katalog frontmatter'dan ya da ilk başlık ve paragraftan kurulur, `find <kelimeler>` modelsiz puanlar, `show <slug…> --lean` üç kitap ve 48 KB ile sınırlı, `record` `docs/danisma/` altına yazar, `push private` özel rafı commit'ler ve iter, `stale [gün]` her rafın kaç gün önce çekildiğini listeler, `fetch all --stale 7` yalnız ondan eskileri çeker. Otuz üç raf `core/kutuphane.json` ile gelir (1890 kitap; MIT, Apache-2.0, CC0, CC BY-SA 4.0 ve bir CC BY-NC-SA 4.0; seçim `docs/kutuphane/` altında; 8 Eylül 2026 piyasa taraması, 1000 depo, 963 okundu, 93 Al, `docs/kutuphane/piyasa-2026-09-08.md`), `raf add <slug> <url> --kind agents|skills|prompts|docs` ekler; tür neyin kitap sayılacağını seçer. Hiçbiri kurulmaz, hiçbir raf bağlama girmez. |
 | `scripts/agency.js` | [agency-agents](https://github.com/msitarzewski/agency-agents) deposu artık kütüphanenin `agency` rafı, komutlar aynı: `find ui` seçer, `show <slug> --lean` rolü kişilik ve ölçüt bloklarını atarak alt ajana verir, `record` alışverişi `docs/danisma/` altına yazar. `show` bir koltuk izi bırakır, sonraki `Stop` onu sohbette `Koltuk: <slug> okundu · <n> KB` diye basar; satır bağlama girmez. Hiçbiri ajan olarak kurulmaz; liste bağlama hiç girmez. |
 | `scripts/manset.js` | Markdown raporu denetler: düzyazıdaki her sayı aynı bölümün tablosunda ya da listesinde bulunmalı. |
 | `scripts/scaffold.js` | Lisans, imza bloğu, dil linki: modelin asla yazmadığı sabit metinler. |
@@ -223,7 +224,7 @@ Yedi olay, altı dosya, hepsi `core/hooks/` altında:
 | Olay | Kanca | Söyler |
 |---|---|---|
 | `SessionStart` | `count.js` | varsa `Devam: .claude/handoff.md`; varsa `docs/plan.md`nin ilk açık `- [ ]` adımı; yoksa hiçbir şey. Günde bir kez `kutuphane.js fetch all --stale 7`yi arka planda ayrık başlatır, hiçbir raf bir haftadan eski kalmaz; model hiçbirini görmez |
-| `UserPromptSubmit` | `mod.js` | `??` / `++`de kütüphane bulguları, `pp`de özel kitaplar; yoksa hiçbir şey |
+| `UserPromptSubmit` | `mod.js` | `??` / `++`de kütüphane bulguları, `pp`de özel kitaplar, `aa`da ajans koltukları; yoksa hiçbir şey |
 | `PostToolUse` | `count.js` | eşikte tek satır, bir kez; yoksa hiçbir şey |
 | `PostToolUseFailure` | `count.js` | hiçbir şey; kalan test komutunu kaydeder |
 | `PreToolUse` | `prefs.js` | README yazılırken kendi README kurallarınız |
@@ -233,7 +234,7 @@ Yedi olay, altı dosya, hepsi `core/hooks/` altında:
 | `SessionEnd` | `handoff.js` | hiçbir şey; devri yazar |
 | `Notification` | `notify.js` | hiçbir şey; çalar |
 
-Bağlama yalnız `count.js` ve `mod.js` yazabilir; test takımı başkasının yazmadığını denetler. Ölçüm: sıradan tur 0 bayt, `??` ~1,7 KB, `pp` ~3,7 KB.
+Bağlama yalnız `count.js` ve `mod.js` yazabilir; test takımı başkasının yazmadığını denetler. Ölçüm: sıradan tur 0 bayt, `??` ~1,7 KB, `pp` ~3,7 KB, `aa` 1 KB altı.
 
 ---
 

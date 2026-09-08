@@ -30,9 +30,9 @@ Aynı anda tek madde açık kalır.
 - [x] **Raflar güncel kalsın (2026-09-08, v0.23.0).** `kutuphane.js stale`, `fetch all --stale 7`;
       SessionStart günde bir arka planda çeker, 0 token. Kendi depolarımız (Desktop/Projeler)
       için aynı şey karar bekliyor: hangi klasör, ne yapılsın (fetch mi, bildir mi).
-- [ ] **`ss` / `aa` önekleri.** Karar bekliyor: `aa` = agency koltuklarına danış (find +
-      alt ajan + record), `ss` = önce beceri rafları. Her biri mod.js'e bir önek + bir metin,
-      ~1 $. Ölçü: bir hafta `??` kullanımından sonra gerek kalıyor mu.
+- [x] **`aa` öneki (2026-09-08, v0.24.0).** Ajans koltukları: `agency.js find`, en çok üç koltuk
+      + kural, 1 KB altı; alt ajan ve `record` akışı. `ss` alınmadı: `??` beceri raflarını zaten
+      tarıyor, ayrı önek aynı şeyi daraltmaktan öteye gitmiyordu.
 - [x] **Kütüphane (2026-09-08, v0.21.0).** Agency tek raf; onlarca raf içeren kütüphane, sıradan
       turda sıfır. `??` = kütüphanede işe yarayan var mı bak, varsa derin oku, o uzman gibi
       davran; bedeli yalnız `??` yazan öder. 100+ repo taranır, işe yarama ihtimali olanlar

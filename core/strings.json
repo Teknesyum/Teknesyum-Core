@@ -203,6 +203,14 @@
     "en": "Private mode. Open the reply with the line \"◆ Teknesyum · private shelf\" and close it with the books you used. The books below are the owner's identity and preferences: apply them, never ask the owner to repeat them. When a preference changes or a new one appears, edit the matching file under %D and run: %C",
     "tr": "Özel mod. Cevabın ilk satırı \"◆ Teknesyum · özel raf\" olsun, son satırı kullandığın kitaplar. Aşağıdaki kitaplar sahibin kimliği ve tercihleri: uygula, sahibine kendini anlattırma. Bir tercih değişir ya da yenisi çıkarsa %D altındaki ilgili dosyayı düzenle ve çalıştır: %C"
   },
+  "mod.agency": {
+    "en": "Agency. The seats below match (slug, name, description). Pick one to three, read each with %C, hand the body plus the user's question to an Agent in Turkish, and write the reply under docs/danisma/ with %R. Give the path and the cost on one line. Never alter the user's sentence.",
+    "tr": "Ajans. Aşağıdaki koltuklar uyuyor (slug, ad, açıklama). Bir ile üçünü seç, her birini %C ile oku, gövdeyi ve kullanıcının sorusunu Türkçe olarak Agent aracına ver, dönen cevabı %R ile docs/danisma/ altına yaz. Yolu ve maliyeti tek satır söyle. Kullanıcının cümlesini değiştirme."
+  },
+  "mod.agencyNone": {
+    "en": "No seat matches; answer without the agency.",
+    "tr": "Uyan koltuk yok; ajanssız cevap ver."
+  },
   "mod.big": {
     "en": "The shelf is over %K KB, so only the list is here; read what you need with show.",
     "tr": "Raf %K KB üstünde, burada yalnız liste var; gerekeni show ile oku."

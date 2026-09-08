@@ -2,8 +2,10 @@ const fs = require('fs');
 const path = require('path');
 const { configRoot, stateFile, t } = require('./lib.js');
 const lib = require('../scripts/kutuphane.js');
+const ag = require('../scripts/agency.js');
 
-const PREFIX = /^\s*(\?\?|\+\+|pp)(?=\s|$)/i;
+const PREFIX = /^\s*(\?\?|\+\+|pp|aa)(?=\s|$)/i;
+const MAX_SEATS = 3;
 const MAX_HITS = 8;
 const MAX_WORDS = 8;
 
@@ -11,8 +13,8 @@ function plugin() {
   return process.env.CLAUDE_PLUGIN_ROOT || path.join(__dirname, '..');
 }
 
-function cmd(rest) {
-  return 'node "' + path.join(plugin(), 'scripts', 'kutuphane.js') + '" ' + rest;
+function cmd(rest, script) {
+  return 'node "' + path.join(plugin(), 'scripts', script || 'kutuphane.js') + '" ' + rest;
 }
 
 function words(text) {
@@ -28,6 +30,14 @@ function library(text) {
   const head = t('mod.library').replace('%C', cmd('show <slug> --lean'));
   if (!hits.length) return head + '\n' + t('mod.none');
   return head + '\n' + hits.join('\n');
+}
+
+function agency(text) {
+  let rows = [];
+  try { rows = ag.find(words(text)).slice(0, MAX_SEATS); } catch {}
+  const head = t('mod.agency').replace('%C', cmd('show <slug> --lean', 'agency.js')).replace('%R', cmd('record --topic T --agents a,b --ask f --reply f --cost c', 'agency.js'));
+  if (!rows.length) return head + '\n' + t('mod.agencyNone');
+  return head + '\n' + rows.join('\n');
 }
 
 function seat(books, bytes) {
@@ -55,7 +65,7 @@ function handle(j) {
   if (!m) return '';
   const rest = prompt.slice(m[0].length);
   const key = m[1].toLowerCase();
-  const text = key === 'pp' ? privateShelf() : library(rest);
+  const text = key === 'pp' ? privateShelf() : key === 'aa' ? agency(rest) : library(rest);
   return JSON.stringify({ hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: text } });
 }
 

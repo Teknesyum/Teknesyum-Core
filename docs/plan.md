@@ -48,3 +48,21 @@ Havuz: 400 depo tarandı (`tarama.jsonl`), 58'i derin okundu, 342 okunmadı; awe
 Öneri: 0 sonra 1. Çıktı `docs/kutuphane/derin/` notları, özet tablo, yol haritasına "Al" satırları.
 Kendi depolarımız (Desktop/Projeler: VidShrink, QuizLoop, Usb-Guard…) için güncellik: hangi
 klasör, ne yapılsın (fetch mi, geride kaldı bildirimi mi) — karar.
+
+## E. Piyasa sonrası yapım sırası (2026-09-08, sıra benim)
+
+Kaynak: `docs/kutuphane/piyasa-2026-09-08.md` Öncelik bölümü. Ölçü: önce sıfır bedelli, sonra Core'un boşluğunu kapatan kanca, sonra ölçüm.
+
+- [x] Kitaplar: 19 raf `core/kutuphane.json`e eklendi, fetch edildi (0.24.0). `aa` öneki.
+- [ ] K1 Stop kapısı: kanıt yoksa `decision:block`, `stop_hook_active` ile tek ısrar; `doubt` öneki.
+- [ ] K2 Tehlikeli komut denylist (PreToolUse) + vakalı test.
+- [ ] K3 Kanca hijyeni: aynı metni ikinci kez basma, bayt bütçesi testi, Windows `python3` stub, stdin boşaltma.
+- [ ] B1 `npm test` içinde kanca şema denetimi + kuru çalıştırıcı.
+- [ ] K4 SessionStart `startup|clear|compact` + PreCompact özet yaması.
+- [ ] B5 Kütüphane: tek katalog, kaynak SHA ile tazeleme, `last_verified`, BM25 `ara`.
+- [ ] K5 Commit anı kancası + oturum manifesti.
+- [ ] B3 Yerel özet (handoff'u betik yazsın).
+- [ ] B4 Düzeltme yakalayıcı.
+- [ ] B6 Statusline widget'ları.
+- [ ] B2 AGENTS.md lint, B7 README ikizleri pre-commit.
+- [ ] Bench: baseline × skilled, yargıçsız A/B.

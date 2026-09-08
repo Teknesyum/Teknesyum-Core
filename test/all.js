@@ -723,6 +723,9 @@ function testPrivate() {
   const q = JSON.parse(mod('?? ui tasarım denetle').stdout).hookSpecificOutput;
   ok('?? injects the library hits with the read instruction', q.hookEventName === 'UserPromptSubmit' && /show <slug> --lean/.test(q.additionalContext) && /design-ui-designer/.test(q.additionalContext), q.additionalContext);
   ok('++ is the same key', /design-ui-designer/.test(JSON.parse(mod('++ ui').stdout).hookSpecificOutput.additionalContext));
+  const a = JSON.parse(mod('aa ui tasarım').stdout).hookSpecificOutput.additionalContext;
+  ok('aa lists agency seats with the show and record commands', /design-ui-designer/.test(a) && /agency\.js" show <slug> --lean/.test(a) && /docs\/danisma/.test(a), a);
+  ok('aa says so when no seat matches', /No seat|Uyan koltuk yok/.test(JSON.parse(mod('aa zzqqx').stdout).hookSpecificOutput.additionalContext));
   const p = JSON.parse(mod('pp hangi dili konuşuyoruz').stdout).hookSpecificOutput.additionalContext;
   ok('pp injects the private books whole with the banner rule', /◆ Teknesyum/.test(p) && /Türkçe konuş/.test(p) && /token dışına/.test(p) && /push private/.test(p), p);
   const seat = JSON.parse(fs.readFileSync(path.join(cfg, 'teknesyum', 'seat.json'), 'utf8'));
