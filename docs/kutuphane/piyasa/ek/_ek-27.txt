@@ -1,0 +1,3 @@
+vercel-labs/skills · ★30683 · `skills/find-skills` rafı google/skills bulucusunun bağımsız ikinci uygulaması; ayrıca `npx skills add` kurulum sözleşmesi — antfu ve google bunu kullanıyor, Core'un raf kataloğu için referans.
+tech-leads-club/agent-skills · ★5149 · Kataloğu MCP üzerinden kademeli açılımla sunuyor (önce ara, sonra yalnız gerekeni çek) + doğrulanmış/imzalı raf kaydı; Core'un `kutuphane.js fetch` güven tarafı için okunmalı.
+karanb192/claude-code-hooks · ★507 · Yalnız kanca satan bir plugin pazarı (güvenlik, maliyet, gözlemlenebilirlik); settings.json elle düzenlemeden tek kanca kurma biçimi Core'un kanca dağıtımıyla karşılaştırılabilir.

@@ -1,0 +1,3 @@
+centminmod/my-claude-code-setup · ★2625 · CLAUDE.md hafiza-bankasi sablonu ve kademeli acilim rehberi; Core'un raf mantigina en yakin metin paketi.
+rohitg00/awesome-claude-code-toolkit · ★2601 · 20 kanca, 15 kural, 14 MCP yapilandirmasi tek yerde; kanca ve kural desenleri icin raf kitabi adayi.
+daymade/claude-code-skills · ★1384 · Uretim skill'leri pazari; SKILL frontmatter ve aciklama yazim desenleri icin karsilastirma malzemesi.

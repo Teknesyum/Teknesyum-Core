@@ -1,0 +1,19 @@
+{"repo":"awesome-selfhosted/awesome-selfhosted","stars":317855,"karar":"hayir","ne":"-","ozet":"Kendi sunucunda barindirilabilir servis listesi; Claude Code ya da ajan is akisiyla ilgisi yok."}
+{"repo":"FoundationAgents/MetaGPT","stars":70263,"karar":"hayir","ne":"-","ozet":"Python cok-ajanli yazilim sirketi catisi; kendi calisma zamanini kuruyor, Core'un pasif ilkesiyle ortusmuyor."}
+{"repo":"continuedev/continue","stars":35832,"karar":"hayir","ne":"-","ozet":"IDE icine kurulan bagimsiz kodlama ajani urunu; Claude Code eklentisi degil, alinacak pasif parca yok."}
+{"repo":"camel-ai/camel","stars":17685,"karar":"hayir","ne":"-","ozet":"Arastirma odakli cok-ajanli Python catisi; olcek yasasi deneyleri, gelistirici bilgi paketi degil."}
+{"repo":"ai-boost/awesome-prompts","stars":8838,"karar":"hayir","ne":"-","ozet":"GPT magazasi istemleri ve prompt muhendisligi okuma listesi; GPL-3.0 oldugu icin Core rafina metin olarak alinamaz."}
+{"repo":"pezzolabs/pezzo","stars":3270,"karar":"hayir","ne":"-","ozet":"Sunucu tarafi LLMOps platformu; istem surumleme ve gozlemleme urunu, yerel eklenti degil."}
+{"repo":"eylonmiz/react-agent","stars":1654,"karar":"hayir","ne":"-","ozet":"React.js kodu ureten ozerk LLM ajani demosu; Core'a girecek mekanizma yok."}
+{"repo":"e2b-dev/awesome-ai-sdks","stars":1217,"karar":"hayir","ne":"-","ozet":"Ajan SDK ve arac veritabani listesi; lisansi yok, icerigi Core raflari icin fazla genel."}
+{"repo":"team-openpm/workgpt","stars":732,"karar":"hayir","ne":"-","ozet":"API cagiran GPT ajan catisi (TypeScript); Claude Code ile iliskisi yok."}
+{"repo":"iart-ai/motion-skills","stars":424,"karar":"hayir","ne":"-","ozet":"Onceki dilimde okundu, atlandi."}
+{"repo":"WenyuChiou/ai-research-skills","stars":243,"karar":"fikir","ne":"fikir","ozet":"Salt marketplace katalogu (0 SKILL.md, 0 kanca); raf kunyesine dogrulama tarihi ve katman tablosu fikri alinir."}
+{"repo":"stefanprodan/cctop","stars":139,"karar":"al","ne":"betik","ozet":"Salt okuyan TUI izleyici; baglam token formulu ve CLAUDE_CONFIG_DIR/proje dizini turetmesi Core betiklerine alinir."}
+{"repo":"zihenghe04/CCDash","stars":72,"karar":"fikir","ne":"fikir","ozet":"Sifir bagimlilikli kullanim panosu; yalniz maskeli API uc noktasi tespiti fikri kaliyor."}
+{"repo":"BetaBots-LLC/callimachus","stars":38,"karar":"fikir","ne":"fikir","ozet":"11 ajanin gecmisini yerel SQLite'a indeksleyen Tauri uygulamasi; dosya-anmasi indeksi fikri alinir, AGPL+ticari lisans ve MCP yuku alinmaz."}
+{"repo":"Data-Everything/mcp-server-templates","stars":21,"karar":"hayir","ne":"-","ozet":"Docker/Kubernetes arka uclu MCP sunucu dagitim platformu; Core'un pasif kitap ilkesine aykiri."}
+{"repo":"oubakiou/mdxg-redline","stars":13,"karar":"hayir","ne":"-","ozet":"MDX markdown icin satir ici inceleme araci; ajan is akisiyla ilgisi yok."}
+{"repo":"entire-vc/evc-spark-mcp","stars":5,"karar":"hayir","ne":"-","ozet":"Spark is akisi katalogu icin MCP sunucusu; her tura arac tanimi yazar, Core ilkesine aykiri."}
+{"repo":"jabbawocky/proposalcraft","stars":2,"karar":"hayir","ne":"-","ozet":"Serbest calisanlar icin teklif yazan MCP sunucusu; gelistirici bilgi paketi degil."}
+{"repo":"Proofpane/releases","stars":0,"karar":"hayir","ne":"-","ozet":"Kapali kaynak MCP daemon'unun indirme aynasi; kaynak yok, incelenecek mekanizma yok."}

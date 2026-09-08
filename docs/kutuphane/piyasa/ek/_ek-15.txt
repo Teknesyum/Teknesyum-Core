@@ -1,0 +1,3 @@
+disler/claude-code-hooks-mastery · ★3914 · kancalarin LLM karari olmadan deterministik kontrol saglamasi uzerine referans depo; Core'un kanca eslerini karsilastirmak icin en genis ornek kumesi
+karanb192/claude-code-hooks · ★507 · MIT · PreToolUse/PostToolUse ile en az yetki uygulayan 20 kanca + kurulabilir marketplace; guvenlik ve maliyet kancalari Core'a betik olarak alinabilir
+egorfedorov/claude-context-optimizer · ★107 · MIT · yerel, model cagirmayan deterministik token sayaci ve israf haritasi; Core'un "eklenti sayar, gosterir" hattinin dogrudan akrabasi (yildiz esigin altinda, yine de not)

@@ -1,0 +1,2 @@
+karanb192/claude-code-hooks · ★507 · Kanca pazar yeri: guvenlik, maliyet, gozlemlenebilirlik kancalari tek tek kurulabiliyor; Core'un kanca yazim kaliplari icin dogrudan karsilastirma.
+disler/claude-code-hooks-mastery · ★3914 · 30 yasam dongusu olayinin calisan ornekleri; Core'un kullanmadigi olaylar (SubagentStop, PreCompact) icin referans raf.

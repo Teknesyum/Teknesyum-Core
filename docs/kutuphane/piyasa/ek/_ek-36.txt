@@ -1,0 +1,2 @@
+karanb192/claude-code-hooks · ★507 MIT · yalniz kanca pazari; dosya basina baglam-maliyeti tablosu ve surekli yok sayilan kurallari deterministik kancaya terfi ettirme fikri Core'un esik mantigiyla ortusuyor
+rohitg00/awesome-claude-code-toolkit · ★2601 · yerlesik araclarin token-verimli alternatifleri (bagimsiz olcumle %57 azalma) — Core'un pasif betik rafi icin aday liste

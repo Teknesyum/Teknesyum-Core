@@ -1,0 +1,2 @@
+karanb192/claude-code-hooks · ★507 · Her kanca tek komutla kurulan ayri bir plugin; PreToolUse/PostToolUse ile en az yetki, maliyet ve gozlemlenebilirlik. Dosya basina baglam-maliyet siralamasi ve "cache-tax" statusline segmenti Core'a dogrudan fikir.
+edouard-claude/snip · ★438 · Go ile yazilmis rtk alternatifi CLI proxy; bildirimsel YAML filtreleriyle komut ciktisini %60-90 kirpiyor. Core'un rtk bagimliligina deterministik, model gerektirmeyen ikinci ornek.

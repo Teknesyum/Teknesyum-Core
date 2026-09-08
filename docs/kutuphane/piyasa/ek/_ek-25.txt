@@ -1,0 +1,2 @@
+karanb192/claude-code-hooks · ★507 · 10 kancalik koleksiyon (cost-tracker, rate-limiter, branch-guard, protect-tests, context-snapshot); Core'un esik kancasi ve maliyet sayaci icin dogrudan karsilastirma malzemesi
+musistudio/claude-code-router · ★37129 · blog/en/progressive-disclosure-of-agent-tools yazisi arac tanimlarini kademeli acmayi CLI benzetmesiyle anlatiyor; Core'un raf/yonlendirici tasarimina kitap

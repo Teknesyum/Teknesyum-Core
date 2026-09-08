@@ -1,0 +1,2 @@
+nadimtuhin/claude-token-optimizer · ★572 · UserPromptSubmit kancası kullanıcının cümlesini docs/learnings/ dosya adlarıyla eşleştirip yalnız eşleşeni enjekte ediyor; Core'un önek kancasına anahtar-kelime eşiği örneği.
+rohitg00/awesome-claude-code-toolkit · ★2601 · 20 kanca ve 6 yaşam döngüsü olayını tek yerde toplamış envanter; Core'un kanca olay seçimini karşılaştırmak için kaynak listesi.

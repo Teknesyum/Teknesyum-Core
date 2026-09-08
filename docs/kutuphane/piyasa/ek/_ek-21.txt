@@ -1,0 +1,3 @@
+karanb192/claude-code-hooks · ★507 · yalnız kanca odaklı kurulabilir pazar yeri: güvenlik, maliyet, gözlemlenebilirlik kancaları; Core'un kanca deseni için birebir karşılaştırma
+rohitg00/awesome-claude-code-toolkit · ★2601 · 20 kanca + 176 eklenti + 35 skill envanteri; piyasadaki mekanizma dağılımını tek yerden saymak için kaynak
+hesreallyhim/awesome-claude-code · ★53698 · statusline ve geliştirici araçları bölümleri Core'un statusline/kütüphane rafları için aday listesi

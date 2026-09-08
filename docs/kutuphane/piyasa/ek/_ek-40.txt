@@ -1,0 +1,3 @@
+egorfedorov/claude-context-optimizer · Yerel, sifir API cagrisi, <5ms deterministik kanca ile baglam israfini olcuyor; Core'un "kanca sayar, esikte konusur" mekanizmasinin dogrudan komsusu.
+karanb192/claude-code-hooks · Kanca pazar yeri; icinde CLAUDE.md uyum karnesi ve baglam maliyeti izleyicisi var, Core'un plan/esik kancalarina olcum kalibi verebilir.
+sgaabdu4/claude-code-tips · RTK + context-mode + zorlayici kancalardan olusan token optimizasyon yigini; Core'un RTK kullanimiyla ortusuyor, kanca fikirleri toplanabilir.

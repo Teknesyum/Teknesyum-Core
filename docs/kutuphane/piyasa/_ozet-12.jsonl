@@ -1,0 +1,18 @@
+{"repo":"github/spec-kit","stars":134014,"karar":"hayir","ne":"-","ozet":"Zaten okunmus (docs/kutuphane/piyasa/spec-kit.md); cakisma nedeniyle atlandi."}
+{"repo":"Aider-AI/aider","stars":48827,"karar":"hayir","ne":"-","ozet":"Kendi terminal ajani olan bagimsiz Python CLI urunu; Claude Code'a kurulacak bir mekanizma sunmuyor."}
+{"repo":"promptslab/Awesome-Prompt-Engineering","stars":6318,"karar":"hayir","ne":"-","ozet":"GPT odakli baglanti listesi; zaten okunmus prompt-engineering-guide rafiyla ayni alan."}
+{"repo":"0-AI-UG/cate","stars":2127,"karar":"hayir","ne":"-","ozet":"Ajan terminallerini tasiyan Electron masaustu IDE'si; eklenti/kanca mekanizmasi degil."}
+{"repo":"vitalops/openvibe","stars":1450,"karar":"hayir","ne":"-","ozet":"Auto-GPT turevi modulel ajan cercevesi; Claude Code ile ilgisi yok."}
+{"repo":"ur-whitelab/chemcrow-public","stars":950,"karar":"hayir","ne":"-","ozet":"Kimya alanina ozel LLM ajani; gelistirici is akisiyla ilgisi yok."}
+{"repo":"ag2ai/fastagency","stars":548,"karar":"hayir","ne":"-","ozet":"Coklu ajan is akisi dagitim cercevesi (Python); Core mekanizmasiyla ortusmuyor."}
+{"repo":"stackwiseai/stackwise","stars":186,"karar":"hayir","ne":"-","ozet":"AI uygulama koleksiyonu vitrini; kurulabilir mekanizma icermiyor."}
+{"repo":"shengyanlin/claude-overlay","stars":89,"karar":"hayir","ne":"-","ozet":"Windows'ta ekran okuyan yuzen sohbet penceresi; claude CLI'yi surer, eklenti mekanizmasi sunmaz."}
+{"repo":"TheoLvs/westworld","stars":59,"karar":"hayir","ne":"-","ozet":"Ajan tabanli simulasyon kutuphanesi (Jupyter); alakasiz."}
+{"repo":"proficientai/js","stars":10,"karar":"hayir","ne":"-","ozet":"Ticari SDK monoreposu; gelistirici bilgi paketi degil."}
+{"repo":"GTCC777/mcp-pulsenetwork","stars":3,"karar":"hayir","ne":"-","ozet":"Odemeli veri akisi satan genel MCP sunucusu; Core ilkesine aykiri surekli baglanti."}
+{"repo":"claire-gong-18/awesome-cursorrules","stars":0,"karar":"hayir","ne":"-","ozet":"Okunmus awesome-cursorrules deposunun catallanmisi; yeni icerik yok."}
+{"repo":"openai/skills","stars":26259,"karar":"fikir","ne":"kitap","ozet":"44 SKILL.md'lik Codex katalogu, sifir otomatik yukleme; skill-creator olcutleri raf yazim kilavuzuna girer."}
+{"repo":"contains-studio/agents","stars":12410,"karar":"hayir","ne":"fikir","ozet":"37 ajan tanimi her turda ~15k token; Core ilkesinin olculmus karsi-ornegi, alinacak mekanizma yok."}
+{"repo":"DevinoSolutions/anotifier-for-claude-codex-cursor","stars":28,"karar":"fikir","ne":"kanca","ozet":"2 kanca (Notification/Stop) baglama sifir yazar; Stop yukundeki background_tasks defteri ve olay sozlugu alinabilir."}
+{"repo":"briansmith80/claude-code-status-bar","stars":17,"karar":"al","ne":"betik","ozet":"subagentStatusLine ile ajan paneli satirlarini devralma ve tokenSamples->tok/s spark hesabi; modele 0 token."}
+{"repo":"harperreed/dotfiles","stars":332,"karar":"al","ne":"betik","ozet":"check-claude-md: CLAUDE.md icin bayt tavani + zorunlu/yasak dizge denetcisi; Core'un denetlenmeyen kural tavanlarini olculebilir yapar."}

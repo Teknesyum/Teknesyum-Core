@@ -1,0 +1,26 @@
+{"repo":"nexu-io/open-design","stars":94879,"karar":"hayir","ne":"-","ozet":"Yerel masaustu tasarim urunu; Claude Code eklenti mekanizmasiyla ilgisi yok, elendi."}
+{"repo":"headroomlabs-ai/headroom","stars":70634,"karar":"fikir","ne":"fikir","ozet":"Arac ciktisini modele gitmeden sikistiran ara katman; kurulacak parcasi yok, kabul testi fikri kaliyor."}
+{"repo":"calesthio/OpenMontage","stars":56667,"karar":"hayir","ne":"-","ozet":"Ajansal video uretim sistemi; alan tamamen disarida, elendi."}
+{"repo":"zhayujie/CowAgent","stars":46835,"karar":"hayir","ne":"-","ozet":"Bagimsiz ajan cercevesi; Claude Code eklentisi degil, elendi."}
+{"repo":"github/awesome-copilot","stars":38771,"karar":"fikir","ne":"fikir","ozet":"Copilot katalogu; applyTo dosya desenli yukleme ve llms.txt makine katalogu iki not."}
+{"repo":"tirth8205/code-review-graph","stars":31260,"karar":"hayir","ne":"-","ozet":"Python MCP/CLI kod grafi; Core zaten graphify kullaniyor, yeni mekanizma yok."}
+{"repo":"Nutlope/hallmark","stars":28284,"karar":"al","ne":"kitap","ozet":"Tek skill (68 KB) + 106 dosyalik pasif referans, bosta 70 token; 58 kapili teslim testi ve on-elestiri raf olarak alinir."}
+{"repo":"agentskills/agentskills","stars":25143,"karar":"al","ne":"kitap","ozet":"Agent Skills sartnamesi raf olur; 9 baytlik CLAUDE.md deseni Core ile ayni, async kanca ({\"async\":true}) olculmus mekanizma."}
+{"repo":"1Panel-dev/MaxKB","stars":22739,"karar":"hayir","ne":"-","ozet":"Kurumsal ajan platformu; ayri urun, elendi."}
+{"repo":"google/skills","stars":19651,"karar":"al","ne":"betik","ozet":"137 rafi tek bulucu skill + uretilmis 81 KB index.json ile tasiyor; bosta ~130 token, Core kutuphanesinin buyume cozumu."}
+{"repo":"AgriciDaniel/claude-seo","stars":16568,"karar":"fikir","ne":"betik","ozet":"25 skill + 18 ajan = her turda 4.5 KB olculdu; Windows Store python saplamasini eleyen 65 satirlik kopru deseni alinir."}
+{"repo":"xpzouying/xiaohongshu-mcp","stars":15698,"karar":"hayir","ne":"-","ozet":"Tek platformluk MCP sunucusu; ilgisiz, elendi."}
+{"repo":"NanmiCoder/cc-haha","stars":14301,"karar":"hayir","ne":"-","ozet":"Claude Code masaustu istemcisi; GUI urunu, eklenti mekanizmasi sunmuyor."}
+{"repo":"tadata-org/fastapi_mcp","stars":12002,"karar":"hayir","ne":"-","ozet":"FastAPI uclarini MCP araci yapan kutuphane; ilgisiz, elendi."}
+{"repo":"holaboss-ai/holaOS","stars":11185,"karar":"hayir","ne":"-","ozet":"Kurumsal ajansal calisma alani urunu; elendi."}
+{"repo":"ykdojo/claude-code-tips","stars":10056,"karar":"fikir","ne":"fikir","ozet":"9 raf ve 5 betik; konusmayi yariya klonlama ve review-claudemd iki not, kurulacak mekanizma yok."}
+{"repo":"freecodexyz/free-code","stars":8738,"karar":"hayir","ne":"-","ozet":"Guvenlik korumalari sokulmus Claude Code catali; lisansi belirsiz, alinmaz."}
+{"repo":"Vincentwei1021/video-shotcraft","stars":7789,"karar":"hayir","ne":"-","ozet":"Video uretimi skill'i; tarif karti katalogu deseni zaten hallmark'ta olculdu."}
+{"repo":"LiamGvchi/gc-minimal-zine-poster","stars":6984,"karar":"hayir","ne":"-","ozet":"Tek amacli Codex poster skill'i; mekanizma yok, elendi."}
+{"repo":"getsentry/XcodeBuildMCP","stars":6352,"karar":"hayir","ne":"-","ozet":"iOS/Xcode MCP sunucusu; ilgisiz platform, elendi."}
+{"repo":"antfu/skills","stars":5863,"karar":"al","ne":"betik","ozet":"19 raf = 3891 B bosta; degeri uretim zinciri: submodule kaynak + GENERATION.md kaynak SHA damgasi ile tazeleme."}
+{"repo":"Devin-AXIS/iPolloWork","stars":5511,"karar":"hayir","ne":"-","ozet":"Kurumsal ajan tezgahi urunu; elendi."}
+{"repo":"KnockOutEZ/wigolo","stars":5186,"karar":"hayir","ne":"-","ozet":"Arama/crawl MCP sunucusu; genel MCP, elendi."}
+{"repo":"ag2ai/ag2","stars":4913,"karar":"hayir","ne":"-","ozet":"AutoGen ardili ajan cercevesi; Claude Code disi, elendi."}
+{"repo":"atilaahmettaner/tradingview-mcp","stars":4390,"karar":"hayir","ne":"-","ozet":"Piyasa verisi MCP sunucusu; ilgisiz, elendi."}
+{"repo":"txn2/kubefwd","stars":4165,"karar":"hayir","ne":"-","ozet":"Kubernetes port yonlendirme araci; yapay zeka ile ilgisi yok, elendi."}

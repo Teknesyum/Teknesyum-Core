@@ -1,0 +1,3 @@
+disler/claude-code-hooks-mastery · ★3914 · Claude Code'un sekiz kanca olayının tamamını çalışan örnekle gösteren referans depo; Core'un kanca yüzeyini genişletirken doğrudan kitap adayı (çıkış kodu 2 ile engelleme, stdout vs JSON additionalContext ayrımı).
+alexgreensh/token-optimizer · ★2199 · Bağlam israfını yalnız komut çıktısında değil şişkin ayarlar, kullanılmayan skill'ler, bayat bellek ve model yanlış yönlendirmesinde arıyor; Core'un "sıradan turda sıfır token" ölçümü için israf taksonomisi.
+karanb192/claude-code-hooks · ★507 · Güvenlik, maliyet, gözlemlenebilirlik ve verimlilik kancalarını kurulabilir eklenti pazarı biçiminde toplayan derleme; her kancanın tek başına pasif betik olarak alınabilir olması Core'un raf mantığına uygun.

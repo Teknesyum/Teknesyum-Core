@@ -19,6 +19,10 @@ Aynı anda tek madde açık kalır.
 
 ## Açık maddeler
 
+- [ ] **Piyasa taraması sonrası yapım sırası (2026-09-08).** 1000 depo tarandı, 963 okundu, 93 Al;
+      rapor ve fiyatlı öncelik listesi `docs/kutuphane/piyasa-2026-09-08.md`. Karar bekleyen üç
+      paket: K1–K5 kancalar (~550K token), B1–B7 betikler (~720K), 3. bölümdeki kitaplar (raf add,
+      sıfır). Hangisi, hangi sırayla — kullanıcının.
 - [x] **Özel raf ve önek kancası (2026-09-08, v0.22.0).** `~/.claude/teknesyum-private/private/`
       sahibin kitapları; `pp` bütün okur, `push private` iter, banner `◆ Teknesyum · özel raf`.
       `??` = `++`, kanca (`hooks/mod.js`) bulguları o tura koyar; Türkçe eşanlam, tam kelime.

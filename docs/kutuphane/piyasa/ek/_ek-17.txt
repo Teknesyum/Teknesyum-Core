@@ -1,0 +1,3 @@
+karanb192/claude-code-hooks · 507 yildiz; kanca pazaryeri (guvenlik, maliyet, gozlem) — Core'un kanca listesiyle dogrudan karsilastirilabilir, .env sizdirma ve kanca dosyasina mudahaleyi engelleme kaliplari alinabilir
+wesammustafa/Claude-Code-Everything-You-Need-to-Know · 2983 yildiz; saf metin paketi (kurulum, slash komut, skill, kanca, alt ajan, MCP) — 0 token, Core kutuphanesine raf kitabi olarak girebilir
+rohitg00/awesome-claude-code-toolkit · 2601 yildiz; 20 kanca + 15 kural + 7 sablon envanteri — hangi mekanizmanin piyasada standartlastigini olcmek icin tek kaynak

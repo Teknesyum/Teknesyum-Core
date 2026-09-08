@@ -1,0 +1,26 @@
+{"repo":"addyosmani/agent-skills","stars":92965,"karar":"fikir","ne":"kitap","ozet":"25 skill + SessionStart meta-skill enjeksiyonu her oturumda ~4.8K token yazıyor; alınacak olan Red Flags/Common Rationalizations kalıbı ve 304 doğrulamalı fetch önbelleği."}
+{"repo":"colbymchenry/codegraph","stars":70081,"karar":"hayir","ne":"-","ozet":"Rust kernel'li yerel kod grafiği CLI/MCP ürünü; Core'da aynı işi graphify görüyor."}
+{"repo":"Alishahryar1/free-claude-code","stars":53962,"karar":"hayir","ne":"-","ozet":"Bedava token sağlayan uçbirim aracı; eklenti mekanizmasıyla ilgisi yok."}
+{"repo":"DeusData/codebase-memory-mcp","stars":42662,"karar":"hayir","ne":"-","ozet":"Genel amaçlı kod indeksleme MCP sunucusu; Core MCP kurmuyor."}
+{"repo":"herdrdev/herdr","stars":36529,"karar":"hayir","ne":"-","ozet":"Kodlama ajanlarının üstünde koştuğu Rust çalışma zamanı; ayrı ürün katmanı."}
+{"repo":"nanocoai/nanoclaw","stars":30723,"karar":"hayir","ne":"-","ozet":"Konteynerde koşan WhatsApp/Telegram ajan istemcisi; Claude Code eklentisi değil."}
+{"repo":"decolua/9router","stars":27956,"karar":"hayir","ne":"-","ozet":"Ücretsiz model yönlendirici vekil sunucu; bağlam mekanizması yok."}
+{"repo":"Donchitos/Claude-Code-Game-Studios","stars":24890,"karar":"hayir","ne":"fikir","ozet":"98 ajan dosyası, 73 skill, 5 @ içe aktarmalı CLAUDE.md ve her oturumda git durumu yazan kanca; yalnız settings deny listesi fikir olarak kaldı."}
+{"repo":"winfunc/opcode","stars":22395,"karar":"hayir","ne":"-","ozet":"Claude Code için masaüstü GUI uygulaması; metin/kanca paketi değil."}
+{"repo":"nukeop/nuclear","stars":18413,"karar":"hayir","ne":"-","ozet":"Müzik çalar; konuyla ilgisiz."}
+{"repo":"MemoriLabs/Memori","stars":16503,"karar":"hayir","ne":"-","ozet":"LLM-bağımsız ajan bellek altyapısı; sunucu/kütüphane ürünü."}
+{"repo":"chenhg5/cc-connect","stars":15406,"karar":"hayir","ne":"-","ozet":"Yerel ajanları Feishu/Slack gibi mesajlaşmaya bağlayan Go köprüsü."}
+{"repo":"superset-sh/superset","stars":13926,"karar":"hayir","ne":"-","ozet":"100+ ajanı paralel koşturan ajan IDE'si; ayrı ürün."}
+{"repo":"BeehiveInnovations/pal-mcp-server","stars":11737,"karar":"hayir","ne":"-","ozet":"Çok sağlayıcılı MCP sunucusu; Core MCP kurmuyor."}
+{"repo":"Untrivial-ai/agent-orchestrator","stars":11098,"karar":"hayir","ne":"-","ozet":"Ajan filosu yöneten IDE ve orkestratör; eklenti değil."}
+{"repo":"kangarooking/cangjie-skill","stars":9698,"karar":"al","ne":"kitap","ozet":"Kitap/video/podcast'i çalıştırılabilir beceri kartlarına damıtan RIA-TV++ boru hattı; 0 kanca, terfi kapısı ve tek kaynaktan deterministik derleme Core'un raf kabul ölçütüne birebir oturuyor."}
+{"repo":"Maciek-roboblog/Claude-Code-Usage-Monitor","stars":8684,"karar":"hayir","ne":"-","ozet":"Bağımsız Python kullanım izleyicisi; Core durumu zaten statusline'da gösteriyor."}
+{"repo":"2FastLabs/agent-squad","stars":7756,"karar":"hayir","ne":"-","ozet":"Swift ile çok ajanlı konuşma çatısı; Claude Code mekanizmasıyla ilgisi yok."}
+{"repo":"deanpeters/Product-Manager-Skills","stars":6881,"karar":"fikir","ne":"kitap","ozet":"77 skill, 0 kanca; alınacak olan 'sağ boyutlandırma kullanıcının kadranı' ve 'sıkı bağ yok' yazım kuralları, 45 KB'lik depo talimatı değil."}
+{"repo":"heilcheng/awesome-agent-skills","stars":6187,"karar":"fikir","ne":"fikir","ozet":"Kurulmayan skill dizini; sıfır maliyetli aday havuzu ve 'toplu üretilmiş depo' eleme ölçütü."}
+{"repo":"Klavis-AI/klavis","stars":5801,"karar":"hayir","ne":"-","ozet":"MCP entegrasyon platformu; kurulum gerektiren sunucu ürünü."}
+{"repo":"OpenSenseNova/SenseNova-Skills","stars":5453,"karar":"hayir","ne":"-","ozet":"SenseNova modelleri için ofis becerileri (PPT, Excel, görsel); geliştirici iş akışı değil."}
+{"repo":"tech-leads-club/agent-skills","stars":5149,"karar":"fikir","ne":"fikir","ozet":"88 skill, 0 kanca, MCP ile kademeli açığa çıkarma (ara → gövde → doğrulanmış referans); Core'un pasif rafıyla aynı mantık ama MCP'ye bağlı."}
+{"repo":"TabularisDB/tabularis","stars":4831,"karar":"hayir","ne":"-","ozet":"Masaüstü SQL çalışma alanı; konuyla ilgisiz."}
+{"repo":"eugeniughelbur/obsidian-second-brain","stars":4368,"karar":"al","ne":"kitap","ozet":"Recall kancasının sözleşmesi ölçülü: en çok 4 not / 900 karakter (~250 token), şüphedeyse sus, hata=sessiz çıkış, her karar tek JSONL satırı, iki env yoksa ölü."}
+{"repo":"microsoft/flint-chart","stars":4160,"karar":"hayir","ne":"-","ozet":"Ajanların grafik üretmesi için görselleştirme dili; Core kapsamı dışında."}

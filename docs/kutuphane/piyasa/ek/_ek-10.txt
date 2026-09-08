@@ -1,0 +1,3 @@
+disler/claude-code-hooks-mastery · ★3914 · sekiz kanca olayının tamamını tek tek gösteren referans depo; Core'un kanca payload sözleşmesi kitabı için birincil kaynak
+karanb192/claude-code-hooks · ★507 · her kanca ayrı tek komutluk plugin olarak kuruluyor (güvenlik, maliyet, gözlem); Core'un "kanca eşikte tek satır" desenine en yakın paketleme örneği
+quemsah/awesome-claude-plugins · ★1272 · GitHub'daki plugin benimsenme metriklerini otomatik toplayan depo; sonraki piyasa dilimleri için aday havuzu ve yıldız/kullanım verisi

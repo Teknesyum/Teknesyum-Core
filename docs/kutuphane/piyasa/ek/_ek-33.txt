@@ -1,0 +1,3 @@
+karanb192/claude-code-hooks · ★507 · kurulabilir kanca pazari: guvenlik, maliyet, gozlemleme kancalari; Core'un esik kancasi icin dogrudan karsilastirma
+rohitg00/awesome-claude-code-toolkit · ★2601 · 20 kanca + 176 eklenti envanteri; dilim 33'te cikan mekanizmalarin kaynak listesi, raf taramasi icin
+alirezarezvani/claude-skills · ★25707 · 380 skill/30 ajan cok-cati paket; siradan turda baglama maliyetini olcmek icin buyuk karsi ornek

@@ -1,0 +1,3 @@
+disler/claude-code-hooks-mastery · 13 kanca olayinin tamami tek depoda calisir ornekle; Core'un kullanmadigi PreCompact/PermissionRequest icin referans (★3914)
+karanb192/claude-code-hooks · Her kanca ayri kurulabilir eklenti olarak paketlenmis marketplace; Core'un "kanca eklentiye nasil paketlenir" sorusuna dogrudan ornek (★507)
+ericbuess/claude-code-docs · /docs komutu ile yerel dokuman aynasi + tazelik kontrolu; Core'un kutuphane raflarinin bayatlik takibiyle ayni problem (★980)

@@ -1,0 +1,2 @@
+karanb192/claude-code-hooks · ★507 · kurulabilir kanca pazaryeri (20 eklenti: guvenlik, maliyet, gozlem); Corein kanca deseniyle dogrudan kiyaslanabilir
+nadimtuhin/claude-token-optimizer · ★572 · UserPromptSubmit kancasi istemi dosya adlariyla eslestirip yalniz eslesen dosyayi baglama koyuyor; Corein ?? onek kancasinin en yakin piyasa karsiligi

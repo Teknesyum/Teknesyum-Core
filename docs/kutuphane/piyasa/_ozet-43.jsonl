@@ -1,0 +1,25 @@
+{"repo":"Evianis/travel-photo-abstraction","stars":744,"karar":"hayir","ne":"-","ozet":"Fotograf estetigi ureten Codex skill'i; Claude Code is akisiyla ilgisi yok, elendi."}
+{"repo":"quant-sentiment-ai/claude-equity-research","stars":712,"karar":"hayir","ne":"-","ozet":"Hisse arastirma eklentisi; alan urunu, Core mekanizmasiyla ilgisiz, elendi."}
+{"repo":"instavm/clickclickclick","stars":711,"karar":"hayir","ne":"-","ozet":"Android/bilgisayar kullanim otomasyonu; Claude Code eklentisi degil, elendi."}
+{"repo":"M1n-n9/paper-lifecycle","stars":668,"karar":"hayir","ne":"-","ozet":"Akademik makale yasam dongusu skill'i; alan urunu, elendi."}
+{"repo":"ItsssssJack/power-design","stars":662,"karar":"hayir","ne":"-","ozet":"Slayt tasarim skill'i; Core'un ilgi alani disinda, elendi."}
+{"repo":"Pasta-Devs/Marinara-Engine","stars":634,"karar":"hayir","ne":"-","ozet":"AGPL frontend uretim motoru; eklenti/kanca mekanizmasi yok, elendi."}
+{"repo":"wlzh/skills","stars":614,"karar":"hayir","ne":"-","ozet":"YouTube/ses/video medya skill koleksiyonu; gelistirici is akisi degil, elendi."}
+{"repo":"anthropics/life-sciences","stars":592,"karar":"hayir","ne":"-","ozet":"Yasam bilimleri marketplace'i; alan paketi, Core'a mekanizma sunmuyor, elendi."}
+{"repo":"rokpiy/auto-commenter","stars":584,"karar":"hayir","ne":"-","ozet":"Sosyal medya yorum botu skill'i; ilgisiz, elendi."}
+{"repo":"zarazhangrui/youtube-to-ebook","stars":553,"karar":"hayir","ne":"-","ozet":"YouTube transkriptinden EPUB ureten skill; ilgisiz, elendi."}
+{"repo":"mengke-wang/xiaohongshu-ai-workbench","stars":543,"karar":"hayir","ne":"-","ozet":"Xiaohongshu icerik operasyonu skill paketi; ilgisiz, elendi."}
+{"repo":"ananddtyagi/cc-marketplace","stars":688,"karar":"hayir","ne":"-","ozet":"Topluluk komut/ajan marketplace aynasi; kendi mekanizmasi yok, salt dizin, elendi."}
+{"repo":"divar-ir/ai-doc-gen","stars":755,"karar":"hayir","ne":"-","ozet":"Cok ajanli README/CLAUDE.md ureteci (Python, OpenAI uyumlu API); Core'un sifir-token ilkesine ters agir kosum, elendi."}
+{"repo":"shanraisshan/claude-code-hooks","stars":539,"karar":"al","ne":"kitap","ozet":"30 kanca olayinin tam katalogu (34.9 KB HOOKS-README + surum tablosu); Core 5 olayi hic kullanmiyor."}
+{"repo":"raiyanyahya/recall","stars":750,"karar":"al","ne":"fikir","ozet":"3 kanca, 1676 satir salt-stdlib Python; ozeti TF-IDF+TextRank yerel uretiyor, sifir model token."}
+{"repo":"dongshuyan/compass-skills","stars":724,"karar":"al","ne":"kitap","ozet":"9 skill, 4.676 B daimi frontmatter yuku; task-clarifier ve session-handoff metinleri rafa deger."}
+{"repo":"levnikolaevich/claude-code-skills","stars":559,"karar":"al","ne":"kitap","ozet":"SKILL_TEMPLATE 200 satir tavani ve preservation contract; Core'un kitap yazma disiplinine dogrudan uyar."}
+{"repo":"soumatheusgomes/vibe-coding-toolkit","stars":570,"karar":"al","ne":"kitap","ozet":"Kurulan hicbir sey yok, 26 dokuman 67 KB pasif metin; kanca pratikleri ve paralel alt ajan sevki alinir."}
+{"repo":"hellowind777/hello2cc","stars":693,"karar":"fikir","ne":"kanca","ozet":"7 kanca olayi; lastRouteStateSignature ile ayni bagalam ikinci kez enjekte edilmiyor - tekrar bastirma deseni."}
+{"repo":"kingbootoshi/cartographer","stars":680,"karar":"fikir","ne":"fikir","ozet":"SQLite kod grafi + sinirli brief; map.js icin artimli onbellek ve brief fikri, MCP alinmaz."}
+{"repo":"GaoSSR/best-claude-hud","stars":762,"karar":"fikir","ne":"fikir","ozet":"Rust statusline; baglam penceresi transkript geri dusmesi ve sabit proje koku segmenti alinabilir."}
+{"repo":"zscole/adversarial-spec","stars":556,"karar":"fikir","ne":"fikir","ozet":"Cok modelli tartisma; tek alinacak parca Claude'un sentezci degil bagimsiz elestirmen olmasi."}
+{"repo":"majiayu000/claude-skill-registry","stars":598,"karar":"fikir","ne":"fikir","ozet":"Skill dizini, kurulum yok; mantik/veri/ayna ayrimi ve stats.json badge fikri kutuphane buyurse ise yarar."}
+{"repo":"chujianyun/skills","stars":732,"karar":"fikir","ne":"fikir","ozet":"32 SKILL.md, CC-BY-NC-SA; agent-md-advisor ilginc ama lisans ticari degil ve 32 skill kurulum ilkesine aykiri."}
+{"repo":"memvid/claude-brain","stars":576,"karar":"hayir","ne":"-","ozet":"PostToolUse matcher * ile her arac cagrisinda Node sureci; recall ayni isi bagimliliksiz yapiyor."}

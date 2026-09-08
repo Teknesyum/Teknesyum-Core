@@ -1,0 +1,3 @@
+huggingface/upskill · skill'i baseline vs with-skill kosup token farkini (or. 1200 -> 800, -%33) raporluyor; Core'un bench'ine dogrudan olcum kolonu
+karanb192/claude-code-hooks · kanca kataloqu: guvenlik, maliyet, gozlemlenebilirlik, verimlilik; her biri tek komutla kurulan ayri eklenti, Core'un kanca esikleriyle karsilastirilabilir
+anthropics/knowledge-work-plugins · resmi eklenti deposu; skill'lerin ilerlemeli yuklenmesi (once ad+aciklama, gerekince govde) Core'un raf ilkesinin resmi karsiligi

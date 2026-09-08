@@ -1,0 +1,3 @@
+daniel3303/ClaudeCodeStatusLine · ★600 · statusline modele hic token yazmadan model/token/kota/git gosterir; Core'un statusline alanina dogrudan karsilastirma
+agent-sh/agnix · ★405 · CLAUDE.md, AGENTS.md, SKILL.md, kanca ve MCP dosyalarini dogrulayan linter; Core'un kural tavani denetcisi icin hazir kural kumesi
+tmck-code/yet-another-statusline · ★241 · UserPromptSubmit kancasiyla tur basina zaman damgasi tutup alt ajan gosterimini tur kapsamina indiriyor; Core'un esik sayaci icin pasif kanca ornegi

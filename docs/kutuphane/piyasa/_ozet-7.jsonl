@@ -1,0 +1,18 @@
+{"repo":"anomalyco/opencode","stars":205802,"karar":"hayir","ne":"-","ozet":"Claude Code'un yerine geçen bağımsız açık kaynak kodlama ajanı; eklentiye alınacak bir parçası yok."}
+{"repo":"microsoft/autogen","stars":60866,"karar":"hayir","ne":"-","ozet":"Python çok-ajanlı programlama çatısı; Claude Code eklenti mekanizmasıyla ilgisiz."}
+{"repo":"davila7/claude-code-templates","stars":30565,"karar":"hayir","ne":"-","ozet":"Zaten okunmuş (okunmus.txt), çakışma nedeniyle atlandı."}
+{"repo":"AgriciDaniel/claude-obsidian","stars":14728,"karar":"hayir","ne":"-","ozet":"Zaten okunmuş (okunmus.txt), çakışma nedeniyle atlandı."}
+{"repo":"joshpxyne/gpt-migrate","stars":6978,"karar":"hayir","ne":"-","ozet":"Kod tabanını dil/çatı arası taşıyan tek amaçlı GPT aracı; Claude Code iş akışıyla ilgisiz."}
+{"repo":"muellerberndt/mini-agi","stars":2897,"karar":"hayir","ne":"-","ozet":"OpenAI API üstünde genel amaçlı otonom ajan denemesi; eklenti mekanizması yok."}
+{"repo":"Farama-Foundation/ChatArena","stars":1560,"karar":"hayir","ne":"-","ozet":"LLM'ler için çok-ajanlı dil oyunu ortamı; araştırma kütüphanesi, Core ile ilgisiz."}
+{"repo":"kreneskyp/ix","stars":1046,"karar":"hayir","ne":"-","ozet":"GPT-4 tabanlı otonom ajan platformu (Django+React); Claude Code eklentisi değil."}
+{"repo":"genlayerlabs/yeagerai-agent","stars":592,"karar":"hayir","ne":"-","ozet":"LangChain aracı üreten eski ajan asistanı; açıklama bile boş, Core ile ilgisiz."}
+{"repo":"nicepkg/gpt-runner","stars":384,"karar":"hayir","ne":"-","ozet":"AI ön ayarlarını yöneten CLI/Web/VSCode aracı; Claude Code öncesi, eklenti mekanizması yok."}
+{"repo":"jthack/ffuf_claude_skill","stars":211,"karar":"fikir","ne":"fikir","ozet":"Konu (web fuzzing) alakasız ama 178 baytlık frontmatter'a karşı 17 KB gövde oranı Core'un raf ölçüsü için referans."}
+{"repo":"egorfedorov/claude-context-optimizer","stars":107,"karar":"al","ne":"kanca","ozet":"22 skill yüzeyi (~810 token sabit) alınmaz, ama PreToolUse tekrar-okuma engeli ve puan≥80'de susan istem koçu Core'un kanca felsefesiyle birebir."}
+{"repo":"saten-private/BabyCommandAGI","stars":61,"karar":"hayir","ne":"-","ozet":"CLI ile LLM'i birleştiren BabyAGI türevi deney; Claude Code eklenti yüzeyi yok."}
+{"repo":"glama-ai/tool-definition-quality-score","stars":32,"karar":"al","ne":"kitap","ozet":"Kurulacak hiçbir şey yok, 62 KB saf spesifikasyon; altı boyutlu araç açıklaması ölçeği ve definitionBytes kavramı rafa girer."}
+{"repo":"lukaszraczylo/claude-mnemonic","stars":19,"karar":"hayir","ne":"-","ozet":"Her istemde 8.000 token'a kadar bellek enjekte ediyor (maxTokens:=8000), artı daemon + MCP + pano; Core ilkesinin tersi."}
+{"repo":"grooverLab/fable","stars":11,"karar":"al","ne":"kitap","ozet":"25 MCP aracı (~7.100 token) alınmaz, ama istem-tarafı kapı (deixis+nadir varlık, taban 70) ve 30 sn duvar saati bütçesi deseni piyasanın en iyi örneği."}
+{"repo":"Jackalope-Dev/allmcps-server","stars":4,"karar":"hayir","ne":"-","ozet":"AllMCPs.com dizinine sunucu kaydeden ürün MCP'si; geliştirici bilgi paketi değil."}
+{"repo":"minia2auk/minia2a-mcp","stars":1,"karar":"hayir","ne":"-","ozet":"USDC ile ücretli x402 ajan araçları sunan uzak MCP sunucusu; Core'a alınacak mekanizma yok."}

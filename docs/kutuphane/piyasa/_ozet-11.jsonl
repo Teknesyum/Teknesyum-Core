@@ -1,0 +1,18 @@
+{"repo":"x1xhlol/system-prompts-and-models-of-ai-tools","stars":143445,"karar":"fikir","ne":"kitap","ozet":"30+ aracin sizdirilmis sistem istemi; kurulum yok, sifir token, ama Core'da okunmus claude-code-system-prompts ayni alani daha temiz kapatiyor."}
+{"repo":"anthropics/claude-cookbooks","stars":52549,"karar":"al","ne":"kitap","ozet":"Resmi Claude API tarif derlemesi; arac kullanimi ve istem onbellekleme defterleri pasif raf olarak dogrudan aliniyor."}
+{"repo":"gastownhall/beads","stars":26969,"karar":"hayir","ne":"-","ozet":"Zaten okunmus (okunmus.txt), atlandi."}
+{"repo":"Piebald-AI/claude-code-system-prompts","stars":12612,"karar":"hayir","ne":"-","ozet":"Zaten okunmus (okunmus.txt), atlandi."}
+{"repo":"linyiLYi/street-fighter-ai","stars":6521,"karar":"hayir","ne":"-","ozet":"Pekistirmeli ogrenmeyle oyun oynayan ajan; Claude Code is akisiyla ilgisi yok."}
+{"repo":"agiresearch/OpenAGI","stars":2282,"karar":"hayir","ne":"-","ozet":"AIOS cekirdegi icin Python ajan olusturma paketi; kendi SDK'sina goc etmis, Core mekanizmasiyla ilgisiz."}
+{"repo":"tddworks/ClaudeBar","stars":1468,"karar":"hayir","ne":"-","ozet":"macOS menu cubugunda kota izleyici (Swift); Windows'ta calismaz, Core'a kurulacak mekanizma yok."}
+{"repo":"hoangsonww/Claude-Code-Agent-Monitor","stars":983,"karar":"fikir","ne":"kanca","ozet":"8 kanca olayini settings.json'a yazip SQLite panoya akitiyor; alinacak olan matcher'li/matchersiz olay tablosu ve hazir deny izin sablonu."}
+{"repo":"composable-models/llm_multiagent_debate","stars":551,"karar":"hayir","ne":"-","ozet":"ICML makalesinin cok ajanli tartisma deney kodu; urun mekanizmasi degil."}
+{"repo":"felixbrock/lemon-agent","stars":350,"karar":"hayir","ne":"-","ozet":"Bakimsiz LangChain tabanli Airtable/Notion is akisi ajani; Claude Code ile ilgisiz."}
+{"repo":"mag123c/toktrack","stars":188,"karar":"fikir","ne":"fikir","ozet":"Kalici onbellekli token/maliyet izleyici; Claude Code oturumu 30 gun sonra sildigi icin olcum ham verisi kopyalanmali uyarisi alindi."}
+{"repo":"seahyinghang8/blinky","stars":90,"karar":"hayir","ne":"-","ozet":"VSCode uzantisi olarak OpenAI tabanli hata ayiklama ajani; eklenti mekanizmasi yok."}
+{"repo":"Equilateral-AI/equilateral-agents-open-core","stars":59,"karar":"fikir","ne":"fikir","ozet":"4 eklenti, 10 komut, 22 JS ajani ve skill icinde ticari katman reklami; yalniz ALWAYS/NEVER alanli YAML standart semasi alinir."}
+{"repo":"mennanov/blockwatch","stars":29,"karar":"al","ne":"betik","ozet":"Yorum icindeki <block affects=...> etiketiyle kod-dokuman surukleniyorsa CI/pre-commit'i dusuren deterministik linter; README ikizleri kuralini modelden alip araca veriyor, sifir token."}
+{"repo":"sotthang/so-agentbar","stars":17,"karar":"hayir","ne":"-","ozet":"macOS menu cubugunda oturum izleyici; platform disi, mekanizma yok."}
+{"repo":"serpro69/capy","stars":10,"karar":"fikir","ne":"fikir","ozet":"MCP + sifreli SQLite ile arac ciktisini baglamdan cikaran agir katman; alinan sey NIAH tabanli durust olcum yontemi ve ciktiyi diske yazma kalibi."}
+{"repo":"skills-lock/skil-lock","stars":3,"karar":"fikir","ne":"fikir","ozet":"Skill'lerin kabuk/ag/dosya yetenek yuzeyini skills.lock'a sabitleyip PR'da sapmayi bloklayan Go araci; kutuphane raflari icin yetenek yuzeyi kaydi fikri."}
+{"repo":"bridgenode-ai/bridgenode-mcp","stars":1,"karar":"hayir","ne":"-","ozet":"Solana USDC ile odemeli genel MCP proxy'si; Core ilkesiyle alakasiz."}

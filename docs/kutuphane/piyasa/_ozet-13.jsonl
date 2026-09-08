@@ -1,0 +1,18 @@
+{"repo":"garrytan/gstack","stars":132023,"karar":"hayir","ne":"-","ozet":"Zaten okunmus (okunmus.txt), atlandi."}
+{"repo":"Aider-AI/aider","stars":48827,"karar":"hayir","ne":"-","ozet":"Bagimsiz terminal esli programlama araci; Claude Code eklenti mekanizmasi yok."}
+{"repo":"microsoft/JARVIS","stars":25240,"karar":"hayir","ne":"-","ozet":"LLM'i HuggingFace modellerine baglayan arastirma sistemi; Core ile ilgisiz."}
+{"repo":"smol-ai/developer","stars":12186,"karar":"hayir","ne":"-","ozet":"Uygulamaya gomulen 2023 gelistirici ajan kutuphanesi; gecerli mekanizma yok."}
+{"repo":"anthropics/claude-code-security-review","stars":6182,"karar":"al","ne":"kitap","ozet":"Yuksek guvenli guvenlik bulgusu istemi + dosyadaki eleme kurallari; sirada 0 KB, komut 10.8 KB."}
+{"repo":"satellitecomponent/Neurite","stars":2126,"karar":"hayir","ne":"-","ozet":"Fraktal zihin haritasi web arayuzu; Claude Code is akisiyla ilgisiz."}
+{"repo":"eumemic/ai-legion","stars":1435,"karar":"hayir","ne":"-","ozet":"Otonom ajan platformu; eklenti/kanca mekanizmasi yok."}
+{"repo":"bitjaru/styleseed","stars":944,"karar":"fikir","ne":"fikir","ozet":"23 skill acikliksi 4.5 KB her turda yukleniyor; alinan sey 50 KB el kitabini kucuk pakete derleme deseni."}
+{"repo":"danielrosehill/Claude-Code-Projects-Index","stars":539,"karar":"hayir","ne":"fikir","ozet":"Lisanssiz metin indeksi, 0 mekanizma; yalniz sonraki tarama icin aday kaynagi."}
+{"repo":"blob42/Instrukt","stars":330,"karar":"hayir","ne":"-","ozet":"Terminalde ajan gelistirme ortami (AGPL); Claude Code baglam mekanizmasi yok."}
+{"repo":"roomi-fields/notebooklm-mcp","stars":174,"karar":"hayir","ne":"-","ozet":"Genel MCP sunucusu (NotebookLM koprusu); eleme kurali geregi acilmadi."}
+{"repo":"agentrhq/authsome","stars":88,"karar":"hayir","ne":"-","ozet":"Ajanlar icin OAuth kimlik gecidi; urun, Core'a alinacak metin/kanca yok."}
+{"repo":"pj4533/yourgoal","stars":53,"karar":"hayir","ne":"-","ozet":"BabyAGI'nin Swift portu; guncel Claude Code mekanizmasiyla ilgisiz."}
+{"repo":"arturogarrido/claudinho","stars":28,"karar":"hayir","ne":"-","ozet":"Dunya Kupasi skorlarini statusline'a basan MCP/CLI; mekanizma ilginc, icerik alakasiz."}
+{"repo":"fabioconcina/claumon","stars":16,"karar":"fikir","ne":"fikir","ozet":"0 KB baglam, limit ongorusunu panoya yazan Go ikilisi; statusline ilkesini dogrulayan ornek."}
+{"repo":"Work90210/APIFold","stars":10,"karar":"hayir","ne":"-","ozet":"REST API'yi MCP sunucusuna ceviren arac; genel MCP, elendi."}
+{"repo":"agentbodegastore/agentbodega","stars":3,"karar":"hayir","ne":"-","ozet":"MCP kesif kayit paketi; icerik yok."}
+{"repo":"team886/findagent-mcp","stars":0,"karar":"hayir","ne":"-","ozet":"Ajan pazaryeri MCP sunucusu; Core ile ilgisiz."}

@@ -1,0 +1,3 @@
+karanb192/claude-code-hooks · 507 yildiz · her arac cagrisini PreToolUse/PostToolUse kancasindan geciren en az yetki katmani, kancalar OWASP LLM Top 10 2026 ile eslenmis; Core'un kanca tarafinda dogrudan ornek
+disler/claude-code-hooks-mastery · 3914 yildiz · sekiz kanca olayinin tamami icin calisan referans ornekler; Core'un kanca olay listesi rafi icin birincil kaynak
+athola/claude-night-market · 336 yildiz · 23 eklenti icinde "context optimization" ve TDD zorlayan kancalar; yildiz esigin altinda ama baglam maliyeti olcumu icin bakilabilir

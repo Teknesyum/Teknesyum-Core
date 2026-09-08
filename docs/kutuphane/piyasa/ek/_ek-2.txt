@@ -1,0 +1,3 @@
+jarrodwatts/claude-hud · ★27875 MIT · Bağlam kullanımı, etkin araçlar, çalışan ajanlar ve todo ilerlemesini gösteren Claude Code eklentisi; Core'un statusline'ı ile doğrudan aynı alan, kanca/ölçüm mekanizması ölçülmeli.
+sirmalloc/ccstatusline · ★12803 MIT · Statusline; JSONL transkriptini tek geçişte akıtarak (tümünü belleğe almadan) büyük oturumlarda hızlı ölçüm yapıyor — Core betikleri için ucuz okuma tarifi.
+disler/claude-code-hooks-multi-agent-observability · ★1532 · Yalnız kanca olaylarıyla çalışan izleme; hangi olayın ne yazdığına dair kanon örnek, Core'un "kanca yalnız eşikte konuşur" ilkesine karşı ölçüt.

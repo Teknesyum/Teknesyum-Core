@@ -1,0 +1,3 @@
+scaccogatto/okf-skills · ★378 · spec'i skills/okf/reference/SPEC.md altında aynen vendor'layıp deterministik uygunluk denetleyicisiyle doğruluyor — workflows-plugin'in VENDOR.lock desenini ikinci kez doğrulayan örnek, Core kütüphanesi için doğrudan model
+travisvn/awesome-claude-skills · ★15006 · Claude Code odaklı skill/araç kataloğu; okunmuş listede yok, sonraki dilimlerin aday havuzunu tazelemek için ham kaynak
+jeremylongshore/claude-code-plugins-plus-skills · ★2711 · harness'tan bağımsız kanonik skill katmanı + doğrulanmış uyarlayıcılar; Core'un "hiçbir şey skill olarak kurulmaz" ilkesinin karşı-tezi, mekanizma karşılaştırması için değerli

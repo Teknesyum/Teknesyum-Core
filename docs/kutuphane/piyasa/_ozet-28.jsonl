@@ -1,0 +1,26 @@
+{"repo":"career-ops-hq/career-ops","stars":70570,"karar":"hayir","ne":"-","ozet":"Is arama otomasyonu; Claude Code mekanizmasiyla ilgisiz urun, 1. adimda elendi."}
+{"repo":"tt-a1i/archify","stars":54323,"karar":"hayir","ne":"-","ozet":"Mimari diyagram ureten icerik skill'i; Core'un pasif kutuphane ilkesine katki yok."}
+{"repo":"blader/humanizer","stars":45281,"karar":"hayir","ne":"-","ozet":"Metinden yapay zeka izlerini silen yazim skill'i; gelistirici is akisiyla ilgisiz."}
+{"repo":"musistudio/claude-code-router","stars":37128,"karar":"hayir","ne":"-","ozet":"Saglayici yonlendirme masaustu uygulamasi; baglam maliyeti degil altyapi problemi cozuyor."}
+{"repo":"googleworkspace/cli","stars":30785,"karar":"hayir","ne":"-","ozet":"Google Workspace CLI; alakasiz urun, 1. adimda elendi."}
+{"repo":"BloopAI/vibe-kanban","stars":28037,"karar":"hayir","ne":"-","ozet":"Kanban tabanli ajan orkestratoru, README'de kapaniyor duyurusu var; alinacak mekanizma yok."}
+{"repo":"claude-code-best/claude-code","stars":22413,"karar":"hayir","ne":"-","ozet":"Claude Code'un yeniden yazilmis kopyasi; eklenti degil, harness alternatifi."}
+{"repo":"teng-lin/notebooklm-py","stars":19212,"karar":"hayir","ne":"-","ozet":"NotebookLM icin resmi olmayan Python API; alakasiz urun."}
+{"repo":"getpaseo/paseo","stars":16505,"karar":"hayir","ne":"-","ozet":"Coklu ajan masaustu/mobil arayuzu; Core'un tur basina sifir token ilkesine temas etmiyor."}
+{"repo":"img2threejs/img2threejs","stars":15560,"karar":"hayir","ne":"-","ozet":"Gorselden three.js sahnesi ureten arac; alakasiz."}
+{"repo":"lidge-jun/opencodex","stars":13935,"karar":"hayir","ne":"-","ozet":"Saglayici proxy'si; model yonlendirme, bilgi paketi degil."}
+{"repo":"mrexodia/ida-pro-mcp","stars":11908,"karar":"hayir","ne":"-","ozet":"IDA Pro icin MCP sunucusu; genel MCP, Core kapsaminin disinda."}
+{"repo":"omnigent-ai/omnigent","stars":9778,"karar":"hayir","ne":"-","ozet":"Coklu harness meta-orkestratoru (alfa); urun katmani, pasif kitap degil."}
+{"repo":"chuspeeism/dashi-ppt-skill","stars":7782,"karar":"hayir","ne":"-","ozet":"Sunum ureten icerik skill'i; gelistirici bilgi paketi degil."}
+{"repo":"op7418/guizang-social-card-skill","stars":6914,"karar":"hayir","ne":"-","ozet":"Sosyal medya kart ureten skill; alakasiz icerik uretimi."}
+{"repo":"ThinkInAIXYZ/deepchat","stars":6310,"karar":"hayir","ne":"-","ozet":"Masaustu sohbet istemcisi; Claude Code eklenti mekanizmasiyla ilgisiz."}
+{"repo":"browser-act/skills","stars":5842,"karar":"hayir","ne":"-","ozet":"Tarayici otomasyonu bulut urunu; anti-bot/proxy satiyor, baglam mekanizmasi yok."}
+{"repo":"internet-court/internet-court-skill","stars":5476,"karar":"hayir","ne":"-","ozet":"Ajanlar arasi ticaret/yetkilendirme katmani; Core kapsaminin disinda."}
+{"repo":"tinyplex/tinybase","stars":5171,"karar":"hayir","ne":"-","ozet":"Reaktif veri deposu kutuphanesi; ajan is akisiyla ilgisiz."}
+{"repo":"darrenhinde/OpenAgentsControl","stars":4833,"karar":"hayir","ne":"-","ozet":"OpenCode uzerine kurulu ajan/onay catisi; Claude Code kanca modeline tasinmiyor."}
+{"repo":"haris-musa/excel-mcp-server","stars":4163,"karar":"hayir","ne":"-","ozet":"Excel icin genel MCP sunucusu; alakasiz."}
+{"repo":"thedotmack/claude-mem","stars":93465,"karar":"fikir","ne":"kanca","ozet":"6 kanca olayi + daima acik MCP; async kanca ve SessionStart compact matcheri alinir, her turda baglam enjeksiyonu alinmaz."}
+{"repo":"EveryInc/compound-engineering-plugin","stars":24956,"karar":"al","ne":"kitap","ozet":"33 skill, 0 kanca, tur basina 8,2 KB; ince SKILL.md + kalin references/ deseni Corein raf yapisiyla birebir."}
+{"repo":"cobusgreyling/loop-engineering","stars":11114,"karar":"al","ne":"kitap","ozet":"7 skill 589 bayt; butce/kisit/dogrulayici metinleri ve ilk hafta yalniz rapor varsayilani rafa girer."}
+{"repo":"elementalsouls/Claude-BugHunter","stars":4378,"karar":"hayir","ne":"fikir","ozet":"83 skill + 15 komut = tur basina ~59 KB aciklama; alan disi ama pasif kutuphane tercihinin olculmus karsi ornegi."}
+{"repo":"nexu-io/html-anything","stars":8701,"karar":"fikir","ne":"fikir","ozet":"Claude Codea hicbir sey kurmuyor; 75 sablondan yalnizca eslesenini isteme koyan kod tarafli skills-matcher fikri kayda deger."}

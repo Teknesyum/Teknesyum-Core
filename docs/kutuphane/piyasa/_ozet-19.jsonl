@@ -1,0 +1,18 @@
+{"repo":"shareAI-lab/learn-claude-code","stars":76320,"karar":"hayir","ne":"-","ozet":"Zaten okunmus (okunmus.txt), atlandi."}
+{"repo":"luongnv89/claude-howto","stars":41408,"karar":"hayir","ne":"-","ozet":"Zaten okunmus (okunmus.txt), atlandi."}
+{"repo":"SWE-agent/SWE-agent","stars":20279,"karar":"hayir","ne":"-","ozet":"Kendi Python ajan catisi ve LM dongusu; Claude Code eklenti yuzeyi yok."}
+{"repo":"nicobailon/visual-explainer","stars":9665,"karar":"hayir","ne":"-","ozet":"Zaten okunmus (okunmus.txt), atlandi."}
+{"repo":"BuilderIO/micro-agent","stars":4328,"karar":"hayir","ne":"-","ozet":"Test-odakli kod ureten bagimsiz CLI urunu; Core mekanizmasiyla kesismiyor."}
+{"repo":"101dotxyz/GPTeam","stars":1723,"karar":"hayir","ne":"-","ozet":"Coklu ajan sosyal simulasyonu; gelistirici is akisiyla ilgisiz."}
+{"repo":"TaxyAI/browser-extension","stars":1275,"karar":"hayir","ne":"-","ozet":"GPT-4 ile tarayici otomasyonu eklentisi; Claude Code baglami disinda."}
+{"repo":"es617/claude-replay","stars":826,"karar":"fikir","ne":"betik","ozet":"Sifir baglamli CLI; sir temizleyici (src/secrets.mjs) ve bicim adaptor katmani Core'un log/kayit tarafina uyar."}
+{"repo":"stepanogil/autonomous-hr-chatbot","stars":462,"karar":"hayir","ne":"-","ozet":"IK sohbet botu demosu; alakasiz."}
+{"repo":"codeintegrity-ai/mutahunter","stars":300,"karar":"hayir","ne":"-","ozet":"Mutasyon testi araci, AGPL; eklenti/baglam mekanizmasi yok."}
+{"repo":"sorkila/lockpaw","stars":148,"karar":"hayir","ne":"-","ozet":"macOS ekran kilidi uygulamasi; baglama giren hicbir sey yok, Core alani degil."}
+{"repo":"sathish316/pied-piper","stars":78,"karar":"hayir","ne":"-","ozet":"Go ile alt ajan takimi ureten SDLC catisi; Core'un 'hicbir sey ajan olarak kurulmaz' ilkesinin tersi."}
+{"repo":"duqaXxX/seedeep","stars":45,"karar":"fikir","ne":"fikir","ozet":"0 kanca / 0 token; tur sonu yedi deterministik israf kontrolu (verdict.ts) ve soguk-resume ayrimi Core esik kancasina uyar."}
+{"repo":"masondelan/selvedge","stars":23,"karar":"hayir","ne":"fikir","ozet":"'Denendi ve geri alindi' kaydi degerli ama kurulum ~2,0k token (CLAUDE.md 7,3KB + MCP + skill) ve her Edit/Bash'te kanca."}
+{"repo":"TevvvB/termagitchi","stars":14,"karar":"hayir","ne":"fikir","ozet":"~55 token, 3 kanca ama ciktisi statusline'a gidiyor; mekanizma ornek, islev Core alani degil."}
+{"repo":"2s-io/sdk","stars":8,"karar":"hayir","ne":"-","ozet":"2s.io icin istemci API sarmalayicisi; genel urun SDK'si."}
+{"repo":"gzchenhao/openhire","stars":2,"karar":"hayir","ne":"-","ozet":"ATS API'leri uzerinden is arama ajani; gelistirici is akisiyla ilgisiz."}
+{"repo":"RightOnPar-LLC/mesh-connector","stars":0,"karar":"hayir","ne":"-","ozet":"Genel MCP istemci koprusu/pazar yeri baglayicisi; elendi."}

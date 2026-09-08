@@ -1,0 +1,18 @@
+{"repo":"trekhleb/javascript-algorithms","stars":196657,"karar":"hayir","ne":"-","ozet":"JavaScript algoritma ders deposu; Claude Code veya ajan is akisiyla ilgisi yok."}
+{"repo":"crewAIInc/crewAI","stars":58230,"karar":"hayir","ne":"-","ozet":"Python rol tabanli coklu ajan cercevesi; Claude Code eklenti mekanizmasiyla kesismiyor."}
+{"repo":"assafelovic/gpt-researcher","stars":29352,"karar":"hayir","ne":"-","ozet":"Otonom arastirma ajani urunu; kanca/skill/komut mekanizmasi yok."}
+{"repo":"coleam00/context-engineering-intro","stars":13822,"karar":"hayir","ne":"-","ozet":"Onceki dilimde okundu (okunmus.txt), atlandi."}
+{"repo":"superagent-ai/superagent","stars":6734,"karar":"hayir","ne":"-","ozet":"Ajan guvenligi SDK'si (prompt injection, PII); Claude Code baglami disinda."}
+{"repo":"dot-agent/nextpy","stars":2347,"karar":"hayir","ne":"-","ozet":"Kendini degistiren Python uygulama cercevesi; eklenti mekanizmasi yok."}
+{"repo":"disler/claude-code-hooks-multi-agent-observability","stars":1532,"karar":"fikir","ne":"fikir","ozet":"13 kancali olay izleme panosu; kanca olay katalogu degerli ama --summarize her tur model cagiriyor."}
+{"repo":"metauto-ai/GPTSwarm","stars":1043,"karar":"hayir","ne":"-","ozet":"Grafik tabanli ajan optimizasyonu arastirma kodu; Core'a aktarilabilir mekanizma yok."}
+{"repo":"jbexta/AgentPilot","stars":567,"karar":"hayir","ne":"-","ozet":"Masaustu is akisi GUI'si; Claude Code eklenti yuzeyi kullanmiyor."}
+{"repo":"hluaguo/learn-faster-kit","stars":371,"karar":"fikir","ne":"fikir","ozet":"CLI baslatici kip basina sistem istemini --system-prompt ile ikame ediyor (5.9 KB, ekleme degil)."}
+{"repo":"node9-ai/node9-proxy","stars":210,"karar":"fikir","ne":"fikir","ozet":"Guvenlik proxy'si; skill-pin ozet sabitlemesi raf bayatligi tespiti icin uygun."}
+{"repo":"RubricLab/maige","stars":103,"karar":"hayir","ne":"-","ozet":"GitHub App SaaS, issue etiketleme; self-host desteklenmiyor."}
+{"repo":"depwire/depwire","stars":61,"karar":"hayir","ne":"fikir","ozet":"BUSL lisansli 24 aracli MCP bagimlilik grafigi; ters-bagimlilik sorgusu map.js icin fikir."}
+{"repo":"SergKam/FlyCrys","stars":31,"karar":"hayir","ne":"-","ozet":"Arsivlenmis Linux GTK4 GUI; resmi Linux uygulamasi cikinca gelistirme durdurulmus."}
+{"repo":"TakaGoto/rag-learning-academy","stars":18,"karar":"al","ne":"betik","ozet":"9.5 KB CLAUDE.md + 20 ajan + 22 skill; check-freshness.sh git tarihinden bayat dosya bulan pasif betik."}
+{"repo":"labzink/cc-probeline","stars":11,"karar":"fikir","ne":"kanca","ozet":"Siradan turda 0 token; kosullu tek satir kanca ve iki sinifli uyari deseni Core ilkesiyle ortusuyor."}
+{"repo":"jaspertvdm/mcp-server-gemini-bridge","stars":4,"karar":"hayir","ne":"-","ozet":"Gemini API'ye genel MCP koprusu; Core baglaminda karsiligi yok."}
+{"repo":"getanyapi-com/mcp","stars":1,"karar":"hayir","ne":"-","ozet":"Ticari scraping API'lerini saran genel stdio MCP sunucusu."}

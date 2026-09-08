@@ -1,0 +1,21 @@
+{"repo":"glitternetwork/pinme","stars":3739,"karar":"hayir","ne":"-","ozet":"Tek komutla frontend/Worker dagitan zero-config CLI; skill destegi var ama urun dagitim araci, Claude Code is akisiyla ilgisi yok."}
+{"repo":"isjiamu/gzh-design-skill","stars":3567,"karar":"hayir","ne":"-","ozet":"Markdown'i WeChat editorune yapisacak HTML'e ceviren tema skill'i; alan tamamen alakasiz."}
+{"repo":"codeaashu/claude-code","stars":3309,"karar":"hayir","ne":"-","ozet":"Sizdirilmis Claude Code kaynagi aynasi; kurulabilir bir paket degil, RepoXray reklami tasiyor."}
+{"repo":"punitarani/fli","stars":3143,"karar":"hayir","ne":"-","ozet":"Google Flights MCP/CLI kutuphanesi; genel MCP sunucusu, konu disi."}
+{"repo":"tigerless-labs/autoharness","stars":2953,"karar":"al","ne":"kanca","ozet":"Tek kapi dispatcher (4 olay tek dosya), 60 karakter tavanli SessionStart indeksi ve kullanim oraniyla budama; Core'un pasif kutuphanesine dogrudan uyar."}
+{"repo":"addyosmani/web-quality-skills","stars":2766,"karar":"fikir","ne":"fikir","ozet":"6 skill, kanca yok ama 3382 B CLAUDE.md ile turda ~1225 token sabit yuk; olcmeden iddia etme disiplini alinir, alan alinmaz."}
+{"repo":"NeekChaw/RIPER-5","stars":2624,"karar":"hayir","ne":"fikir","ozet":"Bes modlu davranis protokolu metni (~3900 token), kurulabilir mekanizma yok; mod ilani fikri Core'un plan ipucunda zaten var."}
+{"repo":"softaworks/agent-toolkit","stars":2446,"karar":"fikir","ne":"fikir","ozet":"47 beceri tek tek kurulabilir eklenti olarak dagitiliyor; hepsi 11.9 KB (~3000 token), bes tanesi ~320 token — secilebilir dagitimin aritmetigi."}
+{"repo":"Astro-Han/karpathy-llm-wiki","stars":2178,"karar":"al","ne":"betik","ozet":"Tek skill + check_evidence.py: wiki'deki her sayi/tarih/alintinin degistirilemez kaynakta birebir gectigini makineyle dogrular, rapor-only."}
+{"repo":"composio-community/awesome-claude-plugins","stars":1941,"karar":"hayir","ne":"-","ozet":"Composio pazarlamali awesome listesi; kod yok, kurulacak mekanizma yok."}
+{"repo":"chaseai-yt/claudex-loop","stars":1703,"karar":"fikir","ne":"fikir","ozet":"4 skill (21 KB), kanca yok, turda ~275 token; sinirli revizyon turu fikri alinir, iki CLI + Python bagimliligi alinmaz."}
+{"repo":"huangserva/skill-prompt-generator","stars":1481,"karar":"hayir","ne":"-","ozet":"AI portre prompt uretim sistemi; alan tamamen alakasiz."}
+{"repo":"Dimillian/CodexSkillManager","stars":1370,"karar":"hayir","ne":"-","ozet":"Codex becerilerini yoneten macOS uygulamasi; Swift GUI, Core'a alinabilir bir parca yok."}
+{"repo":"JuneYaooo/gpt-image2-ppt-skills","stars":1259,"karar":"hayir","ne":"-","ozet":"pptx duzenini gpt-image-2 ile klonlayan sunum skill'i; alan alakasiz."}
+{"repo":"alookai/alook","stars":1179,"karar":"hayir","ne":"-","ozet":"Insan ve ajanlar icin ortak odalar urunu; Claude Code eklenti mekanizmasi degil."}
+{"repo":"mohi-devhub/antivibe","stars":1100,"karar":"hayir","ne":"fikir","ozet":"Stop ve SubagentStop kancalari 'type: prompt' — her tur sonunda model cagiriyor; sifir token ilkesinin tam karsi ornegi."}
+{"repo":"am-will/codex-skills","stars":1030,"karar":"hayir","ne":"fikir","ozet":"22 skill + 44 ajan, CLAUDE.md 5141 B ile turda ~2165 token sabit yuk; yalniz llm-council fikri not."}
+{"repo":"bawadou/claude-engineer","stars":954,"karar":"hayir","ne":"-","ozet":"Kendi aracini ureten Python CLI ajani; Claude Code eklentisi degil, ayri catI."}
+{"repo":"gamedev-skills/awesome-gamedev-agent-skills","stars":891,"karar":"hayir","ne":"-","ozet":"67 oyun gelistirme becerisi katalogu; alan Core disinda, mekanizma duz skill klasoru."}
+{"repo":"alirezarezvani/claude-code-skill-factory","stars":859,"karar":"hayir","ne":"fikir","ozet":"CLAUDE.md 10082 B (~2520 token) + 17 komut + 6 ajan; /build hook sablonu disinda ilkeyle olcum duzeyinde celisiyor."}
+{"repo":"ruvnet/agentic-flow","stars":804,"karar":"hayir","ne":"-","ozet":"66 kendi kendine ogrenen ajan, 213 MCP araci, her turda calisan ogrenme kancalari; agirlik olarak Core'un tam zitti."}

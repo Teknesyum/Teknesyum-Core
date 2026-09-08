@@ -1,0 +1,25 @@
+{"repo":"darcyegb/ClaudeCodeAgents","stars":761,"karar":"fikir","ne":"betik","ozet":"6 QA ajani (Jenny, Karen, CLAUDE.md uyum denetcisi); ajan olarak kurulmasi ilkeye aykiri ama CLAUDE.md uyum denetimi pasif betik olabilir."}
+{"repo":"yunshu0909/yunshu_skillshub","stars":754,"karar":"hayir","ne":"-","ozet":"36 Cince skill, frontmatter 19,6 KB ~4.900 token sabit gider; yalniz find-top-three ve dual-agent kaliplari not."}
+{"repo":"liquidos-ai/AutoAgents","stars":749,"karar":"hayir","ne":"-","ozet":"Rust cok-ajanli cerceve, Claude Code ile ilgisiz urun; 1. adimda elendi."}
+{"repo":"mliu98/awesome-human-distillation","stars":743,"karar":"hayir","ne":"-","ozet":"210 skill'lik Cince awesome listesi, kendi mekanizmasi yok; 1. adimda elendi."}
+{"repo":"decebals/claude-code-java","stars":731,"karar":"fikir","ne":"fikir","ozet":"18 skill 4.781 B (~1.200 token) ile dilimin en ucuz cok-skill'lisi; raf basina eval ve frontmatter'da license alani fikri."}
+{"repo":"borghei/Claude-Skills","stars":723,"karar":"hayir","ne":"-","ozet":"369 skill + 85 ajan, ~11.200 token; MIT + Commons Clause metin almayi kirletiyor, yalniz bundles.json demetlemesi fikir."}
+{"repo":"staruhub/ClaudeSkills","stars":711,"karar":"fikir","ne":"fikir","ozet":"20 skill 11.745 B (~2.900 token); kabul kontrolu alani ve raf bicimini CI'da dogrulama iki ucuz ekleme."}
+{"repo":"rshankras/claude-code-apple-skills","stars":710,"karar":"fikir","ne":"kitap","ozet":"183 skill ~13.100 token; frontmatter'daki last_verified/review_by tarih cifti raf bayatlamasina karsi bedava cozum."}
+{"repo":"gmickel/flow-next","stars":693,"karar":"fikir","ne":"fikir","ozet":"73 skill + 25 ajan ~7.200 token; CLAUDE.md'ye isaretli ve surumlu blok enjeksiyonu scaffold.js icin uygulanabilir desen."}
+{"repo":"Wechat-ggGitHub/wechat-claude-code","stars":683,"karar":"hayir","ne":"-","ozet":"WeChat'ten Claude Code'a kopru; urun yuzeyi Core ile ilgisiz, 1. adimda elendi."}
+{"repo":"shinpr/claude-code-workflows","stars":679,"karar":"fikir","ne":"kitap","ozet":"121 skill + 91 ajan ~15.600 token; 'yakinsama sorunu' cercevesi ve is akisini fiyatlama listesi rafa yazilir."}
+{"repo":"aeonfun/soul.md","stars":665,"karar":"hayir","ne":"-","ozet":"Ajana kisilik/SOUL.md uretme urunu, token satisi ile paketlenmis; gelistirici bilgi paketi degil, 1. adimda elendi."}
+{"repo":"AgentTorch/AgentTorch","stars":647,"karar":"hayir","ne":"-","ozet":"Genis nufus simulasyon modelleri; Claude Code ile ilgisiz, 1. adimda elendi."}
+{"repo":"dekart-xyz/geosql","stars":626,"karar":"hayir","ne":"-","ozet":"Cografi veri skill'i; alan Core'a tamamen uzak, 1. adimda elendi."}
+{"repo":"nWave-ai/nWave","stars":610,"karar":"hayir","ne":"-","ozet":"276 skill + 103 ajan ~23.900 token ve PreToolUse'ta her arac cagrisinda gomulu python3; Core ilkesinin karsi ornegi."}
+{"repo":"ksimback/tech-debt-skill","stars":593,"karar":"al","ne":"kitap","ozet":"Tek skill, frontmatter 409 B (~100 token) ve disable-model-invocation:true; churn okumadan hukum yok, her bulguda dosya:satir."}
+{"repo":"blader/napkin","stars":590,"karar":"fikir","ne":"kitap","ozet":"Her oturum kosulsuz okunan 3,9 KB (~1.000 token) — mekanizma ilkeye aykiri; kategori basi 10 madde + 'Do instead' budama sozlesmesi degerli."}
+{"repo":"dzhng/claude-agent-server","stars":583,"karar":"hayir","ne":"-","ozet":"Claude Agent SDK'yi E2B sandbox'ta websocket ile saran sunucu; eklenti/bilgi paketi degil, 1. adimda elendi."}
+{"repo":"seulee26/mckinsey-pptx","stars":575,"karar":"hayir","ne":"-","ozet":"PPTX sunum ureteci eklentisi; alan Core'a uzak, 1. adimda elendi."}
+{"repo":"flowful-ai/cad-skill","stars":564,"karar":"hayir","ne":"-","ozet":"CadQuery ile 3B model uretimi skill'i; alan Core'a uzak, 1. adimda elendi."}
+{"repo":"dacnay816y62-hub/photo-revival","stars":557,"karar":"hayir","ne":"-","ozet":"Fotograftan illustrasyon ureten Codex skill'i; ilgisiz urun, 1. adimda elendi."}
+{"repo":"agentlabs-dev/agentlabs","stars":556,"karar":"hayir","ne":"-","ozet":"AI ajanlari icin evrensel frontend urunu; Claude Code eklentisi degil, 1. adimda elendi."}
+{"repo":"oxbshw/Open-Workflow-Library","stars":552,"karar":"hayir","ne":"-","ozet":"n8n is akisi koleksiyonu ve dogrulama araclari; Claude Code ile ilgisiz, 1. adimda elendi."}
+{"repo":"oliver-kriska/claude-elixir-phoenix","stars":541,"karar":"fikir","ne":"kanca","ozet":"323 skill + 30 ajan ~13.600 token; hooks.json'daki 'if: Edit(*.ex)' kosulu ve statusMessage alani Core kancalarina birebir uygular."}
+{"repo":"s0xDk/refactoring-ui-skill","stars":539,"karar":"al","ne":"kitap","ozet":"Tek skill, frontmatter 612 B (~150 token), govde tetiklenince acilir; sabit bosluk/tip/agirlik olcekleri teknesyum-ui bosluguna denk."}

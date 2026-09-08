@@ -1,0 +1,3 @@
+mksglu/context-mode · ★21282 · Arac ciktisini kum havuzuna alip baglama girdisini %98 azalttigini iddia ediyor; Core'un sifir token ilkesinin olculmus rakibi, en azindan olcum yontemi alinabilir.
+mgechev/skills-best-practices · ★2250 · Yalin baglam penceresi icin beceri yazim kurallari + LLM ile dogrulama; Core'un raf yazim kilavuzuna dogrudan kitap adayi.
+thedaviddias/skill-check · ★188 · SKILL.md frontmatter/govde siniri icin deterministik linter, --fix destekli; model gerektirmeyen pasif betik, Core'un raflarini denetlemek icin. (yildiz esigin biraz altinda)

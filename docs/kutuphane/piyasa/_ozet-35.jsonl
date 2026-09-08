@@ -1,0 +1,22 @@
+{"repo":"liustack/modlens","stars":3916,"karar":"hayir","ne":"-","ozet":"DeepSeek Harness icin gorsel eklentisi; Claude Code is akisi ya da bilgi paketi degil, elendi."}
+{"repo":"memodb-io/Acontext","stars":3686,"karar":"hayir","ne":"fikir","ozet":"Skill bicimli otomatik bellek katmani; barindirilan servis ve kendi yazan skill'ler yuzunden tur maliyeti tavansiz."}
+{"repo":"bytebase/dbhub","stars":3478,"karar":"hayir","ne":"-","ozet":"Genel veritabani MCP sunucusu; Core ile ilgisiz, elendi."}
+{"repo":"cloudflare/security-audit-skill","stars":3246,"karar":"al","ne":"kitap","ozet":"86 KB'lik bilgi 9 konu dosyasina bolunmus salt metin paketi; sirada turda yalniz 325 B aciklama."}
+{"repo":"SnailSploit/Claude-Red","stars":3048,"karar":"hayir","ne":"betik","ozet":"78 saldirgan guvenlik skill'i (42.800 B aciklama); alan ilgisiz, secici install.sh kalibi not edildi."}
+{"repo":"jangviktor-web/nihaixia","stars":2869,"karar":"hayir","ne":"-","ozet":"Geleneksel Cin tibbi skill'i; gelistirici is akisiyla ilgisiz, elendi."}
+{"repo":"sparfenyuk/mcp-proxy","stars":2742,"karar":"hayir","ne":"-","ozet":"MCP tasima koprusu; Core mekanizmasiyla ilgisiz, elendi."}
+{"repo":"zilliztech/memsearch","stars":2577,"karar":"hayir","ne":"fikir","ozet":"5 kancali semantik bellek eklentisi; CLAUDE.md 9.884 B + 17 skill aciklamasi 6.293 B = ~4k token sabit yuk."}
+{"repo":"FrancyJGLisboa/agent-skills-platform","stars":2379,"karar":"fikir","ne":"fikir","ozet":"Skill uretme ve yonetisim platformu; kanit-baglantili bakim kaydi fikri alinir, kurulumu Core'a agir."}
+{"repo":"Weizhena/Deep-Research-skills","stars":2125,"karar":"fikir","ne":"kitap","ozet":"Iki fazli arastirma yonergesi, aramayi alt ajana devrediyor; tek varyant ~170 token aciklama."}
+{"repo":"aiwithremy/claude-skills-llm-council","stars":1879,"karar":"fikir","ne":"fikir","ozet":"Tek dosyalik 5 danisman konseyi; anonim akran degerlendirmesi ve negatif tetikleyici kurali alinir."}
+{"repo":"patoles/agent-flow","stars":1626,"karar":"fikir","ne":"fikir","ozet":"Kanca olaylarini HTTP ile toplayip ajan akisini gorsellestiren VS Code eklentisi; olay akisini disari verme fikri."}
+{"repo":"browserwing/browserwing","stars":1413,"karar":"hayir","ne":"-","ozet":"Tarayici eylemlerini MCP komutuna ceviren arac; Core ile ilgisiz, elendi."}
+{"repo":"cbrock84/headcount","stars":1322,"karar":"fikir","ne":"fikir","ozet":"16 bolum, 172 skill; hepsi kurulursa 68.742 B ≈ 17k token, yalniz ad alani ve yetki siniri kalibi alinir."}
+{"repo":"dariubs/awesome-workflow-automation","stars":1214,"karar":"hayir","ne":"-","ozet":"Genel is akisi otomasyonu listesi; Claude Code ile ilgisiz, elendi."}
+{"repo":"fcakyon/claude-codex-settings","stars":1134,"karar":"al","ne":"kanca","ozet":"33 eklenti, 6 hooks.json; commit oncesi simplify kapisi ve PreCompact oncelik yamasi dosya duzeyinde alinabilir."}
+{"repo":"Appllama/appllama-skills","stars":1065,"karar":"hayir","ne":"-","ozet":"Mobil uygulama uretim skill'leri; gelistirici bilgi paketi degil, elendi."}
+{"repo":"cclank/lanshu-create-ai-presenter-video","stars":997,"karar":"hayir","ne":"-","ozet":"AI sunucu videosu ureten Codex skill'i; Core ile ilgisiz, elendi."}
+{"repo":"Kappaemme-git/codex-complexity-optimizer","stars":915,"karar":"hayir","ne":"-","ozet":"Codex karmasiklik analizi skill'i, npm ile ~/.codex/skills'e kurulur; Core'un kurulum ilkesine ters, ozgun mekanizma yok."}
+{"repo":"nexscope-ai/eCommerce-Skills","stars":886,"karar":"hayir","ne":"-","ozet":"E-ticaret skill'leri; gelistirici is akisiyla ilgisiz, elendi."}
+{"repo":"keskinonur/claude-code-ios-dev-guide","stars":832,"karar":"fikir","ne":"kitap","ozet":"Tek README'lik Claude Code kurulum rehberi (17 bolum); iOS'a ozel ama ayar hiyerarsisi bolumu rafa uyar."}
+{"repo":"vshulcz/deja-vu","stars":790,"karar":"fikir","ne":"kanca","ozet":"5 kanca olayli capraz ajan hafizasi; cift kurulum susturma, byte butcesi ve daima exit 0 kurallari alinir."}

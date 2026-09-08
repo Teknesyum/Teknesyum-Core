@@ -1,0 +1,22 @@
+{"repo":"OneRedOak/claude-code-workflows","stars":3893,"karar":"fikir","ne":"fikir","ozet":"Uc inceleme is akisi, sifir otomatik baglam; icerik Claude Code'un kendi code-review/security-review skilleriyle ortusuyor, yalniz bulgu-tavani bicimi alinir."}
+{"repo":"asciimoo/hister","stars":3647,"karar":"hayir","ne":"-","ozet":"Kisisel arama motoru; Claude Code veya ajan is akisiyla ilgisi yok."}
+{"repo":"jakubkrehel/make-interfaces-feel-better","stars":3390,"karar":"al","ne":"kitap","ozet":"MIT saf metin arayuz-cila kitabi, 145 token giris; Core'un bos duran arayuz rafini doldurur."}
+{"repo":"foryourhealth111-pixel/Vibe-Skills","stars":3206,"karar":"fikir","ne":"fikir","ozet":"160 B aciklamayla 18 KB govdeyi ayiran yonetisimli giris; tetik sozlesmesi bicimi alinir, kurulum betigi ve settings yazimi alinmaz."}
+{"repo":"RKiding/Awesome-finance-skills","stars":2994,"karar":"hayir","ne":"-","ozet":"Finans alanina ozel skill koleksiyonu; mekanizma yok, alan Core'a yabanci."}
+{"repo":"rusq/slackdump","stars":2779,"karar":"hayir","ne":"-","ozet":"Slack disa aktarma araci; Claude Code ile ilgisiz."}
+{"repo":"zhizhuodemao/js-reverse-mcp","stars":2708,"karar":"hayir","ne":"-","ozet":"Genel amacli JS tersine muhendislik MCP sunucusu; Core'un kanca/raf mimarisiyle ilgisiz."}
+{"repo":"UnicomAI/wanwu","stars":2460,"karar":"hayir","ne":"-","ozet":"Kurumsal cok kiracili ajan platformu; Claude Code eklentisi degil."}
+{"repo":"DenisSergeevitch/agents-best-practices","stars":2277,"karar":"al","ne":"kitap","ozet":"21 referans dosyalik ajan-kosumu kitabi, kanca yok, 185 token giris; baglam-sikistirma ve prompt-caching dosyalari dogrudan rafa konur."}
+{"repo":"JuneYaooo/nihaisha-nishi-tcm","stars":2056,"karar":"hayir","ne":"-","ozet":"Geleneksel Cin tibbi ders materyali skilli; alan Core'a tamamen yabanci."}
+{"repo":"a5c-ai/babysitter","stars":1780,"karar":"fikir","ne":"fikir","ozet":"14 kanca ve tur basina ~500 token sabit yuk; yalniz degistirilemez karar gunlugu ve breakpoint fikri alinir."}
+{"repo":"mex-memory/mex","stars":1550,"karar":"fikir","ne":"fikir","ozet":"Depoda yasayan takim hafizasi; her oturum ~500 token + iki zorunlu dosya okumasi ilkeyi bozuyor, devir-sahipligi ve paylasim-siniri cumlesi alinir."}
+{"repo":"nilbuild/claude-statusline","stars":1390,"karar":"fikir","ne":"fikir","ozet":"Dilimdeki tek gercek sifir-token kurulum; yedek/geri-al simetrisi ve limit gostergesi alinir, betik (bash+jq) alinmaz."}
+{"repo":"piomin/claude-ai-spring-boot","stars":1286,"karar":"fikir","ne":"fikir","ozet":"Spring Boot sablonu, 6 ajan + CLAUDE.md ile ~850 token sabit yuk; yalniz otomatik tasks/lessons.md ders-kaydi tetikleyicisi alinir."}
+{"repo":"TrafficGuard/typedai","stars":1194,"karar":"hayir","ne":"-","ozet":"Bagimsiz TypeScript AI platformu (chat, otonom ajanlar); Claude Code kurulum bicimi degil."}
+{"repo":"fivetaku/gptaku_plugins","stars":1121,"karar":"hayir","ne":"-","ozet":"18 eklentilik marketplace ama govdeler submodule oldugu icin olculemedi, ust depoda kanca yok; yalniz depo duzeni fikri not."}
+{"repo":"AKCodez/hackingtool-plugin","stars":1037,"karar":"hayir","ne":"-","ozet":"183 pentest aracini saran Claude Code eklentisi; mekanizma tek skill sarmalayici, alan Core'a yabanci."}
+{"repo":"DreambigOu/ELI5","stars":963,"karar":"hayir","ne":"-","ozet":"Tek amacli anlatim skilli (hedef kitleye gore ton ayari); kanca yok, Core'a alinacak mekanizma yok."}
+{"repo":"fivetaku/fablize","stars":896,"karar":"al","ne":"kanca","ozet":"PostToolUse kanit defteri + Stop kapisi; Core'da sifir-token kurulabilir, fablize'in her tur ~180 tokenlik mod-enjeksiyonu alinmaz."}
+{"repo":"wshuyi/x-article-publisher-skill","stars":862,"karar":"hayir","ne":"-","ozet":"Markdown yazilari X Articles'a yayinlayan skill; Playwright MCP'ye bagli, Core ile ilgisiz."}
+{"repo":"laolaoshiren/claude-code-skills-zh","stars":823,"karar":"hayir","ne":"-","ozet":"20 skillik Cince koleksiyon, hepsi kurulursa ~890 token; mekanizma yok, yalniz skill-maliyet sayaci fikri not."}
+{"repo":"zenstory-ai/novel-to-game","stars":772,"karar":"hayir","ne":"-","ozet":"Romani oynanabilir oyuna ceviren Agent Skills seti; alan Core'a yabanci."}

@@ -1,0 +1,21 @@
+{"repo":"dagucloud/dagu","stars":3844,"karar":"hayir","ne":"-","ozet":"Kendi kendine barindirilan YAML is akisi orkestratoru; Claude Code ile ilgisi yok."}
+{"repo":"xpf0000/FlyEnv","stars":3199,"karar":"hayir","ne":"-","ozet":"XAMPP alternatifi masaustu yerel gelistirme ortami; ajan is akisiyla ilgisiz."}
+{"repo":"opensolon/solon","stars":2777,"karar":"hayir","ne":"-","ozet":"Java kurumsal uygulama cercevesi; alakasiz urun."}
+{"repo":"NarratorAI-Studio/narrator-ai-cli-skill","stars":2633,"karar":"hayir","ne":"-","ozet":"Video seslendirme CLI'sini saran skill; gelistirici bilgi paketi degil."}
+{"repo":"Ar9av/obsidian-wiki","stars":3374,"karar":"hayir","ne":"-","ozet":"Ajanlarin Obsidian wiki kurmasi icin cerceve; Core'un pasif raf ilkesiyle ortusmuyor."}
+{"repo":"EmbeddedLLM/JamAIBase","stars":1103,"karar":"hayir","ne":"-","ozet":"AI hesap tablosu urunu; Claude Code eklenti alaniyla ilgisiz."}
+{"repo":"liyue-aigc/female-portrait-director","stars":1490,"karar":"hayir","ne":"-","ozet":"Portre gorsel istem skill'i; alan disi."}
+{"repo":"Bhanunamikaze/Agentic-SEO-Skill","stars":893,"karar":"hayir","ne":"-","ozet":"SEO analiz skill paketi; gelistirici is akisi disinda."}
+{"repo":"komal-SkyNET/claude-skill-homeassistant","stars":957,"karar":"hayir","ne":"-","ozet":"Home Assistant yonetimi skill'i; alan disi."}
+{"repo":"dgreenheck/webgpu-claude-skill","stars":1183,"karar":"hayir","ne":"-","ozet":"WebGPU/Three.js alan skill'i; Core mekanizmasina katkisi yok."}
+{"repo":"Kappaemme-git/codex-first-customer-finder-skill","stars":1032,"karar":"hayir","ne":"-","ozet":"Musteri bulma pazarlama skill'i; alan disi."}
+{"repo":"jim-schwoebel/awesome_ai_agents","stars":1968,"karar":"hayir","ne":"-","ozet":"1500+ ajan araci baglanti listesi; mekanizma yok, salt link derlemesi."}
+{"repo":"penso/arbor","stars":809,"karar":"hayir","ne":"-","ozet":"Rust masaustu worktree/terminal uygulamasi; kurulum biciminin Core ile kesisimi yok."}
+{"repo":"coldteadotai/pr-lens","stars":860,"karar":"hayir","ne":"-","ozet":"PR'lari diyagrama ceviren GitHub App + servis; barindirilan urun, pasif raf degil."}
+{"repo":"sanjeed5/awesome-cursor-rules-mdc","stars":3570,"karar":"fikir","ne":"fikir","ozet":"Kutuphane basina Cursor .mdc kural dosyasi ureten Python jenerator; kural metnini modele degil uretime birakma fikri."}
+{"repo":"peterkrueck/Claude-Code-Development-Kit","stars":1380,"karar":"al","ne":"kanca","ozet":"Uc fazli stop uyarisi ve oturuma ozgu dokunma manifestosu Core'un esik kancasini yanlis pozitiften kurtarir; 11 KB CLAUDE.md sablonu alinmaz."}
+{"repo":"caliber-ai-org/ai-setup","stars":1263,"karar":"fikir","ne":"kanca","ozet":"lastRefreshSha ile 15 commit bayatlik esigi ve CALIBER_SUBPROCESS ile alt oturum susturmasi; gerisi harici CLI'ye bagimli."}
+{"repo":"Nanako0129/sepia","stars":2448,"karar":"al","ne":"kitap","ozet":"research/ altindaki 119 KB kaynakli yapay-metin izleri derlemesi pasif raf bicimine birebir uyuyor; olculen sirali tur maliyeti ~380 token."}
+{"repo":"rpamis/comet","stars":2971,"karar":"fikir","ne":"fikir","ozet":"Faz gecisini betik onayliyor ve tek config yonlendiriyor; ama 32 KB CLAUDE/AGENTS + 36 skill ile ~9k token baglam yukluyor."}
+{"repo":"mrgoonie/claudekit-skills","stars":2211,"karar":"fikir","ne":"fikir","ozet":".mcp.json'u .claude/ altina alip MCP'yi mcp-manager alt ajanina surme deseni; 45 skill aciklamasi tek basina 14 KB."}
+{"repo":"zanwei/design-dna","stars":1716,"karar":"fikir","ne":"fikir","ozet":"Tek skill + references duzeni ~65 token'a mal oluyor; olculebilir token / niteliksel uslup ayrimi teknesyum-ui icin alan listesi."}

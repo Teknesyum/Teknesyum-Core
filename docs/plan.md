@@ -28,7 +28,12 @@ altında md; depo `Teknesyum/Teknesyum-Private`. Kapı: aynanın uzak deposu sah
 
 Bedel ölçüldü: sıradan tur 0 B; `??` 1726 B; `pp` 3738 B; kanca ~170 ms.
 
-## D. Kapsamlı araştırma: projeye ne eklenebilir (karar bekliyor)
+## D. Kapsamlı araştırma: projeye ne eklenebilir
+
+- [x] Kademe 0+3 (2026-09-08): tarama 1000 depo, 45 opus ajanı, 963 depo okundu, 93 Al / 165 fikir / 705 hayır;
+      rapor `docs/kutuphane/piyasa-2026-09-08.md`, notlar `docs/kutuphane/piyasa/`. Yapım sırası yol haritasında.
+
+Eski fiyat tablosu (kayıt için):
 
 Havuz: 400 depo tarandı (`tarama.jsonl`), 58'i derin okundu, 342 okunmadı; awesome listesinden
 15 aday ayrıca. Okuma birimi: sonnet ajanı, depo başına ~65K token, aynı şablon, ≤300 kelime not.

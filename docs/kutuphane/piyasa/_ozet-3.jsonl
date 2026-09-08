@@ -1,0 +1,19 @@
+{"repo":"obra/superpowers","stars":283012,"karar":"hayir","ne":"-","ozet":"Onceki dilimde okundu, tekrar bakilmadi."}
+{"repo":"openinterpreter/openinterpreter","stars":68268,"karar":"hayir","ne":"-","ozet":"Codex forku bagimsiz CLI ajan; Claude Code eklentisi degil, alinacak mekanizma yok."}
+{"repo":"OpenBMB/ChatDev","stars":34233,"karar":"hayir","ne":"-","ozet":"LLM cok-ajanli yazilim sirketi simulasyonu; Claude Code is akisiyla ilgisiz."}
+{"repo":"Canner/WrenAI","stars":17544,"karar":"hayir","ne":"-","ozet":"Text-to-SQL BI urunu; gelistirici bilgi paketi degil."}
+{"repo":"HumanSignal/Adala","stars":1631,"karar":"hayir","ne":"-","ozet":"Veri etiketleme ajan cercevesi; Claude Code ile ilgisiz."}
+{"repo":"mensfeld/code-on-incus","stars":692,"karar":"hayir","ne":"-","ozet":"Incus konteynerinde ajan izolasyonu; Go CLI, eklenti mekanizmasi yok."}
+{"repo":"ennucore/clippinator","stars":411,"karar":"hayir","ne":"-","ozet":"2023 doneminden OpenAI tabanli Python kod asistani; lisanssiz ve olu."}
+{"repo":"FOLLGAD/godmode","stars":231,"karar":"hayir","ne":"-","ozet":"AutoGPT donemi web urunu; Claude Code ile ilgisiz."}
+{"repo":"hamflx/imagen3-mcp","stars":68,"karar":"hayir","ne":"-","ozet":"Gorsel uretim MCP sunucusu; konu disi."}
+{"repo":"glenngillen/mcpmcp-server","stars":37,"karar":"hayir","ne":"-","ozet":"MCP sunucu kesif servisi; pasif kutuphaneye girecek mekanizma yok."}
+{"repo":"gzoonet/cortex","stars":21,"karar":"hayir","ne":"-","ozet":"Yerel bilgi grafi urunu; surekli calisan izleyici, sifir-token ilkesine ters."}
+{"repo":"cleatdev/cleat","stars":13,"karar":"hayir","ne":"-","ozet":"Docker sandbox sarmalayici; eklenti/kanca icerigi yok."}
+{"repo":"Aganium/agenium","stars":4,"karar":"hayir","ne":"-","ozet":"Ajan kimlik/DNS deneyi; konu disi."}
+{"repo":"jaspertvdm/mcp-server-openai-bridge","stars":2,"karar":"hayir","ne":"-","ozet":"OpenAI API koprusu MCP; konu disi."}
+{"repo":"Gliana-Labs/gliana-mcp","stars":0,"karar":"hayir","ne":"-","ozet":"Bos/0 yildizli MCP denemesi; icerik yok."}
+{"repo":"mikeyobrien/ralph-orchestrator","stars":3127,"karar":"fikir","ne":"kitap","ozet":"Sapka/olay topolojisi ve completion_promise+iterasyon tavani; 3 skill, ~280 token siradan yuk."}
+{"repo":"modu-ai/moai-adk","stars":1201,"karar":"fikir","ne":"kanca","ozet":"47 kanca/20 olay ama siradan turda ~24 bin token; kanca-yoksa-sessizce-cik sarmalayicisi ve async/timeout ayrimi alinabilir."}
+{"repo":"anthropics/claude-code-action","stars":8818,"karar":"fikir","ne":"fikir","ozet":"CI action; oturuma sifir kurulum, mod tespiti ve plugin_marketplaces girdisi not degerinde."}
+{"repo":"sverrirsig/claude-control","stars":132,"karar":"fikir","ne":"kanca","ozet":"7 kanca, stdout sifir, olaylar $PPID.json'a yaziliyor; PID'li olay dosyasi ve PermissionRequest/PostToolUseFailure alinabilir."}

@@ -1,0 +1,18 @@
+{"repo":"Significant-Gravitas/AutoGPT","stars":187195,"karar":"hayir","ne":"-","ozet":"Kendi ajan platformu ve bulut arayuzu; Claude Code eklenti mekanizmasiyla ilgisi yok."}
+{"repo":"zylon-ai/private-gpt","stars":57496,"karar":"hayir","ne":"-","ozet":"Yerel modeller icin RAG API katmani; gelistirici bilgi paketi ya da kanca icermiyor."}
+{"repo":"eyaltoledano/claude-task-master","stars":28060,"karar":"hayir","ne":"-","ozet":"Onceki dilimde task-master olarak okundu, cakisma nedeniyle atlandi."}
+{"repo":"e2b-dev/E2B","stars":13710,"karar":"hayir","ne":"-","ozet":"Ajanlar icin bulut sandbox altyapisi; Core'un dosya disina bir sey kurmama ilkesiyle ortusmuyor."}
+{"repo":"SawyerHood/dev-browser","stars":6596,"karar":"hayir","ne":"-","ozet":"Puppeteer tabanli tarayici CLI'si; skill olarak kuruluyor ama Windows desteklenmiyor ve Core'da tarayici araclari zaten var."}
+{"repo":"antonbabenko/terraform-skill","stars":2332,"karar":"al","ne":"kitap","ozet":"216 KB bilgi 60 token karsiligi duruyor; ince baslik + talep uzerine references duzeni raf bicimi icin model."}
+{"repo":"kenryu42/cc-safety-net","stars":1528,"karar":"fikir","ne":"kanca","ozet":"Tek PreToolUse kancasi sessizken sifir cikti veriyor; fail-open sozlesmesi ve disable-model-invocation kalibi alinabilir."}
+{"repo":"zabirauf/AutoGPT.js","stars":1024,"karar":"hayir","ne":"-","ozet":"AutoGPT'nin tarayici portu; arsivlik, Claude Code ile ilgisiz."}
+{"repo":"sidhq/Multi-GPT","stars":565,"karar":"hayir","ne":"-","ozet":"Deneysel cok ajanli GPT-4 denemesi; bakimsiz ve Core mekanizmalariyla ilgisiz."}
+{"repo":"leeguooooo/claude-code-usage-bar","stars":365,"karar":"fikir","ne":"fikir","ozet":"Statusline kota cubugu; prompt-cache yasi ve tukenme ETA'si alinabilir, 1030 karakterlik skill aciklamasi karsi ornek."}
+{"repo":"HelpCode-ai/anythingmcp","stars":195,"karar":"hayir","ne":"-","ozet":"Kendi barindirilan MCP ag gecidi; sunucu kurmak Core ilkesine aykiri."}
+{"repo":"iurykrieger/claude-bedrock","stars":97,"karar":"fikir","ne":"fikir","ozet":"10 skill sabit ~850 token yukluyor; grafik-once kademesi ve tek yazma noktasi desenleri alinabilir."}
+{"repo":"imoonkey/openweb","stars":60,"karar":"hayir","ne":"-","ozet":"90+ siteye API ile erisen ajan araci; gelistirici bilgi paketi degil, urun."}
+{"repo":"kumamaki/Claude-Code-Personalities","stars":31,"karar":"hayir","ne":"-","ozet":"Statusline'a kaomoji basan Rust araci; Core'un statusline'i zaten var, katki yok."}
+{"repo":"MuhammadTalhaMT/claude-intercom","stars":18,"karar":"hayir","ne":"-","ozet":"Iki Claude Code oturumu arasinda Channels API koprusu; Core 0.16'da relay makinesi zaten trash'e alinmisti."}
+{"repo":"ctxlint/Ctxlint","stars":11,"karar":"al","ne":"betik","ozet":"AGENTS.md/CLAUDE.md/.mcp.json linter'i; 9 kural, sifir kanca, sifir baglam - Core'un baglam israfi iddiasini disardan olcuyor."}
+{"repo":"jaspertvdm/mcp-server-ollama-bridge","stars":4,"karar":"hayir","ne":"-","ozet":"Yerel Ollama'ya MCP koprusu; baska bir ekosistemin parcasi, Core'a girecek bir sey yok."}
+{"repo":"alexar76/aimarket-plugins","stars":1,"karar":"hayir","ne":"-","ozet":"TEE escrow ve itibar odakli 15 AIMarket eklentisi; kripto pazar yeri, gelistirici is akisi degil."}

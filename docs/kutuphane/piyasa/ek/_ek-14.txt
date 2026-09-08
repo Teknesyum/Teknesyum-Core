@@ -1,0 +1,3 @@
+disler/claude-code-hooks-mastery · ★3914 · sekiz kanca olayının hepsini tek tek gösteren referans depo; Core'un "kanca yalnız eşikte konuşur" tercihini olay olay karşılaştırmak için
+karanb192/claude-code-hooks · ★507 · güvenlik/maliyet/gözlem kancaları eklenti pazarı olarak paketlenmiş; kanca kurulumunun settings.json'a dokunmadan dağıtılması deseni
+yzhao062/agent-style · ★672 · ajan çıktısı için 21 yazım kuralı, tek metin dosyası; rafa uygun boyut, RULES.md'nin "duvar gibi metin yok" maddesine dış ölçüt

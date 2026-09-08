@@ -1,0 +1,3 @@
+disler/claude-code-hooks-mastery · 13 kanca olayinin tamami calisir ornekle; Core'un kanca sozlesmesi kitabi icin birincil kaynak (★3914)
+affaan-m/everything-claude-code · harness performans optimizasyonu: skill/instinct/memory katmanlari ve baglam maliyeti olcumu (★253910)
+VoltAgent/awesome-agent-skills · 1000+ skill katalogu; "kurmadan okunan dizin" ornegi ve skill secim yarismasi olcumu icin (★33933)

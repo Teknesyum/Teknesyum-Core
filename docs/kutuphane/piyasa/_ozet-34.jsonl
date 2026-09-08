@@ -1,0 +1,22 @@
+{"repo":"parcadei/Continuous-Claude-v3","stars":3937,"karar":"fikir","ne":"fikir","ozet":"74 kanca ve 160 skill ile sıradan turda >=40 KB yük; yalnız YAML handoff ve PreCompact tazeleme fikri alınabilir."}
+{"repo":"browserbase/skills","stars":3714,"karar":"hayir","ne":"-","ozet":"Browserbase tarayıcı otomasyonu ürününün resmi skill paketi; Core'un konusu değil, elendi."}
+{"repo":"agenticnotetaking/arscontexta","stars":3486,"karar":"fikir","ne":"kitap","ozet":"249 iddia dosyalık methodology rafı cazip ama 3,7 MB ve 26 skill ~3,2k token sabit yük getiriyor."}
+{"repo":"AminBlg/SimpleEnglish","stars":3255,"karar":"al","ne":"kitap","ozet":"Kancasız, komutsuz ASD-STE100 yazım kitabı; 40 KB paket, sıradan turda yalnız 1097 B frontmatter."}
+{"repo":"Forward-Future/loopy","stars":3120,"karar":"fikir","ne":"fikir","ozet":"Döngü tanımı (durma koşulu + kanıt fişi) 220 token'la geliyor ama içerik dış katalog sitesine bağlı."}
+{"repo":"AlephAITech/WorkBuddyGuide","stars":2871,"karar":"hayir","ne":"-","ozet":"WorkBuddy adlı ayrı ürünün Çince kullanım kitabı; Claude Code ile ilgisi yok, elendi."}
+{"repo":"aaron-he-zhu/aaron-marketing-skills","stars":2747,"karar":"hayir","ne":"-","ozet":"120 pazarlama skill'i; alan içeriği, mekanizma standart skill paketi, elendi."}
+{"repo":"BAAI-Agents/Cradle","stars":2579,"karar":"hayir","ne":"-","ozet":"Genel bilgisayar kontrolü (GCC) araştırma çatısı; Claude Code eklentisi değil, elendi."}
+{"repo":"yctimlin/mcp_excalidraw","stars":2395,"karar":"hayir","ne":"-","ozet":"Excalidraw için genel MCP sunucusu; ayrı ürün, elendi."}
+{"repo":"wondelai/skills","stars":2125,"karar":"hayir","ne":"fikir","ozet":"65 skill 165 KB frontmatter (~41k token); yalnız metaskill durumunu docs/ altında tutma fikri not edildi."}
+{"repo":"flyeric0212/cursor-rules","stars":1887,"karar":"hayir","ne":"-","ozet":"Cursor .mdc kural dosyaları derlemesi; Claude Code mekanizması yok, elendi."}
+{"repo":"feiskyer/claude-code-settings","stars":1647,"karar":"hayir","ne":"-","ozet":"12 skill + 9 ajan + 1 MCP'lik yapılandırma paketi, ~1,4k token sabit yük, yeni mekanizma yok."}
+{"repo":"BayramAnnakov/claude-reflect","stars":1429,"karar":"al","ne":"betik","ozet":"Regex tabanlı düzeltme yakalayıcı; sıradan turda 0 token, eşleşince tek satır, decay_days ile kural eskitme."}
+{"repo":"specstoryai/getspecstory","stars":1325,"karar":"hayir","ne":"-","ozet":"Ticari IDE eklentisi, oturum geçmişini kendi bulutunda indeksliyor; eklenti mekanizması yok, elendi."}
+{"repo":"gastownhall/gascity","stars":1232,"karar":"hayir","ne":"-","ozet":"Go ile yazılmış çok ajanlı orkestrasyon SDK'sı; Core'un pasif ilkesinin zıddı, elendi."}
+{"repo":"Aaronontheweb/dotnet-skills","stars":1144,"karar":"hayir","ne":"-","ozet":"30 skill + 5 ajanlık .NET alan paketi; içerik alan bilgisi, elendi."}
+{"repo":"brycewang-stanford/Awesome-Journal-Skills","stars":1079,"karar":"hayir","ne":"-","ozet":"Akademik dergi biçim skill'leri; alan içeriği, mekanizma standart, elendi."}
+{"repo":"jezweb/claude-skills","stars":999,"karar":"hayir","ne":"-","ozet":"10 plugin koleksiyonluk üretim skill'leri (Cloudflare, React); alan içeriği, elendi."}
+{"repo":"Dicklesworthstone/claude_code_agent_farm","stars":916,"karar":"hayir","ne":"-","ozet":"20+ Claude Code oturumunu paralel koşturan Python orkestratörü; Core kapsamı dışı, elendi."}
+{"repo":"Sushegaad/Claude-Skills-Governance-Risk-and-Compliance","stars":887,"karar":"hayir","ne":"-","ozet":"ISO 27001/GRC uyum skill paketi; alan içeriği, elendi."}
+{"repo":"BrownFineSecurity/iothackbot","stars":834,"karar":"hayir","ne":"-","ozet":"IoT sızma testi skill'leri ve araçları; alan içeriği, elendi."}
+{"repo":"zhnnky329/MathModeling-skills","stars":793,"karar":"hayir","ne":"-","ozet":"Matematiksel modelleme yarışması skill'leri; alan içeriği, elendi."}

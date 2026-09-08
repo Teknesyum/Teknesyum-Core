@@ -1,0 +1,27 @@
+{"repo":"DietrichGebert/ponytail","stars":131878,"karar":"fikir","ne":"kitap","ozet":"YAGNI merdiveni ve borc defteri degerli ama SessionStart kancasi her oturumda 5.229 karakter (~1.300 token) enjekte ediyor, ustune 6 skill aciklamasi 2.907 B."}
+{"repo":"rtk-ai/rtk","stars":79470,"karar":"hayir","ne":"fikir","ozet":"Bash ciktisini sikistiran Rust vekili; baglama 0 token yaziyor ama kullanicinin makinesinde zaten kurulu, Core'a girecek parcasi yok."}
+{"repo":"stablyai/orca","stars":64104,"karar":"hayir","ne":"-","ozet":"Paralel ajan worktree'lerini yoneten Electron masaustu uygulamasi ve mobil companion; eklenti degil, Core'a tasinacak mekanizma yok."}
+{"repo":"router-for-me/CLIProxyAPI","stars":50986,"karar":"hayir","ne":"-","ozet":"Claude/Codex/Gemini aboneliklerini OpenAI uyumlu API'ye ceviren Go vekil sunucusu; Claude Code is akisiyla ilgisiz altyapi urunu."}
+{"repo":"Wei-Shaw/sub2api","stars":40878,"karar":"hayir","ne":"-","ozet":"Abonelik paylasim/transit servisi; ajan is akisi degil, ticari aracilik altyapisi."}
+{"repo":"openai/codex-plugin-cc","stars":32913,"karar":"fikir","ne":"kanca","ozet":"3 skill de user-invocable:false, siradan tur ~80 token; Stop kancasiyla istege bagli cikis kapisi ve arka plan is defteri deseni ornek."}
+{"repo":"iOfficeAI/OfficeCLI","stars":30321,"karar":"hayir","ne":"-","ozet":"Ajanlar icin Office suite (C#); ofis dosyasi duzenleme urunu, Core'un alani degil."}
+{"repo":"phuryn/pm-skills","stars":26112,"karar":"fikir","ne":"fikir","ozet":"68 skill aciklamasi 20.291 B (~5.000 token) hepsi kurulursa; 9 eklentiye bolme sayesinde tek raf ~550 token'a iniyor, bolme kurali Core'a girdi."}
+{"repo":"alchaincyf/huashu-design","stars":23978,"karar":"hayir","ne":"fikir","ozet":"HTML yerel tasarim skill'i; alan disi, yalniz 'marka verisi yoksa uydurma, adlandirilmis kutuphaneye dus' kurali not edildi."}
+{"repo":"KKKKhazix/khazix-skills","stars":20523,"karar":"al","ne":"kitap","ozet":"neat-freak kapanis listesi (dokuman/kural/hafiza kodla uzlastirma) ve leader gorev kitabi sablonu iki raf metni olarak alinir; 6 skill aciklamasi 5.743 B."}
+{"repo":"larksuite/cli","stars":17075,"karar":"hayir","ne":"-","ozet":"Resmi Lark/Feishu CLI; kurumsal SaaS istemcisi, Claude Code is akisiyla ilgisiz."}
+{"repo":"wanshuiyin/Auto-claude-code-research-in-sleep","stars":15881,"karar":"hayir","ne":"fikir","ozet":"82 skill aciklamasi 39.514 B (~10.000 token) ve 7 MCP sunucusu; ML arastirma alani Core disi, yalniz auto-review-loop kalibi not edildi."}
+{"repo":"open-metadata/OpenMetadata","stars":15142,"karar":"hayir","ne":"-","ozet":"Veri katalogu ve yonetisim platformu; ajan is akisiyla ilgisiz kurumsal urun."}
+{"repo":"Wei-Shaw/claude-relay-service","stars":12597,"karar":"hayir","ne":"-","ozet":"Kendi kendine barindirilan Claude Code aynasi/transit servisi; Core'un 0.16'da trash'e attigi relay makinesiyle ayni sinif."}
+{"repo":"OpenByteInc/QuantDinger","stars":11422,"karar":"hayir","ne":"-","ozet":"AI trading OS ve cok kiracili SaaS; finans urunu, alan disi."}
+{"repo":"xinnan-tech/xiaozhi-esp32-server","stars":10531,"karar":"hayir","ne":"-","ozet":"ESP32 cihaz kontrol sunucusu; gomulu sistem backend'i, alan disi."}
+{"repo":"openstatusHQ/openstatus","stars":9089,"karar":"hayir","ne":"-","ozet":"Uptime/API izleme ve durum sayfasi; ajan is akisiyla ilgisiz SaaS."}
+{"repo":"jnMetaCode/superpowers-zh","stars":8026,"karar":"al","ne":"betik","ozet":"run-hook.cmd cmd/bash poliglot sarmalayicisi ve kanca cikti bicimi haritasi alinir; oturum enjeksiyonu 4.446 B + 20 skill aciklamasi 5.235 B = ~2.400 token alinmaz."}
+{"repo":"firecrawl/firecrawl-mcp-server","stars":7418,"karar":"hayir","ne":"-","ozet":"Genel web kazima MCP sunucusu; Core hicbir seyi MCP olarak kurmuyor."}
+{"repo":"Gentleman-Programming/gentle-ai","stars":6440,"karar":"fikir","ne":"kitap","ozet":"AGENTS.md 2.678 B'lik 'Skill | Tetikleyici | Yol' dizin tablosu; skill govdeleri hic yuklenmiyor, Core'un raf indeksine uygulanabilir bicim."}
+{"repo":"MinishLab/semble","stars":6026,"karar":"fikir","ne":"fikir","ozet":"Ajanlar icin kod arama; yalniz CLI + AGENTS.md tek satir kipinde siradan tur ~100-200 token, graphify'a ikinci secenek ama %99 iddiasi olculmedi."}
+{"repo":"ageerle/ruoyi-ai","stars":5683,"karar":"hayir","ne":"-","ozet":"Java kurumsal AI gelistirme cercevesi; Claude Code eklenti ekosistemi disinda."}
+{"repo":"metalbear-co/mirrord","stars":5323,"karar":"hayir","ne":"-","ozet":"Yerel sureci Kubernetes pod'u gibi calistiran gelistirme araci; ajan baglam maliyetiyle ilgisiz."}
+{"repo":"s1dashu/ip-as-logo-skill","stars":5062,"karar":"hayir","ne":"-","ozet":"Tek amacli maskot logo uretme skill'i; gorsel uretim, Core'un alani degil."}
+{"repo":"xingkongliang/skills-manager","stars":4554,"karar":"hayir","ne":"fikir","ozet":"Skill yoneten masaustu uygulamasi, baglama 0 token; yalniz global/ajan/proje uc kademeli raf ayrimi fikri not edildi."}
+{"repo":"archestra-ai/archestra","stars":4265,"karar":"hayir","ne":"-","ozet":"Kurumsal MCP registry, gateway ve orkestrator platformu; Core olceginin cok disinda."}
+{"repo":"0x0funky/agent-sprite-forge","stars":4043,"karar":"hayir","ne":"-","ozet":"Codex icin 2D sprite/harita uretim skill'i; oyun varlik hatti, alan disi."}

@@ -1,0 +1,3 @@
+karanb192/claude-code-hooks · 507 yildiz; guvenlik/maliyet/gozlem kancalari eklenti olarak paketlenmis, ajanin kendi kanca ayarlarini kurcalamasini engelleyen PreToolUse korumasi var — Core'un kanca hijyeni icin dogrudan ornek
+disler/claude-code-hooks-mastery · 3.914 yildiz; sekiz kanca olayinin tamaminin calisan ornekleri, cikis kodu ve JSON sozlesmesi dahil — Core'un kanca yazimi icin referans kitap
+addyosmani/agent-skills · 92.969 yildiz; 25 duz markdown skill, hicbir kurulum gerektirmiyor ("plain Markdown, works with any agent") — Core'un pasif raf bicimiyle birebir uyumlu metin paketi

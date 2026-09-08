@@ -1,0 +1,3 @@
+addyosmani/agent-skills · Uretim duzeyinde muhendislik skill'leri; kademeli acilim olculmus (metadata ~100 token, govde <5k) — Core'un pasif raf modelinin dogrudan olcum ornegi.
+agentskills/agentskills · Agent Skills spesifikasyonu ve dokumantasyonu; raf bicimini CI'da dogrulamak icin kanonik sema kaynagi.
+karanb192/claude-code-hooks · Kanca marketplace'i: guvenlik, maliyet, gozlemlenebilirlik kancalari; Core'un "yalniz esikte tek satir" kancasina karsilastirma tabani.

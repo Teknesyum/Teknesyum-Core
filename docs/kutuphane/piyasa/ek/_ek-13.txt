@@ -1,0 +1,3 @@
+drona23/claude-token-efficient · ★6017 · Tek CLAUDE.md ile cikti uzunlugunu kisan drop-in dosya; Core'un "sirada sifir token" iddiasiyla dogrudan olculebilir rakip/olcut.
+awesome-skills/code-review-skill · ★1914 · 21k satirlik inceleme kilavuzu tek skill'de; Core'un raf/kitap boyut siniri icin karsi ornek ve kural metni kaynagi.
+VILA-Lab/Dive-into-Claude-Code · ★2101 · Claude Code mimarisinin sistematik analizi; kanca/baglam mekanizmalari icin olguya dayali kitap adayi.

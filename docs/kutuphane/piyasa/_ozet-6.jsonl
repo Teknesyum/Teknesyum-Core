@@ -1,0 +1,18 @@
+{"repo":"ossu/computer-science","stars":208816,"karar":"hayir","ne":"-","ozet":"Ücretsiz CS müfredatı bağlantı listesi; Claude Code ya da ajan iş akışıyla ilgisi yok."}
+{"repo":"upstash/context7","stars":61772,"karar":"hayir","ne":"-","ozet":"Zaten okunmuş (okunmus.txt: context7), çakışma nedeniyle atlandı."}
+{"repo":"vercel-labs/agent-skills","stars":30958,"karar":"hayir","ne":"-","ozet":"Zaten okunmuş (okunmus.txt: vercel-agent-skills), çakışma nedeniyle atlandı."}
+{"repo":"yusufkaraaslan/Skill_Seekers","stars":14934,"karar":"hayir","ne":"-","ozet":"Zaten okunmuş (okunmus.txt: skill-seekers), çakışma nedeniyle atlandı."}
+{"repo":"MineDojo/Voyager","stars":7183,"karar":"hayir","ne":"-","ozet":"Minecraft'ta GPT-4 ile açık uçlu gömülü ajan araştırması; geliştirici iş akışıyla ilgisi yok."}
+{"repo":"gmpetrov/databerry","stars":2965,"karar":"hayir","ne":"-","ozet":"Kodsuz LLM ajanı SaaS platformu; Claude Code mekanizması içermiyor."}
+{"repo":"pedrohcgs/claude-code-my-workflow","stars":1567,"karar":"fikir","ne":"kanca","ozet":"Akademik şablon; 60 skill + CLAUDE.md ile sıradan turda ~43 KB (~11k token) yük, ama context-monitor.py eşik uyarısı ve pre/post-compact durum çifti alınmaya değer desenler."}
+{"repo":"mpaepper/llm_agents","stars":1052,"karar":"hayir","ne":"-","ozet":"Eğitim amaçlı ~200 satırlık Python ReAct ajanı; Core'a girecek mekanizma yok."}
+{"repo":"fjrdomingues/autopilot","stars":611,"karar":"hayir","ne":"-","ozet":"GPT ile kod tabanı okuyup görev çözen bağımsız CLI; Claude Code eklenti yüzeyi yok."}
+{"repo":"BlockRunAI/blockrun-mcp","stars":393,"karar":"hayir","ne":"-","ozet":"Kripto/piyasa verisi için ücretli genel MCP sunucusu; ilgisiz ürün."}
+{"repo":"krohling/bondai","stars":224,"karar":"hayir","ne":"-","ozet":"Python ajan çatısı ve araç kütüphanesi; Claude Code kanca/skill mekanizması yok."}
+{"repo":"Markeljan/web3gpt","stars":117,"karar":"hayir","ne":"-","ozet":"Doğal dille akıllı sözleşme yazıp yayımlayan web uygulaması; ilgisiz."}
+{"repo":"stacklok/brood-box","stars":64,"karar":"hayir","ne":"-","ozet":"Kod ajanlarını libkrun microVM içinde koşturan Go CLI (bbox claude-code); yalıtım katmanı, bağlam/kanca mekanizması sunmuyor."}
+{"repo":"Imolatte/claude-cli-telegram","stars":33,"karar":"hayir","ne":"-","ozet":"Claude Code CLI'ı Telegram'dan süren Node bot sarmalayıcısı (30+ komut, oturum yönetimi); uzaktan erişim, Core'un bağlam ilkesiyle kesişmiyor."}
+{"repo":"dshakes/compass","stars":19,"karar":"al","ne":"betik","ozet":"Bütçe tavanı + guardrail eklentisi; budget-gate.sh (144 satır) transcript JSONL'inden model fiyat tablosuyla oturum maliyetini USD hesaplayıp PreToolUse'ta sert durduruyor, tavan yokken exit 0."}
+{"repo":"Continuum-AI-Corp/orcarouter-mcp-server","stars":12,"karar":"hayir","ne":"-","ozet":"LLM ağ geçidi için genel MCP sunucusu; Core'a alınacak mekanizma yok."}
+{"repo":"cinderwright-ai/cinderwright-api","stars":4,"karar":"hayir","ne":"-","ozet":"x402 ajan ekonomisi arama motoru MCP'si; ilgisiz ürün."}
+{"repo":"forgemeshlabs/coinopai-mcp","stars":1,"karar":"hayir","ne":"-","ozet":"Kripto piyasa istihbaratı MCP sunucusu; ilgisiz ürün."}

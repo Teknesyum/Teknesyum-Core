@@ -1,0 +1,2 @@
+Dicklesworthstone/destructive_command_guard · ★5943 · PreToolUse Bash bekcisi; kanca dosyalarini kendi bulup settings.json'a kendini yaziyor, davidondrej/skills'teki bekcinin olgunlasmis hali
+karanb192/claude-code-hooks · ★507 · guvenlik/maliyet/gozlem kancalari + kurulabilir marketplace; block-dangerous-commands kancasi Core'un esik-konusan ilkesine yakin

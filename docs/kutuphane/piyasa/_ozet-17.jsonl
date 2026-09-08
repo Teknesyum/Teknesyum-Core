@@ -1,0 +1,18 @@
+{"repo":"OpenHands/OpenHands","stars":86800,"karar":"hayir","ne":"-","ozet":"Bagimsiz AI gelistirme platformu; Claude Code eklenti mekanizmasiyla ilgisi yok, elenen."}
+{"repo":"danielmiessler/Fabric","stars":43869,"karar":"hayir","ne":"-","ozet":"Onceki dilimde okunmus (okunmus.txt: fabric), atlandi."}
+{"repo":"yoheinakajima/babyagi","stars":22352,"karar":"hayir","ne":"-","ozet":"2023 otonom ajan dongusu, lisanssiz; Claude Code is akisiyla ilgisi yok."}
+{"repo":"diet103/claude-code-infrastructure-showcase","stars":10015,"karar":"hayir","ne":"-","ozet":"Onceki dilimde okunmus (okunmus.txt: infrastructure-showcase), atlandi."}
+{"repo":"OpenBMB/AgentVerse","stars":5120,"karar":"hayir","ne":"-","ozet":"Coklu LLM ajan simulasyon catisisi; kurulabilir Claude Code mekanizmasi yok."}
+{"repo":"Kav-K/GPTDiscord","stars":1853,"karar":"hayir","ne":"-","ozet":"Discord icin GPT arayuzu; alakasiz urun."}
+{"repo":"tjboudreaux/cc-thinking-skills","stars":1293,"karar":"al","ne":"kitap","ozet":"28 dusunme modeli skill'i; frontmatterlar 6833 B ~1700 token sabit bedel, ayni icerik tek rafta 0 token."}
+{"repo":"DataBassGit/AgentForge","stars":847,"karar":"hayir","ne":"-","ozet":"GPL-3.0 genel AGI catisi; Core'un pasif eklenti ilkesiyle ortusmuyor."}
+{"repo":"alonw0/web-asset-generator","stars":493,"karar":"hayir","ne":"-","ozet":"Favicon/ikon ureten Claude skill'i; Pillow bagimli, Core'un alanina girmiyor."}
+{"repo":"LukeRenton/explore-claude-code","stars":308,"karar":"hayir","ne":"kitap","ozet":"Uzatma noktalarini ogreten statik site; kurulacak mekanizma yok, icerigi raf ozeti olabilir."}
+{"repo":"taskade/mcp","stars":164,"karar":"hayir","ne":"-","ozet":"Taskade urun MCP sunucusu; genel MCP, elenen."}
+{"repo":"cesarandreslopez/sidekick-agent-hub","stars":82,"karar":"hayir","ne":"-","ozet":"VS Code eklentisi + terminal panosu; Core zaten statusline ile durumu gosteriyor."}
+{"repo":"costiash/claude-code-docs","stars":49,"karar":"al","ne":"betik","ozet":"3 MB meta veri + istenince canli sayfa cekme; 5 skill 2981 B ~745 token, alinacak olan getirme betigi ve indeks fikri."}
+{"repo":"WenyuChiou/agent-collab-skills","stars":26,"karar":"fikir","ne":"fikir","ozet":"7 skill 1546 B ~385 token; yalniz-oneri hafiza ve kontrol noktasi fikirleri alinir, kurulum alinmaz."}
+{"repo":"Zandereins/schliff","stars":15,"karar":"al","ne":"betik","ozet":"AGENTS.md/CLAUDE.md icin modelsiz 8 boyutlu puanlayici; kritik yolda LLM yok, CI kapisi olabiliyor."}
+{"repo":"inoX-Network/claude-code-safety-guard","stars":8,"karar":"fikir","ne":"kanca","ozet":"PreToolUse deterministik bekci, siradan turda 0 token; 3970 satirlik Python oldugu gibi tasinmaz."}
+{"repo":"reefapi/reefapi-mcp","stars":3,"karar":"hayir","ne":"-","ozet":"185+ web veri API'si icin genel MCP sunucusu; alakasiz."}
+{"repo":"mcpqueen/mcpqueen","stars":0,"karar":"hayir","ne":"-","ozet":"MCP kayit defteri sunucularini derecelendiren kanit katmani; Core'a kurulacak mekanizma degil."}

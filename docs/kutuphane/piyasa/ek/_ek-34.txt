@@ -1,0 +1,3 @@
+alexgreensh/token-optimizer · ★2200 · Kanca yolunu tek env değişkeniyle kapatabilen, ölçüm modülünü yüklemeden önce kontrol eden UserPromptSubmit deseni; Core'un "sıradan turda sıfır" iddiasını ölçen bir kanca için doğrudan model.
+karanb192/claude-code-hooks · ★507 · Güvenlik/maliyet/gözlemlenebilirlik kancalarının küçük ve bağımsız paketlenmiş hali; Core'un kanca sayısını artırmadan hangi olayda ne yapılabileceğini gösteren katalog.
+nadimtuhin/claude-token-optimizer · ★572 · docs/learnings/ altındaki konu belgelerini yalnız eşleşme olduğunda enjekte eden, eşleşme yoksa sıfır token harcayan kanca; Core'un pasif raf + `??` öneki mekanizmasının yakın akrabası.

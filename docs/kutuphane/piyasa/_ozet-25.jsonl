@@ -1,0 +1,26 @@
+{"repo":"jeecgboot/JeecgBoot","stars":47680,"karar":"hayir","ne":"-","ozet":"Java kurumsal low-code platformu; Claude Code eklenti mimarisiyle ilgisiz, elendi."}
+{"repo":"modelscope/FunASR","stars":20230,"karar":"hayir","ne":"-","ozet":"Konusma tanima araci; ajan is akisiyla ilgisi yok, elendi."}
+{"repo":"budtmo/docker-android","stars":15833,"karar":"hayir","ne":"-","ozet":"Docker icinde Android emulatoru; ilgisiz urun, elendi."}
+{"repo":"maximhq/bifrost","stars":7893,"karar":"hayir","ne":"-","ozet":"Kurumsal LLM gateway/proxy; eklenti baglami disinda, elendi."}
+{"repo":"Zipstack/unstract","stars":7226,"karar":"hayir","ne":"-","ozet":"Yapisiz veriden LLM ile cikarim ETL urunu; ilgisiz, elendi."}
+{"repo":"FunnyWolf/Viper","stars":5298,"karar":"hayir","ne":"-","ozet":"Kirmizi takim/saldiri simulasyon platformu; ilgisiz, elendi."}
+{"repo":"sansan0/TrendRadar","stars":62129,"karar":"hayir","ne":"-","ozet":"Cok platformlu gundem/trend izleyici; gelistirici bilgi paketi degil, elendi."}
+{"repo":"IvanMurzak/Unity-MCP","stars":4216,"karar":"hayir","ne":"-","ozet":"Unity icin MCP sunucusu; genel MCP urunu, elendi."}
+{"repo":"exa-labs/exa-mcp-server","stars":4987,"karar":"hayir","ne":"-","ozet":"Web arama MCP sunucusu; genel MCP, Core ilkesine girdi yok, elendi."}
+{"repo":"Panniantong/Agent-Reach","stars":78803,"karar":"hayir","ne":"-","ozet":"Ajana internet erisimi veren MCP/servis; genel MCP sunucusu, elendi."}
+{"repo":"earthtojake/text-to-cad","stars":14754,"karar":"hayir","ne":"-","ozet":"CAD/CAE/CAM alan skill kitapligi; alan disi, elendi."}
+{"repo":"yizhiyanhua-ai/fireworks-tech-graph","stars":11291,"karar":"hayir","ne":"-","ozet":"Dogal dilden SVG teknik diyagram ureten skill; alan disi, elendi."}
+{"repo":"joeseesun/qiaomu-anything-to-notebooklm","stars":5970,"karar":"hayir","ne":"-","ozet":"NotebookLM icin icerik toplayici skill; alan disi, elendi."}
+{"repo":"nextlevelbuilder/ui-ux-pro-max-skill","stars":126034,"karar":"al","ne":"betik","ozet":"3,7 MB CSV bilgi tabani BM25 betikle sorgulaniyor, bagalama sadece 7 skill aciklamasi (~650 token) giriyor; raf mantiginin en iyi ornegi."}
+{"repo":"Yeachan-Heo/oh-my-claudecode","stars":39052,"karar":"fikir","ne":"fikir","ozet":"20 kanca/11 olay ve 15,4 KB sabit baglam Core ilkesine aykiri; enjeksiyon tavani sabitleri ve OMC_SKIP_HOOKS kanca kapatma anahtari alinabilir."}
+{"repo":"remotion-dev/skills","stars":4511,"karar":"al","ne":"kitap","ozet":"2,9 MB bilgiyi 2,5 KB yonlendirici tabloyla adresliyor, 12 skill aciklamasi toplam 559 B; kutuphane dizinine dogrudan uygulanabilir."}
+{"repo":"Kuberwastaken/claurst","stars":10292,"karar":"fikir","ne":"kitap","ozet":"Rust'ta Claude Code klonu; docs/hooks.md ve 12 bolumlu spec kanca sozlesmesini yaziyor, dort kanca turu (command/HTTP/LLM/dogrulayici) fikri."}
+{"repo":"oraios/serena","stars":29033,"karar":"fikir","ne":"fikir","ozet":"LSP tabanli semantik kod MCP'si; alinacak olan .serena/memories deseni (konu basina bellek dosyasi, kendiliginden yuklenmez)."}
+{"repo":"zilliztech/claude-context","stars":12504,"karar":"hayir","ne":"fikir","ozet":"Kod tabanini Milvus'a gomen arama MCP'si; bulut veritabani ve embedding anahtari zorunlu, yalniz Merkle artimli indeks fikri kaldi."}
+{"repo":"JimLiu/baoyu-skills","stars":25752,"karar":"fikir","ne":"fikir","ozet":"21 icerik uretim skill'i (7893 B aciklama); alan disi ama 'danger-' ad oneki ve secmeli kurulum uyarisi kullanisli."}
+{"repo":"0xNyk/awesome-hermes-agent","stars":5595,"karar":"fikir","ne":"betik","ozet":"103 KB tek dosya Hermes dizini; tarih damgasi ve CI bagalanti dogrulayici Core kutuphanesine ucuz iki ekleme."}
+{"repo":"MervinPraison/PraisonAI","stars":9029,"karar":"hayir","ne":"-","ozet":"Cok ajanli Python cercevesi (kendi calistirici); Claude Code eklenti mimarisine girdi vermiyor."}
+{"repo":"slopus/happy","stars":23698,"karar":"hayir","ne":"-","ozet":"Claude Code icin mobil/web istemci; arayuz urunu, baglam mekanizmasi yok."}
+{"repo":"iOfficeAI/AionUi","stars":32683,"karar":"hayir","ne":"-","ozet":"CLI ajanlari icin masaustu GUI kabugu; eklenti/kanca mekanizmasi sunmuyor."}
+{"repo":"op7418/Humanizer-zh","stars":16914,"karar":"hayir","ne":"-","ozet":"Tek dosyalik Cince yazim-arindirma skill'i; metin uslubu alani, Core'a girdi yok."}
+{"repo":"anbeime/skill","stars":6394,"karar":"hayir","ne":"-","ozet":"245 skill'i 24 saatte bir otomatik toplayan katalog deposu; icerik degil dizin, ozgun mekanizma yok."}

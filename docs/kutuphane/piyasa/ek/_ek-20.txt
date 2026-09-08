@@ -1,0 +1,3 @@
+karanb192/claude-code-hooks · ★507 · 10 kancalik eklenti pazari (maliyet, hiz siniri, dal koruma, test koruma, oturum ozeti); Core'un "kanca yalniz esikte konusur" ilkesine dogrudan kanca adaylari.
+raiyanyahya/recall · ★750 · Tamamen cevrimdisi, API anahtarsiz yerel oturum ozeti; presence'in agir alternatifi, pasif betik olarak Core'a uygun olabilir.
+thedotmack/claude-mem · ★93464 · Oturum yakalama + AI sikistirma + sonraki oturuma enjeksiyon; enjeksiyon butcesi ve sikistirma esigi olculup Core'un sifir-token ilkesine karsi tartilmali.

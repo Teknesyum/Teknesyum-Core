@@ -1,0 +1,18 @@
+{"repo":"dair-ai/Prompt-Engineering-Guide","stars":78097,"karar":"hayir","ne":"-","ozet":"134 sayfalik genel prompt muhendisligi ders sitesi (MDX, 1559 dosya); Claude Code mekanizmasi yok, raf icerigi olarak fazla genel."}
+{"repo":"K-Dense-AI/scientific-agent-skills","stars":43750,"karar":"fikir","ne":"kitap","ozet":"163 skill'in name+description'i 70 KB ~17.5k token/tur; kutuphane girmez ama AGENTS.md kapsam-disi kurali ve bu rakam kitaba yazilir."}
+{"repo":"PromtEngineer/localGPT","stars":22202,"karar":"hayir","ne":"-","ozet":"Yerel RAG belge sohbeti; Claude Code / ajan is akisiyla ilgisi yok."}
+{"repo":"microsoft/UFO","stars":9668,"karar":"hayir","ne":"-","ozet":"Windows GUI ajan cercevesi; ayri urun, Core ilkesiyle kesismiyor."}
+{"repo":"xlang-ai/OpenAgents","stars":4860,"karar":"hayir","ne":"-","ozet":"Arastirma ajan platformu (COLM 2024); kurulum modeli Core'a uzak."}
+{"repo":"Alisa0808/vox-director","stars":1806,"karar":"hayir","ne":"-","ozet":"Video uretim boru hatti; gelistirici bilgi paketi degil."}
+{"repo":"codefuse-ai/codefuse-chatbot","stars":1291,"karar":"hayir","ne":"-","ozet":"Yazilim yasam dongusu asistani, kendi MCP/LLM yigini; alakasiz urun."}
+{"repo":"Oneirocom/Magick","stars":847,"karar":"hayir","ne":"-","ozet":"Gorsel dugum tabanli AI olusturma araci; Claude Code eklentisi degil."}
+{"repo":"eidolon-ai/eidolon","stars":492,"karar":"hayir","ne":"-","ozet":"Kurumsal ajan sunucusu SDK'si; ayri calisma zamani, Core'a alinacak sey yok."}
+{"repo":"ThibautMelen/agentic-ai-systems","stars":304,"karar":"al","ne":"kitap","ozet":"Kurulumsuz 45 md metin paketi (520 KB, 0 token/tur): 2024-2026 ajan taksonomisi ve hook/skill/komut/alt-ajan karsilastirmasi."}
+{"repo":"samholt/L2MAC","stars":160,"karar":"hayir","ne":"-","ozet":"LLM otomatik bilgisayar arastirma cercevesi; Claude Code mekanizmasi yok."}
+{"repo":"SFKislev/Flue","stars":79,"karar":"hayir","ne":"-","ozet":"Photoshop/Blender gibi masaustu yazilimlarin betik API'sine kopru (pip); Core'un konusu degil."}
+{"repo":"lookfree/cc-harness","stars":48,"karar":"al","ne":"betik","ozet":"Electron isbanki; kanca kuru calistiricisi (~120 satir) pasif betik olarak alinabilir, matcher tam-eslesme olgulari kitap."}
+{"repo":"Myr-Aya/GouvernAI-claude-code-plugin","stars":23,"karar":"fikir","ne":"kitap","ozet":"5 matcher'a bagli 17.7 KB PreToolUse betigi; agir ama allow/ask/deny sozlesmesi ve token tavani fikri degerli."}
+{"repo":"elisymlabs/elisym","stars":15,"karar":"hayir","ne":"-","ozet":"Ajanlarin birbirini bulup odeme yapmasi icin altyapi; Core ile ilgisiz."}
+{"repo":"EricAndrechek/Pacer","stars":8,"karar":"fikir","ne":"fikir","ozet":"macOS menu cubugu kullanim izleyici; kota temposu (5 saat / haftalik) statusline fikri, kod tasinmaz."}
+{"repo":"8randonpickart5/alderpost-mcp","stars":2,"karar":"hayir","ne":"-","ozet":"Ucretli istihbarat API'lerine genel MCP sunucusu; Claude Code is akisiyla ilgisi yok."}
+{"repo":"szp2005/llm-prices-cn","stars":0,"karar":"hayir","ne":"-","ozet":"Gunluk LLM fiyat veri seti + barindirilan MCP; veri urunu, Core mekanizmasi degil."}

@@ -1,0 +1,3 @@
+karanb192/claude-code-hooks · ★507 · Kanca odakli marketplace; .env sizmasi, curl|sh, rm -rf, main'e force push ve kanca yapilandirmasina mudahaleyi engelleyen desenler — Core'un sir tarama betigi icin dogrudan malzeme, her kanca OWASP LLM Top 10 esleniyor.
+rohitg00/awesome-claude-code-toolkit · ★2601 · 20 kanca, 15 kural, 14 MCP yapilandirmasi ve 176 plugin envanteri; piyasa taramasinin kalan dilimleri icin kaynak liste, ayrica kanca deseni derlemesi.
+mintmcp/agent-security · ★76 · Yalniz Python'un yerlesik regex'leriyle, tamamen yerel calisan sir tarayici; pre kancasi engelliyor, post kancasi uyariyor — bagimliliksiz pasif betik ornegi (yildiz esigin altinda, yalnizca mekanizma icin).

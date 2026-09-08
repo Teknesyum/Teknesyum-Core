@@ -1,0 +1,26 @@
+{"repo":"Graphify-Labs/graphify","stars":115947,"karar":"al","ne":"kitap","ozet":"419 B'lik AGENTS.md sozlesmesi: mimari sorudan once grafigi oku, ham dosya okuma."}
+{"repo":"microsoft/ai-agents-for-beginners","stars":74206,"karar":"hayir","ne":"-","ozet":"18 derslik Jupyter egitim serisi; kurulan mekanizma yok, Claude Code ile ilgisiz."}
+{"repo":"mvanhorn/last30days-skill","stars":61596,"karar":"fikir","ne":"fikir","ozet":"69 token frontmatter; optionalEnv kademelendirmesi ve doctor saglik denetimi alinabilir."}
+{"repo":"Imbad0202/academic-research-skills","stars":47005,"karar":"fikir","ne":"betik","ozet":"run_guard.sh Windows python3 stub sorununu PASS_THROUGH JSON + exit 0 ile cozuyor."}
+{"repo":"bytedance/UI-TARS-desktop","stars":38902,"karar":"hayir","ne":"-","ozet":"Multimodal masaustu ajan yigini; buyuk urun, Core'un yuzeyiyle ilgisiz."}
+{"repo":"mukul975/Anthropic-Cybersecurity-Skills","stars":32411,"karar":"hayir","ne":"fikir","ozet":"818 skill 39000 token frontmatter; yalniz negatif-tetikleyici kurali not edildi."}
+{"repo":"ayghri/i-have-adhd","stars":28885,"karar":"al","ne":"kanca","ozet":"Bayrak dosyasi yoksa exit 0, varsa SKILL.md govdesini basan SessionStart kancasi."}
+{"repo":"alirezarezvani/claude-skills","stars":25705,"karar":"fikir","ne":"betik","ozet":"846 skill 47000 token; dosya+kural basina oturumda bir kez uyaran guvenlik kancasi degerli."}
+{"repo":"czlonkowski/n8n-mcp","stars":22843,"karar":"hayir","ne":"-","ozet":"n8n is akisi kuran genel MCP sunucusu; Core ilkesiyle celisir."}
+{"repo":"liyupi/ai-guide","stars":19682,"karar":"hayir","ne":"-","ozet":"Cince AI kaynak derlemesi ve egitim sitesi; mekanizma yok."}
+{"repo":"microsoft/SkillOpt","stars":16785,"karar":"hayir","ne":"-","ozet":"Donmus LLM ajanlari icin metin-uzayi skill egitici; arastirma sistemi, kurulum yuzeyi degil."}
+{"repo":"wasp-lang/open-saas","stars":15762,"karar":"hayir","ne":"-","ozet":"React/Node SaaS iskeleti; Claude Code ile ilgisiz buyuk urun."}
+{"repo":"NevaMind-AI/memU","stars":14393,"karar":"hayir","ne":"-","ozet":"Ajanlar arasi kalici bellek servisi; harici sunucu, sifir-token ilkesine aykiri."}
+{"repo":"Orchestra-Research/AI-Research-SKILLs","stars":12432,"karar":"hayir","ne":"fikir","ozet":"98 skill 7800 token; numarali raf duzeni disinda Core'un alanina girmiyor."}
+{"repo":"helloianneo/ian-xiaohei-illustrations","stars":11247,"karar":"hayir","ne":"-","ozet":"Cince el cizimi gorsel uretim skill'i; Core'un konusu disinda."}
+{"repo":"BehiSecc/awesome-claude-skills","stars":10113,"karar":"hayir","ne":"-","ozet":"Tek README'lik derleme listesi; kurulan mekanizma yok, sonraki tarama icin kaynak."}
+{"repo":"eze-is/web-access","stars":8880,"karar":"al","ne":"betik","ozet":"MCP kurmadan 5 pasif betikle tarayici erisimi; frontmatter 28 B (~7 token)."}
+{"repo":"osaurus-ai/osaurus","stars":7805,"karar":"hayir","ne":"-","ozet":"macOS yerel ajan kosum ortami (Swift); ayri urun, Core eklentisiyle ilgisiz."}
+{"repo":"BrowserMCP/mcp","stars":7062,"karar":"hayir","ne":"-","ozet":"Genel tarayici kontrol MCP sunucusu; web-access ayni isi betikle yapiyor."}
+{"repo":"apify/apify-mcp-server","stars":6375,"karar":"hayir","ne":"-","ozet":"Ticari veri kazima MCP sunucusu; her turda arac tanimi yukler, ilkeye aykiri."}
+{"repo":"MengTo/Skills","stars":5874,"karar":"fikir","ne":"kitap","ozet":"132 skill 11200 token; SKILL/REFERENCES/ARTICLE uc katmanli klasor sozlesmesi alinabilir."}
+{"repo":"zarazhangrui/codebase-to-course","stars":5524,"karar":"hayir","ne":"fikir","ozet":"HTML kurs ureticisi; yalniz alt ajana brief-once verme deseni not edildi."}
+{"repo":"wuyoscar/GPT-Image2-Skill","stars":5219,"karar":"hayir","ne":"-","ozet":"OpenAI gorsel uretim galerisi ve CLI; baska saglayici, Core disi."}
+{"repo":"larashero3-dotcom/lieflat-charts","stars":4977,"karar":"fikir","ne":"fikir","ozet":"37,9 KB govde pahali; renkleri metne degil betige koyan token deseni degerli."}
+{"repo":"jihe520/MathModelAgent","stars":4392,"karar":"hayir","ne":"-","ozet":"Matematiksel modelleme icin ozel ajan; ayri urun, Core yuzeyi degil."}
+{"repo":"dmmulroy/anti-slop","stars":4172,"karar":"al","ne":"kitap","ozet":"LLM kod kokularini reddeden 15 Oxlint kurali; kalite denetimi modele degil linter'a."}

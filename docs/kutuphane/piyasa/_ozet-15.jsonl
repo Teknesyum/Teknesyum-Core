@@ -1,0 +1,18 @@
+{"repo":"google-gemini/gemini-cli","stars":106863,"karar":"hayir","ne":"-","ozet":"Gemini'yi terminale getiren rakip ajan CLI'ı; Claude Code eklentisine alinacak parcasi yok."}
+{"repo":"kepano/obsidian-skills","stars":48018,"karar":"fikir","ne":"kitap","ozet":"5 skill, 0 kanca; 31 KB govdeye karsilik 1,4 KB acilis metni — negatif tetikli aciklama kalibi ve defuddle web-okuma bolumu alinabilir."}
+{"repo":"letta-ai/letta","stars":24655,"karar":"hayir","ne":"-","ozet":"Durum tutan ajan platformu ve sunucu; Claude Code is akisiyla ilgisi yok."}
+{"repo":"VoltAgent/voltagent","stars":10569,"karar":"hayir","ne":"-","ozet":"TypeScript ajan cercevesi ve gozlemlenebilirlik platformu; eklenti degil, urun."}
+{"repo":"kuafuai/DevOpsGPT","stars":5965,"karar":"hayir","ne":"-","ozet":"LLM + DevOps araclarini birlestiren cok ajanli yazilim gelistirme urunu; Core'a tasinabilir mekanizma yok."}
+{"repo":"melih-unsal/DemoGPT","stars":1907,"karar":"hayir","ne":"-","ozet":"Istemden LLM uygulamasi ureten Python araci; gelistirici bilgi paketi degil."}
+{"repo":"e2b-dev/e2b-cookbook","stars":1394,"karar":"hayir","ne":"-","ozet":"E2B sandbox SDK ornekleri; lisans yok, eklenti mekanizmasi yok."}
+{"repo":"baryhuang/claude-code-by-agents","stars":891,"karar":"hayir","ne":"-","ozet":"macOS/iOS Swift uygulamasi (Agentrooms); coklu ajan odasi, dosya disi kurulum gerektirir."}
+{"repo":"1mcp-app/agent","stars":500,"karar":"hayir","ne":"-","ozet":"Genel MCP toplayici sunucu; sıradan turda arac tanimi yukler, Core ilkesine aykiri."}
+{"repo":"educlopez/ui-craft","stars":318,"karar":"fikir","ne":"fikir","ozet":"26 komut, 3 ajan, 217 SKILL.md ama sadece 4 aciklama (1294 B, ~320 token) yuklu kaliyor; 'merdiven' modeli ve renk uydurmama kapisi ornek."}
+{"repo":"agiletec-inc/airis-mcp-gateway","stars":172,"karar":"fikir","ne":"fikir","ozet":"Gateway'i global MCP olarak kaydetmeyip skill'le kisa omurlu acma kurali; siradan turda 0 arac tanimi."}
+{"repo":"airutorg/airut","stars":83,"karar":"hayir","ne":"-","ozet":"E-posta/Slack'ten sandbox konteynerde Claude Code calistiran self-hosted altyapi; eklenti degil, sunucu."}
+{"repo":"ccf/agentcairn","stars":50,"karar":"fikir","ne":"kanca","ozet":"4 kanca olayi hepsi matcher '*', UserPromptSubmit her turda baglama yaziyor; fail-open ve detached-warmup kanca kaliplari alinabilir."}
+{"repo":"Barnett-Studios/cxpak","stars":27,"karar":"fikir","ne":"betik","ozet":"3 skill toplam 519 B (~130 token) karsiliginda tum depo brifingi; diff'e daraltilmis bagimlilik paketi map.js icin uygulanabilir."}
+{"repo":"isaac-levine/forage","stars":16,"karar":"hayir","ne":"-","ozet":"Ajanin kendi kendine MCP sunucusu bulup kurmasini saglayan MCP sunucusu; CLAUDE.md'ye yaziyor, Core'un sifir-token ilkesine aykiri."}
+{"repo":"zakariagharzouli/sparda","stars":8,"karar":"hayir","ne":"fikir","ozet":"BUSL-1.1 lisansli deterministik backend kanit kapisi; uc durumlu verdikt (kanit/kismi/onerme dogrulanmadi) fikri notlandi."}
+{"repo":"agenthotspot/agenthotspot-mcp","stars":3,"karar":"hayir","ne":"-","ozet":"Pazar yeri konnektor arama MCP sunucusu; alakasiz urun."}
+{"repo":"forgemeshlabs/anomaly-mcp","stars":0,"karar":"hayir","ne":"-","ozet":"Blokzincir olay anomali tespiti MCP sunucusu; gelistirici is akisiyla ilgisi yok."}

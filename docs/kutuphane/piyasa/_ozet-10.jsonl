@@ -1,0 +1,18 @@
+{"repo":"anthropics/claude-code","stars":144414,"karar":"hayir","ne":"-","ozet":"Core'un ustunde calistigi urunun kendisi; issue tracker ve dokuman deposu, alinacak mekanizma yok."}
+{"repo":"Kilo-Org/kilocode","stars":27223,"karar":"hayir","ne":"-","ozet":"VS Code eklentisi olarak ayri bir ajan platformu; Claude Code eklenti mekanizmasiyla ilgisiz."}
+{"repo":"siteboon/claudecodeui","stars":13611,"karar":"hayir","ne":"-","ozet":"Onceki dilimde okundu; mobil/web arayuz, tekrar bakilmadi."}
+{"repo":"punkpeye/awesome-mcp-clients","stars":6581,"karar":"hayir","ne":"-","ozet":"MCP istemci listesi; Core MCP kurmuyor, icerik ilgisiz."}
+{"repo":"trypromptly/LLMStack","stars":2311,"karar":"hayir","ne":"-","ozet":"No-code cok ajanli LLM uygulama platformu; Claude Code disinda ayri urun."}
+{"repo":"memfreeme/memfree","stars":1505,"karar":"hayir","ne":"-","ozet":"Hibrit AI arama motoru ve sayfa ureteci; gelistirici is akisiyla ilgisiz."}
+{"repo":"dzoba/gptrpg","stars":992,"karar":"hayir","ne":"-","ozet":"GPT ajaninin RPG ortaminda yasadigi demo; oyun deneyi."}
+{"repo":"giselles-ai/giselle","stars":555,"karar":"hayir","ne":"-","ozet":"Web tabanli AI uygulama kurucu; terminal ajan is akisiyla ilgisiz."}
+{"repo":"arikusi/deepseek-mcp-server","stars":18,"karar":"hayir","ne":"-","ozet":"DeepSeek icin genel MCP sunucusu; Core ilkesi MCP kurmamak."}
+{"repo":"ariekogan/ateam-mcp","stars":1,"karar":"hayir","ne":"-","ozet":"Cok ajanli cozum dagitan MCP sunucusu, 1 yildiz, lisanssiz."}
+{"repo":"gmr/claude-status","stars":59,"karar":"hayir","ne":"-","ozet":"macOS menu cubugu widget'i; Core Windows statusline'i zaten var, Swift kodu tasinmaz."}
+{"repo":"hesreallyhim/awesome-claude-code","stars":53680,"karar":"fikir","ne":"fikir","ozet":"Mekanizmasi olmayan kaynak listesi; sonraki dilimler icin aday havuzu."}
+{"repo":"rahulvrane/awesome-claude-agents","stars":362,"karar":"hayir","ne":"-","ozet":"Agu 2025'te donmus alt ajan dizini; Core ajan kurmuyor."}
+{"repo":"ayoubben18/ab-method","stars":189,"karar":"fikir","ne":"kitap","ozet":"32 skill her turda 2.2K token, ama grill-me kurali ve yan-konu handoff'u kitap olarak alinir."}
+{"repo":"tony/claude-code-riper-5","stars":93,"karar":"hayir","ne":"-","ozet":"15 KB sabit baglam karsiliginda tek fikri (asama kilidi) Core'da plan esigiyle zaten var."}
+{"repo":"ngmeyer/librarian-mcp","stars":29,"karar":"fikir","ne":"fikir","ozet":"Raf ici wikilink+trigram arama fikri degerli, MCP kurulumu Core ilkesine ters."}
+{"repo":"HeyRenan/showreel","stars":10,"karar":"fikir","ne":"kitap","ozet":"2 skill=180 token, 40 betik; ince skill + kalin betik + kendini dogrulayan cikti deseni."}
+{"repo":"LiveNL/tmux-claude-status-tabs","stars":3,"karar":"al","ne":"kitap","ozet":"10 olayda 0 token kanca; payload-contract.txt ve gercek payload'la test Core'un kanca kor noktasini kapatiyor."}

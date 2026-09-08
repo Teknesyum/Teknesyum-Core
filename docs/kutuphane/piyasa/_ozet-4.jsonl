@@ -1,0 +1,19 @@
+{"repo":"NousResearch/hermes-agent","stars":243217,"karar":"fikir","ne":"fikir","ozet":"Kendi skill'ini deneyimden üreten bağımsız ajan çatısı; Claude Code eklentisi değil, yalnız 'deneyimden raf üret' fikri not edildi."}
+{"repo":"cline/cline","stars":67659,"karar":"hayir","ne":"-","ozet":"IDE eklentisi/SDK biçiminde ayrı bir kodlama ajanı; Core'un eklenti yüzeyiyle kesişmiyor."}
+{"repo":"Pythagora-io/gpt-pilot","stars":33679,"karar":"hayir","ne":"-","ozet":"Uçtan uca uygulama üreten Python ajanı; kanca/skill mekanizması yok."}
+{"repo":"NVIDIA/SkillSpector","stars":16607,"karar":"hayir","ne":"-","ozet":"Önceki dilimde 'skillspector' olarak okundu, çakışma nedeniyle atlandı."}
+{"repo":"OpenBMB/XAgent","stars":8540,"karar":"hayir","ne":"-","ozet":"Otonom LLM ajan çatısı; Claude Code iş akışıyla ilgisi yok."}
+{"repo":"lackeyjb/playwright-skill","stars":3109,"karar":"fikir","ne":"fikir","ozet":"0 kanca 1 skill, sıradan turda ~408 bayt; SKILL_DIR çözümü ve allowed-tools sınırı biçim olarak alınabilir."}
+{"repo":"abilzerian/LLM-Prompt-Library","stars":1606,"karar":"hayir","ne":"-","ozet":"164 Jinja2 kurumsal şablon + 60 istem; ajan mekanizması yok, Core'un rafı için fazla genel."}
+{"repo":"agentcoinorg/evo.ninja","stars":1081,"karar":"hayir","ne":"-","ozet":"Genel amaçlı TypeScript ajanı; Claude Code eklenti yüzeyi yok."}
+{"repo":"m1ckc3s/claude-status-bar","stars":681,"karar":"hayir","ne":"-","ozet":"macOS menü çubuğu uygulaması; kancaları settings'e kendisi yazıyor, Core'un 'settings'e dokunma' ilkesine aykırı ve platform dışı."}
+{"repo":"genia-dev/GeniA","stars":409,"karar":"hayir","ne":"-","ozet":"Platform mühendisliği için Slack ajanı; ilgisiz."}
+{"repo":"chrisvoncsefalvay/claude-d3js-skill","stars":229,"karar":"fikir","ne":"fikir","ozet":"Çıplak skill, ~478 bayt açıklama; 'bu raf ne için değildir' başlangıcı ve referans üçe bölme biçimi alınabilir, lisansı yok."}
+{"repo":"minchenlee/c9watch","stars":128,"karar":"hayir","ne":"-","ozet":"macOS Tauri panosu + JSON CLI; Core statusline'ı zaten aynı işi kancasız yapıyor."}
+{"repo":"ajhous44/cody","stars":66,"karar":"hayir","ne":"-","ozet":"Küçük Python kod asistanı; mekanizma yok."}
+{"repo":"rhein1/agoragentic-integrations","stars":36,"karar":"hayir","ne":"-","ozet":"Ajan çatıları için adaptör kataloğu; Core'un tek kullanıcılı eklenti yüzeyiyle ilgisiz."}
+{"repo":"EndeavorYen/chrome-cdp-ex","stars":20,"karar":"hayir","ne":"-","ozet":"Açık Chrome sekmesine CDP ile bağlanan araç; Core'a girecek pasif parça yok."}
+{"repo":"jungjaehoon-lifegamez/MAMA","stars":13,"karar":"hayir","ne":"-","ozet":"Messenger arkasında çalışan yerel iş ajanı + kendi sunucusu; 'sıfır token' ilkesiyle taban tabana zıt bir kurulum."}
+{"repo":"espadaw/Agent47","stars":4,"karar":"hayir","ne":"-","ozet":"İş arama MCP sunucusu; ilgisiz."}
+{"repo":"zircote/workflows-plugin","stars":1,"karar":"al","ne":"betik","ozet":"0 kanca 1 skill, ~593 bayt sıradan bağlama; vendor/VENDOR.lock (url+sha256+fetchedAt+refreshable) deseni Core kütüphanesine doğrudan alınabilir."}
+{"repo":"hedging8563/tokenlab-mcp-server","stars":0,"karar":"hayir","ne":"-","ozet":"OpenAPI'den üretilmiş genel MCP sunucusu; Core'un alanı değil."}

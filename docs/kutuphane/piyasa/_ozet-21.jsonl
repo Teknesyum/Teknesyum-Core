@@ -1,0 +1,27 @@
+{"repo":"n8n-io/n8n","stars":203733,"karar":"hayir","ne":"-","ozet":"Genel iş akışı otomasyon platformu; Claude Code ile ilgisi yok, klonlanmadı."}
+{"repo":"Leonxlnx/taste-skill","stars":85384,"karar":"fikir","ne":"fikir","ozet":"12 tasarım skill'i; alınacak tek şey 'kurallar bağlamsal, kendiliğinden ateşlenmez' raf sözleşmesi."}
+{"repo":"shanraisshan/claude-code-best-practice","stars":65764,"karar":"al","ne":"kitap","ozet":"Sıfır kurulumlu referans derlemesi; claude-settings.md 159 KB, doğrudan raf malzemesi."}
+{"repo":"CherryHQ/cherry-studio","stars":51571,"karar":"hayir","ne":"-","ozet":"Masaüstü AI sohbet istemcisi; Claude Code eklenti mekanizmasıyla ilgisiz."}
+{"repo":"chatboxai/chatbox","stars":41691,"karar":"hayir","ne":"-","ozet":"Genel AI istemcisi; Core'a alınacak mekanizma yok."}
+{"repo":"JCodesMore/ai-website-cloner-template","stars":34045,"karar":"fikir","ne":"betik","ozet":"12 baytlık CLAUDE.md + 16 araç dizinine ikizlenen yapılandırma; scaffold.js için üretici deseni."}
+{"repo":"topoteretes/cognee","stars":30587,"karar":"hayir","ne":"-","ozet":"Ajan bellek platformu (Python kütüphanesi); Claude Code'a takılan bir şey değil."}
+{"repo":"manaflow-ai/cmux","stars":26902,"karar":"hayir","ne":"-","ozet":"macOS terminal uygulaması; Core'un alanı dışında."}
+{"repo":"activepieces/activepieces","stars":24339,"karar":"hayir","ne":"-","ozet":"MCP/iş akışı otomasyon ürünü; Claude Code eklentisi değil."}
+{"repo":"mksglu/context-mode","stars":21274,"karar":"fikir","ne":"kanca","ozet":"7 kanca olayı + 8 skill + MCP; SessionStart'ta ~1300 token sabit blok basıyor, sıfır-token ilkesiyle çelişiyor."}
+{"repo":"rowboatlabs/rowboat","stars":17499,"karar":"hayir","ne":"-","ozet":"Bellekli AI iş arkadaşı ürünü; ayrı uygulama, eklenti değil."}
+{"repo":"xbtlin/ai-berkshire","stars":16242,"karar":"hayir","ne":"fikir","ozet":"21 yatırım araştırma skill'i; yalnız 'tez kayması denetimi' fikri not edildi."}
+{"repo":"YishenTu/claudian","stars":15224,"karar":"hayir","ne":"-","ozet":"Obsidian eklentisi; Claude Code'u barındırıyor, ona bir şey kurmuyor."}
+{"repo":"sirmalloc/ccstatusline","stars":12803,"karar":"al","ne":"fikir","ozet":"91 statusline widget'ı, modele sıfır token; CompactionCounter ve CacheHitRate Core'da yok."}
+{"repo":"humanlayer/humanlayer","stars":11492,"karar":"hayir","ne":"-","ozet":"Ayrı ajan koşum ortamı (CodeLayer); Core'un pasif eklenti modeline takılmıyor."}
+{"repo":"getagentseal/codeburn","stars":10902,"karar":"fikir","ne":"betik","ozet":"Oturum günlüklerinden token/maliyet okuyan yerel araç; Core'un ölçüm ihtiyacına sıfır token'la oturuyor."}
+{"repo":"ChinaSiro/claude-code-sourcemap","stars":9657,"karar":"hayir","ne":"-","ozet":"CLI 2.1.88 source map'inden geri kurulmuş 4756 dosya; telifli ve lisanssız, kopyalanamaz."}
+{"repo":"firerpa/lamda","stars":8288,"karar":"hayir","ne":"-","ozet":"Android cihaz denetim platformu; konu dışı."}
+{"repo":"yzfly/Awesome-MCP-ZH","stars":7636,"karar":"hayir","ne":"-","ozet":"Çince MCP sunucu/istemci listesi; Core'un raf konusuyla örtüşmüyor."}
+{"repo":"zenstory-ai/oh-story-claudecode","stars":6670,"karar":"hayir","ne":"fikir","ozet":"13 web-roman skill'i; alınacak tek şey 'deslop ayrı geçiş' fikri."}
+{"repo":"trailhq/Graft","stars":6108,"karar":"fikir","ne":"fikir","ozet":"Kod grafiği + her turda düğüm enjekte eden kanca; --dry-run ve yerel önbellek ayrımı alınır, enjeksiyon alınmaz."}
+{"repo":"potpie-ai/potpie","stars":5715,"karar":"hayir","ne":"-","ozet":"SDLC bağlam grafiği servisi (Python); Claude Code'a kurulan bir mekanizma sunmuyor."}
+{"repo":"breaking-brake/cc-wf-studio","stars":5374,"karar":"hayir","ne":"-","ozet":"VS Code tuval eklentisi; terminal ve dosya temelli Core'a takılacak parçası yok."}
+{"repo":"libukai/awesome-agent-skills","stars":5072,"karar":"al","ne":"kitap","ozet":"Sıfır kurulumlu skill tasarım kılavuzu; beş tasarım kalıbı raf yazımına doğrudan malzeme."}
+{"repo":"twostraws/SwiftUI-Agent-Skill","stars":4673,"karar":"fikir","ne":"kitap","ozet":"Tek skill, 2 satır açıklama; en yalın raf biçimi ve 'sorun uydurma' çıktı sözleşmesi."}
+{"repo":"antvis/mcp-server-chart","stars":4352,"karar":"hayir","ne":"-","ozet":"Grafik üreten MCP sunucusu; Core hiçbir şeyi MCP olarak kurmuyor."}
+{"repo":"Manavarya09/design-extract","stars":4059,"karar":"hayir","ne":"fikir","ozet":"14 komutlu tasarım token çıkarıcı; plugin.json açıklamasının 180 kelimeye şişmesi karşı örnek."}

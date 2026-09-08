@@ -1,0 +1,3 @@
+nvidia/SkillSpector · ★16638 · Apache-2.0 · kurmadan once skill/MCP tarayan scanner; snyk/agent-scan ile ayni alan ama 5 kat yildiz, desen listesi Core'un raf denetimi icin kitap olur.
+cisco-ai-defense/skill-scanner · ★2509 · SKILL.md ve MCP dizinlerinde prompt injection/exfiltration statik desen taramasi; Core'un `kutuphane.js fetch` sonrasi pasif betigi icin dogrudan kaynak.
+karanb192/claude-code-hooks · ★507 · MIT · 20 kancalik katalog; config-guard PreToolUse kancasi .claude/settings.json'a enjeksiyonu engelliyor (CHAINDROP/CVE-2026-25725), Core'un kapisina kanca fikri.

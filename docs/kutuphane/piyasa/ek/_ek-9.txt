@@ -1,0 +1,3 @@
+karanb192/claude-code-hooks · 507 yildiz; 10 kancalik kopyala-yapistir koleksiyonu (cost-tracker, rate-limiter, branch-guard, context-snapshot, rules-injector) - Core'un kanca disiplini icin karsilastirma tabani
+rohitg00/awesome-claude-code-toolkit · 2601 yildiz; 20 kanca, 15 kural, 176+ eklenti dizini - kutuphane raflari icin toplu aday kaynagi
+seojoonkim/agentlinter · 80 yildiz; 38 kural, sayisal esikli token butcesi ve en agir bolum analizi - ctxlint'e alternatif olcum, esik ≥200 degil ama tek ilgili ikinci linter

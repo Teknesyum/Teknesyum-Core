@@ -1,0 +1,3 @@
+Dicklesworthstone/destructive_command_guard · ★5943 · Yıkıcı git/shell komutlarını çalışmadan önce kesen tek PreToolUse kancası; Core'un "kanca yalnız eşikte konuşur" kalıbına uygun, tek amaçlı pasif betik.
+karanb192/claude-code-hooks · ★507 · Güvenlik/maliyet/gözlemlenebilirlik kancalarının tek komutla kurulan eklenti pazarı; kanca olay eşlemesi ve deny gerekçesi geri besleme deseni için okunmalı.
+u-ichi/compact-plus · ★203 · /compact çevresinde çalışma durumunu saklayıp geri yükleyen eklenti; Core'un handoff/devir işini kancayla yapan en yakın örnek.

@@ -1,0 +1,26 @@
+{"repo":"koala73/worldmonitor","stars":85830,"karar":"hayir","ne":"-","ozet":"Jeopolitik haber panosu; Claude Code ya da ajan is akisiyla ilgisi yok, elendi."}
+{"repo":"code-yeongyu/oh-my-openagent","stars":68816,"karar":"hayir","ne":"-","ozet":"Kendi ajan CLI'si (OmO); sponsorlu ayri urun, eklenti mekanizmasi Core'a tasinmaz."}
+{"repo":"VoltAgent/awesome-openclaw-skills","stars":52447,"karar":"hayir","ne":"-","ozet":"5300+ OpenClaw skill'inin kategorili listesi; baska bir asistanin kayit defteri, Core'a girecek mekanizma yok."}
+{"repo":"amruthpillai/reactive-resume","stars":42335,"karar":"hayir","ne":"-","ozet":"Ozgecmis olusturucu; alakasiz urun, elendi."}
+{"repo":"zhaoxuya520/reverse-skill","stars":35097,"karar":"hayir","ne":"-","ozet":"Siber guvenlik skill yonlendirici paketi; dar alan, Core ilkesine katki yok."}
+{"repo":"vercel-labs/skills","stars":30681,"karar":"fikir","ne":"fikir","ozet":"npx skills use ile kurmadan tek turluk istem uretimi ve token'i process'e kopyalamayan kimlik zinciri."}
+{"repo":"jarrodwatts/claude-hud","stars":27875,"karar":"al","ne":"betik","ozet":"0 kanca 0 skill, tum is statusline'da; oturum bazli baglam onbellegi ve isSidechain ile alt ajan ayirma dogrudan alinabilir."}
+{"repo":"titanwings/distilly","stars":24435,"karar":"hayir","ne":"-","ozet":"Kisi profilini skill'e damitan yerel urun; 5 MCP araci kuruyor, Core'un kurulum-yok ilkesine ters."}
+{"repo":"alibaba/open-code-review","stars":22094,"karar":"al","ne":"fikir","ozet":"Deterministik motor + dar ajan bolusumu, olculmus ~1/9 token; ilgili dosyalari tek inceleme birimine paketleme deseni."}
+{"repo":"muratcankoylan/Agent-Skills-for-Context-Engineering","stars":17947,"karar":"al","ne":"kitap","ozet":"Baglam bozulmasi, sikistirma ve dosya-sistemi-baglam metinleri Core'un pasif raf tasarimina yazili dayanak."}
+{"repo":"composio-community/awesome-codex-skills","stars":16316,"karar":"hayir","ne":"fikir","ozet":"880 SKILL.md yigini ve Composio MCP Gateway pazarlamasi; yalniz skill-creator/installer/share ayrimi not."}
+{"repo":"citrolabs/ego-lite","stars":15313,"karar":"hayir","ne":"-","ozet":"Ajanlar icin tarayici otomasyonu; Core'un bilgi paketi alaniyla ilgisiz."}
+{"repo":"modelcontextprotocol/typescript-sdk","stars":13349,"karar":"hayir","ne":"-","ozet":"Genel MCP SDK'si; Core MCP sunucusu kurmuyor."}
+{"repo":"0x4m4/hexstrike-ai","stars":11666,"karar":"hayir","ne":"-","ozet":"Pentest MCP sunucusu; alakasiz alan."}
+{"repo":"aden-hive/hive","stars":11019,"karar":"hayir","ne":"-","ozet":"102 MCP aracli uretim ajan cercevesi; agir kosum katmani, Core'un sifir-token ilkesiyle bagdasmiyor."}
+{"repo":"awslabs/mcp","stars":9675,"karar":"hayir","ne":"-","ozet":"AWS MCP sunuculari; genel MCP, elendi."}
+{"repo":"smtg-ai/claude-squad","stars":8448,"karar":"hayir","ne":"-","ozet":"tmux tabanli coklu ajan yoneticisi (Go ikilisi); eklenti degil, bagimsiz terminal uygulamasi."}
+{"repo":"SimoneAvogadro/android-reverse-engineering-skill","stars":7732,"karar":"hayir","ne":"-","ozet":"Tek alanli Android tersine muhendislik skill'i; Core'a genellenebilir mekanizma yok."}
+{"repo":"WenyuChiou/awesome-agentic-ai-zh","stars":6720,"karar":"hayir","ne":"-","ozet":"Uc dilli ogrenme yol haritasi listesi; mekanizma icermiyor."}
+{"repo":"ikaijua/Awesome-AITools","stars":6169,"karar":"hayir","ne":"-","ozet":"Genel AI arac listesi; elendi."}
+{"repo":"gosom/google-maps-scraper","stars":5766,"karar":"hayir","ne":"-","ozet":"Harita kazima araci; alakasiz urun, elendi."}
+{"repo":"dotnet/skills","stars":5383,"karar":"al","ne":"fikir","ozet":"Baseline-vs-skilled esli eval deneyi (vary /environment/skills, uyaran basi tek oy) ve USE FOR / DO NOT USE FOR frontmatter kalibi; 105 skill 72.4 KB."}
+{"repo":"vitali87/code-graph-rag","stars":5104,"karar":"hayir","ne":"-","ozet":"Monorepo icin kod grafigi RAG'i; Core'da graphify ayni isi zaten goruyor."}
+{"repo":"u14app/deep-research","stars":4682,"karar":"hayir","ne":"-","ozet":"Deep research web uygulamasi + MCP sunucusu; Core'un alani degil."}
+{"repo":"open-webui/mcpo","stars":4365,"karar":"hayir","ne":"-","ozet":"MCP-OpenAPI proxy'si; genel altyapi, elendi."}
+{"repo":"inkeep/open-knowledge","stars":4089,"karar":"hayir","ne":"-","ozet":"Markdown IDE ve LLM wiki masaustu uygulamasi; ayri urun, eklenti mekanizmasi yok."}

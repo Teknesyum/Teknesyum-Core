@@ -1,0 +1,3 @@
+sirmalloc/ccstatusline · ★12803 · Statusline'da kanca ciktisini susturma (no-op JSON bastirma) ve tema/powerline yapisi; Core'un statusline'i icin dogrudan mekanizma.
+AI-Builder-Club/skills · ★1240 · "Loop engineer" skill paketi: ajan tetiklenir, isi alir, dogrular, ogrendigini loglar. Core'un plan/handoff dongusune raf notu.
+tmck-code/yet-another-statusline · ★241 · UserPromptSubmit kancasiyla oturum basina prompt zaman damgasi tutup tur-kapsamli alt ajan gosterimi; Core'un sayaclarina ucuz kalip.

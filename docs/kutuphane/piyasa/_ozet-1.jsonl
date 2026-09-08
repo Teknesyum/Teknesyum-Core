@@ -1,0 +1,19 @@
+{"repo":"donnemartin/system-design-primer","stars":368663,"karar":"hayir","ne":"-","ozet":"Sistem tasarimi mulakat notlari; Claude Code / ajan is akisiyla ilgisi yok."}
+{"repo":"ruvnet/ruflo","stars":71563,"karar":"hayir","ne":"-","ozet":"Daha once okundu (okunmus.txt)."}
+{"repo":"PatrickJS/awesome-cursorrules","stars":40740,"karar":"hayir","ne":"-","ozet":"Daha once okundu (okunmus.txt)."}
+{"repo":"ccusage/ccusage","stars":18420,"karar":"hayir","ne":"-","ozet":"Daha once okundu (okunmus.txt)."}
+{"repo":"revfactory/harness","stars":8929,"karar":"hayir","ne":"-","ozet":"Daha once okundu (okunmus.txt)."}
+{"repo":"entropy-research/Devon","stars":3456,"karar":"hayir","ne":"-","ozet":"Bagimsiz pipx/npm ajan urunu ve kendi TUI'si; Claude Code eklenti mekanizmasi yok."}
+{"repo":"nimbalyst/nimbalyst","stars":1675,"karar":"hayir","ne":"-","ozet":"Electron masaustu GUI urunu; dosya disina kurulum gerektirir, Core'a alinacak metin yok."}
+{"repo":"conorluddy/ios-simulator-skill","stars":1245,"karar":"fikir","ne":"fikir","ozet":"31 betikli tek skill; 65 token pasif, cikti tek satir ozet + xcresult tutamagi (10 vs 1600 token olculmus)."}
+{"repo":"pgalko/BambooAI","stars":787,"karar":"hayir","ne":"-","ozet":"LLM ile veri analizi Python kutuphanesi; ajan is akisi degil."}
+{"repo":"renezander030/capcut-cli","stars":424,"karar":"hayir","ne":"-","ozet":"CapCut proje dosyasi duzenleyen alakasiz urun CLI'si."}
+{"repo":"Li-Evan/Bloom","stars":253,"karar":"hayir","ne":"-","ozet":"FastAPI + React ozel ders urunu; Claude Code eklenti mekanizmasi yok."}
+{"repo":"api7/aisix","stars":141,"karar":"hayir","ne":"-","ozet":"Rust LLM ag gecidi; altyapi urunu, gelistirici bilgi paketi degil."}
+{"repo":"Jovancoding/Network-AI","stars":74,"karar":"hayir","ne":"-","ozet":"npm cok ajanli orkestratoru; kutuphane olarak koda gomulur, Core ilkesine yabanci."}
+{"repo":"Wolfe-Jam/faf-cli","stars":39,"karar":"fikir","ne":"fikir","ozet":"Tek .faf dosyasindan CLAUDE.md/AGENTS.md uretir; ~385 token sabit tur yuku Core ilkesini bozar."}
+{"repo":"tadas-github/a2asearch-mcp","stars":21,"karar":"hayir","ne":"-","ozet":"Genel MCP arama sunucusu; Core kurulum bicimine uymaz."}
+{"repo":"wei18/Upkeep","stars":14,"karar":"al","ne":"kitap","ozet":"Kancasiz tek skill (45 token); 8 paralel gozden gecirici istemi ve katı JSON cikti sozlesmesi raf adayi."}
+{"repo":"alexanderclapp/clirank-mcp-server","stars":6,"karar":"hayir","ne":"-","ozet":"API siralama MCP sunucusu; alakasiz."}
+{"repo":"gpu-bridge/mcp-server","stars":2,"karar":"hayir","ne":"-","ozet":"30 AI servisini MCP araci yapan genel sunucu; alakasiz."}
+{"repo":"avotsai/avots-mcp","stars":0,"karar":"hayir","ne":"-","ozet":"Gorsel/video uretim MCP sunucusu; alakasiz."}

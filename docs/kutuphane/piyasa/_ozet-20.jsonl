@@ -1,0 +1,18 @@
+{"repo":"ComposioHQ/awesome-claude-skills","stars":74657,"karar":"fikir","ne":"fikir","ozet":"1000+ skill derlemesi; kurulacak sey yok, sonraki taramalara aday havuzu ve Composio MCP gateway reklami."}
+{"repo":"ashishps1/awesome-system-design-resources","stars":41238,"karar":"hayir","ne":"-","ozet":"Sistem tasarimi mulakat kaynaklari; Claude Code ya da ajan is akisiyla ilgisi yok."}
+{"repo":"stitionai/devika","stars":19565,"karar":"hayir","ne":"-","ozet":"Bagimsiz agentic yazilim muhendisi urunu; Claude Code eklenti yuzeyi yok."}
+{"repo":"frankbria/ralph-claude-code","stars":9623,"karar":"fikir","ne":"fikir","ozet":"Disaridan otonom dongu; cift kosullu cikis kapisi ve saatlik cagri sayaci not degerinde, baglama 0 token."}
+{"repo":"langroid/langroid","stars":4101,"karar":"hayir","ne":"-","ozet":"Python coklu ajan programlama cercevesi; Core'un kanca/raf mimarisiyle kesismiyor."}
+{"repo":"lst97/claude-code-sub-agents","stars":1678,"karar":"hayir","ne":"-","ozet":"37 ajan + 10.7 KB CLAUDE.md ile olculen ~4900 token/tur sabit maliyet; Core ilkesinin tam ziddi."}
+{"repo":"mcpjungle/MCPJungle","stars":1246,"karar":"hayir","ne":"-","ozet":"Genel MCP sunucu yoneticisi; Core'da MCP katmani yok."}
+{"repo":"Technion-Kishony-lab/data-to-paper","stars":819,"karar":"hayir","ne":"-","ozet":"Bilimsel makale ureten arastirma urunu; gelistirici bilgi paketi degil."}
+{"repo":"erik-megarad/beebot","stars":453,"karar":"hayir","ne":"-","ozet":"Otonom AI ajan denemesi; Claude Code ile ilgisi yok."}
+{"repo":"uilicious/english-compiler","stars":298,"karar":"hayir","ne":"-","ozet":"Markdown spesifikasyonundan kod ureten POC derleyici; alakasiz."}
+{"repo":"xeol-io/bumpgen","stars":146,"karar":"hayir","ne":"-","ozet":"npm paket yukseltme ajani; tek amacli urun, Core'a girecek parca yok."}
+{"repo":"ypollak2/llm-router","stars":77,"karar":"fikir","ne":"fikir","ozet":"Istemi ucuz/pahali model katmanlarina yonlendiriyor; zorluga gore katman secimi ve kota olcumu fikri."}
+{"repo":"anneschuth/claude-threads","stars":39,"karar":"hayir","ne":"-","ozet":"Claude Code'u Slack/Mattermost thread'ine tasiyan kopru; ayri urun, baglam mekanizmasi yok."}
+{"repo":"vimalk78/dictate","stars":21,"karar":"hayir","ne":"-","ozet":"Linux'ta yerel Whisper ile sesle yazma; Core ilkesiyle ilgisiz, Windows'ta calismiyor."}
+{"repo":"mishanefedov/agentwatch","stars":14,"karar":"fikir","ne":"fikir","ozet":"Butun kodlama ajanlari icin tek yerel zaman cizgisi; statusline olcumu ve AGENTS.md oz-tanitim bicimi not degerinde."}
+{"repo":"sara-star-quant/presence","stars":7,"karar":"al","ne":"kanca","ozet":"Stop kancasinda dogrulanmamis basari iddiasi kapisi ve bos kuyrukta susan UserPromptSubmit deseni; olculen bos tur maliyeti 0."}
+{"repo":"Alepha188838884/context-firewall","stars":2,"karar":"fikir","ne":"fikir","ozet":"MCP proxy, 122 arac 4'e katlaniyor ve cikti %70-98 sikisiyor; oturum sonu tasarruf karnesi fikri."}
+{"repo":"adw0rd/awesome-mcp-tools-mcp","stars":0,"karar":"hayir","ne":"-","ozet":"2000+ MCP sunucusu katalogu icin CLI/MCP koprusu; genel MCP, Core'a girmiyor."}

@@ -1,0 +1,3 @@
+karanb192/claude-code-hooks · 507 yıldız · 20 kancanın her biri tek kurulan eklenti; .env sızdırma, curl|sh, main'e force push ve kanca ayarını kurcalama PreToolUse'ta engelleniyor — agent-guard'ın deterministik kanca fikrinin daha geniş, OWASP LLM Top 10 eşlemeli hâli.
+athola/claude-night-market · 336 yıldız · 23 eklentilik tek depo; TDD zorlayan kancalar ve spec-güdümlü akış — Core'un "kanca eşikte tek satır konuşur" ilkesinin çok eklentili bir karşılaştırma zemini.
+yoloshii/ClawMem · 209 yıldız · cihaz-içi bellek katmanı, kanca + MCP; Core'un handoff/devir notu ile aynı sorunu farklı mekanizmayla çözüyor, bağlama ne yazdığı ölçülmeye değer.

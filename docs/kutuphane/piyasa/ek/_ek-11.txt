@@ -1,0 +1,3 @@
+disler/claude-code-hooks-mastery · ★3914 · 13 kanca yasam dongusu olayinin tamami icin JSON yukleriyle referans uygulama; Core'un kanca tablosunu olguya baglar.
+karanb192/claude-code-hooks · ★507 · PreToolUse/PostToolUse ile arac cagrisini modelin disinda izin veren-reddeden kanca seti + eklenti pazari; istem enjeksiyonuna kapali guvenlik katmani ornegi.
+alirezarezvani/claudeforge · ★424 · CLAUDE.md icin 150 satir tavanini PostToolUse kancasiyla deterministik zorluyor ve fazlasini @path alt dosyalarina dagitiyor; Core'un AGENTS.md 20 satir kuralinin makine karsiligi.

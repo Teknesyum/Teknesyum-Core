@@ -1,0 +1,24 @@
+{"repo":"xiaopu-ai/web-design","stars":755,"karar":"al","ne":"kitap","ozet":"20 KB gövdeyi 125 tokenlik aciklamanin arkasina sakliyor; kalite kontrol listesi ve DESIGN.md sablonu rafa alinir."}
+{"repo":"taekchef/claude-code-zh-cn","stars":753,"karar":"hayir","ne":"-","ozet":"Claude Code CLI arayuz cevirisi; ikili yamalama, baglam ya da is akisi mekanizmasi yok."}
+{"repo":"CryptoDmitry/Ghost-Agent","stars":747,"karar":"hayir","ne":"-","ozet":"Solana uzerinde MCP odeme/arac calistirma motoru; Claude Code is akisiyla ilgisiz."}
+{"repo":"jwangkun/claude-for-financial-services-cn","stars":739,"karar":"hayir","ne":"-","ozet":"A hissesi finans alani icin 63 skill; alan urunu, mekanizma yeni degil."}
+{"repo":"hamelsmu/claude-review-loop","stars":724,"karar":"al","ne":"kanca","ozet":"Stop kancasi durum dosyasi yoksa tek satir approve basip cikiyor; ERR tuzagi hatada kullaniciyi dongude birakmiyor."}
+{"repo":"LigphiDonk/Oh-my--paper","stars":721,"karar":"fikir","ne":"fikir","ozet":"35 skill aciklamasi ~7.500 token/tur; TTL'li oturum baglami ve 'bu proje benim mi' kontrolu alinabilir."}
+{"repo":"runesleo/claude-code-workflow","stars":711,"karar":"al","ne":"kitap","ozet":"1.631 baytlik (~410 token) ortak Agent Core metni ve izlenmeyen ozel baglam dosyasi Core'un ozel rafini dogruluyor."}
+{"repo":"hex/claude-council","stars":706,"karar":"fikir","ne":"fikir","ozet":"Bes saglayiciya ayni soru; 'hemfikirlik dogrulama degildir' sentez kurali agency.js akisina eklenir."}
+{"repo":"growthenginenowoslawski/coldoutboundskills","stars":691,"karar":"hayir","ne":"-","ozet":"Soguk e-posta ve satis skilleri; alan urunu, Core ile ilgisiz."}
+{"repo":"FerroxLabs/agents-md","stars":683,"karar":"fikir","ne":"fikir","ozet":"Tek 10.610 baytlik AGENTS.md her turda ~2.650 token; symlink kalibi disinda mekanizma yok."}
+{"repo":"mhattingpete/claude-skills-marketplace","stars":671,"karar":"hayir","ne":"-","ozet":"18 skill aciklamasi 1.240 token/tur, CLAUDE.md 21 KB; mekanizmalari Core'da zaten var."}
+{"repo":"Hao0321/claude-skill-social-post","stars":664,"karar":"hayir","ne":"-","ozet":"Facebook/IG/Threads otomatik paylasim skilli; alan urunu."}
+{"repo":"zhuyansen/wx-favorites-report","stars":641,"karar":"hayir","ne":"-","ozet":"WeChat favori DB'sinden HTML rapor ureten skill; alan urunu."}
+{"repo":"Mintplex-Labs/openai-assistant-swarm","stars":617,"karar":"hayir","ne":"-","ozet":"OpenAI Node SDK uzantisi; Claude Code ile ilgisiz."}
+{"repo":"Pravko-Solutions/FlashLearn","stars":607,"karar":"hayir","ne":"-","ozet":"JSON akisli LLM pipeline kutuphanesi; ajan is akisi paketi degil."}
+{"repo":"binggandata/bggg-skills","stars":592,"karar":"hayir","ne":"-","ozet":"Codex icerik uretim ve veri toplama skilleri (PSD, PPT, TikTok); alan urunu."}
+{"repo":"10cl/chatdev","stars":586,"karar":"hayir","ne":"-","ozet":"Tarayici tabanli ajan olusturma IDE'si; Claude Code eklenti mekanizmasiyla ilgisiz."}
+{"repo":"RobotecAI/rai","stars":583,"karar":"hayir","ne":"-","ozet":"ROS 2 robotik ajan cercevesi; ilgisiz."}
+{"repo":"LeastBit/Claude_skills_zh-CN","stars":575,"karar":"hayir","ne":"-","ozet":"anthropics/skills deposunun Cince cevirisi; ozgun mekanizma yok."}
+{"repo":"louisedesadeleer/clipify","stars":563,"karar":"hayir","ne":"-","ozet":"Uzun videodan sosyal klip cikaran skill; alan urunu."}
+{"repo":"freddy-schuetz/n8n-claw","stars":557,"karar":"hayir","ne":"-","ozet":"n8n icinde kurulu otonom ajan; Claude Code disinda calisiyor."}
+{"repo":"axtonliu/smart-illustrator","stars":555,"karar":"hayir","ne":"-","ozet":"Makale gorseli ureten skill; alan urunu."}
+{"repo":"xiaofenggan01/aigc-reduce","stars":545,"karar":"hayir","ne":"-","ozet":"Akademik metinde AIGC tespit oranini dusuren skill; alan urunu."}
+{"repo":"michalparkola/tapestry-skills","stars":540,"karar":"hayir","ne":"-","ozet":"YouTube/makale/PDF icerik cekme ve aksiyon plani skilleri; alan urunu, mekanizma yeni degil."}

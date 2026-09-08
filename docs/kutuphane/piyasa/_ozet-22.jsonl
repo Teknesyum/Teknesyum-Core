@@ -1,0 +1,27 @@
+{"repo":"Shubhamsaboo/awesome-llm-apps","stars":136646,"karar":"hayir","ne":"-","ozet":"100+ bagimsiz LLM uygulamasi ve RAG sablonu; Claude Code mekanizmasi yok, elendi."}
+{"repo":"Egonex-AI/Understand-Anything","stars":81809,"karar":"fikir","ne":"fikir","ozet":"Kod tabanini bilgi grafigine ceviren ayri urun; Core'un graphify akisiyla ayni isi yapiyor, mekanizma alinamaz."}
+{"repo":"asgeirtj/system_prompts_leaks","stars":64440,"karar":"al","ne":"kitap","ozet":"CC0 sistem istemi arsivi; Anthropic/claude-code altinda resmi Claude Code istemi, 25 skill ve 4 output-style birebir duruyor."}
+{"repo":"ChromeDevTools/chrome-devtools-mcp","stars":51342,"karar":"hayir","ne":"-","ozet":"Genel amacli MCP sunucusu; Core MCP kurmuyor."}
+{"repo":"MadsLorentzen/ai-job-search","stars":41384,"karar":"hayir","ne":"-","ozet":"Claude Code uzerine kurulu is basvuru catisi; alan alakasiz."}
+{"repo":"VoltAgent/awesome-agent-skills","stars":33932,"karar":"fikir","ne":"fikir","ozet":"1497 skill listesi tek 257 KB README'de; raf olamaz, sonraki dilimlere aday kaynagi."}
+{"repo":"feder-cr/AIHawk","stars":30323,"karar":"hayir","ne":"-","ozet":"Web otomasyonu tarayici ajani; Claude Code mekanizmasi yok."}
+{"repo":"OthmanAdi/planning-with-files","stars":26720,"karar":"al","ne":"kanca","ozet":"6 kanca olayi, plan dosyasi yoksa sessiz cikiyor; sabit gider yalnizca 175 token'lik skill aciklamasi."}
+{"repo":"modelcontextprotocol/python-sdk","stars":24242,"karar":"hayir","ne":"-","ozet":"MCP protokol SDK'si; Core'un kanca/raf mimarisiyle ilgisiz."}
+{"repo":"steipete/CodexBar","stars":21104,"karar":"hayir","ne":"-","ozet":"macOS menu cubugu kota gostergesi; Core'un statusline'i ayni isi model gormeden yapiyor."}
+{"repo":"microsoft/mcp-for-beginners","stars":17172,"karar":"hayir","ne":"-","ozet":"MCP egitim mufredati (Jupyter); kurulacak mekanizma yok."}
+{"repo":"triggerdotdev/trigger.dev","stars":16231,"karar":"hayir","ne":"-","ozet":"Yonetilen is akisi/ajan platformu; sunucu urunu, Core'a alinamaz."}
+{"repo":"eigent-ai/eigent","stars":15220,"karar":"hayir","ne":"-","ozet":"Cowork masaustu uygulamasi alternatifi; ayri urun."}
+{"repo":"JoeanAmier/XHS-Downloader","stars":12634,"karar":"hayir","ne":"-","ozet":"Xiaohongshu icerik indirici; tamamen alakasiz."}
+{"repo":"0xJacky/nginx-ui","stars":11479,"karar":"hayir","ne":"-","ozet":"Nginx web arayuzu; tamamen alakasiz."}
+{"repo":"mcp-use/mcp-use","stars":10591,"karar":"hayir","ne":"-","ozet":"MCP sunucu/uygulama gelistirme catisi; Core MCP kurmuyor."}
+{"repo":"Agents365-ai/drawio-skill","stars":9146,"karar":"hayir","ne":"-","ozet":"drawio diyagram ureten skill paketi; Core skill kurmuyor, icerik alansal."}
+{"repo":"google-labs-code/stitch-skills","stars":8274,"karar":"hayir","ne":"fikir","ozet":"10 skill, 0 kanca, 360 token sabit gider; islev Stitch MCP'sine bagli, yalniz sparse fetch fikri alinir."}
+{"repo":"refly-ai/refly","stars":7505,"karar":"hayir","ne":"-","ozet":"Web tabanli skill olusturucu platform; kurulum sunucu tarafinda."}
+{"repo":"julep-ai/julep","stars":6590,"karar":"hayir","ne":"-","ozet":"Dayanikli ajan is akisi motoru; sunucu urunu."}
+{"repo":"jacob-bd/gemini-notebook-mcp-cli","stars":6042,"karar":"hayir","ne":"-","ozet":"Gemini Notebook icin MCP/CLI kopru; alakasiz saglayici."}
+{"repo":"ningzimu/codex-ppt-skill","stars":5701,"karar":"hayir","ne":"-","ozet":"Gorsel PPT ureten skill; alansal icerik, mekanizma yok."}
+{"repo":"epoko77-ai/im-not-ai","stars":5327,"karar":"hayir","ne":"-","ozet":"Korece AI metni insanlastiran skill; dil alani alakasiz."}
+{"repo":"iflytek/skillhub","stars":5065,"karar":"hayir","ne":"-","ozet":"Java/React kurumsal skill kayit sunucusu; Core'un pasif raf ilkesinin tersi."}
+{"repo":"JetBrains/koog","stars":4563,"karar":"hayir","ne":"-","ozet":"JVM ajan gelistirme catisi; Core'a alinacak mekanizma yok."}
+{"repo":"httprunner/httprunner","stars":4295,"karar":"hayir","ne":"-","ozet":"API/UI test catisi; alakasiz."}
+{"repo":"nyldn/claude-octopus","stars":4057,"karar":"hayir","ne":"fikir","ozet":"57 kanca, 61 skill, 53 komut; olculen ~7300 token/tur sabit gider Core ilkesini ihlal ediyor, uzlasma kapisi fikri kaliyor."}

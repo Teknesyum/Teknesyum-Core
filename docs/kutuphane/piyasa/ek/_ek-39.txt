@@ -1,0 +1,3 @@
+disler/claude-code-hooks-mastery · ★3914 · sekiz kanca olayinin hepsi icin calisan referans uygulama (UserPromptSubmit, PreToolUse, Stop, SubagentStop, PreCompact, SessionStart/End, Notification); Core'un kanca yuzeyini genisletmeden once olay-basina davranis ve exit-code sozlesmesi icin dogrudan raf adayi.
+karanb192/claude-code-hooks · ★507 · MIT · her kanca tek komutla kurulan bagimsiz eklenti; guvenlik, maliyet, gozlemlenebilirlik dallari ayri. Core'un "kanca esikte tek satir konusur" ilkesiyle olculebilir karsilastirma ve maliyet-kancasi ornegi.
+rohitg00/awesome-claude-code-toolkit · ★2601 · Apache-2.0 · 20 kanca + 15 kural + 7 sablon iceren katalog; kural/sablon boyutlari raf indeksinin token maliyetini kiyaslamak icin hazir olcu seti.

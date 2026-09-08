@@ -1,0 +1,3 @@
+karanb192/claude-code-hooks · ★507 · Kurulabilir kanca pazar yeri: guvenlik, maliyet, gozlemlenebilirlik ve uretkenlik kancalari ayri ayri; Core'un kanca desenleri icin dogrudan karsilastirma tabani.
+google/skills · ★19653 · Google'in resmi agent skills deposu (Cloud Next 2026); frontmatter/progressive disclosure standardinin ikinci resmi ornegi, Core'un raf indeks bicimini kiyaslamak icin.
+egorfedorov/claude-context-optimizer · ★107 · Token kullanimini izleyip israf edilen baglami isaretleyen eklenti; Core'un "siradan turda sifir" iddiasini olcecek arac deseni (yildiz esigin altinda, yalniz olcum fikri icin).

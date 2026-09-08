@@ -1,0 +1,3 @@
+mksglu/context-mode · ★21280 · Arac ciktisini kum havuzuna alip %98 kuculten, oturum bellegini kalici tutan kanca+MCP; Core'un sifir-token ilkesinin en yakin rakibi, olculmesi gerek.
+karanb192/claude-code-hooks · ★507 · Kurulabilir kanca pazari: PreToolUse/PostToolUse ile guvenlik, maliyet, gozlemlenebilirlik; uc kapsam (global/yigin/proje-yerel) ayrimi Core kancalari icin dogrudan ornek.
+alexfazio/plankton · ★365 · Yazma aninda kalite: her dosya duzenlemesi hizli Rust linter'lari tetikliyor; anti-slop'un kanca ile otomatiklestirilmis hali, deterministik-arac kuralina uygun.

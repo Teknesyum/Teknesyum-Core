@@ -1,0 +1,3 @@
+alexgreensh/token-optimizer · ★2199 · UserPromptSubmit yolunu tek env degiskeniyle kapatabilen, opt-out'u kanca import'undan once okuyan tasarim; Core'un "sifir token" olcumu icin dogrudan olcut
+karanb192/claude-code-hooks · ★507 · Guvenlik/maliyet/gozlem kancalarini kurulabilir marketplace olarak paketleyen 20 kanca; Core'un kanca envanteriyle birebir karsilastirilabilir
+carlrannaberg/claudekit · ★760 · Komut+kanca+yardimci araci seti; kanca basina bagimsiz calisan pasif betik dizilimi Core'un scripts/ yapisina ornek

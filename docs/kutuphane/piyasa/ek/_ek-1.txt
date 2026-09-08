@@ -1,0 +1,3 @@
+drona23/claude-token-efficient · Tek CLAUDE.md ile cevap ayrintisini kisan drop-in paket (★6017); Core'un "sifir token" ilkesinin karsit yaklasimi, kitap adayi.
+daymade/claude-code-skills · Uretim skill pazari (★1384); SKILL.md frontmatter boyutlariyla pasif maliyet olcumu icin ornek yigin.
+musistudio/claude-code-router · CLI arac uslubuyla kademeli arac acma uzerine yazili blog + kod (★37128); arac ciktisi tasarimi icin fikir kaynagi.

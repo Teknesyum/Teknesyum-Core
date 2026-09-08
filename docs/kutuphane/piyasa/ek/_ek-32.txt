@@ -1,0 +1,3 @@
+alexgreensh/token-optimizer · ★2200 · UserPromptSubmit'i "on-mesaj", Stop'u "son-mesaj" kancasi olarak kullanip tur basina token deltasini olcuyor; ortam degiskeniyle tum yolu sifirlayabiliyor. Core'un esik sayaci icin dogrudan olcum deseni.
+disler/claude-code-hooks-mastery · ★3914 · Sekiz kanca olayinin tamaminin calisan ornekleri; Core'un kanca yuzeyini genisletirken referans metin, kurulacak bir sey yok.
+agentskills/agentskills · ★25144 · Agent Skills spesifikasyonu ve kesif maliyeti olculeri (skill basina ~80 token kesif, gövde ortalama ~2.000); Core'un raf/skill ayrimini savunurken atif verecegi kaynak.

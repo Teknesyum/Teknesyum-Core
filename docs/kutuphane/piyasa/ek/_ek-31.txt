@@ -1,0 +1,3 @@
+karanb192/claude-code-hooks · ★507 · Kanca pazaryeri: guvenlik, maliyet, gozlemlenebilirlik ve verimlilik kancalari; Core'un kanca katalogu icin dogrudan kaynak.
+rohitg00/awesome-claude-code-toolkit · ★2601 · 20 kanca, 15 kural, 14 MCP ayari ve 176+ eklenti dizini; kanca/kural taksonomisi Core'un raflari icin.
+alirezarezvani/claude-skills · ★25707 · 380 skill, 30+ ajan, 70+ komut; bu olcekte skill tanimlarinin baglam maliyetini olcmek Core'un sifir-token ilkesi icin karsit ornek.

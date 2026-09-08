@@ -1,0 +1,18 @@
+{"repo":"multica-ai/andrej-karpathy-skills","stars":211037,"karar":"hayir","ne":"-","ozet":"okunmus.txt icinde (karpathy-skills), atlandi."}
+{"repo":"Fission-AI/OpenSpec","stars":67624,"karar":"hayir","ne":"-","ozet":"okunmus.txt icinde (openspec), atlandi."}
+{"repo":"cursor/cursor","stars":33222,"karar":"hayir","ne":"-","ozet":"Cursor urun/issue deposu, Claude Code ile ilgisi yok."}
+{"repo":"travisvn/awesome-claude-skills","stars":15003,"karar":"hayir","ne":"-","ozet":"Link listesi; mekanizma yok, okunmus agentic-awesome-skills ile ayni tur."}
+{"repo":"anthropics/claude-agent-sdk-python","stars":8055,"karar":"hayir","ne":"-","ozet":"Python SDK; kurulum bicimi kutuphane, eklentiye alinacak kanca/kitap yok."}
+{"repo":"Chachamaru127/claude-code-harness","stars":3098,"karar":"hayir","ne":"-","ozet":"okunmus.txt icinde (harness), atlandi."}
+{"repo":"activeloopai/hivemind","stars":1597,"karar":"hayir","ne":"-","ozet":"Bulut destekli paylasimli hafiza; her turda iz gonderir, sifir-token ilkesine aykiri."}
+{"repo":"asklokesh/loki-mode","stars":1054,"karar":"hayir","ne":"-","ozet":"BUSL lisansli otonom SDLC CLI cercevesi; pasif eklenti degil, ticari katmani var."}
+{"repo":"simple10/agents-observe","stars":668,"karar":"fikir","ne":"kitap","ozet":"28 olayli kanca haritasi ve atesle-unut deseni alinir; Docker+MCP+pano alinmaz."}
+{"repo":"agent-sh/agnix","stars":405,"karar":"al","ne":"betik","ozet":"455 kuralli linter binary'si; Core'un kendi hooks.json ve SKILL dosyalarini sifir tokenla denetler."}
+{"repo":"ferrumclaudepilgrim/claude-code-android","stars":228,"karar":"hayir","ne":"-","ozet":"Termux kurulum rehberi; eklenti mekanizmasi yok."}
+{"repo":"yylo-dev/roundtable","stars":125,"karar":"hayir","ne":"-","ozet":"Coklu CLI'yi birlestiren MCP sunucusu; genel MCP, Core ilkesine aykiri."}
+{"repo":"amirrezasalimi/friday","stars":66,"karar":"hayir","ne":"-","ozet":"Nodejs proje ureten ayri asistan urunu, alakasiz."}
+{"repo":"backstabslash/goccc","stars":34,"karar":"fikir","ne":"kanca","ozet":"SessionEnd'de tek satir maliyet ozeti ve 1,5 sn sessiz-cikis kurali alinir."}
+{"repo":"stefanoginella/aicontainer","stars":20,"karar":"hayir","ne":"-","ozet":"Devcontainer kum havuzu; bağlam degil altyapi isi."}
+{"repo":"hashgraph-online/hashnet-mcp-js","stars":13,"karar":"hayir","ne":"-","ozet":"Blockchain ajan kesif MCP sunucusu, alakasiz."}
+{"repo":"garasegae/aiskillstore","stars":4,"karar":"hayir","ne":"-","ozet":"Uzak MCP skill pazari; her turda sunucu baglar, pasif raf ilkesine aykiri."}
+{"repo":"TheoLvs/westworldjs","stars":1,"karar":"hayir","ne":"-","ozet":"Coklu ajan simulasyon kutuphanesi, Claude Code ile ilgisi yok."}

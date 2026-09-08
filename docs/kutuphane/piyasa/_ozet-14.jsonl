@@ -1,0 +1,18 @@
+{"repo":"openai/codex","stars":122413,"karar":"hayir","ne":"-","ozet":"Rust ile yazılmış rakip terminal ajanı; kurulum biçimi kendi CLI'ı, Core'a taşınabilir bir raf/kanca parçası yok."}
+{"repo":"calcom/cal.diy","stars":48273,"karar":"hayir","ne":"-","ozet":"Randevu altyapısı ürünü; Claude Code veya ajan iş akışıyla ilgisi yok, elendi."}
+{"repo":"VoltAgent/awesome-claude-code-subagents","stars":24927,"karar":"hayir","ne":"-","ozet":"Zaten okunmuş (okunmus.txt: voltagent-subagents), çakışma nedeniyle atlandı."}
+{"repo":"onceupon/Bash-Oneliner","stars":10769,"karar":"fikir","ne":"kitap","ozet":"Bash tek satırlık komut derlemesi; 'angaryada önce deterministik araç' kuralına raf malzemesi ama Linux odaklı, kabuk PowerShell 5.1."}
+{"repo":"VoltAgent/awesome-codex-subagents","stars":6113,"karar":"hayir","ne":"-","ozet":"Zaten okunmuş (okunmus.txt: codex-subagents), çakışma nedeniyle atlandı."}
+{"repo":"VILA-Lab/Dive-into-Claude-Code","stars":2101,"karar":"al","ne":"kitap","ozet":"Claude Code v2.1.88 kaynak çözümlemesi; kurulmuyor, bağlama 0 KB, docs/build-your-own-agent.md 19,4 KB rafa uygun tek parça (lisans NC-SA)."}
+{"repo":"myshell-ai/AIlice","stars":1415,"karar":"hayir","ne":"-","ozet":"Kendi başına özerk Python ajan çatısı; Claude Code eklenti mekanizmasıyla kesişmiyor."}
+{"repo":"seanpixel/Teenage-AGI","stars":909,"karar":"hayir","ne":"-","ozet":"2023 dönemi AGI deneyi; bakımsız, Core'a alınacak mekanizma yok."}
+{"repo":"LehengTHU/Agent4Rec","stars":502,"karar":"hayir","ne":"-","ozet":"Tavsiye sistemi araştırma kodu (SIGIR 2024); geliştirici iş akışıyla ilgisiz."}
+{"repo":"rixinhahaha/snip","stars":323,"karar":"fikir","ne":"fikir","ozet":"Ajanın diyagram/HTML çıktısını dışarıdan bir CLI ile gösterip kullanıcı işaretlemesini JSON döndürmesi; masaüstü uygulaması gerektirdiği için alınmaz, geri bildirim sözleşmesi not edilir."}
+{"repo":"Continuum-AI-Corp/OrcaReplay","stars":173,"karar":"fikir","ne":"fikir","ozet":"Ajan koşusunu byte-byte kaydedip ağ kapalıyken yeniden oynatma ve adımdan çatallama; bench tekrarlanabilirliği için fikir, kendi router ürününe bağlı."}
+{"repo":"Rich627/whatsapp-claude-plugin","stars":83,"karar":"hayir","ne":"-","ozet":"WhatsApp'ı MCP kanalı olarak bağlayan eklenti; sürekli yüklü MCP araçları Core'un sıfır-token ilkesine aykırı."}
+{"repo":"roampal-ai/roampal-core","stars":51,"karar":"hayir","ne":"-","ozet":"Kalıcı bellek MCP sunucusu; her turda yüklü araç seti demek, pasif kütüphane ilkesinin tam karşıtı."}
+{"repo":"Ventuss-OvO/cc-costline","stars":28,"karar":"hayir","ne":"fikir","ozet":"Statusline maliyet izleyici; LICENSE dosyası yok, kod alınamaz — artımlı jsonl tarama ve kilitli arka plan yenileme deseni fikir olarak kalır."}
+{"repo":"Taiizor/agents-md-cookbook","stars":16,"karar":"al","ne":"kitap","ozet":"16 AGENTS.md şablonu + 15 kurallı linter; kurulum bağlama 0 KB, anatomy+common-mistakes 7,7 KB rafa, satır/bayt sayan pasif betik Core'un 20 satır kuralını ölçer."}
+{"repo":"educlopez/ccvitals","stars":9,"karar":"fikir","ne":"kanca","ozet":"Saf bash statusline; 145 satırlık kanca disiplini (stdout'a yazma, her yolda exit 0, atomik yazım) ve subagentStatusLine sözleşmesi alınacak, ürünün kendisi değil."}
+{"repo":"doggychip/agentforge","stars":3,"karar":"hayir","ne":"-","ozet":"Abonelikli ajan pazaryeri ürünü; teknik mekanizma yok."}
+{"repo":"daedalusdevelopmentgroup/ddg-agent-payable-services","stars":0,"karar":"hayir","ne":"-","ozet":"x402 ödeme ağ geçidi MCP sunucusu; Core'un konusuyla kesişmiyor."}

@@ -1,0 +1,22 @@
+{"repo":"geekjourneyx/md2wechat-skill","stars":3633,"karar":"hayir","ne":"-","ozet":"Markdown'i WeChat gonderisine ceviren Go CLI; Claude Code is akisiyla ilgisiz urun, elendi."}
+{"repo":"stickerdaniel/linkedin-mcp-server","stars":3390,"karar":"hayir","ne":"-","ozet":"Genel amacli LinkedIn MCP sunucusu; Core'un kanca/raf mekanizmasiyla ortak yani yok."}
+{"repo":"Agentchengfeng/chengfeng-videocut-skills","stars":2979,"karar":"hayir","ne":"-","ozet":"Video kurgu skill paketi; alan tamamen ilgisiz, elendi."}
+{"repo":"dominikmartn/nothing-design-skill","stars":2778,"karar":"hayir","ne":"-","ozet":"Nothing gorsel dili icin tek skill + 3 referans dosyasi; icerik UI tasarimi, Core'a girecek mekanizma yok."}
+{"repo":"Natively-AI-assistant/natively-cluely-ai-assistant","stars":2457,"karar":"hayir","ne":"-","ozet":"Toplanti/mulakat asistani masaustu uygulamasi; ilgisiz urun."}
+{"repo":"lessweb/deepcode-cli","stars":2232,"karar":"hayir","ne":"-","ozet":"deepseek-v4 icin ayri terminal ajani; Claude Code'a takilan bir sey degil, rakip CLI."}
+{"repo":"PaperDebugger/paperdebugger","stars":1531,"karar":"hayir","ne":"-","ozet":"Overleaf icinde akademik yazim icin coklu-ajan eklentisi; alan ilgisiz."}
+{"repo":"Spark-To-Paper-Skills/paperjury","stars":1118,"karar":"hayir","ne":"-","ozet":"Makale on-inceleme skill'i; icerik akademik, Core'a alinacak mekanizma yok."}
+{"repo":"Evokoa/pgGraph","stars":1037,"karar":"hayir","ne":"-","ozet":"Postgres uzerine graf veritabani; ajan is akisiyla ilgisi yok."}
+{"repo":"cclank/lanshu-animated-architecture-diagram","stars":958,"karar":"hayir","ne":"-","ozet":"Codex icin animasyonlu mimari diyagram skill'i; tek amacli icerik uretici, elendi."}
+{"repo":"ferdinandobons/startup-skill","stars":894,"karar":"hayir","ne":"-","ozet":"Girisim dogrulama/rekabet analizi skill'leri; gelistirici bilgi paketi degil."}
+{"repo":"iamzifei/show-me-the-money","stars":860,"karar":"hayir","ne":"-","ozet":"Otomatik is kurma skill paketi; alan ilgisiz."}
+{"repo":"danilo-znamerovszkij/draw-your-font","stars":763,"karar":"hayir","ne":"-","ozet":"El yazisi fotografini fonta ceviren arac; ilgisiz urun."}
+{"repo":"microsoft/skill-recorder","stars":3887,"karar":"fikir","ne":"fikir","ozet":"Ekran kaydini Copilot CLI ile SKILL.md yordamina ceviren Electron uygulamasi; baglama 0 yazar, alinacak sey 'tek ornekten yordam uret' fikri."}
+{"repo":"samber/cc-skills-golang","stars":3204,"karar":"fikir","ne":"fikir","ozet":"46 Go skill'i; yalniz description satirlari 28.7 KB (~7.2k token) sabit maliyet, Core'un pasif raf tezinin olculmus karsit ornegi."}
+{"repo":"jgravelle/jcodemunch-mcp","stars":2672,"karar":"fikir","ne":"kitap","ozet":"Token verimli kod kesfi MCP'si; MCP ilkeye aykiri ama claude-md-budget ve mechanism-not-instance skill metinleri (1.6+1.3 KB) rafa alinabilir."}
+{"repo":"GuDaStudio/skills","stars":2027,"karar":"hayir","ne":"-","ozet":"Codex/Gemini'ye is devreden 2 skill; Core'un danisma akisi ayni isi ajan kurmadan yapiyor."}
+{"repo":"Prat011/awesome-llm-skills","stars":1728,"karar":"fikir","ne":"kitap","ozet":"Awesome listesi; degerli tek parca alti araci kapsayan skill kesif yollari tablosu, kurulum maliyeti 0."}
+{"repo":"daymade/claude-code-skills","stars":1384,"karar":"al","ne":"kitap","ozet":"104 SKILL.md (frontmatter toplam 73 KB ~18k token); skill-governance metni ve git-safety-net'in 6 deterministik betigi Core'a alinabilir."}
+{"repo":"quemsah/awesome-claude-plugins","stars":1272,"karar":"fikir","ne":"fikir","ozet":"36.457 depo taranarak uretilen Top 100 eklenti tablosu; icerik degil, sonraki taramanin kaynak listesi."}
+{"repo":"snflkd/fluent-korean","stars":1191,"karar":"fikir","ne":"fikir","ozet":"6.4 KB output-style ile Korece yazim yonergesi, secilmezse baglama 0; Turkce icin ayni kalip ve yanlis-dogru ornek cifti bicimi alinabilir."}
+{"repo":"coleam00/second-brain-skills","stars":821,"karar":"fikir","ne":"fikir","ozet":"Bilgi isi skill koleksiyonu; klonda yalniz README geldi, marka/ses dosyasi fikrinin Core'da karsiligi zaten var."}

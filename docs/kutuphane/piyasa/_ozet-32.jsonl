@@ -1,0 +1,22 @@
+{"repo":"muxuuu/serenity-skill","stars":3971,"karar":"hayir","ne":"-","ozet":"Tedarik zinciri hisse arastirmasi skill'i; Claude Code is akisiyla ilgisiz urun, elendi."}
+{"repo":"bethington/ghidra-mcp","stars":3729,"karar":"hayir","ne":"-","ozet":"Ghidra tersine muhendislik icin 200+ araclik MCP sunucusu; genel MCP urunu, Core ilkesiyle ilgisiz."}
+{"repo":"KKKKhazix/human-writing","stars":3531,"karar":"hayir","ne":"-","ozet":"Cince metni insan agzindan yazdirma skill'i; icerik uretim urunu, gelistirici bilgi paketi degil."}
+{"repo":"skyhook-io/radar","stars":3284,"karar":"hayir","ne":"-","ozet":"Kubernetes UI + gomulu MCP sunucusu; altyapi urunu, elendi."}
+{"repo":"taylorwilsdon/google_workspace_mcp","stars":3129,"karar":"hayir","ne":"-","ozet":"Gmail/Calendar/Drive MCP sunucusu; genel MCP urunu, elendi."}
+{"repo":"zinja-coder/jadx-ai-mcp","stars":2765,"karar":"hayir","ne":"-","ozet":"JADX tersine muhendislik MCP eklentisi; alakasiz urun."}
+{"repo":"ningzimu/image-to-editable-ppt-skill","stars":2415,"karar":"hayir","ne":"-","ozet":"Slayt goruntusunu duzenlenebilir PPTX'e ceviren Codex skill'i; belge donusturme urunu."}
+{"repo":"Paramchoudhary/ResumeSkills","stars":2173,"karar":"hayir","ne":"-","ozet":"Ozgecmis/kariyer skill koleksiyonu; gelistirici is akisiyla ilgisiz."}
+{"repo":"Rion-Wu-tech/wechat-intelligence-hub","stars":1924,"karar":"hayir","ne":"-","ozet":"WeChat sohbet arsivi CLI + Codex skill'leri; kisisel veri urunu, elendi."}
+{"repo":"hesreallyhim/a-list-of-claude-code-agents","stars":1348,"karar":"hayir","ne":"-","ozet":"Topluluk alt-ajan listesi; mekanizma yok, Core ajan kurmadigi icin alinacak sey yok."}
+{"repo":"Shanyin-ai/shanyin-screenwriting-master","stars":1100,"karar":"hayir","ne":"-","ozet":"Senaryo yazim skill'i; icerik uretim urunu, elendi."}
+{"repo":"simonw/claude-skills","stars":928,"karar":"hayir","ne":"-","ozet":"Icerigi anthropics/skills'e tasinmis bos isaret deposu; okunacak dosya kalmamis."}
+{"repo":"RayFernando1337/llm-cursor-rules","stars":889,"karar":"hayir","ne":"-","ozet":"Swift ve Next.js icin iki Cursor kural dosyasi; kurulum mekanizmasi yok, Core'un raflarindan zayif."}
+{"repo":"karanb192/itr-wala","stars":856,"karar":"hayir","ne":"-","ozet":"Hindistan gelir vergisi beyani CLI'i; alakasiz urun."}
+{"repo":"agiwhitelist/auteur","stars":1019,"karar":"hayir","ne":"-","ozet":"Web sitesini film gibi yoneten tasarim skill'i; Core'un arayuz standardi ayri depoda, mekanizma alinamaz."}
+{"repo":"NeoLabHQ/context-engineering-kit","stars":1675,"karar":"al","ne":"kanca","ozet":"14 granuler eklenti, 68 skill (17 KB frontmatter, ~4.300 token); reflexion kancasi Stop'u tetik kelimeyle blokluyor, o desen alinir."}
+{"repo":"hyhmrright/brooks-lint","stars":1457,"karar":"fikir","ne":"kitap","ozet":"6 skill 1.240 token + SessionStart'ta 175 token yaziyor; alinacak olan _shared/decay-risks kriter metni ve dort alanli bulgu bicimi."}
+{"repo":"yaojingang/yao-meta-skill","stars":2604,"karar":"al","ne":"kitap","ozet":"Tek skill 95 token; references/resource-boundaries.md kademe basina 700-1.300 token ilk-yukleme butcesi tanimliyor, rafa girer."}
+{"repo":"itsmostafa/aws-agent-skills","stars":1150,"karar":"al","ne":"betik","ozet":"18 skill 1.820 token daima yuklu; alinacak olan RSS ile raf tazeligini izleyen 433 satirlik betik ve last_updated/doc_source alanlari."}
+{"repo":"coreyhaines31/makerskills","stars":796,"karar":"fikir","ne":"fikir","ozet":"21 skill frontmatter'i 22 KB ~5.500 token daima yuklu; acik depo / gizli yapilandirma iki katmani ve karar-gunlugu kurali not edildi."}
+{"repo":"open-gitagent/opengap","stars":2928,"karar":"fikir","ne":"fikir","ozet":"Sifir baglam CLI + 37 KB spec, 19 catiya adaptor; tek kaynaktan cok hedefe derleme ve validate deneticisi fikri alinir."}
+{"repo":"obra/superpowers-marketplace","stars":1252,"karar":"fikir","ne":"fikir","ozet":"Sifir baglam katalog, 11 eklenti dis depolara url ile bagli; raf buyutme bicimi ve Stop kapisi (double-shot-latte) fikri alinir."}

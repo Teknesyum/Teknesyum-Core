@@ -1,0 +1,3 @@
+simonw/claude-code-transcripts · ★1683 · Claude Code oturum JSONL'ini sifir bagimlilikla HTML'e ceviren pasif CLI; Core'un devir/handoff uretimi icin ayristirici ornegi, baglama 0 token.
+daaain/claude-code-log · ★1210 · Ayni JSONL'i Markdown/HTML'e ceviren Python CLI; oturum ozetini dosyaya yazma kalibi, kanca yok.
+Maciek-roboblog/Claude-Code-Usage-Monitor · ★8684 · Gercek zamanli kullanim/limit izleyici; Core statusline'inin maliyet tarafi icin olcum kaynagi, model gormez.
