@@ -27,3 +27,19 @@ altında md; depo `Teknesyum/Teknesyum-Private`. Kapı: aynanın uzak deposu sah
 - [x] 0.23.0 kes, laptop eklentisini güncelle.
 
 Bedel ölçüldü: sıradan tur 0 B; `??` 1726 B; `pp` 3738 B; kanca ~170 ms.
+
+## D. Kapsamlı araştırma: projeye ne eklenebilir (karar bekliyor)
+
+Havuz: 400 depo tarandı (`tarama.jsonl`), 58'i derin okundu, 342 okunmadı; awesome listesinden
+15 aday ayrıca. Okuma birimi: sonnet ajanı, depo başına ~65K token, aynı şablon, ≤300 kelime not.
+
+| Kademe | Ne | Token | Bedel | Süre |
+|---|---|---|---|---|
+| 0 | `scan.js`i 1000 depoya genişlet, model yok | 0 | API kotası | ~5 dk |
+| 1 | okunmamış en iyi 60 (awesome 15 + yıldıza göre 45) | ~3,9M | ~17 $ | ~3 dk |
+| 2 | okunmamış en iyi 150 | ~9,8M | ~42 $ | ~8 dk |
+| 3 | 342'nin hepsi + kademe 0'dan gelenler | ~22M+ | ~95 $+ | ~20 dk |
+
+Öneri: 0 sonra 1. Çıktı `docs/kutuphane/derin/` notları, özet tablo, yol haritasına "Al" satırları.
+Kendi depolarımız (Desktop/Projeler: VidShrink, QuizLoop, Usb-Guard…) için güncellik: hangi
+klasör, ne yapılsın (fetch mi, geride kaldı bildirimi mi) — karar.
