@@ -19,6 +19,11 @@ altında md; depo `Teknesyum/Teknesyum-Private`. Kapı: aynanın uzak deposu sah
   bandı `◆ Teknesyum · özel raf`, plan adımı satırı.
 - [x] Tohum kitaplar: `kimlik.md`, `tercihler/{yazim,ui,araclar,calisma}.md` (3,2 KB), itildi.
 - [x] Testler (252), README ×2, COST-MODEL, home CLAUDE.md.
-- [ ] 0.22.0 kes, yayınla, laptop eklentisini güncelle.
+- [x] 0.22.0 kes, yayınla, laptop eklentisini güncelle.
+
+## C. Raflar güncel kalsın
+
+- [x] `kutuphane.js stale`, `fetch --stale <gün>`, SessionStart günde bir arka plan çekme (0 token).
+- [ ] 0.23.0 kes, laptop eklentisini güncelle.
 
 Bedel ölçüldü: sıradan tur 0 B; `??` 1726 B; `pp` 3738 B; kanca ~170 ms.

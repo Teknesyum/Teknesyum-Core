@@ -104,6 +104,8 @@ starts with `??` / `++` (library hits, measured 1.7 KB) or `pp` (private books, 
 `SessionStart` sibling in `count.js` adds one line (~20 tokens) while `docs/plan.md` has an
 open checkbox step. Wall clock of the hook: ~170 ms on a plain prompt, ~200 ms on a key.
 
+Shelf refresh (0.23.0): `SessionStart` checks one stamp file (`kutuphane/.refresh`, a stat) and at most once a day spawns `kutuphane.js fetch all --stale 7` detached with stdio ignored. Zero tokens, ~5 ms on the hook, the pulls run after the hook has exited.
+
 `PostCompact` was registered and is not any more. The event fires, but plain stdout reaches
 the model on `SessionStart`, `UserPromptSubmit` and `UserPromptExpansion` only; anywhere
 else it goes to the debug log. `SessionStart` already fires after compaction, so the branch

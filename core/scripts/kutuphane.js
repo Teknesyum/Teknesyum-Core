@@ -130,6 +130,23 @@ function git(args, cwd) {
   return { ok: r.status === 0, out: (r.stdout || '') + (r.stderr || '') };
 }
 
+const DAY = 24 * 60 * 60 * 1000;
+const STALE_DAYS = 7;
+
+function ageDays(dir) {
+  for (const f of ['FETCH_HEAD', 'ORIG_HEAD', 'HEAD']) {
+    try { return (Date.now() - fs.statSync(path.join(dir, '.git', f)).mtimeMs) / DAY; } catch {}
+  }
+  return Infinity;
+}
+
+function stale(days) {
+  return shelves().map((r) => {
+    const age = ageDays(r.slug === PRIVATE ? privateRoot() : shelfDir(r.slug));
+    return { slug: r.slug, age, stale: age > days };
+  });
+}
+
 function fetchOne(r) {
   if (r.slug === PRIVATE) {
     const p = git(['pull', '-q', '--ff-only'], privateRoot());
@@ -145,11 +162,16 @@ function fetchOne(r) {
   return r.slug + ': ' + (c.ok ? 'fetched' : 'clone failed: ' + c.out.trim());
 }
 
-function fetch(which) {
+function fetch(which, days) {
   migrate();
   const all = shelves();
-  const pick = !which || which === 'all' ? all : all.filter((r) => r.slug === which);
+  let pick = !which || which === 'all' ? all : all.filter((r) => r.slug === which);
   if (!pick.length) return ['no shelf ' + which];
+  if (days != null) {
+    const old = new Set(stale(days).filter((x) => x.stale).map((x) => x.slug));
+    pick = pick.filter((r) => old.has(r.slug));
+    if (!pick.length) return ['all shelves fetched within ' + days + ' days'];
+  }
   const lines = pick.map(fetchOne);
   const cat = build();
   lines.push(cat.books.length + ' books in ' + cat.shelves + ' shelves -> ' + catalogFile());
@@ -440,14 +462,32 @@ function arg(argv, flag) {
   return i === -1 || i === argv.length - 1 ? '' : argv[i + 1];
 }
 
+function refresh(root, dry) {
+  const at = home();
+  if (!fs.existsSync(at)) return false;
+  const stamp = path.join(at, '.refresh');
+  try { if (Date.now() - fs.statSync(stamp).mtimeMs < DAY) return false; } catch {}
+  fs.writeFileSync(stamp, new Date().toISOString());
+  if (dry) return true;
+  const child = require('child_process').spawn(process.execPath, [__filename, 'fetch', 'all', '--stale', String(STALE_DAYS)], { cwd: root || process.cwd(), detached: true, stdio: 'ignore', windowsHide: true });
+  child.unref();
+  return true;
+}
+
 function usage() {
-  return 'kutuphane.js fetch [raf|all] | push private | raf list | raf add <slug> <url> [--kind agents|skills|prompts|docs] [--scan a,b] [--skip a,b] | list [raf] | find <words> | show <slug...> [--lean] | record --topic T --books a,b --ask f --reply f [--cost c]';
+  return 'kutuphane.js fetch [raf|all] [--stale <days>] | stale [days] | push private | raf list | raf add <slug> <url> [--kind agents|skills|prompts|docs] [--scan a,b] [--skip a,b] | list [raf] | find <words> | show <slug...> [--lean] | record --topic T --books a,b --ask f --reply f [--cost c]';
 }
 
 function main(argv) {
   const cmd = argv[0];
   if (cmd === 'fetch') {
-    console.log(fetch(argv[1]).join('\n'));
+    const days = arg(argv, '--stale');
+    console.log(fetch(argv[1] && !argv[1].startsWith('--') ? argv[1] : 'all', days === '' ? null : Number(days)).join('\n'));
+    return 0;
+  }
+  if (cmd === 'stale') {
+    const days = Number(argv[1] || STALE_DAYS);
+    console.log(stale(days).map((x) => x.slug.padEnd(24) + (x.age === Infinity ? 'never' : x.age.toFixed(1) + ' days') + (x.stale ? '  stale' : '')).join('\n'));
     return 0;
   }
   if (cmd === 'push') {
@@ -490,4 +530,4 @@ function main(argv) {
 }
 
 if (require.main === module) process.exit(main(process.argv.slice(2)));
-module.exports = { home, shelves, shelfDir, fetch, push, build, catalog, list, find, show, lean, record, addShelf, seatFile, owner, privateRoot, privateDir, privateBooks, expand, PRIVATE, PRIVATE_MAX, MAX_BOOKS, MAX_BYTES };
+module.exports = { home, shelves, shelfDir, fetch, push, stale, refresh, ageDays, STALE_DAYS, build, catalog, list, find, show, lean, record, addShelf, seatFile, owner, privateRoot, privateDir, privateBooks, expand, PRIVATE, PRIVATE_MAX, MAX_BOOKS, MAX_BYTES };

@@ -139,6 +139,7 @@ function handle(j) {
     const st = read(f);
     if (!st || j.source === 'startup' || j.source === 'clear') write(f, fresh(j));
     const cwd = j.cwd || process.cwd();
+    if (j.source !== 'compact' && !process.env.TEKNESYUM_NO_REFRESH) try { require('../scripts/kutuphane.js').refresh(cwd); } catch {}
     const lines = [];
     if (j.source !== 'compact' && fs.existsSync(path.join(cwd, '.claude', 'handoff.md'))) lines.push(t('cue.resume'));
     const s = step(cwd);

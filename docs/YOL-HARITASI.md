@@ -23,6 +23,9 @@ Aynı anda tek madde açık kalır.
       sahibin kitapları; `pp` bütün okur, `push private` iter, banner `◆ Teknesyum · özel raf`.
       `??` = `++`, kanca (`hooks/mod.js`) bulguları o tura koyar; Türkçe eşanlam, tam kelime.
       Plan kutuları: `docs/plan.md`deki ilk açık `- [ ]` SessionStart'ta tek satır.
+- [x] **Raflar güncel kalsın (2026-09-08, v0.23.0).** `kutuphane.js stale`, `fetch all --stale 7`;
+      SessionStart günde bir arka planda çeker, 0 token. Kendi depolarımız (Desktop/Projeler)
+      için aynı şey karar bekliyor: hangi klasör, ne yapılsın (fetch mi, bildir mi).
 - [ ] **`ss` / `aa` önekleri.** Karar bekliyor: `aa` = agency koltuklarına danış (find +
       alt ajan + record), `ss` = önce beceri rafları. Her biri mod.js'e bir önek + bir metin,
       ~1 $. Ölçü: bir hafta `??` kullanımından sonra gerek kalıyor mu.

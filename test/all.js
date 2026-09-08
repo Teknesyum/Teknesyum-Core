@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+process.env.TEKNESYUM_NO_REFRESH = '1';
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -676,6 +677,15 @@ function testKutuphane() {
   ok('the old agency clone moves under the library on the next build', /agency\/design\/design-ui-designer/.test(call('list', 'agency').stdout) && !fs.existsSync(oldAgency), call('list', 'agency').stdout);
   const empty = home();
   const none = run(process.execPath, [LIB, 'list'], { cwd: CORE, env: { ...process.env, CLAUDE_CONFIG_DIR: empty } });
+  const gitOld = path.join(at, 'agency', '.git');
+  fs.mkdirSync(gitOld, { recursive: true });
+  fs.writeFileSync(path.join(gitOld, 'FETCH_HEAD'), '');
+  const old = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000);
+  fs.utimesSync(path.join(gitOld, 'FETCH_HEAD'), old, old);
+  const st = run(process.execPath, [LIB, 'stale', '7'], { cwd: root, env: { ...process.env, CLAUDE_CONFIG_DIR: cfg } });
+  ok('stale lists the shelf fetched ten days ago as stale', /agency\s+10\.\d days\s+stale/.test(st.stdout) && /skillpack\s+never\s+stale/.test(st.stdout), st.stdout);
+  const fr = run(process.execPath, ['-e', 'const k=require(process.argv[1]);console.log(k.refresh(process.cwd(), true), k.refresh(process.cwd(), true))', LIB], { cwd: root, env: { ...process.env, CLAUDE_CONFIG_DIR: cfg, TEKNESYUM_NO_REFRESH: '' } });
+  ok('refresh stamps once a day and stays quiet the second time', /^true false/.test(fr.stdout.trim()) && fs.existsSync(path.join(at, '.refresh')), fr.stdout + fr.stderr);
   ok('without books it says how to fetch', none.status === 1 && /kutuphane\.js fetch/.test(none.stdout), none.stdout);
   sweep(root);
   sweep(cfg);
