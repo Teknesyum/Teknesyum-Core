@@ -8,6 +8,25 @@ Counts, Shows, And Speaks Once
 
 ---
 
+## The Scan
+
+We did not guess what belonged in here. We read the market.
+
+| | |
+|---|---|
+| Repositories looked at | 1,000 |
+| Read end to end, by 45 Opus agents | 963 |
+| Taken into the library | 93 |
+| Kept as an idea note, not shipped | 165 |
+| Declined | 705 |
+| Shelves shipping today | 38 |
+| Books in the catalog | 1,968 |
+
+None of them is installed. The catalog is a file on disk, searched without a model, and no
+shelf ever enters an ordinary turn's context.
+
+---
+
 ## The Numbers First
 
 Every claim below was measured against plain Claude Code on the same seat (sonnet, low
@@ -37,6 +56,39 @@ contracts, roles and tiers. Put back whole, it passed the same tasks at four to 
 the price. Put back one piece at a time, with the decision rule written before the runs,
 no piece moved the acceptance column and none came back. Section 8 of the report has the
 rows; the variants live under `bench/varyant/` and rerun with one command.
+
+---
+
+## Why Big Tools Were Not Bundled
+
+Every one of these was read. None was rejected for being bad; each was rejected for what it
+costs on a turn where nothing happens.
+
+| Tool | Why it is not in here |
+|---|---|
+| [Obsidian](https://obsidian.md) | A whole note vault beside the repo. What we needed from it was one handoff file, and that is `handoff.js`. |
+| [graphify](https://github.com/hongkongkiwi/graphify) | Excellent on a large codebase, and we still recommend it. It indexes; we did not want an index in every session, so `map.js` runs only when called. |
+| [Context7](https://context7.com) | Live documentation on demand. It is a per-turn context cost by design; our rule is that an ordinary turn costs nothing extra. |
+| [superpowers](https://github.com/obra/superpowers) | The broadest skill framework there is. Its own lab shelf is in our library; the framework itself keeps a schema in context every session, which is the one thing we do not do. |
+
+The line between class Z and class C is the whole plugin: Z writes nothing ever, A writes
+only when you call it, B keeps a schema per session, C pays on every turn. Core ships Z and
+A. Nothing above them.
+
+```mermaid
+flowchart LR
+  Z["Class Z<br/>writes nothing"] --> A["Class A<br/>only when called"]
+  A --> B["Class B<br/>schema per session"]
+  B --> C["Class C<br/>pays every turn"]
+  Z:::in
+  A:::in
+  B:::out
+  C:::out
+  classDef in fill:#1b5e20,stroke:#2e7d32,color:#fff
+  classDef out fill:#4e342e,stroke:#6d4c41,color:#fff
+```
+
+Green is what Core ships. Brown is what it refused.
 
 ---
 
@@ -128,6 +180,18 @@ A prompt that starts with `aa` opens the agency: `agency.js find` on the words, 
 the question: `advice.js ask` writes it under `docs/netlestirme/`, the gate in
 `hooks/scout.js` lets it out once, `record` files the answer.
 
+
+```mermaid
+flowchart TD
+  P["Your prompt"] --> M{"Mark at either end?"}
+  M -->|"none"| N["Ordinary turn<br/>nothing is written"]
+  M -->|"?? ++"| L["Library<br/>1,968 books, no model call"]
+  M -->|"pp"| S["Private shelf<br/>owner's machine only"]
+  M -->|"aa"| G["Agency<br/>a seat, handed to a subagent"]
+  M -->|"ff"| F["Fable<br/>one consult, filed on disk"]
+  M -->|"hh"| H["Lists every mark"]
+```
+
 ### Tools that only run when called
 
 | Script | What it does |
@@ -135,7 +199,7 @@ the question: `advice.js ask` writes it under `docs/netlestirme/`, the gate in
 | `scripts/map.js .` | Import graph: hubs, cycles, orphans. `map.js who <file>` says what imports it. |
 | `scripts/log.js write` | A bug log with a fixed shape, into the project's own repository. |
 | `scripts/advice.js` | `ask <question> [--facts <file>]` writes a `??` question under `docs/netlestirme/` and arms the gate for one call on any model; `record` files the answer; `list` shows the records under `docs/danisma/`. |
-| `scripts/kutuphane.js` | The library: shelves cloned outside the project (`fetch`), a catalog built from front matter or the first heading and paragraph, `find <words>` scored without a model, `show <slug…> --lean` capped at three books and 48 KB, `record` under `docs/danisma/`, `push private` commits and pushes the private shelf, `stale [days]` lists how long ago each shelf was fetched, `fetch all --stale 7` pulls only the ones older than that. Thirty-three shelves ship in `core/kutuphane.json` (1890 books; MIT, Apache-2.0, CC0, CC BY-SA 4.0 and one CC BY-NC-SA 4.0; the picks are in `docs/kutuphane/`; the 2026-09-08 market scan of 1000 repositories, 963 read and 93 marked take, is in `docs/kutuphane/piyasa-2026-09-08.md`), plus `raf add <slug> <url> --kind agents|skills|prompts|docs`; the kind decides what counts as a book. Nothing is installed, so no shelf ever enters the context. |
+| `scripts/kutuphane.js` | The library: shelves cloned outside the project (`fetch`), a catalog built from front matter or the first heading and paragraph, `find <words>` scored without a model, `show <slug…> --lean` capped at three books and 48 KB, `record` under `docs/danisma/`, `push private` commits and pushes the private shelf, `stale [days]` lists how long ago each shelf was fetched, `fetch all --stale 7` pulls only the ones older than that. Thirty-eight shelves ship in `core/kutuphane.json` (1,968 books; MIT, Apache-2.0, CC0, CC BY-SA 4.0 and one CC BY-NC-SA 4.0; the picks are in `docs/kutuphane/`; the 2026-09-08 market scan of 1000 repositories, 963 read and 93 marked take, is in `docs/kutuphane/piyasa-2026-09-08.md`), plus `raf add <slug> <url> --kind agents|skills|prompts|docs`; the kind decides what counts as a book. Nothing is installed, so no shelf ever enters the context. |
 | `scripts/agency.js` | A seat from [agency-agents](https://github.com/msitarzewski/agency-agents), on demand: now the `agency` shelf of the library, same commands: `find ui` picks, `show <slug> --lean` hands the role to a subagent without its personality and metrics blocks, `record` files the exchange under `docs/danisma/`. `show` leaves a seat mark that the next `Stop` prints in the chat as `Seat: <slug> read, <n> KB`; the line never enters the context. Nothing is installed as an agent, so the roster never enters the context. |
 | `scripts/manset.js` | Checks a Markdown report: every number in prose must appear in the same section's table or list. |
 | `scripts/scaffold.js` | License, signature block, language link: fixed texts the model never types. |
@@ -144,6 +208,31 @@ the question: `advice.js ask` writes it under `docs/netlestirme/`, the gate in
 | `scripts/scan.js` | Seven read-only checks on the project itself: license surfaces, plan against the five-file threshold, handoff holes, documents against the version, test script, `trash/` references, map. Nothing written, no model, nothing into context; the profile only widens the document set. |
 | `scripts/scout.js` | Prior-art scout, on demand and once: `brief <topic>` writes a bounded brief under `docs/oncul/` (5 searches, 3 pages, 5 candidates, 400 words) and arms the gate; the brief goes to one subagent on sonnet; `record` files the answer, cut at 8,000 characters. The gate in `hooks/scout.js` refuses a second call on the same brief, another model, or a longer prompt. |
 | `scripts/release.js` | Bumps the version from the notes left in `.changes/`, rewrites the install lines, tags; `publish` creates the GitHub release titled `vX.Y.Z` and uploads both installers with their `.sha256` files. |
+
+---
+
+## Design And UI Review
+
+Design work and design review are two different jobs, so the library carries both. Five
+shelves were added for them after a second sweep of the market.
+
+| Shelf | What it is for |
+|---|---|
+| `ui-ux-pro-max` | Designing: 67 styles, 96 palettes, 57 font pairings, across 13 stacks. |
+| `anthropic-skills` | Designing: `frontend-design`, `brand-guidelines`, `canvas-design`, from Anthropic's own repository. |
+| `addyosmani-skills` | Both: `frontend-ui-engineering` builds accessible, responsive UI; the accessibility checklist reviews it. |
+| `react-best-practices` | Reviewing: `web-design-guidelines` reads finished UI code against the Web Interface Guidelines. |
+| `pair-design` | Designing: a framework for working through a design with the user rather than at them. |
+
+Alongside what was already there — `refactoring-ui`, `web-design`, `ecc/skills/design-system`,
+`ecc/skills/accessibility`, the `design` seats of the agency. Nothing is installed; `?? ui`
+or `?? arayüzü denetle` finds them, and an ordinary turn sees none of it.
+
+```mermaid
+flowchart LR
+  D["?? tasarım"] --> DS["ui-ux-pro-max<br/>frontend-design<br/>design-system"]
+  R["?? arayüzü denetle"] --> RS["web-design-guidelines<br/>accessibility<br/>ui-finish-gate-reviewer"]
+```
 
 ---
 
@@ -229,7 +318,19 @@ nothing, stale when HEAD or the working tree moved after it.
 
 ## Hooks
 
-Eight events, eight files, all under `core/hooks/`:
+```mermaid
+flowchart LR
+  E["Write / Edit"] --> C{"A code file?"}
+  C -->|"prose only"| Q["Stays quiet"]
+  C -->|"yes"| T{"Tests run on this tree?"}
+  T -->|"yes"| Q
+  T -->|"no"| A["Asks once, at the threshold"]
+  A --> K{"git commit?"}
+  K -->|"yes"| R["Seals the work,<br/>counter reset"]
+```
+
+The evidence gate above is one of nine hooks. Nine events, nine files, all under
+`core/hooks/`:
 
 | Event | Hook | Says |
 |---|---|---|
@@ -245,8 +346,29 @@ Eight events, eight files, all under `core/hooks/`:
 | `Stop` | `dur.js` | a session that edited files and ran nothing is blocked once; the same tree is never asked twice. Off with `evidence: false` |
 | `SessionEnd` | `handoff.js` | nothing; writes the handoff |
 | `Notification` | `notify.js` | nothing; rings |
+| `MessageDisplay` | `sonda.js` | nothing; a silent probe that records which fields the event carries, so a future banner can be built on measurement instead of a guess |
 
 Only `count.js` and `mod.js` can write into the context, and the test suite checks that they are the only ones. Measured: an ordinary turn 0 bytes, `??` about 1.7 KB, `pp` about 3.7 KB, `aa` under 1 KB.
+
+A turn, end to end:
+
+```mermaid
+sequenceDiagram
+  participant You
+  participant CC as Claude Code
+  participant H as Core hooks
+  You->>CC: prompt
+  CC->>H: UserPromptSubmit
+  H-->>CC: nothing, unless a mark is on the prompt
+  CC->>You: model works
+  CC->>H: PostToolUse, after every edit
+  H-->>H: counts the file, refreshes the statusline
+  CC->>H: Stop
+  H-->>CC: one line, only at the threshold
+  CC->>H: SessionEnd
+  H-->>H: writes the handoff
+```
+
 
 ---
 

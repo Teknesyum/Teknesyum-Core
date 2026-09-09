@@ -1,85 +1,306 @@
 {
   "raflar": [
-    { "slug": "agency", "url": "https://github.com/msitarzewski/agency-agents.git", "kind": "agents", "skip": [
+    {
+      "slug": "agency",
+      "url": "https://github.com/msitarzewski/agency-agents.git",
+      "kind": "agents",
+      "skip": [
         "integrations",
         "strategy",
         "examples",
         "scripts"
-      ], "license": "MIT" },
-    { "slug": "avoid-ai-writing", "url": "https://github.com/conorbronsdon/avoid-ai-writing.git", "kind": "skills", "scan": [
+      ],
+      "license": "MIT"
+    },
+    {
+      "slug": "avoid-ai-writing",
+      "url": "https://github.com/conorbronsdon/avoid-ai-writing.git",
+      "kind": "skills",
+      "scan": [
         "skills"
-      ], "license": "MIT" },
-    { "slug": "claude-code-everything", "url": "https://github.com/wesammustafa/Claude-Code-Everything-You-Need-to-Know.git", "kind": "agents", "scan": [
+      ],
+      "license": "MIT"
+    },
+    {
+      "slug": "claude-code-everything",
+      "url": "https://github.com/wesammustafa/Claude-Code-Everything-You-Need-to-Know.git",
+      "kind": "agents",
+      "scan": [
         ".claude/agents",
         "specialized-agents/system-prompts"
-      ], "license": "MIT" },
-    { "slug": "claude-code-guide", "url": "https://github.com/zebbern/claude-code-guide.git", "kind": "skills", "scan": [
+      ],
+      "license": "MIT"
+    },
+    {
+      "slug": "claude-code-guide",
+      "url": "https://github.com/zebbern/claude-code-guide.git",
+      "kind": "skills",
+      "scan": [
         "skills"
-      ], "license": "MIT" },
-    { "slug": "claude-plugins-official", "url": "https://github.com/anthropics/claude-plugins-official.git", "kind": "agents", "scan": [
+      ],
+      "license": "MIT"
+    },
+    {
+      "slug": "claude-plugins-official",
+      "url": "https://github.com/anthropics/claude-plugins-official.git",
+      "kind": "agents",
+      "scan": [
         "plugins"
-      ], "skip": [
+      ],
+      "skip": [
         "external_plugins"
-      ], "license": "Apache-2.0" },
-    { "slug": "diagram-design", "url": "https://github.com/cathrynlavery/diagram-design.git", "kind": "skills", "scan": [
+      ],
+      "license": "Apache-2.0"
+    },
+    {
+      "slug": "diagram-design",
+      "url": "https://github.com/cathrynlavery/diagram-design.git",
+      "kind": "skills",
+      "scan": [
         "skills"
-      ], "license": "MIT" },
-    { "slug": "ecc", "url": "https://github.com/affaan-m/ECC.git", "kind": "skills", "scan": [
+      ],
+      "license": "MIT"
+    },
+    {
+      "slug": "ecc",
+      "url": "https://github.com/affaan-m/ECC.git",
+      "kind": "skills",
+      "scan": [
         "skills"
-      ], "license": "MIT" },
-    { "slug": "expo-skills", "url": "https://github.com/expo/skills.git", "kind": "skills", "scan": [
+      ],
+      "license": "MIT"
+    },
+    {
+      "slug": "expo-skills",
+      "url": "https://github.com/expo/skills.git",
+      "kind": "skills",
+      "scan": [
         "plugins"
-      ], "license": "MIT" },
-    { "slug": "frontend-slides", "url": "https://github.com/zarazhangrui/frontend-slides.git", "kind": "skills", "scan": [
+      ],
+      "license": "MIT"
+    },
+    {
+      "slug": "frontend-slides",
+      "url": "https://github.com/zarazhangrui/frontend-slides.git",
+      "kind": "skills",
+      "scan": [
         "plugins"
-      ], "skip": [
+      ],
+      "skip": [
         "bold-template-pack"
-      ], "license": "MIT" },
-    { "slug": "huggingface-skills", "url": "https://github.com/huggingface/skills.git", "kind": "skills", "scan": [
+      ],
+      "license": "MIT"
+    },
+    {
+      "slug": "huggingface-skills",
+      "url": "https://github.com/huggingface/skills.git",
+      "kind": "skills",
+      "scan": [
         "skills",
         "hf-mcp"
-      ], "license": "Apache-2.0" },
-    { "slug": "microsoft-skills", "url": "https://github.com/microsoft/skills.git", "kind": "skills", "scan": [
+      ],
+      "license": "Apache-2.0"
+    },
+    {
+      "slug": "microsoft-skills",
+      "url": "https://github.com/microsoft/skills.git",
+      "kind": "skills",
+      "scan": [
         ".github/plugins"
-      ], "skip": [
+      ],
+      "skip": [
         "references"
-      ], "license": "MIT" },
-    { "slug": "naming", "url": "https://github.com/glacierphonk/naming.git", "kind": "skills", "skip": [
+      ],
+      "license": "MIT"
+    },
+    {
+      "slug": "naming",
+      "url": "https://github.com/glacierphonk/naming.git",
+      "kind": "skills",
+      "skip": [
         "scripts"
-      ], "license": "MIT" },
-    { "slug": "superpowers-lab", "url": "https://github.com/obra/superpowers-lab.git", "kind": "skills", "scan": [
+      ],
+      "license": "MIT"
+    },
+    {
+      "slug": "superpowers-lab",
+      "url": "https://github.com/obra/superpowers-lab.git",
+      "kind": "skills",
+      "scan": [
         "skills"
-      ], "license": "MIT" },
-    { "slug": "trailofbits-skills", "url": "https://github.com/trailofbits/skills.git", "kind": "skills", "scan": [
+      ],
+      "license": "MIT"
+    },
+    {
+      "slug": "trailofbits-skills",
+      "url": "https://github.com/trailofbits/skills.git",
+      "kind": "skills",
+      "scan": [
         "plugins"
-      ], "skip": [
+      ],
+      "skip": [
         "evals",
         "assets"
-      ], "license": "CC-BY-SA-4.0" },
-    { "slug": "claude-code-prompts", "url": "https://github.com/asgeirtj/system_prompts_leaks.git", "kind": "docs", "scan": [
+      ],
+      "license": "CC-BY-SA-4.0"
+    },
+    {
+      "slug": "claude-code-prompts",
+      "url": "https://github.com/asgeirtj/system_prompts_leaks.git",
+      "kind": "docs",
+      "scan": [
         "Anthropic"
-      ], "license": "CC0-1.0" },
-    { "slug": "claude-code-best-practice", "url": "https://github.com/shanraisshan/claude-code-best-practice.git", "kind": "docs", "license": "MIT" },
-    { "slug": "hooks-mastery", "url": "https://github.com/disler/claude-code-hooks-mastery.git", "kind": "docs", "scan": [
+      ],
+      "license": "CC0-1.0"
+    },
+    {
+      "slug": "claude-code-best-practice",
+      "url": "https://github.com/shanraisshan/claude-code-best-practice.git",
+      "kind": "docs",
+      "license": "MIT"
+    },
+    {
+      "slug": "hooks-mastery",
+      "url": "https://github.com/disler/claude-code-hooks-mastery.git",
+      "kind": "docs",
+      "scan": [
         "ai_docs"
-      ], "license": "none" },
-    { "slug": "claude-code-hooks", "url": "https://github.com/shanraisshan/claude-code-hooks.git", "kind": "docs", "license": "MIT" },
-    { "slug": "agents-best-practices", "url": "https://github.com/DenisSergeevitch/agents-best-practices.git", "kind": "docs", "license": "MIT" },
-    { "slug": "agent-rules-books", "url": "https://github.com/ciembor/agent-rules-books.git", "kind": "docs", "license": "MIT" },
-    { "slug": "agentic-ai-systems", "url": "https://github.com/ThibautMelen/agentic-ai-systems.git", "kind": "docs", "license": "MIT" },
-    { "slug": "dive-into-claude-code", "url": "https://github.com/VILA-Lab/Dive-into-Claude-Code.git", "kind": "docs", "scan": [
+      ],
+      "license": "none"
+    },
+    {
+      "slug": "claude-code-hooks",
+      "url": "https://github.com/shanraisshan/claude-code-hooks.git",
+      "kind": "docs",
+      "license": "MIT"
+    },
+    {
+      "slug": "agents-best-practices",
+      "url": "https://github.com/DenisSergeevitch/agents-best-practices.git",
+      "kind": "docs",
+      "license": "MIT"
+    },
+    {
+      "slug": "agent-rules-books",
+      "url": "https://github.com/ciembor/agent-rules-books.git",
+      "kind": "docs",
+      "license": "MIT"
+    },
+    {
+      "slug": "agentic-ai-systems",
+      "url": "https://github.com/ThibautMelen/agentic-ai-systems.git",
+      "kind": "docs",
+      "license": "MIT"
+    },
+    {
+      "slug": "dive-into-claude-code",
+      "url": "https://github.com/VILA-Lab/Dive-into-Claude-Code.git",
+      "kind": "docs",
+      "scan": [
         "docs"
-      ], "license": "CC BY-NC-SA 4.0" },
-    { "slug": "security-review", "url": "https://github.com/anthropics/claude-code-security-review.git", "kind": "prompts", "license": "MIT" },
-    { "slug": "security-audit", "url": "https://github.com/cloudflare/security-audit-skill.git", "kind": "skills", "license": "Apache-2.0" },
-    { "slug": "hallmark", "url": "https://github.com/Nutlope/hallmark.git", "kind": "skills", "license": "MIT" },
-    { "slug": "anti-slop", "url": "https://github.com/dmmulroy/anti-slop.git", "kind": "skills", "license": "MIT" },
-    { "slug": "simple-english", "url": "https://github.com/AminBlg/SimpleEnglish.git", "kind": "skills", "license": "MIT" },
-    { "slug": "refactoring-ui", "url": "https://github.com/s0xDk/refactoring-ui-skill.git", "kind": "skills", "license": "MIT" },
-    { "slug": "web-design", "url": "https://github.com/xiaopu-ai/web-design.git", "kind": "skills", "license": "MIT" },
-    { "slug": "compound-engineering", "url": "https://github.com/EveryInc/compound-engineering-plugin.git", "kind": "skills", "license": "MIT" },
-    { "slug": "yao-meta-skill", "url": "https://github.com/yaojingang/yao-meta-skill.git", "kind": "skills", "license": "MIT" },
-    { "slug": "thinking-skills", "url": "https://github.com/tjboudreaux/cc-thinking-skills.git", "kind": "skills", "license": "MIT" },
-    { "slug": "skill-governance", "url": "https://github.com/daymade/claude-code-skills.git", "kind": "skills", "license": "MIT" }
+      ],
+      "license": "CC BY-NC-SA 4.0"
+    },
+    {
+      "slug": "security-review",
+      "url": "https://github.com/anthropics/claude-code-security-review.git",
+      "kind": "prompts",
+      "license": "MIT"
+    },
+    {
+      "slug": "security-audit",
+      "url": "https://github.com/cloudflare/security-audit-skill.git",
+      "kind": "skills",
+      "license": "Apache-2.0"
+    },
+    {
+      "slug": "hallmark",
+      "url": "https://github.com/Nutlope/hallmark.git",
+      "kind": "skills",
+      "license": "MIT"
+    },
+    {
+      "slug": "anti-slop",
+      "url": "https://github.com/dmmulroy/anti-slop.git",
+      "kind": "skills",
+      "license": "MIT"
+    },
+    {
+      "slug": "simple-english",
+      "url": "https://github.com/AminBlg/SimpleEnglish.git",
+      "kind": "skills",
+      "license": "MIT"
+    },
+    {
+      "slug": "refactoring-ui",
+      "url": "https://github.com/s0xDk/refactoring-ui-skill.git",
+      "kind": "skills",
+      "license": "MIT"
+    },
+    {
+      "slug": "web-design",
+      "url": "https://github.com/xiaopu-ai/web-design.git",
+      "kind": "skills",
+      "license": "MIT"
+    },
+    {
+      "slug": "compound-engineering",
+      "url": "https://github.com/EveryInc/compound-engineering-plugin.git",
+      "kind": "skills",
+      "license": "MIT"
+    },
+    {
+      "slug": "yao-meta-skill",
+      "url": "https://github.com/yaojingang/yao-meta-skill.git",
+      "kind": "skills",
+      "license": "MIT"
+    },
+    {
+      "slug": "thinking-skills",
+      "url": "https://github.com/tjboudreaux/cc-thinking-skills.git",
+      "kind": "skills",
+      "license": "MIT"
+    },
+    {
+      "slug": "skill-governance",
+      "url": "https://github.com/daymade/claude-code-skills.git",
+      "kind": "skills",
+      "license": "MIT"
+    },
+    {
+      "slug": "addyosmani-skills",
+      "url": "https://github.com/addyosmani/agent-skills.git",
+      "kind": "skills",
+      "scan": [
+        "skills",
+        "references"
+      ]
+    },
+    {
+      "slug": "anthropic-skills",
+      "url": "https://github.com/anthropics/skills.git",
+      "kind": "skills",
+      "scan": [
+        "skills"
+      ]
+    },
+    {
+      "slug": "ui-ux-pro-max",
+      "url": "https://github.com/yuvalcohenrappaport/claude-skill-ui-ux-pro-max.git",
+      "kind": "skills"
+    },
+    {
+      "slug": "pair-design",
+      "url": "https://github.com/tizsabrine/claude-skills-design.git",
+      "kind": "skills"
+    },
+    {
+      "slug": "react-best-practices",
+      "url": "https://github.com/vercel-labs/agent-skills.git",
+      "kind": "skills",
+      "scan": [
+        "skills"
+      ]
+    }
   ]
 }

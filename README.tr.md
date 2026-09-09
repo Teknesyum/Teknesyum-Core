@@ -8,6 +8,25 @@ Sayar, Gösterir, Bir Kez Konuşur
 
 ---
 
+## Tarama
+
+Buraya neyin gireceğini tahmin etmedik. Piyasayı okuduk.
+
+| | |
+|---|---|
+| Bakılan depo | 1.000 |
+| 45 Opus ajanıyla baştan sona okunan | 963 |
+| Kütüphaneye alınan | 93 |
+| Fikir notu olarak tutulan, konmayan | 165 |
+| Reddedilen | 705 |
+| Bugün gelen raf | 38 |
+| Kataloğdaki kitap | 1.968 |
+
+Hiçbiri kurulu değil. Katalog diskte bir dosya, modelsiz aranıyor; sıradan bir turun
+bağlamına hiçbir raf girmiyor.
+
+---
+
 ## Önce Sayılar
 
 Aşağıdaki her iddia düz Claude Code'a karşı aynı koltukta (sonnet, düşük efor), temiz
@@ -36,6 +55,38 @@ katmanların arkasına alıyordu. Olduğu gibi geri takılınca aynı görevleri
 fiyata geçti. Karar kuralı koşudan önce yazılıp parça parça geri takılınca hiçbir parça
 kabul sütununu oynatmadı, hiçbiri geri girmedi. Satırlar raporun 8. bölümünde; varyantlar
 `bench/varyant/` altında, tek komutla yeniden koşar.
+
+---
+
+## Büyük Araçlar Neden Konmadı
+
+Hepsi okundu. Hiçbiri kötü olduğu için elenmedi; her biri, hiçbir şeyin olmadığı bir turda
+ne tuttuğu için elendi.
+
+| Araç | Neden burada değil |
+|---|---|
+| [Obsidian](https://obsidian.md) | Deponun yanına koca bir not kasası. Ondan ihtiyacımız olan tek şey bir devir dosyasıydı; o da `handoff.js`. |
+| [graphify](https://github.com/hongkongkiwi/graphify) | Büyük kod tabanında çok iyi, hâlâ öneriyoruz. O indeksler; biz her oturumda indeks istemedik, `map.js` yalnız çağrılınca koşuyor. |
+| [Context7](https://context7.com) | İstendiğinde canlı belge. Tasarımı gereği tur başına bağlam maliyeti; bizim kuralımız sıradan turun bedava olması. |
+| [superpowers](https://github.com/obra/superpowers) | En geniş skill çatısı. Kendi lab rafı bizim kütüphanemizde; çatının kendisi her oturumda bağlamda şema tutuyor, yapmadığımız tek şey o. |
+
+Z ile C arasındaki çizgi eklentinin tamamı: Z hiç yazmaz, A yalnız çağrılınca yazar, B
+oturum başına şema tutar, C her turda öder. Core Z ve A gönderiyor. Üstünde hiçbir şey yok.
+
+```mermaid
+flowchart LR
+  Z["Sınıf Z<br/>hiç yazmaz"] --> A["Sınıf A<br/>yalnız çağrılınca"]
+  A --> B["Sınıf B<br/>oturum başına şema"]
+  B --> C["Sınıf C<br/>her turda öder"]
+  Z:::ic
+  A:::ic
+  B:::dis
+  C:::dis
+  classDef ic fill:#1b5e20,stroke:#2e7d32,color:#fff
+  classDef dis fill:#4e342e,stroke:#6d4c41,color:#fff
+```
+
+Yeşil Core'un gönderdiği. Kahverengi reddettiği.
 
 ---
 
@@ -121,6 +172,18 @@ altına kaydeder. Sıradan tur hiçbirinden bir şey almaz. `netleştir` sözcü
 soruyu keskinleştirme isteğidir: `advice.js ask` soruyu `docs/netlestirme/` altına yazar,
 `hooks/scout.js` kapısı bir kez bırakır, `record` cevabı dosyalar.
 
+
+```mermaid
+flowchart TD
+  P["Promptun"] --> M{"İki uçtan birinde işaret var mı?"}
+  M -->|"yok"| N["Sıradan tur<br/>hiçbir şey yazılmaz"]
+  M -->|"?? ++"| L["Kütüphane<br/>1.968 kitap, model çağrısı yok"]
+  M -->|"pp"| S["Özel raf<br/>yalnız sahibinin makinesinde"]
+  M -->|"aa"| G["Ajans<br/>bir koltuk, alt ajana verilir"]
+  M -->|"ff"| F["Fable<br/>tek danışma, diske yazılır"]
+  M -->|"hh"| H["Bütün işaretleri sayar"]
+```
+
 ### Yalnız çağrılınca çalışan araçlar
 
 | Betik | Ne yapar |
@@ -128,7 +191,7 @@ soruyu keskinleştirme isteğidir: `advice.js ask` soruyu `docs/netlestirme/` al
 | `scripts/map.js .` | Import grafiği: merkezler, döngüler, yetimler. `map.js who <dosya>` kimin import ettiğini söyler. |
 | `scripts/log.js write` | Sabit biçimli hata günlüğü, projenin kendi deposuna. |
 | `scripts/advice.js` | `ask <soru> [--facts <dosya>]` `??` sorusunu `docs/netlestirme/` altına yazar ve kapıyı herhangi bir modelde tek çağrı için kurar; `record` cevabı dosyalar; `list` `docs/danisma/` kayıtlarını gösterir. |
-| `scripts/kutuphane.js` | Kütüphane: raflar projenin dışına klonlanır (`fetch`), katalog frontmatter'dan ya da ilk başlık ve paragraftan kurulur, `find <kelimeler>` modelsiz puanlar, `show <slug…> --lean` üç kitap ve 48 KB ile sınırlı, `record` `docs/danisma/` altına yazar, `push private` özel rafı commit'ler ve iter, `stale [gün]` her rafın kaç gün önce çekildiğini listeler, `fetch all --stale 7` yalnız ondan eskileri çeker. Otuz üç raf `core/kutuphane.json` ile gelir (1890 kitap; MIT, Apache-2.0, CC0, CC BY-SA 4.0 ve bir CC BY-NC-SA 4.0; seçim `docs/kutuphane/` altında; 8 Eylül 2026 piyasa taraması, 1000 depo, 963 okundu, 93 Al, `docs/kutuphane/piyasa-2026-09-08.md`), `raf add <slug> <url> --kind agents|skills|prompts|docs` ekler; tür neyin kitap sayılacağını seçer. Hiçbiri kurulmaz, hiçbir raf bağlama girmez. |
+| `scripts/kutuphane.js` | Kütüphane: raflar projenin dışına klonlanır (`fetch`), katalog frontmatter'dan ya da ilk başlık ve paragraftan kurulur, `find <kelimeler>` modelsiz puanlar, `show <slug…> --lean` üç kitap ve 48 KB ile sınırlı, `record` `docs/danisma/` altına yazar, `push private` özel rafı commit'ler ve iter, `stale [gün]` her rafın kaç gün önce çekildiğini listeler, `fetch all --stale 7` yalnız ondan eskileri çeker. Otuz sekiz raf `core/kutuphane.json` ile gelir (1.968 kitap; MIT, Apache-2.0, CC0, CC BY-SA 4.0 ve bir CC BY-NC-SA 4.0; seçim `docs/kutuphane/` altında; 8 Eylül 2026 piyasa taraması, 1000 depo, 963 okundu, 93 Al, `docs/kutuphane/piyasa-2026-09-08.md`), `raf add <slug> <url> --kind agents|skills|prompts|docs` ekler; tür neyin kitap sayılacağını seçer. Hiçbiri kurulmaz, hiçbir raf bağlama girmez. |
 | `scripts/agency.js` | [agency-agents](https://github.com/msitarzewski/agency-agents) deposu artık kütüphanenin `agency` rafı, komutlar aynı: `find ui` seçer, `show <slug> --lean` rolü kişilik ve ölçüt bloklarını atarak alt ajana verir, `record` alışverişi `docs/danisma/` altına yazar. `show` bir koltuk izi bırakır, sonraki `Stop` onu sohbette `Koltuk: <slug> okundu · <n> KB` diye basar; satır bağlama girmez. Hiçbiri ajan olarak kurulmaz; liste bağlama hiç girmez. |
 | `scripts/manset.js` | Markdown raporu denetler: düzyazıdaki her sayı aynı bölümün tablosunda ya da listesinde bulunmalı. |
 | `scripts/scaffold.js` | Lisans, imza bloğu, dil linki: modelin asla yazmadığı sabit metinler. |
@@ -137,6 +200,31 @@ soruyu keskinleştirme isteğidir: `advice.js ask` soruyu `docs/netlestirme/` al
 | `scripts/scan.js` | Projenin kendisine yedi salt okunur kontrol: lisans yüzeyleri, beş dosya eşiğine karşı plan, devir boşlukları, sürüme karşı belgeler, test betiği, `trash/` atıfları, harita. Yazmaz, model çağırmaz, bağlama taşımaz; profil yalnız belge kümesini genişletir. |
 | `scripts/scout.js` | Öncül arama, istenince ve bir kez: `brief <konu>` `docs/oncul/` altına sınırlı bir öncül yazar (5 arama, 3 sayfa, 5 aday, 400 kelime) ve kapıyı kurar; öncül sonnet üstünde tek alt ajana gider; `record` cevabı 8.000 karakterde keserek dosyalar. `hooks/scout.js` kapısı aynı öncüle ikinci çağrıyı, başka modeli ya da uzatılmış istemi reddeder. |
 | `scripts/release.js` | Sürümü `.changes/` altındaki notlardan artırır, kurulum satırlarını yeniler, etiketler; `publish` GitHub sürümünü `vX.Y.Z` başlığıyla açar, iki kurucuyu `.sha256` dosyalarıyla yükler. |
+
+---
+
+## Tasarım Ve Arayüz Denetimi
+
+Tasarlamak ile tasarımı denetlemek ayrı iki iş, kütüphane ikisini de taşıyor. Piyasanın
+ikinci taramasından sonra bunun için beş raf eklendi.
+
+| Raf | Ne işe yarar |
+|---|---|
+| `ui-ux-pro-max` | Tasarlarken: 67 stil, 96 palet, 57 font eşleşmesi, 13 yığın. |
+| `anthropic-skills` | Tasarlarken: `frontend-design`, `brand-guidelines`, `canvas-design`; Anthropic'in kendi deposu. |
+| `addyosmani-skills` | İkisinde de: `frontend-ui-engineering` erişilebilir ve duyarlı arayüz kurar, erişilebilirlik listesi onu denetler. |
+| `react-best-practices` | Denetlerken: `web-design-guidelines` bitmiş arayüz kodunu Web Interface Guidelines'a göre okur. |
+| `pair-design` | Tasarlarken: kullanıcıya değil kullanıcıyla tasarım yürütme çerçevesi. |
+
+Zaten duranların yanına — `refactoring-ui`, `web-design`, `ecc/skills/design-system`,
+`ecc/skills/accessibility`, ajansın `design` koltukları. Hiçbiri kurulu değil; `?? tasarım`
+ya da `?? arayüzü denetle` bulur, sıradan tur hiçbirini görmez.
+
+```mermaid
+flowchart LR
+  D["?? tasarım"] --> DS["ui-ux-pro-max<br/>frontend-design<br/>design-system"]
+  R["?? arayüzü denetle"] --> RS["web-design-guidelines<br/>accessibility<br/>ui-finish-gate-reviewer"]
+```
 
 ---
 
@@ -222,7 +310,20 @@ ağacı sonradan değiştiyse bayat.
 
 ## Kancalar
 
-Sekiz olay, sekiz dosya, hepsi `core/hooks/` altında:
+```mermaid
+flowchart LR
+  E["Write / Edit"] --> C{"Kod dosyası mı?"}
+  C -->|"yalnız yazı"| Q["Sessiz kalır"]
+  C -->|"evet"| T{"Bu ağaçta test koştu mu?"}
+  T -->|"evet"| Q
+  T -->|"hayır"| A["Eşikte bir kez sorar"]
+  A --> K{"git commit?"}
+  K -->|"evet"| R["İşi mühürler,<br/>sayaç sıfırlanır"]
+```
+
+
+Yukarıdaki kanıt kapısı dokuz kancadan biri. Dokuz olay, dokuz dosya, hepsi
+`core/hooks/` altında:
 
 | Olay | Kanca | Söyler |
 |---|---|---|
@@ -238,8 +339,29 @@ Sekiz olay, sekiz dosya, hepsi `core/hooks/` altında:
 | `Stop` | `dur.js` | Dosya düzenleyip hiçbir şey koşmayan oturum bir kez durdurulur; aynı ağaç ikinci kez sorulmaz. Kapatmak: `evidence: false` |
 | `SessionEnd` | `handoff.js` | hiçbir şey; devri yazar |
 | `Notification` | `notify.js` | hiçbir şey; çalar |
+| `MessageDisplay` | `sonda.js` | hiçbir şey; sessiz sonda, olayın hangi alanları taşıdığını kaydeder ki ileride bir banner tahminle değil ölçümle kurulsun |
 
 Bağlama yalnız `count.js` ve `mod.js` yazabilir; test takımı başkasının yazmadığını denetler. Ölçüm: sıradan tur 0 bayt, `??` ~1,7 KB, `pp` ~3,7 KB, `aa` 1 KB altı.
+
+Bir tur, baştan sona:
+
+```mermaid
+sequenceDiagram
+  participant Sen
+  participant CC as Claude Code
+  participant H as Core kancaları
+  Sen->>CC: prompt
+  CC->>H: UserPromptSubmit
+  H-->>CC: işaret yoksa hiçbir şey
+  CC->>Sen: model çalışır
+  CC->>H: PostToolUse, her düzenlemeden sonra
+  H-->>H: dosyayı sayar, statusline'ı tazeler
+  CC->>H: Stop
+  H-->>CC: tek satır, yalnız eşikte
+  CC->>H: SessionEnd
+  H-->>H: devir dosyasını yazar
+```
+
 
 ---
 

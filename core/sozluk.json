@@ -1,77 +1,366 @@
 {
-  "arama": ["search", "seo"],
-  "motor": ["engine"],
-  "sira": ["rank", "ranking"],
-  "siralama": ["rank", "ranking"],
-  "site": ["site", "web"],
-  "sitem": ["site", "web"],
-  "sitemin": ["site", "web"],
-  "reklam": ["ads", "advertising"],
-  "pazarlama": ["marketing"],
-  "icerik": ["content"],
-  "metin": ["copy", "content"],
-  "guvenlik": ["security"],
-  "sizma": ["penetration", "security"],
-  "test": ["test", "testing"],
-  "hata": ["bug", "error", "debug"],
-  "ayikla": ["debug"],
-  "veritabani": ["database", "sql"],
-  "sorgu": ["query", "sql"],
-  "onbellek": ["cache", "caching"],
-  "kilit": ["lock", "locking"],
-  "kuyruk": ["queue"],
-  "dagitim": ["deploy", "deployment"],
-  "yayin": ["release", "deploy"],
-  "surum": ["version", "release"],
-  "kurulum": ["install", "setup"],
-  "tasarim": ["design", "ui"],
-  "arayuz": ["ui", "interface", "frontend"],
-  "erisilebilirlik": ["accessibility"],
-  "performans": ["performance"],
-  "hiz": ["speed", "performance"],
-  "bellek": ["memory"],
-  "sizinti": ["leak"],
-  "gozden": ["review"],
-  "inceleme": ["review"],
-  "belge": ["docs", "documentation"],
-  "dokuman": ["docs", "documentation"],
-  "gunluk": ["log", "logging"],
-  "izleme": ["monitoring", "observability"],
-  "olcum": ["metrics", "benchmark"],
-  "maliyet": ["cost"],
-  "veri": ["data"],
-  "analiz": ["analytics", "analysis"],
-  "makine": ["machine"],
-  "ogrenme": ["learning", "ml"],
-  "yapay": ["ai"],
-  "zeka": ["ai", "intelligence"],
-  "mobil": ["mobile"],
-  "oyun": ["game", "gamedev"],
-  "video": ["video"],
-  "ses": ["audio", "voice"],
-  "eposta": ["email"],
-  "odeme": ["payment", "billing"],
-  "abonelik": ["subscription", "billing"],
-  "musteri": ["customer"],
-  "kullanici": ["user"],
-  "yetki": ["auth", "authorization"],
-  "kimlik": ["auth", "identity"],
-  "sifre": ["password", "auth"],
-  "goc": ["migration"],
-  "yeniden": ["refactor"],
-  "duzenleme": ["refactor"],
-  "mimari": ["architecture"],
-  "altyapi": ["infrastructure", "devops"],
-  "sunucu": ["server", "backend"],
-  "bulut": ["cloud"],
-  "kapsayici": ["container", "docker"],
-  "surekli": ["continuous", "ci"],
-  "butunlestirme": ["integration", "ci"],
-  "sozlesme": ["contract"],
-  "hukuk": ["legal"],
-  "satis": ["sales"],
-  "buyume": ["growth"],
-  "sosyal": ["social"],
-  "medya": ["media"],
-  "marka": ["brand", "branding"]
+  "arama": [
+    "search",
+    "seo"
+  ],
+  "motor": [
+    "engine"
+  ],
+  "sira": [
+    "rank",
+    "ranking"
+  ],
+  "siralama": [
+    "rank",
+    "ranking"
+  ],
+  "site": [
+    "site",
+    "web"
+  ],
+  "sitem": [
+    "site",
+    "web"
+  ],
+  "sitemin": [
+    "site",
+    "web"
+  ],
+  "reklam": [
+    "ads",
+    "advertising"
+  ],
+  "pazarlama": [
+    "marketing"
+  ],
+  "icerik": [
+    "content"
+  ],
+  "metin": [
+    "copy",
+    "content"
+  ],
+  "guvenlik": [
+    "security"
+  ],
+  "sizma": [
+    "penetration",
+    "security"
+  ],
+  "test": [
+    "test",
+    "testing"
+  ],
+  "hata": [
+    "bug",
+    "error",
+    "debug"
+  ],
+  "ayikla": [
+    "debug"
+  ],
+  "veritabani": [
+    "database",
+    "sql"
+  ],
+  "sorgu": [
+    "query",
+    "sql"
+  ],
+  "onbellek": [
+    "cache",
+    "caching"
+  ],
+  "kilit": [
+    "lock",
+    "locking"
+  ],
+  "kuyruk": [
+    "queue"
+  ],
+  "dagitim": [
+    "deploy",
+    "deployment"
+  ],
+  "yayin": [
+    "release",
+    "deploy"
+  ],
+  "surum": [
+    "version",
+    "release"
+  ],
+  "kurulum": [
+    "install",
+    "setup"
+  ],
+  "tasarim": [
+    "design",
+    "ui"
+  ],
+  "arayuz": [
+    "ui",
+    "interface",
+    "frontend"
+  ],
+  "erisilebilirlik": [
+    "accessibility"
+  ],
+  "performans": [
+    "performance"
+  ],
+  "hiz": [
+    "speed",
+    "performance"
+  ],
+  "bellek": [
+    "memory"
+  ],
+  "sizinti": [
+    "leak"
+  ],
+  "gozden": [
+    "review"
+  ],
+  "inceleme": [
+    "review"
+  ],
+  "belge": [
+    "docs",
+    "documentation"
+  ],
+  "dokuman": [
+    "docs",
+    "documentation"
+  ],
+  "gunluk": [
+    "log",
+    "logging"
+  ],
+  "izleme": [
+    "monitoring",
+    "observability"
+  ],
+  "olcum": [
+    "metrics",
+    "benchmark"
+  ],
+  "maliyet": [
+    "cost"
+  ],
+  "veri": [
+    "data"
+  ],
+  "analiz": [
+    "analytics",
+    "analysis"
+  ],
+  "makine": [
+    "machine"
+  ],
+  "ogrenme": [
+    "learning",
+    "ml"
+  ],
+  "yapay": [
+    "ai"
+  ],
+  "zeka": [
+    "ai",
+    "intelligence"
+  ],
+  "mobil": [
+    "mobile"
+  ],
+  "oyun": [
+    "game",
+    "gamedev"
+  ],
+  "video": [
+    "video"
+  ],
+  "ses": [
+    "audio",
+    "voice"
+  ],
+  "eposta": [
+    "email"
+  ],
+  "odeme": [
+    "payment",
+    "billing"
+  ],
+  "abonelik": [
+    "subscription",
+    "billing"
+  ],
+  "musteri": [
+    "customer"
+  ],
+  "kullanici": [
+    "user"
+  ],
+  "yetki": [
+    "auth",
+    "authorization"
+  ],
+  "kimlik": [
+    "auth",
+    "identity"
+  ],
+  "sifre": [
+    "password",
+    "auth"
+  ],
+  "goc": [
+    "migration"
+  ],
+  "yeniden": [
+    "refactor"
+  ],
+  "duzenleme": [
+    "refactor"
+  ],
+  "mimari": [
+    "architecture"
+  ],
+  "altyapi": [
+    "infrastructure",
+    "devops"
+  ],
+  "sunucu": [
+    "server",
+    "backend"
+  ],
+  "bulut": [
+    "cloud"
+  ],
+  "kapsayici": [
+    "container",
+    "docker"
+  ],
+  "surekli": [
+    "continuous",
+    "ci"
+  ],
+  "butunlestirme": [
+    "integration",
+    "ci"
+  ],
+  "sozlesme": [
+    "contract"
+  ],
+  "hukuk": [
+    "legal"
+  ],
+  "satis": [
+    "sales"
+  ],
+  "buyume": [
+    "growth"
+  ],
+  "sosyal": [
+    "social"
+  ],
+  "medya": [
+    "media"
+  ],
+  "marka": [
+    "brand",
+    "branding"
+  ],
+  "denetim": [
+    "audit",
+    "review"
+  ],
+  "denetle": [
+    "audit",
+    "review"
+  ],
+  "denetleme": [
+    "audit",
+    "review"
+  ],
+  "kontrast": [
+    "contrast",
+    "accessibility"
+  ],
+  "duyarli": [
+    "responsive"
+  ],
+  "bilesen": [
+    "component"
+  ],
+  "tipografi": [
+    "typography",
+    "font"
+  ],
+  "yazitipi": [
+    "font",
+    "typography"
+  ],
+  "renkler": [
+    "color",
+    "palette"
+  ],
+  "palet": [
+    "palette",
+    "color"
+  ],
+  "hareket": [
+    "motion",
+    "animation"
+  ],
+  "animasyon": [
+    "animation",
+    "motion"
+  ],
+  "duzen": [
+    "layout"
+  ],
+  "izgara": [
+    "grid",
+    "layout"
+  ],
+  "boslu": [
+    "spacing"
+  ],
+  "tema": [
+    "theme",
+    "dark"
+  ],
+  "karanlik": [
+    "dark",
+    "theme"
+  ],
+  "buton": [
+    "button",
+    "component"
+  ],
+  "form": [
+    "form",
+    "input"
+  ],
+  "ikon": [
+    "icon"
+  ],
+  "gorsel": [
+    "visual",
+    "image"
+  ],
+  "onyuz": [
+    "frontend",
+    "ui"
+  ],
+  "tasarimsistemi": [
+    "design",
+    "system"
+  ],
+  "belirte": [
+    "token",
+    "design"
+  ],
+  "jeton": [
+    "token"
+  ]
 }
