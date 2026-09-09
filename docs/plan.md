@@ -54,7 +54,7 @@ klasör, ne yapılsın (fetch mi, geride kaldı bildirimi mi) — karar.
 Kaynak: `docs/kutuphane/piyasa-2026-09-08.md` Öncelik bölümü. Ölçü: önce sıfır bedelli, sonra Core'un boşluğunu kapatan kanca, sonra ölçüm.
 
 - [x] Kitaplar: 19 raf `core/kutuphane.json`e eklendi, fetch edildi (0.24.0). `aa` öneki.
-- [ ] K1 Stop kapısı: kanıt yoksa `decision:block`, `stop_hook_active` ile tek ısrar; `doubt` öneki.
+- [x] K1 Stop kapısı: `core/hooks/dur.js`, `doubt` ile kurulur, kanıt yoksa `decision:block`, `stop_hook_active` ile tek ısrar (0.25.0).
 - [ ] K2 Tehlikeli komut denylist (PreToolUse) + vakalı test.
 - [ ] K3 Kanca hijyeni: aynı metni ikinci kez basma, bayt bütçesi testi, Windows `python3` stub, stdin boşaltma.
 - [ ] B1 `npm test` içinde kanca şema denetimi + kuru çalıştırıcı.

@@ -214,5 +214,21 @@
   "mod.big": {
     "en": "The shelf is over %K KB, so only the list is here; read what you need with show.",
     "tr": "Raf %K KB üstünde, burada yalnız liste var; gerekeni show ile oku."
+  },
+  "dur.evidence": {
+    "en": "You edited files and nothing ran since: no test, no command output. Run what proves it and show the output, or say in one line why it cannot run. Asked once; the next stop goes through.",
+    "tr": "Dosya düzenledin ve sonrasında hiçbir şey koşmadı: test de komut çıktısı da yok. Kanıtlayanı koş ve çıktısını göster, ya da neden koşamadığını tek satırla yaz. Bir kez soruldu; sonraki durma geçer."
+  },
+  "dur.armed": {
+    "en": "Evidence gate on: a turn that edits but runs nothing is stopped once. Off with \"doubt off\".",
+    "tr": "Kanıt kapısı açık: düzenleyip hiçbir şey koşmayan tur bir kez durdurulur. Kapatmak \"doubt off\"."
+  },
+  "dur.off": {
+    "en": "Evidence gate off.",
+    "tr": "Kanıt kapısı kapandı."
+  },
+  "dur.noSession": {
+    "en": "No session state yet - the gate arms after the first edit or command.",
+    "tr": "Oturum durumu yok - kapı ilk düzenleme ya da komuttan sonra kurulur."
   }
 }

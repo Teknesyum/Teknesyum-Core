@@ -534,6 +534,58 @@ function testLoop() {
   ok('bad input exits quietly', junk.status === 0 && junk.stdout === '');
 }
 
+function testDur() {
+  const DUR = path.join(CORE, 'hooks', 'dur.js');
+  const MOD = path.join(CORE, 'hooks', 'mod.js');
+  const root = fixture();
+  const cfg = home();
+  const stop = (extra) => hook(DUR, { hook_event_name: 'Stop', session_id: 's1', cwd: root, ...extra }, cfg);
+  const prompt = (text) => hook(MOD, { hook_event_name: 'UserPromptSubmit', session_id: 's1', cwd: root, prompt: text }, cfg);
+  const blocks = (r) => {
+    try {
+      return JSON.parse(r.stdout).decision === 'block';
+    } catch {
+      return false;
+    }
+  };
+
+  hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 's1', cwd: root }, cfg);
+  edit(root, cfg, 'src/ok.js', 's1', 'module.exports = 2;' + String.fromCharCode(10));
+  ok('a disarmed session stops without a word', stop().stdout === '' && stop().status === 0, stop().stdout);
+
+  const armed = prompt('doubt');
+  ok('the doubt prefix answers in context', /additionalContext/.test(armed.stdout), armed.stdout);
+  ok('and arms the session', stateOf(cfg).doubt === true, armed.stdout);
+
+  const first = stop();
+  ok('an edit with no run is blocked', blocks(first), first.stdout);
+  ok('the block says what would settle it', /kanıt|evidence|test/i.test(first.stdout), first.stdout);
+  ok('the second stop of the same turn goes through', stop({ stop_hook_active: true }).stdout === '');
+
+  hook(COUNT, { hook_event_name: 'PostToolUse', tool_name: 'Bash', session_id: 's1', cwd: root, tool_input: { command: 'npm test' }, tool_response: { stdout: '12 passing', stderr: '' } }, cfg);
+  ok('a test run on this tree opens the gate', stop().stdout === '', stop().stdout);
+
+  edit(root, cfg, 'src/two.js', 's1', 'module.exports = 3;' + String.fromCharCode(10));
+  ok('an edit after the run closes it again', blocks(stop()), stop().stdout);
+
+  hook(COUNT, { hook_event_name: 'PostToolUseFailure', tool_name: 'Bash', session_id: 's1', cwd: root, tool_input: { command: 'npm test' }, error: '1 failed' }, cfg);
+  ok('a failed run is not evidence', blocks(stop()), stop().stdout);
+
+  const off = prompt('doubt off');
+  ok('doubt off answers', /Evidence gate off/.test(off.stdout), off.stdout);
+  ok('doubt off disarms the state', stateOf(cfg).doubt === false, JSON.stringify(stateOf(cfg).doubt));
+  ok('and the stop goes through', stop().stdout === '', stop().stdout);
+
+  const other = home();
+  hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 's2', cwd: root }, other);
+  ok('a session that touched nothing is never blocked', hook(DUR, { hook_event_name: 'Stop', session_id: 's2', cwd: root }, other).stdout === '');
+  const junk = run(process.execPath, [DUR], { cwd: root, input: '{nope', env: { ...process.env, CLAUDE_CONFIG_DIR: cfg } });
+  ok('bad input exits quietly', junk.status === 0 && junk.stdout === '');
+  sweep(other);
+  sweep(root);
+  sweep(cfg);
+}
+
 function testProcs() {
   const procs = require(path.join(CORE, 'scripts', 'procs.js'));
   const now = 10 * 60 * 60 * 1000;
@@ -874,6 +926,7 @@ function main() {
     ['map guards', testMapGuards],
     ['chime', testChime],
     ['loop gate', testLoop],
+    ['evidence gate', testDur],
     ['stale processes', testProcs],
     ['agency', testAgency],
     ['library', testKutuphane],

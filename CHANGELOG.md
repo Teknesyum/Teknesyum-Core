@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.25.0
+
+- Evidence gate: `doubt` arms it, and a turn that edited files without running anything is blocked once on Stop; `stop_hook_active` lets the second stop through, `doubt off` disarms.
+
 ## v0.24.0
 
 - aa prefix opens the agency seats; nineteen shelves from the market scan (33 shelves, 1890 books); build order in plan section E
