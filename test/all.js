@@ -278,7 +278,7 @@ function testContextCue() {
 function testWiring() {
   const hooks = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8')).hooks;
   const events = Object.keys(hooks).sort().join(',');
-  ok('exactly the eight events are wired', events === 'Notification,PostToolUse,PostToolUseFailure,PreToolUse,SessionEnd,SessionStart,Stop,UserPromptSubmit', events);
+  ok('exactly the nine events are wired', events === 'MessageDisplay,Notification,PostToolUse,PostToolUseFailure,PreToolUse,SessionEnd,SessionStart,Stop,UserPromptSubmit', events);
   for (const ev of Object.keys(hooks))
     for (const g of hooks[ev])
       for (const h of g.hooks) {
@@ -583,6 +583,22 @@ function testDur() {
   ok('bad input exits quietly', junk.status === 0 && junk.stdout === '');
   sweep(root);
   sweep(cfg);
+}
+
+function testSonda() {
+  const SONDA = path.join(CORE, 'hooks', 'sonda.js');
+  const sonda = require(SONDA);
+  const at = sonda.file();
+  try { fs.unlinkSync(at); } catch {}
+  const r = run(process.execPath, [SONDA], { cwd: process.cwd(), input: JSON.stringify({ hook_event_name: 'MessageDisplay', turn_id: 't1', final: true }) });
+  ok('the probe prints nothing on any event', r.status === 0 && r.stdout === '', r.stdout);
+  const log = fs.readFileSync(at, 'utf8');
+  ok('the probe records the event name and its fields', /MessageDisplay/.test(log) && /turn_id/.test(log), log);
+  const junk = run(process.execPath, [SONDA], { cwd: process.cwd(), input: '{nope' });
+  ok('bad input still exits quietly', junk.status === 0 && junk.stdout === '');
+  const wired = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8'));
+  ok('the probe is wired to MessageDisplay', /sonda\.js/.test(JSON.stringify(wired.hooks.MessageDisplay || '')));
+  try { fs.unlinkSync(at); } catch {}
 }
 
 function testYasak() {
@@ -1046,6 +1062,7 @@ function main() {
     ['chime', testChime],
     ['loop gate', testLoop],
     ['evidence gate', testDur],
+    ['display probe', testSonda],
     ['denylist', testYasak],
     ['prompt marks', testMark],
     ['fable mark', testFable],
