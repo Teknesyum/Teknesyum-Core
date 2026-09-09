@@ -56,6 +56,7 @@ Kaynak: `docs/kutuphane/piyasa-2026-09-08.md` Öncelik bölümü. Ölçü: önce
 - [x] Kitaplar: 19 raf `core/kutuphane.json`e eklendi, fetch edildi (0.24.0). `aa` öneki.
 - [x] K1 Stop kapısı: `core/hooks/dur.js`, varsayılan açık ve sessiz; yalnız gerçek Stop olayında, düzenleme var ve o ağaçta koşan yoksa `decision:block`, `stop_hook_active` ile tek ısrar, aynı ağaç ikinci kez sorulmaz, `evidence:false` ile kapanır (0.26.0).
 - [x] K2 Tehlikeli komut denylist: `core/hooks/yasak.js`, 16 desen, 21 reddedilen ve 13 geçen vaka testli (0.26.0).
+- [x] Banner ölçütü ve rename kararı: `docs/banner.md` (2026-09-09). Sohbet adı rename iptal.
 - [ ] K3 Kanca hijyeni: aynı metni ikinci kez basma, bayt bütçesi testi, Windows `python3` stub, stdin boşaltma.
 - [ ] B1 `npm test` içinde kanca şema denetimi + kuru çalıştırıcı.
 - [ ] K4 SessionStart `startup|clear|compact` + PreCompact özet yaması.
