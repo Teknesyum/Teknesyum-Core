@@ -242,3 +242,24 @@ Soru: her Stop'ta sohbete basılan tek satır banner bench maliyetine giriyor mu
 | c5-banner | 06 | 0.37 | 0.49 / 0.31 / 0.32 | 0.31 / 0.31 / 0.53 | 0.38 | esit | 6/6 |
 
 Toplam harcama: 2.27 $ (6 koşu). İlk tur medyanı 0.32 ile "ucuz" çıkıp beklentiyle çeliştiğinden ikinci tur koşuldu; altının ortalaması tabanla eşit. Altı transcript'in hepsinde probe dizisi yalnız `hook_system_message` eki ve ham kanca çıktısı kaydında; `message.content` içinde hiçbir kayıtta yok. D13 üçüncü kez doğrulandı: satır sohbette görünür, modele gitmez. Karar: koltuk satırı 0.20.0 ile Core'a girdi (`agency.js show` iz bırakır, sonraki Stop bir kez basar).
+
+## 12. Native karşılaştırması, 0.27.0, tek koşu
+
+Soru: eklenti açıkken bir görev, eklenti hiç yokken aynı görevden ne kadar pahalı?
+
+Kurulum: `06-slugify-cli`, sonnet/low, tekrar 1, iki kol, Claude Code 2.1.251, model
+`claude-sonnet-5`. Ham satırlar `bench/native-vs-core-2026-09-09.jsonl`.
+
+| Kol | Geçti | Süre | Çıktı | Cache yazma | Cache okuma | Toplam token | USD |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| core | evet | 113 sn | 8.280 | 34.098 | 1.190.982 | 1.233.400 | 0,4063 |
+| native | evet | 118 sn | 9.569 | 35.936 | 1.271.762 | 1.317.309 | 0,4400 |
+
+Fark: core, native'den **83.909 token (-%6,4)** ve **0,034 $ (-%7,6)** *ucuz* çıktı.
+
+İki kolda da `cueHits: 0` ve `cueBytes: 0`: hiçbir kanca modelin bağlamına tek bayt
+yazmadı. Eklentinin "sıradan turda sıfır" iddiası bu koşuda doğrulandı.
+
+**n=1 — fark gürültünün içinde.** Aynı koşuda çıktı token'ı %13 oynadı; %6'lık toplam
+farkı eklentinin marifeti saymak için en az üç tekrar gerekir. Bu koşunun kesin söylediği
+tek şey şudur: eklenti **maliyeti artırmıyor**. Koşunun kendi bedeli 0,85 $.
