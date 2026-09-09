@@ -1,21 +1,32 @@
 #!/usr/bin/env node
-const fs = require('fs');
-const { read, stateFile, t } = require('./lib.js');
+const path = require('path');
+const { read, merge, configRoot, t } = require('./lib.js');
 const { file, tree } = require('./count.js');
 
-function proven(st) {
-  const now = tree(st.cwd || process.cwd());
-  if (!now) return true;
+function off() {
+  const cfg = read(path.join(configRoot(), 'teknesyum', 'config.json')) || {};
+  return cfg.evidence === false || process.env.TEKNESYUM_KANIT === '0';
+}
+
+function proven(st, now) {
   return (st.tests || []).some((r) => r.ok !== false && r.tree === now);
 }
 
 function decide(j) {
   if (j.hook_event_name !== 'Stop') return null;
   if (j.stop_hook_active) return null;
-  const st = read(file(j));
-  if (!st || !st.doubt) return null;
+  if (off()) return null;
+  const f = file(j);
+  const st = read(f);
+  if (!st) return null;
+  const now = tree(st.cwd || j.cwd || process.cwd());
+  if (!now) return null;
+  if (st.stopTree === now) return null;
   if (!Object.keys(st.files || {}).length) return null;
-  if (proven(st)) return null;
+  if (proven(st, now)) {
+    merge(f, { stopTree: now });
+    return null;
+  }
   return { decision: 'block', reason: t('dur.evidence') };
 }
 
@@ -26,12 +37,10 @@ if (require.main === module) {
     try {
       const out = decide(JSON.parse(raw));
       if (out) process.stdout.write(JSON.stringify(out));
-    } catch (e) {
-      try { fs.appendFileSync(stateFile('hook-errors').replace(/\.json$/, '.log'), new Date().toISOString() + ' dur.js ' + String((e && e.stack) || e) + '\n'); } catch {}
-    }
+    } catch {}
     process.exit(0);
   });
   process.stdin.on('error', () => process.exit(0));
 }
 
-module.exports = { decide, proven };
+module.exports = { decide, proven, off };

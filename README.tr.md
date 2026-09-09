@@ -222,19 +222,20 @@ ağacı sonradan değiştiyse bayat.
 
 ## Kancalar
 
-Sekiz olay, yedi dosya, hepsi `core/hooks/` altında:
+Sekiz olay, sekiz dosya, hepsi `core/hooks/` altında:
 
 | Olay | Kanca | Söyler |
 |---|---|---|
 | `SessionStart` | `count.js` | varsa `Devam: .claude/handoff.md`; varsa `docs/plan.md`nin ilk açık `- [ ]` adımı; yoksa hiçbir şey. Günde bir kez `kutuphane.js fetch all --stale 7`yi arka planda ayrık başlatır, hiçbir raf bir haftadan eski kalmaz; model hiçbirini görmez |
-| `UserPromptSubmit` | `mod.js` | `??` / `++`de kütüphane bulguları, `pp`de özel kitaplar, `aa`da ajans koltukları, `doubt`ta kanıt kapısı; yoksa hiçbir şey |
+| `UserPromptSubmit` | `mod.js` | `??` / `++`de kütüphane bulguları, `pp`de özel kitaplar, `aa`da ajans koltukları; yoksa hiçbir şey |
 | `PostToolUse` | `count.js` | eşikte tek satır, bir kez; yoksa hiçbir şey |
 | `PostToolUseFailure` | `count.js` | hiçbir şey; kalan test komutunu kaydeder |
 | `PreToolUse` | `prefs.js` | README yazılırken kendi README kurallarınız |
+| `PreToolUse` | `yasak.js` | tehlikeli komutu tek satır gerekçeyle reddeder: özyineli zorla silme, disk yazma, geçmiş silme, depo/sürüm silme, indir-koş boruları, `chmod 777`, makine çapında durdurma; yoksa hiçbir şey |
 | `PreToolUse` | `loop.js` | bekleme döngüsünün üst sınırı yoksa tek satır; yoksa hiçbir şey |
 | `PreToolUse` | `scout.js` | hiçbir şey; bütçesini aşan öncül ya da `netleştir` çağrısını reddeder |
 | `Stop` | `count.js` | bağlama hiçbir şey; diff'i tazeler, `agency.js show` sonrası koltuğu bir kez sohbet satırı olarak basar |
-| `Stop` | `dur.js` | `doubt` ile kurulmadıkça hiçbir şey: dosya düzenleyip hiçbir şey koşmayan tur bir kez durdurulur |
+| `Stop` | `dur.js` | Dosya düzenleyip hiçbir şey koşmayan oturum bir kez durdurulur; aynı ağaç ikinci kez sorulmaz. Kapatmak: `evidence: false` |
 | `SessionEnd` | `handoff.js` | hiçbir şey; devri yazar |
 | `Notification` | `notify.js` | hiçbir şey; çalar |
 

@@ -1,10 +1,10 @@
 const fs = require('fs');
 const path = require('path');
-const { configRoot, stateFile, read, write, t } = require('./lib.js');
+const { configRoot, stateFile, t } = require('./lib.js');
 const lib = require('../scripts/kutuphane.js');
 const ag = require('../scripts/agency.js');
 
-const PREFIX = /^\s*(\?\?|\+\+|pp|aa|doubt)(?=\s|$)/i;
+const PREFIX = /^\s*(\?\?|\+\+|pp|aa)(?=\s|$)/i;
 const MAX_SEATS = 3;
 const MAX_HITS = 8;
 const MAX_WORDS = 8;
@@ -58,16 +58,6 @@ function privateShelf() {
   return head + '\n\n' + books.map((b) => '### ' + b.file + '\n' + b.text.trim()).join('\n\n');
 }
 
-function doubt(j, rest) {
-  const f = require('./count.js').file(j);
-  const st = read(f);
-  if (!st) return t('dur.noSession');
-  const off = /^\s*(off|kapat|dur)(\s|$)/i.test(rest);
-  st.doubt = !off;
-  write(f, st);
-  return t(off ? 'dur.off' : 'dur.armed');
-}
-
 function handle(j) {
   if (j.hook_event_name !== 'UserPromptSubmit') return '';
   const prompt = String(j.prompt || '');
@@ -75,7 +65,7 @@ function handle(j) {
   if (!m) return '';
   const rest = prompt.slice(m[0].length);
   const key = m[1].toLowerCase();
-  const text = key === 'pp' ? privateShelf() : key === 'aa' ? agency(rest) : key === 'doubt' ? doubt(j, rest) : library(rest);
+  const text = key === 'pp' ? privateShelf() : key === 'aa' ? agency(rest) : library(rest);
   return JSON.stringify({ hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: text } });
 }
 
@@ -92,4 +82,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { handle, words, doubt, PREFIX, configRoot };
+module.exports = { handle, words, PREFIX, configRoot };

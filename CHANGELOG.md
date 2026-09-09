@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.26.0
+
+- Evidence gate is on by default and silent: no prefix to arm, only a real Stop event blocks, the same tree is never asked twice, and `evidence: false` in config.json (or TEKNESYUM_KANIT=0) switches it off. The `doubt` prefix is gone.
+- Denylist on Bash and PowerShell: sixteen patterns deny recursive force deletes, disk writes, history rewrites, repo and release deletion, download-and-run pipes, `chmod 777` and machine-wide kills, each with one line on what to do instead.
+
 ## v0.25.0
 
 - Evidence gate: `doubt` arms it, and a turn that edited files without running anything is blocked once on Stop; `stop_hook_active` lets the second stop through, `doubt off` disarms.

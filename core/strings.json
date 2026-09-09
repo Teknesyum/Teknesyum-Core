@@ -216,19 +216,39 @@
     "tr": "Raf %K KB üstünde, burada yalnız liste var; gerekeni show ile oku."
   },
   "dur.evidence": {
-    "en": "You edited files and nothing ran since: no test, no command output. Run what proves it and show the output, or say in one line why it cannot run. Asked once; the next stop goes through.",
+    "en": "You edited files and nothing ran afterwards: no test, no command output. Run what proves it and show the output, or say in one line why you cannot. Asked once; the next stop goes through.",
     "tr": "Dosya düzenledin ve sonrasında hiçbir şey koşmadı: test de komut çıktısı da yok. Kanıtlayanı koş ve çıktısını göster, ya da neden koşamadığını tek satırla yaz. Bir kez soruldu; sonraki durma geçer."
   },
-  "dur.armed": {
-    "en": "Evidence gate on: a turn that edits but runs nothing is stopped once. Off with \"doubt off\".",
-    "tr": "Kanıt kapısı açık: düzenleyip hiçbir şey koşmayan tur bir kez durdurulur. Kapatmak \"doubt off\"."
+  "yasak.wipe": {
+    "en": "Recursive force delete. Move it to trash/ instead.",
+    "tr": "Özyineli zorla silme. Onun yerine trash/ altına taşı."
   },
-  "dur.off": {
-    "en": "Evidence gate off.",
-    "tr": "Kanıt kapısı kapandı."
+  "yasak.root": {
+    "en": "That path is a root or a home. Delete inside the project.",
+    "tr": "O yol bir kök ya da ev klasörü. Proje içinde sil."
   },
-  "dur.noSession": {
-    "en": "No session state yet - the gate arms after the first edit or command.",
-    "tr": "Oturum durumu yok - kapı ilk düzenleme ya da komuttan sonra kurulur."
+  "yasak.disk": {
+    "en": "Disk level write. Ask the user to run it.",
+    "tr": "Disk düzeyinde yazma. Kullanıcıdan koşmasını iste."
+  },
+  "yasak.hist": {
+    "en": "This throws away history. Ask the user first.",
+    "tr": "Bu, geçmişi siler. Önce kullanıcıya sor."
+  },
+  "yasak.gone": {
+    "en": "This deletes a repo, release or remote branch. Ask first.",
+    "tr": "Bu bir depoyu, sürümü ya da uzak dalı siler. Önce sor."
+  },
+  "yasak.pipe": {
+    "en": "Download and run in one line. Fetch, read, then run.",
+    "tr": "İndirip aynı satırda koşma. İndir, oku, sonra koş."
+  },
+  "yasak.perm": {
+    "en": "777 opens the file to everyone. Give the needed permission.",
+    "tr": "777 dosyayı herkese açar. Gereken izni ver."
+  },
+  "yasak.kill": {
+    "en": "This stops the machine or every process. Name one process.",
+    "tr": "Bu, makineyi ya da bütün süreçleri durdurur. Tek süreci yaz."
   }
 }

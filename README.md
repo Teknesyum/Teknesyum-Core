@@ -229,19 +229,20 @@ nothing, stale when HEAD or the working tree moved after it.
 
 ## Hooks
 
-Eight events, seven files, all under `core/hooks/`:
+Eight events, eight files, all under `core/hooks/`:
 
 | Event | Hook | Says |
 |---|---|---|
 | `SessionStart` | `count.js` | `Resume: .claude/handoff.md` if one exists; the first open `- [ ]` step of `docs/plan.md` if one exists; else nothing. Once a day it also starts `kutuphane.js fetch all --stale 7` detached in the background, so no shelf is older than a week; the model sees none of it |
-| `UserPromptSubmit` | `mod.js` | library hits on `??` / `++`, private books on `pp`, agency seats on `aa`, the evidence gate on `doubt`; else nothing |
+| `UserPromptSubmit` | `mod.js` | library hits on `??` / `++`, private books on `pp`, agency seats on `aa`; else nothing |
 | `PostToolUse` | `count.js` | one line at the threshold, once; else nothing |
 | `PostToolUseFailure` | `count.js` | nothing; files a failed test command |
 | `PreToolUse` | `prefs.js` | your own README conventions, when a README is written |
+| `PreToolUse` | `yasak.js` | a denied command with one line on what to do instead: recursive force delete, disk writes, history rewrites, repo or release deletion, download-and-run pipes, `chmod 777`, machine-wide kills; else nothing |
 | `PreToolUse` | `loop.js` | one line when a wait loop has no upper bound; else nothing |
 | `PreToolUse` | `scout.js` | nothing; refuses a scout or `netleştir` call that breaks its budget |
 | `Stop` | `count.js` | nothing in the context; refreshes the diff, and after `agency.js show` prints the seat once as a chat line |
-| `Stop` | `dur.js` | nothing unless the evidence gate is armed with `doubt`: a turn that edited files but ran nothing is blocked once |
+| `Stop` | `dur.js` | a session that edited files and ran nothing is blocked once; the same tree is never asked twice. Off with `evidence: false` |
 | `SessionEnd` | `handoff.js` | nothing; writes the handoff |
 | `Notification` | `notify.js` | nothing; rings |
 
