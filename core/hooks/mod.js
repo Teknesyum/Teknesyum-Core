@@ -5,6 +5,15 @@ const lib = require('../scripts/kutuphane.js');
 const ag = require('../scripts/agency.js');
 
 const PREFIX = /^\s*(\?\?|\+\+|pp|aa)(?=\s|$)/i;
+const SUFFIX = /(^|\s)(\?\?|\+\+|pp|aa)\s*$/i;
+
+function mark(prompt) {
+  const head = PREFIX.exec(prompt);
+  if (head) return { key: head[1].toLowerCase(), rest: prompt.slice(head[0].length) };
+  const tail = SUFFIX.exec(prompt);
+  if (tail) return { key: tail[2].toLowerCase(), rest: prompt.slice(0, tail.index) };
+  return null;
+}
 const MAX_SEATS = 3;
 const MAX_HITS = 8;
 const MAX_WORDS = 8;
@@ -61,10 +70,9 @@ function privateShelf() {
 function handle(j) {
   if (j.hook_event_name !== 'UserPromptSubmit') return '';
   const prompt = String(j.prompt || '');
-  const m = PREFIX.exec(prompt);
+  const m = mark(prompt);
   if (!m) return '';
-  const rest = prompt.slice(m[0].length);
-  const key = m[1].toLowerCase();
+  const { rest, key } = m;
   const text = key === 'pp' ? privateShelf() : key === 'aa' ? agency(rest) : library(rest);
   return JSON.stringify({ hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: text } });
 }
@@ -82,4 +90,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { handle, words, PREFIX, configRoot };
+module.exports = { handle, words, mark, PREFIX, SUFFIX, configRoot };

@@ -219,13 +219,9 @@
     "en": "You edited files and nothing ran afterwards: no test, no command output. Run what proves it and show the output, or say in one line why you cannot. Asked once; the next stop goes through.",
     "tr": "Dosya düzenledin ve sonrasında hiçbir şey koşmadı: test de komut çıktısı da yok. Kanıtlayanı koş ve çıktısını göster, ya da neden koşamadığını tek satırla yaz. Bir kez soruldu; sonraki durma geçer."
   },
-  "yasak.wipe": {
-    "en": "Recursive force delete. Move it to trash/ instead.",
-    "tr": "Özyineli zorla silme. Onun yerine trash/ altına taşı."
-  },
   "yasak.root": {
-    "en": "That path is a root or a home. Delete inside the project.",
-    "tr": "O yol bir kök ya da ev klasörü. Proje içinde sil."
+    "en": "That path leaves the project or is the project root. Delete inside it.",
+    "tr": "O yol projenin dışına çıkıyor ya da projenin kökü. Proje içinde sil."
   },
   "yasak.disk": {
     "en": "Disk level write. Ask the user to run it.",

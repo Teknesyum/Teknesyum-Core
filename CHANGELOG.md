@@ -3,7 +3,8 @@
 ## v0.26.0
 
 - Evidence gate is on by default and silent: no prefix to arm, only a real Stop event blocks, the same tree is never asked twice, and `evidence: false` in config.json (or TEKNESYUM_KANIT=0) switches it off. The `doubt` prefix is gone.
-- Denylist on Bash and PowerShell: sixteen patterns deny recursive force deletes, disk writes, history rewrites, repo and release deletion, download-and-run pipes, `chmod 777` and machine-wide kills, each with one line on what to do instead.
+- Denylist on Bash and PowerShell, each denial with one line on what to do instead. Inside the working directory the deletes are free; a delete whose target resolves outside it, or is the root itself, is denied — as are disk writes, history rewrites, repo and release deletion, download-and-run pipes, `chmod 777` and machine-wide kills.
+- The `??`, `++`, `pp` and `aa` marks are read at the end of the prompt as well as at the start.
 
 ## v0.25.0
 

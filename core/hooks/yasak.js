@@ -1,11 +1,15 @@
 #!/usr/bin/env node
+const path = require('path');
 const { t } = require('./lib.js');
 
+const WIPE = [
+  /\brm\s+(?:-\S+\s+)*-\S*[rR]\S*f|\brm\s+(?:-\S+\s+)*-\S*f\S*[rR]/,
+  /\bRemove-Item\b[^\n;|]*-Recurse\b[^\n;|]*-Force\b|\bRemove-Item\b[^\n;|]*-Force\b[^\n;|]*-Recurse\b/i,
+  /\brmdir\s+\/s\b/i,
+  /\brm\s+(?:-\S+\s+)*-\S*[rR]/,
+];
+
 const RULES = [
-  ['yasak.wipe', /\brm\s+(-\w*\s+)*-\w*[rR]\w*f|\brm\s+(-\w*\s+)*-\w*f\w*[rR]/],
-  ['yasak.wipe', /\bRemove-Item\b[^\n]*-Recurse\b[^\n]*-Force\b|\bRemove-Item\b[^\n]*-Force\b[^\n]*-Recurse\b/i],
-  ['yasak.wipe', /\brmdir\s+\/s\b/i],
-  ['yasak.root', /\brm\b[^\n|]*\s(\/|~|\$HOME|[A-Za-z]:\\)(\s|$|\*)/],
   ['yasak.disk', /\b(mkfs(\.\w+)?|fdisk|diskpart|Format-Volume|format\s+[a-z]:)\b/i],
   ['yasak.disk', /\bdd\b[^\n]*\bof=\/dev\//],
   ['yasak.hist', /\bgit\s+push\b[^\n]*(--force(?!-with-lease)|(^|\s)-f(\s|$))/],
@@ -20,9 +24,34 @@ const RULES = [
   ['yasak.kill', /\bshutdown\b|\bStop-Computer\b|\bRestart-Computer\b/i],
 ];
 
-function forbidden(cmd) {
+function targets(cmd) {
+  return String(cmd)
+    .split(/[;|&\n]+/)
+    .filter((part) => WIPE.some((r) => r.test(part)))
+    .flatMap((part) =>
+      part
+        .trim()
+        .split(/\s+/)
+        .slice(1)
+        .filter((w) => w && !w.startsWith('-') && !/^\/[a-z]$/i.test(w))
+        .map((w) => w.replace(/^["']|["']$/g, ''))
+    );
+}
+
+function outside(target, cwd) {
+  const s = String(target);
+  if (/^[~$]/.test(s) || /^\/dev\b/.test(s)) return true;
+  if (/^([A-Za-z]:[\\/]|[\\/])/.test(s)) return true;
+  const rel = path.relative(cwd, path.resolve(cwd, s));
+  if (rel === '' || rel === '.') return true;
+  return rel.startsWith('..');
+}
+
+function forbidden(cmd, cwd) {
   const s = String(cmd || '');
   if (!s.trim()) return null;
+  const root = cwd || process.cwd();
+  for (const target of targets(s)) if (outside(target, root)) return 'yasak.root';
   for (const [key, re] of RULES) if (re.test(s)) return key;
   return null;
 }
@@ -30,7 +59,7 @@ function forbidden(cmd) {
 function decide(j) {
   if (j.hook_event_name && j.hook_event_name !== 'PreToolUse') return null;
   if (!/^(Bash|PowerShell)$/.test(j.tool_name || '')) return null;
-  const key = forbidden((j.tool_input || {}).command);
+  const key = forbidden((j.tool_input || {}).command, j.cwd);
   if (!key) return null;
   return {
     hookSpecificOutput: {
@@ -54,4 +83,4 @@ if (require.main === module) {
   process.stdin.on('error', () => process.exit(0));
 }
 
-module.exports = { forbidden, decide, RULES };
+module.exports = { forbidden, decide, outside, targets, RULES, WIPE };

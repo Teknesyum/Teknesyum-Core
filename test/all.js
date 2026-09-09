@@ -580,13 +580,16 @@ function testDur() {
 function testYasak() {
   const yasak = require(path.join(CORE, 'hooks', 'yasak.js'));
   const YASAK = path.join(CORE, 'hooks', 'yasak.js');
+  const GARDEN = path.join(path.parse(process.cwd()).root, 'proje', 'a');
   const denied = [
-    ['rm -rf build', 'yasak.wipe'],
-    ['cd x; rm -fr node_modules', 'yasak.wipe'],
-    ['Remove-Item -Recurse -Force .\\dist', 'yasak.wipe'],
-    ['rmdir /s /q dist', 'yasak.wipe'],
-    ['rm -r /', 'yasak.root'],
-    ['rm -r ~', 'yasak.root'],
+    ['rm -rf /', 'yasak.root'],
+    ['rm -rf ~', 'yasak.root'],
+    ['rm -rf .', 'yasak.root'],
+    ['rm -rf ../komsu', 'yasak.root'],
+    ['rm -rf $HOME/notlar', 'yasak.root'],
+    ['rm -r /dev/null', 'yasak.root'],
+    ['cd build; rm -rf ../..', 'yasak.root'],
+    ['Remove-Item -Recurse -Force ~\\Desktop', 'yasak.root'],
     ['mkfs.ext4 /dev/sdb1', 'yasak.disk'],
     ['dd if=/dev/zero of=/dev/sda', 'yasak.disk'],
     ['git push --force origin main', 'yasak.hist'],
@@ -603,12 +606,15 @@ function testYasak() {
     ['killall -9 -1', 'yasak.kill'],
     ['shutdown /r /t 0', 'yasak.kill'],
   ];
-  for (const [cmd, key] of denied) ok('denies ' + cmd, yasak.forbidden(cmd) === key, String(yasak.forbidden(cmd)));
+  for (const [cmd, key] of denied) ok('denies ' + cmd, yasak.forbidden(cmd, GARDEN) === key, String(yasak.forbidden(cmd, GARDEN)));
 
   const passed = [
+    'rm -rf build',
+    'rm -rf node_modules docs/eski',
+    'rm -rf ./dist',
+    'Remove-Item -Recurse -Force .\\dist',
+    'rmdir /s /q dist',
     'rm build/tmp.txt',
-    'rm -r build/tmp',
-    'Remove-Item -Recurse .\\dist',
     'git push origin main',
     'git push --force-with-lease origin topic',
     'git reset HEAD~1',
@@ -620,23 +626,43 @@ function testYasak() {
     'npm test',
     'gh release create v1.0.0',
   ];
-  for (const cmd of passed) ok('lets through ' + cmd, yasak.forbidden(cmd) === null, String(yasak.forbidden(cmd)));
+  for (const cmd of passed) ok('lets through ' + cmd, yasak.forbidden(cmd, GARDEN) === null, String(yasak.forbidden(cmd, GARDEN)));
 
-  ok('only Bash and PowerShell are read', yasak.decide({ tool_name: 'Write', tool_input: { command: 'rm -rf x' } }) === null);
-  ok('an empty command is not a rule', yasak.forbidden('') === null && yasak.forbidden(undefined) === null);
+  ok('only Bash and PowerShell are read', yasak.decide({ tool_name: 'Write', cwd: GARDEN, tool_input: { command: 'rm -rf /' } }) === null);
+  ok('an empty command is not a rule', yasak.forbidden('', GARDEN) === null && yasak.forbidden(undefined, GARDEN) === null);
 
-  const r = run(process.execPath, [YASAK], { input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'rm -rf /' } }) });
+  const r = run(process.execPath, [YASAK], { input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'Bash', cwd: GARDEN, tool_input: { command: 'rm -rf /' } }) });
   const out = JSON.parse(r.stdout);
   ok('the hook denies on stdin', out.hookSpecificOutput.permissionDecision === 'deny', r.stdout);
-  ok('and says what to do instead', /trash|kök|root|project/i.test(out.hookSpecificOutput.permissionDecisionReason), r.stdout);
-  const clean = run(process.execPath, [YASAK], { input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'npm test' } }) });
-  ok('a plain command passes silently', clean.stdout === '' && clean.status === 0, clean.stdout);
+  ok('and says the garden is the limit', /proje|kök|root|proje içinde|inside/i.test(out.hookSpecificOutput.permissionDecisionReason), r.stdout);
+  const clean = run(process.execPath, [YASAK], { input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'Bash', cwd: GARDEN, tool_input: { command: 'rm -rf build' } }) });
+  ok('a delete inside the garden passes silently', clean.stdout === '' && clean.status === 0, clean.stdout);
   const junk = run(process.execPath, [YASAK], { input: '{nope' });
   ok('bad input exits quietly', junk.status === 0 && junk.stdout === '');
 
   const cfgHooks = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8'));
   const bash = cfgHooks.hooks.PreToolUse.find((g) => g.matcher === 'Bash|PowerShell');
   ok('the denylist runs before the loop gate', /yasak\.js/.test(bash.hooks[0].command), JSON.stringify(bash.hooks));
+}
+
+function testMark() {
+  const { mark } = require(path.join(CORE, 'hooks', 'mod.js'));
+  const at = (text, key, rest) => {
+    const m = mark(text);
+    ok('reads ' + JSON.stringify(text), m && m.key === key && m.rest.trim() === rest, JSON.stringify(m));
+  };
+  at('?? redis kilidi', '??', 'redis kilidi');
+  at('++ redis kilidi', '++', 'redis kilidi');
+  at('pp', 'pp', '');
+  at('aa guvenlik', 'aa', 'guvenlik');
+  at('redis kilidi ??', '??', 'redis kilidi');
+  at('bunu yaz ++', '++', 'bunu yaz');
+  at('ozel raftan bak pp', 'pp', 'ozel raftan bak');
+  at('guvenlik icin rollere bak aa', 'aa', 'guvenlik icin rollere bak');
+  at('  ??  ', '??', '');
+  for (const quiet of ['const x = a ?? b', 'a ?? b sonra devam', 'i++ dedim ve devam', 'npm test', '', 'appa bak', 'ppt dosyasi']) {
+    ok('leaves alone ' + JSON.stringify(quiet), mark(quiet) === null, JSON.stringify(mark(quiet)));
+  }
 }
 
 function testProcs() {
@@ -981,6 +1007,7 @@ function main() {
     ['loop gate', testLoop],
     ['evidence gate', testDur],
     ['denylist', testYasak],
+    ['prompt marks', testMark],
     ['stale processes', testProcs],
     ['agency', testAgency],
     ['library', testKutuphane],
