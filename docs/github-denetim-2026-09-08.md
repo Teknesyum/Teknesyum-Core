@@ -7,3 +7,8 @@ Merkezi GitHub denetimi (2026-09-08) bu depoda şunları değiştirdi:
 - trash/ commit'ten çıkarıldı, .gitignore'a eklendi; canlı kod trash/ altına atıf vermiyor.
 - "Önce Sayılar" tablosunun altına ölçümün 0.16.0'da alındığı, kanca yüzeyinin v0.16.1'den beri değiştiği notu eklendi.
 - Wiki kapatıldı, homepage README#install'a çekildi.
+
+## Kalan (kullanıcı onayı gerekir)
+
+- Git'ten çıkan trash/ kopyası: Teknesyum-Private `teknesyum-core/git-disi-2026-09-08/`.
+- Hook ölçüm tablosu v0.16.1'den beri yeniden ölçülmedi.
