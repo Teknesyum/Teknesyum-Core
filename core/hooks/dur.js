@@ -8,6 +8,12 @@ function off() {
   return cfg.evidence === false || process.env.TEKNESYUM_KANIT === '0';
 }
 
+const CODE = /\.(js|mjs|cjs|jsx|ts|tsx|py|go|rs|java|rb|php|c|h|cc|cpp|cs|swift|kt|sh|bash|ps1|sql|json|ya?ml|toml)$/i;
+
+function code(st) {
+  return Object.keys(st.files || {}).filter((n) => CODE.test(n));
+}
+
 function proven(st, now) {
   return (st.tests || []).some((r) => r.ok !== false && r.tree === now);
 }
@@ -22,7 +28,7 @@ function decide(j) {
   const now = tree(st.cwd || j.cwd || process.cwd());
   if (!now) return null;
   if (st.stopTree === now) return null;
-  if (!Object.keys(st.files || {}).length) return null;
+  if (!code(st).length) return null;
   if (proven(st, now)) {
     merge(f, { stopTree: now });
     return null;
@@ -43,4 +49,4 @@ if (require.main === module) {
   process.stdin.on('error', () => process.exit(0));
 }
 
-module.exports = { decide, proven, off };
+module.exports = { decide, proven, off, code, CODE };

@@ -556,6 +556,14 @@ function testDur() {
   ok('the block says what would settle it', /kanıt|evidence|test/i.test(first.stdout), first.stdout);
   ok('the second stop of the same turn goes through', stop({ stop_hook_active: true }).stdout === '');
 
+  const notes = fixture();
+  hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 's9', cwd: notes }, cfg);
+  edit(notes, cfg, 'docs/note.md', 's9', '# note' + String.fromCharCode(10));
+  ok('a turn that only wrote prose is never asked for evidence', hook(DUR, { hook_event_name: 'Stop', session_id: 's9', cwd: notes }, cfg).stdout === '');
+  edit(notes, cfg, 'src/three.js', 's9', 'module.exports = 4;' + String.fromCharCode(10));
+  ok('one code file among the prose closes the gate again', blocks(hook(DUR, { hook_event_name: 'Stop', session_id: 's9', cwd: notes }, cfg)));
+  sweep(notes);
+
   ok('a stop that is not a stop event is ignored', hook(DUR, { hook_event_name: 'SubagentStop', session_id: 's1', cwd: root }, cfg).stdout === '');
 
   hook(COUNT, { hook_event_name: 'PostToolUse', tool_name: 'Bash', session_id: 's1', cwd: root, tool_input: { command: 'npm test' }, tool_response: { stdout: '12 passing', stderr: '' } }, cfg);
