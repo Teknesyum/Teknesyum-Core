@@ -14,8 +14,8 @@ const WORDS = 400;
 const REPLY_MAX = 8000;
 const MODEL = 'sonnet';
 
-function stateFile() {
-  return lib.stateFile('scout');
+function stateFile(root) {
+  return lib.stateFile(lib.slot('scout', root));
 }
 
 function nextNumber(dir) {
@@ -68,14 +68,14 @@ function brief(root, topic) {
   const slug = slugOf(topic.replace(/[çÇ]/g, 'c').replace(/[ğĞ]/g, 'g').replace(/[ıİ]/g, 'i').replace(/[öÖ]/g, 'o').replace(/[şŞ]/g, 's').replace(/[üÜ]/g, 'u'));
   const file = path.join(dir, id + '-' + slug + '-girdi.md');
   fs.writeFileSync(file, briefText(id, topic));
-  lib.write(stateFile(), { id, slug, topic, at: new Date().toISOString(), spent: false, session: lib.sessionId() });
+  lib.write(stateFile(root), { id, slug, topic, at: new Date().toISOString(), spent: false, session: lib.sessionId() });
   return { id, file: path.relative(root, file).split(path.sep).join('/') };
 }
 
 const gate = lib.makeGate({ mark: MARK, state: 'scout', model: MODEL, max: 6000 });
 
 function record(root, o) {
-  const st = lib.read(stateFile()) || {};
+  const st = lib.read(stateFile(root)) || {};
   const id = o.id || st.id;
   if (!id) throw new Error('no brief to record against');
   const dir = path.join(root, DIR);

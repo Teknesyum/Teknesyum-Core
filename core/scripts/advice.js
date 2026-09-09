@@ -78,14 +78,14 @@ function ask(root, question, facts) {
   const slug = slugOf(ascii(question));
   const file = path.join(at, id + '-' + slug + '-girdi.md');
   fs.writeFileSync(file, askText(id, question, facts));
-  lib.write(lib.stateFile('advice'), { id, slug, question, at: new Date().toISOString(), spent: false, session: lib.sessionId() });
+  lib.write(lib.stateFile(lib.slot('advice', root)), { id, slug, question, at: new Date().toISOString(), spent: false, session: lib.sessionId() });
   return { id, file: path.relative(root, file).split(path.sep).join('/') };
 }
 
 const gate = lib.makeGate({ mark: MARK, state: 'advice', model: '', max: PROMPT_MAX });
 
 function record(root, o) {
-  const st = lib.read(lib.stateFile('advice')) || {};
+  const st = lib.read(lib.stateFile(lib.slot('advice', root))) || {};
   const id = o.id || st.id;
   if (!id) throw new Error('no question to record against');
   const at = path.join(root, ASK_DIR);

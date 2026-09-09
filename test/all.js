@@ -1016,6 +1016,16 @@ function testScout() {
   fs.writeFileSync(path.join(root, 'cevap2.md'), 'net');
   const qr = run(process.execPath, [ADVICE, 'record', '--reply', 'cevap2.md', '--cost', '3k token, 20 s'], { cwd: root, env });
   ok('record files the answer next to the question', qr.stdout.trim() === 'docs/netlestirme/001-plani-mi-kesmeli-yoksa-olcmeli-mi.md' && /3k token/.test(fs.readFileSync(path.join(root, 'docs', 'netlestirme', '001-plani-mi-kesmeli-yoksa-olcmeli-mi.md'), 'utf8')), qr.stdout + qr.stderr);
+  const other = fixture();
+  fs.writeFileSync(path.join(other, 'olgular.md'), '- baska proje');
+  run(process.execPath, [ADVICE, 'ask', 'bambaska bir soru', '--facts', 'olgular.md'], { cwd: other, env });
+  fs.writeFileSync(path.join(root, 'cevap3.md'), 'ikinci');
+  const q2 = run(process.execPath, [ADVICE, 'ask', 'ikinci soru', '--facts', 'olgular.md'], { cwd: root, env });
+  ok('a second question here numbers itself 002', q2.stdout.split(String.fromCharCode(10))[0] === 'docs/netlestirme/002-ikinci-soru-girdi.md', q2.stdout + q2.stderr);
+  const q3 = run(process.execPath, [ADVICE, 'record', '--reply', 'cevap3.md', '--cost', '1k, 1 s'], { cwd: root, env });
+  ok('a consult in another project cannot steal the record', q3.stdout.trim() === 'docs/netlestirme/002-ikinci-soru.md', q3.stdout + q3.stderr);
+  sweep(other);
+
   sweep(root);
   sweep(cfg);
 }

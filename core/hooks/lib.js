@@ -289,6 +289,10 @@ function envPinned(name, probe = {}) {
   return false;
 }
 
+function slot(name, root) {
+  return name + '-' + require('crypto').createHash('sha1').update(path.resolve(String(root || process.cwd()))).digest('hex').slice(0, 12);
+}
+
 function makeGate(o) {
   const mark = o.mark.replace(/[[\]]/g, '\\$&') + '(\\d{3})\\]\\]';
   return function gate(j) {
@@ -297,7 +301,7 @@ function makeGate(o) {
     const m = new RegExp(mark).exec(String(input.prompt || ''));
     if (!m) return null;
     const id = m[1];
-    const file = stateFile(o.state);
+    const file = stateFile(slot(o.state, j.cwd));
     const st = read(file) || {};
     const deny = (why) => ({
       hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: why },
@@ -313,6 +317,7 @@ function makeGate(o) {
 
 module.exports = {
   makeGate,
+  slot,
   envPinned,
   home,
   configRoot,
