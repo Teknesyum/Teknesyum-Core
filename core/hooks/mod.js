@@ -4,8 +4,8 @@ const { configRoot, stateFile, t } = require('./lib.js');
 const lib = require('../scripts/kutuphane.js');
 const ag = require('../scripts/agency.js');
 
-const PREFIX = /^\s*(\?\?|\+\+|pp|aa|ff)(?=\s|$)/i;
-const SUFFIX = /(^|\s)(\?\?|\+\+|pp|aa|ff)\s*$/i;
+const PREFIX = /^\s*(\?\?|\+\+|pp|aa|ff|hh)(?=\s|$)/i;
+const SUFFIX = /(^|\s)(\?\?|\+\+|pp|aa|ff|hh)\s*$/i;
 
 function mark(prompt) {
   const head = PREFIX.exec(prompt);
@@ -39,6 +39,10 @@ function library(text) {
   const head = t('mod.library').replace('%C', cmd('show <slug> --lean'));
   if (!hits.length) return head + '\n' + t('mod.none');
   return head + '\n' + hits.join('\n');
+}
+
+function help() {
+  return t('mod.help');
 }
 
 function fable(text) {
@@ -79,7 +83,7 @@ function handle(j) {
   const m = mark(prompt);
   if (!m) return '';
   const { rest, key } = m;
-  const text = key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : library(rest);
+  const text = key === 'hh' ? help() : key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : library(rest);
   return JSON.stringify({ hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: text } });
 }
 

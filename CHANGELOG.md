@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.27.0
+
+- `hh` lists every mark with a line on what it does and an example of how to type it, and says out loud that a turn with no mark writes nothing into the context.
+
 ## v0.26.0
 
 - Evidence gate is on by default and silent: no prefix to arm, only a real Stop event blocks, the same tree is never asked twice, and `evidence: false` in config.json (or TEKNESYUM_KANIT=0) switches it off. The `doubt` prefix is gone.

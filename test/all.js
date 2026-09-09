@@ -349,7 +349,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 9000, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 12000, String(JSON.stringify(table).length));
   ok('no relay strings are left', !keys.some((k) => /^(role\.|notice\.|line\.(contracts|agents|open|blocked))/.test(k)), keys.join(' '));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
@@ -656,6 +656,8 @@ function testMark() {
   at('pp', 'pp', '');
   at('aa guvenlik', 'aa', 'guvenlik');
   at('ff redis kilidi', 'ff', 'redis kilidi');
+  at('hh', 'hh', '');
+  at('isaretleri anlat hh', 'hh', 'isaretleri anlat');
   at('redis kilidini yaz ff', 'ff', 'redis kilidini yaz');
   at('redis kilidi ??', '??', 'redis kilidi');
   at('bunu yaz ++', '++', 'bunu yaz');
@@ -675,6 +677,12 @@ function testFable() {
   ok('and names the model', /fable/i.test(ctx), ctx);
   ok('and carries the question', /redis kilidi/.test(ctx), ctx);
   ok('and tells where the answer is filed', /record/.test(ctx), ctx);
+  const help = JSON.parse(mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'hh' })).hookSpecificOutput.additionalContext;
+  for (const k of ['??', '++', 'pp', 'aa', 'ff', 'hh']) ok('hh explains ' + k, help.includes('`' + k + '`'), help);
+  ok('hh says where the mark stands', /başında|sonunda|start|end/i.test(help), help);
+  ok('hh shows how to use one', /`\?\? redis/.test(help), help);
+  ok('hh says an unmarked turn is free', /tek harf|not one letter/i.test(help), help);
+
   const bare = JSON.parse(mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'ff' })).hookSpecificOutput.additionalContext;
   ok('a bare ff still gives the recipe', /advice\.js/.test(bare) && !/Soru:/.test(bare), bare);
 }
