@@ -612,3 +612,20 @@ against a 0.37 $ baseline, and the probe never inside `message.content`
 What is built: `agency.js show` writes `teknesyum/seat.json`; `count.js` on `Stop` prints
 `Seat: <slug> read, <n> KB` once and marks it seen. One line, one fact, only after a seat
 was actually read. Other facts can join the same line later on the same terms.
+
+## prefs kancası özel rafa taşındı (2026-09-09)
+
+Yazar kuralları iki yerde duruyordu: `~/.claude/teknesyum/prefs/` (kanca uygular) ve özel
+rafın `tercihler/` klasörü. İkisi çelişti — prefs "sayılar kendi bölümünü bekler", raf "ilk
+ekran sayıyla açar" diyordu.
+
+Karar: kural tek yerde, özel rafta. `readme-protokolu.md` prefs'in şekil, kurulum, diyagram,
+iki dil ve ses bölümlerini aldı; `lisans.md` ve `depo.md` yeni kitap olarak eklendi. Sayı
+bloğu şeklin üçüncü maddesi oldu, çelişki kullanıcının açık talimatı yönünde kapandı.
+
+Kalıntı: `core/hooks/prefs.js` `trash/`e taşındı, `hooks.json` kaydı ve `prefs.json`
+silindi, `testPrefs` süiti kaldırıldı (369 -> 360 test). `prefs/signature.html` ve
+`prefs/assets/` kaldı — onlar kural değil, `scaffold.js signature`ın okuduğu sabit varlıklar.
+
+Bedel: README yazımını bloklayan kapı yok artık. Kurallar `pp` ile okunuyor, zorlanmıyor.
+

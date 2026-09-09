@@ -302,46 +302,6 @@ function testWiring() {
   ok('no description still sells a contract gate', ![pkg.description, plug.description, market.plugins[0].description, market.description].some((d) => /contract|relay/i.test(d)), plug.description);
 }
 
-function testPrefs(root) {
-  const PREFS = path.join(CORE, 'hooks', 'prefs.js');
-  const cfg = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-cfg-'));
-  const call = (payload, env) =>
-    run(process.execPath, [PREFS], {
-      cwd: root,
-      input: JSON.stringify(payload),
-      env: { ...process.env, CLAUDE_CONFIG_DIR: cfg, CLAUDE_CODE_SESSION_ID: 'prefs-test', ...env },
-    });
-
-  const readme = { tool_name: 'Write', tool_input: { file_path: path.join(root, 'README.md'), content: '# x\n' } };
-  ok('with no prefs file the hook does nothing', call(readme).status === 0);
-
-  fs.mkdirSync(path.join(cfg, 'teknesyum'), { recursive: true });
-  fs.writeFileSync(
-    path.join(cfg, 'teknesyum', 'prefs.json'),
-    JSON.stringify({ rules: [{ match: '^README\\.md$', doc: 'prefs/readme.md', require: ['SIGNATURE-MARK'], ask: { when: 'docs/diagram.md', line: 'DIAGRAM-QUESTION' } }] })
-  );
-
-  const blocked = call(readme);
-  ok('a README missing a convention is blocked', blocked.status === 2 && /SIGNATURE-MARK/.test(blocked.stderr), blocked.stderr);
-  ok('the block names the file to read', /readme[.]md/.test(blocked.stderr), blocked.stderr);
-  ok('the block asks the recorded question', /DIAGRAM-QUESTION/.test(blocked.stderr), blocked.stderr);
-
-  const askOnly = call({ tool_name: 'Write', tool_input: { file_path: path.join(root, 'README.md'), content: 'SIGNATURE-MARK' } });
-  ok('the question alone still blocks', askOnly.status === 2 && /DIAGRAM-QUESTION/.test(askOnly.stderr), askOnly.stderr);
-
-  fs.mkdirSync(path.join(root, 'docs'), { recursive: true });
-  fs.writeFileSync(path.join(root, 'docs', 'diagram.md'), 'banner only');
-
-  ok(
-    'a README carrying the convention passes',
-    call({ tool_name: 'Write', tool_input: { file_path: path.join(root, 'README.md'), content: '# x\nSIGNATURE-MARK\n' } }).status === 0
-  );
-  ok('an unrelated file is untouched', call({ tool_name: 'Write', tool_input: { file_path: path.join(root, 'src', 'ok.js'), content: 'x' } }).status === 0);
-  call(readme);
-  ok('the gate stops repeating itself', call(readme).status === 0);
-  sweep(cfg);
-}
-
 function testLanguage(root) {
   const { t } = require(path.join(CORE, 'hooks', 'lib.js'));
   ok('an unknown key returns itself', t('no.such.key') === 'no.such.key');
@@ -1078,7 +1038,6 @@ function main() {
     ['handoff', testHandoff],
     ['context cue', testContextCue],
     ['wiring', testWiring],
-    ['prefs', () => testPrefs(root)],
     ['language', () => testLanguage(root)],
     ['scaffold', testScaffold],
     ['map guards', testMapGuards],

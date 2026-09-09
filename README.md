@@ -329,7 +329,7 @@ flowchart LR
   K -->|"yes"| R["Seals the work,<br/>counter reset"]
 ```
 
-The evidence gate above is one of nine hooks. Nine events, nine files, all under
+The evidence gate above is one of eight hooks. Nine events, eight files, all under
 `core/hooks/`:
 
 | Event | Hook | Says |
@@ -338,7 +338,6 @@ The evidence gate above is one of nine hooks. Nine events, nine files, all under
 | `UserPromptSubmit` | `mod.js` | library hits on `??` / `++`, private books on `pp`, agency seats on `aa`, the consult recipe on `ff`, the list of marks on `hh` — the mark is read at the start or at the end of the prompt; else nothing |
 | `PostToolUse` | `count.js` | one line at the threshold, once; else nothing |
 | `PostToolUseFailure` | `count.js` | nothing; files a failed test command |
-| `PreToolUse` | `prefs.js` | your own README conventions, when a README is written |
 | `PreToolUse` | `yasak.js` | a denied command with one line on what to do instead. Deleting inside the project is free; leaving it is not — a delete whose target resolves outside the working directory, or is the root itself, is denied, along with disk writes, history rewrites, repo and release deletion, download-and-run pipes, `chmod 777` and machine-wide kills; else nothing |
 | `PreToolUse` | `loop.js` | one line when a wait loop has no upper bound; else nothing |
 | `PreToolUse` | `scout.js` | nothing; refuses a scout or `netleştir` call that breaks its budget |

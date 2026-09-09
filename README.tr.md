@@ -322,7 +322,7 @@ flowchart LR
 ```
 
 
-Yukarıdaki kanıt kapısı dokuz kancadan biri. Dokuz olay, dokuz dosya, hepsi
+Yukarıdaki kanıt kapısı sekiz kancadan biri. Dokuz olay, sekiz dosya, hepsi
 `core/hooks/` altında:
 
 | Olay | Kanca | Söyler |
@@ -331,7 +331,6 @@ Yukarıdaki kanıt kapısı dokuz kancadan biri. Dokuz olay, dokuz dosya, hepsi
 | `UserPromptSubmit` | `mod.js` | `??` / `++`de kütüphane bulguları, `pp`de özel kitaplar, `aa`da ajans koltukları, `ff`de fable danışma yordamı, `hh`de işaretlerin listesi — işaret cümlenin başında da sonunda da okunur; yoksa hiçbir şey |
 | `PostToolUse` | `count.js` | eşikte tek satır, bir kez; yoksa hiçbir şey |
 | `PostToolUseFailure` | `count.js` | hiçbir şey; kalan test komutunu kaydeder |
-| `PreToolUse` | `prefs.js` | README yazılırken kendi README kurallarınız |
 | `PreToolUse` | `yasak.js` | tehlikeli komutu tek satır gerekçeyle reddeder. Proje içinde silmek serbest; dışına çıkmak değil — hedefi çalışma klasörünün dışına düşen ya da kökün kendisi olan silme, disk yazma, geçmiş silme, depo/sürüm silme, indir-koş boruları, `chmod 777`, makine çapında durdurma reddedilir; yoksa hiçbir şey |
 | `PreToolUse` | `loop.js` | bekleme döngüsünün üst sınırı yoksa tek satır; yoksa hiçbir şey |
 | `PreToolUse` | `scout.js` | hiçbir şey; bütçesini aşan öncül ya da `netleştir` çağrısını reddeder |
