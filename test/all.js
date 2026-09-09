@@ -701,6 +701,21 @@ function testMark() {
   }
 }
 
+function testSozluk() {
+  const mod = require(path.join(CORE, 'hooks', 'mod.js'));
+  const w = mod.words('sitemin arama motorlarında üst sıralara çıkması');
+  ok('folds the Turkish letters', w.includes('siralara') && w.includes('cikmasi'), JSON.stringify(w));
+  ok('bridges arama to search and seo', w.includes('search') && w.includes('seo'), JSON.stringify(w));
+  ok('bridges a suffixed word', w.includes('rank') || w.includes('ranking'), JSON.stringify(w));
+  const q = mod.words('güvenlik açığı');
+  ok('bridges guvenlik to security', q.includes('security'), JSON.stringify(q));
+  const plain = mod.words('redis lock');
+  ok('leaves English alone', plain.join(' ') === 'redis lock', JSON.stringify(plain));
+  const table = JSON.parse(fs.readFileSync(path.join(CORE, 'sozluk.json'), 'utf8'));
+  ok('every entry is a list of words', Object.values(table).every((v) => Array.isArray(v) && v.length && v.every((s) => typeof s === 'string' && s === s.toLowerCase())));
+  ok('no key carries a Turkish letter', Object.keys(table).every((k) => !/[çğıöşü]/.test(k)), Object.keys(table).filter((k) => /[çğıöşü]/.test(k)).join(','));
+}
+
 function testFable() {
   const mod = require(path.join(CORE, 'hooks', 'mod.js'));
   const out = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'ff redis kilidi' });
@@ -1074,6 +1089,7 @@ function main() {
     ['denylist', testYasak],
     ['prompt marks', testMark],
     ['fable mark', testFable],
+    ['turkish bridge', testSozluk],
     ['stale processes', testProcs],
     ['agency', testAgency],
     ['library', testKutuphane],

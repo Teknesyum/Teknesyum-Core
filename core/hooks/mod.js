@@ -26,18 +26,52 @@ function cmd(rest, script) {
   return 'node "' + path.join(plugin(), 'scripts', script || 'kutuphane.js') + '" ' + rest;
 }
 
+const FOLD = { ç: 'c', ğ: 'g', ı: 'i', ö: 'o', ş: 's', ü: 'u', â: 'a', î: 'i', û: 'u' };
+
+let SOZLUK = null;
+function sozluk() {
+  if (SOZLUK) return SOZLUK;
+  try { SOZLUK = JSON.parse(fs.readFileSync(path.join(plugin(), 'sozluk.json'), 'utf8')); } catch { SOZLUK = {}; }
+  return SOZLUK;
+}
+
+function fold(w) {
+  return w.toLowerCase().replace(/[çğıöşüâîû]/g, (c) => FOLD[c] || c);
+}
+
+function bridge(w) {
+  const s = sozluk();
+  if (s[w]) return s[w];
+  let best = '';
+  for (const key of Object.keys(s)) {
+    if (key.length >= 4 && w.startsWith(key) && key.length > best.length) best = key;
+  }
+  return best ? s[best] : [];
+}
+
 function words(text) {
-  return text
+  const raw = text
     .replace(/[^\p{L}\p{N}\s]/gu, ' ')
     .split(/\s+/)
     .filter((w) => w.length > 1)
-    .slice(0, MAX_WORDS);
+    .slice(0, MAX_WORDS)
+    .map(fold);
+  const out = raw.slice();
+  for (const w of raw) for (const e of bridge(w)) if (!out.includes(e)) out.push(e);
+  return out;
+}
+
+function seats(text) {
+  let rows = [];
+  try { rows = ag.find(words(text)).slice(0, MAX_SEATS); } catch {}
+  if (!rows.length) return '';
+  return '\n' + t('mod.noneSeat') + '\n' + rows.join('\n');
 }
 
 function library(text) {
   const hits = lib.catalog().books.length ? lib.find(words(text)).slice(0, MAX_HITS) : [];
   const head = t('mod.library').replace('%C', cmd('show <slug> --lean'));
-  if (!hits.length) return head + '\n' + t('mod.none');
+  if (!hits.length) return head + '\n' + t('mod.none') + seats(text);
   return head + '\n' + hits.join('\n');
 }
 

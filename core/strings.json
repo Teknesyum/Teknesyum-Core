@@ -191,6 +191,10 @@
     "en": "Nothing matches in the catalog.",
     "tr": "Katalogda uyan yok."
   },
+  "mod.noneSeat": {
+    "en": "The agency has a seat for this, though. Say so in one line and offer it before you carry on:",
+    "tr": "Ama ajansta koltuk var. Devam etmeden önce tek satır söyle ve öner:"
+  },
   "mod.notOwner": {
     "en": "No private shelf on this machine; answer normally.",
     "tr": "Bu makinede özel raf yok; normal cevap ver."
