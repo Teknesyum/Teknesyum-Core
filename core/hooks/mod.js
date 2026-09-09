@@ -4,8 +4,8 @@ const { configRoot, stateFile, t } = require('./lib.js');
 const lib = require('../scripts/kutuphane.js');
 const ag = require('../scripts/agency.js');
 
-const PREFIX = /^\s*(\?\?|\+\+|pp|aa)(?=\s|$)/i;
-const SUFFIX = /(^|\s)(\?\?|\+\+|pp|aa)\s*$/i;
+const PREFIX = /^\s*(\?\?|\+\+|pp|aa|ff)(?=\s|$)/i;
+const SUFFIX = /(^|\s)(\?\?|\+\+|pp|aa|ff)\s*$/i;
 
 function mark(prompt) {
   const head = PREFIX.exec(prompt);
@@ -41,6 +41,12 @@ function library(text) {
   return head + '\n' + hits.join('\n');
 }
 
+function fable(text) {
+  const q = text.trim();
+  const head = t('mod.fable').replace('%C', cmd('ask "<soru>" --facts <olgu dosyasi>', 'advice.js')).replace('%R', cmd('record --reply <dosya> --cost "<token, sure>"', 'advice.js'));
+  return q ? head + '\n' + t('mod.fableAsk').replace('%Q', q) : head;
+}
+
 function agency(text) {
   let rows = [];
   try { rows = ag.find(words(text)).slice(0, MAX_SEATS); } catch {}
@@ -73,7 +79,7 @@ function handle(j) {
   const m = mark(prompt);
   if (!m) return '';
   const { rest, key } = m;
-  const text = key === 'pp' ? privateShelf() : key === 'aa' ? agency(rest) : library(rest);
+  const text = key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : library(rest);
   return JSON.stringify({ hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: text } });
 }
 

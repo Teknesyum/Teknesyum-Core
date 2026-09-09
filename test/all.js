@@ -655,14 +655,28 @@ function testMark() {
   at('++ redis kilidi', '++', 'redis kilidi');
   at('pp', 'pp', '');
   at('aa guvenlik', 'aa', 'guvenlik');
+  at('ff redis kilidi', 'ff', 'redis kilidi');
+  at('redis kilidini yaz ff', 'ff', 'redis kilidini yaz');
   at('redis kilidi ??', '??', 'redis kilidi');
   at('bunu yaz ++', '++', 'bunu yaz');
   at('ozel raftan bak pp', 'pp', 'ozel raftan bak');
   at('guvenlik icin rollere bak aa', 'aa', 'guvenlik icin rollere bak');
   at('  ??  ', '??', '');
-  for (const quiet of ['const x = a ?? b', 'a ?? b sonra devam', 'i++ dedim ve devam', 'npm test', '', 'appa bak', 'ppt dosyasi']) {
+  for (const quiet of ['const x = a ?? b', 'a ?? b sonra devam', 'i++ dedim ve devam', 'npm test', '', 'appa bak', 'ppt dosyasi', 'off dedim', 'ff.js dosyasi']) {
     ok('leaves alone ' + JSON.stringify(quiet), mark(quiet) === null, JSON.stringify(mark(quiet)));
   }
+}
+
+function testFable() {
+  const mod = require(path.join(CORE, 'hooks', 'mod.js'));
+  const out = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'ff redis kilidi' });
+  const ctx = JSON.parse(out).hookSpecificOutput.additionalContext;
+  ok('ff writes the consult recipe', /advice\.js/.test(ctx) && /ask/.test(ctx), ctx);
+  ok('and names the model', /fable/i.test(ctx), ctx);
+  ok('and carries the question', /redis kilidi/.test(ctx), ctx);
+  ok('and tells where the answer is filed', /record/.test(ctx), ctx);
+  const bare = JSON.parse(mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'ff' })).hookSpecificOutput.additionalContext;
+  ok('a bare ff still gives the recipe', /advice\.js/.test(bare) && !/Soru:/.test(bare), bare);
 }
 
 function testProcs() {
@@ -1008,6 +1022,7 @@ function main() {
     ['evidence gate', testDur],
     ['denylist', testYasak],
     ['prompt marks', testMark],
+    ['fable mark', testFable],
     ['stale processes', testProcs],
     ['agency', testAgency],
     ['library', testKutuphane],
