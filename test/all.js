@@ -564,6 +564,14 @@ function testDur() {
   ok('one code file among the prose closes the gate again', blocks(hook(DUR, { hook_event_name: 'Stop', session_id: 's9', cwd: notes }, cfg)));
   sweep(notes);
 
+  const sealed = fixture();
+  hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 's8', cwd: sealed }, cfg);
+  edit(sealed, cfg, 'src/four.js', 's8', 'module.exports = 5;' + String.fromCharCode(10));
+  ok('an unrun edit is blocked', blocks(hook(DUR, { hook_event_name: 'Stop', session_id: 's8', cwd: sealed }, cfg)));
+  hook(COUNT, { hook_event_name: 'PostToolUse', tool_name: 'Bash', session_id: 's8', cwd: sealed, tool_input: { command: 'git commit -m x' }, tool_response: { stdout: '1 file changed', stderr: '' } }, cfg);
+  ok('a commit seals the work and the gate lets go', hook(DUR, { hook_event_name: 'Stop', session_id: 's8', cwd: sealed }, cfg).stdout === '');
+  sweep(sealed);
+
   ok('a stop that is not a stop event is ignored', hook(DUR, { hook_event_name: 'SubagentStop', session_id: 's1', cwd: root }, cfg).stdout === '');
 
   hook(COUNT, { hook_event_name: 'PostToolUse', tool_name: 'Bash', session_id: 's1', cwd: root, tool_input: { command: 'npm test' }, tool_response: { stdout: '12 passing', stderr: '' } }, cfg);

@@ -8,6 +8,7 @@ const DIFF_MAX = 150;
 const CTX_MAX = 60;
 const RISK = /(^|\/)(migrations?\/|\.github\/|dockerfile$)|auth|secur|config|\.lock$|-lock\.json$/i;
 const TEST = /\b(npm|pnpm|yarn|bun)\s+(run\s+)?test\b|\bnpx\s+(ava|jest|mocha|vitest)\b|\bpytest\b|\bgo\s+test\b|\bcargo\s+test\b|\bdotnet\s+test\b|\bnode\s+\S*test\S*\.m?js\b/i;
+const SEAL = /\bgit\b[^\n]*\bcommit\b/;
 const EDITS = /^(Write|Edit|NotebookEdit)$/;
 const SHELLS = /^(Bash|PowerShell)$/;
 
@@ -96,6 +97,14 @@ function tree(cwd) {
 
 function onShell(j, st, failed) {
   const cmd = String((j.tool_input && j.tool_input.command) || '');
+  if (!failed && SEAL.test(cmd)) {
+    st.files = {};
+    st.tests = [];
+    st.diff = 0;
+    st.edited = 0;
+    delete st.stopTree;
+    return '';
+  }
   if (!TEST.test(cmd)) return '';
   const res = j.tool_response || {};
   const out = typeof res === 'string' ? res : String(res.stdout || '') + String(res.stderr || '');
