@@ -8,6 +8,80 @@ Counts, Shows, And Speaks Once
 
 ---
 
+## New In 0.33
+
+Six things arrived between 0.26 and 0.33. None of them costs a byte on a turn where nothing
+happens, and every one of them is covered by the test suite.
+
+### One Core, Four Hosts
+
+Core was a Claude Code plugin. It still is, and now the same hooks also run inside Cursor's
+own agent and inside Gemini CLI. `core/hooks/host.js` is a thin adapter: it turns the host's
+hook JSON into the Claude shape, calls the same counting, denylist, loop, job and handoff
+code, and turns the answer back. One repository, one version, one test suite.
+
+```mermaid
+flowchart LR
+  CC["Claude Code<br/>hooks.json"] --> H["count · mod · yasak<br/>loop · dur · handoff"]
+  CU["Cursor agent<br/>~/.cursor/hooks.json"] --> A["host.js<br/>adapter"]
+  GE["Gemini CLI<br/>~/.gemini/settings.json"] --> A
+  A --> H
+  CX["Codex CLI"] -.-> R["adapters/AGENTS.md<br/>rules only"]
+```
+
+`setup.js --host cursor` or `--host gemini` wires only its own entries, keeps everything else
+in the file, and `--remove` takes them out again. Codex CLI has no hooks on Windows yet, so it
+gets the rules as text. Gemini was run live on 0.58.0: a hard reset denied, the banner shown,
+the job gate holding the turn once ([log](docs/raporlar/gemini-canli-deneme.md)).
+
+### A Banner That Costs Nothing
+
+When a hook acts, you see one line such as `Teknesyum Core > Denylist Stopped A Command`. In
+Claude Code the hook queues it on disk and `bant.js` draws it above the reply through
+`MessageDisplay`; the stored message and the model's context never see it. In Gemini the same
+line rides `systemMessage`, which Gemini shows you and never sends the model. In Cursor it
+appears when a shell command is denied.
+
+### Every Job, This Turn
+
+A prompt with five jobs used to lose one somewhere around the fortieth tool call. Now the
+model lists them in `.claude/jobs.md` as `- [ ] job`, ticks each one `- [x]`, and may leave
+one open only with a reason: `- [ ] job — waits on your decision`.
+
+On `Stop`, `dur.js` holds the turn once if a line is open with no reason, or if the prompt
+was a list and no list was written. On the next prompt the open lines come back and the file
+moves to `trash/`. A background task notification is not a prompt and takes nothing away.
+
+### Evidence Before "Done"
+
+A session that edited code and ran nothing is held once at `Stop`: run it, show the output.
+The same tree is never asked twice, and a commit resets the count.
+
+### A Denylist With Reasons
+
+Before every shell call, destructive commands are denied with one line on what to do
+instead: a delete that leaves the working directory, disk writes, force pushes and hard
+resets, repo and release deletion, download-and-run pipes, `chmod 777`, machine-wide kills.
+Deleting inside the project stays free.
+
+### Marks At Either End
+
+`??` `++` library, `pp` private shelf, `aa` agency, `ff` fable consult, `hh` help. Each is
+read at the start or at the end of the prompt, and `hh` lists them all with an example.
+
+| Feature | Ordinary turn | When it acts | Off with |
+|---|---|---|---|
+| Banner | 0 tokens | 0 tokens, screen only | - |
+| Job gate | 0 bytes | one block at `Stop` | `jobs: false` |
+| Job hand-back | 0 bytes | the open lines, on the next prompt | `jobs: false` |
+| Evidence gate | 0 bytes | one block at `Stop` | `evidence: false` |
+| Denylist | 0 bytes | one reason per denied command | - |
+| Host adapters | 0 bytes | the same as in Claude Code | `setup.js --host <h> --remove` |
+
+The switches live in `~/.claude/teknesyum/config.json`.
+
+---
+
 ## The Scan
 
 We did not guess what belonged in here. We read the market.
@@ -103,6 +177,9 @@ the next session resumes from with one word: "continue".
 Everything Claude Code already does natively - subagents, worktrees, plan mode, hooks, the
 statusline - is left alone. Nothing is wrapped, gated or rewritten.
 
+The same hooks run in Cursor's own agent and in Gemini CLI through a thin adapter, and Codex
+CLI gets the rules as text. See [Other Hosts](#cursor-gemini-codex-and-other-hosts).
+
 ---
 
 ## What It Does
@@ -135,7 +212,7 @@ Kitap Uydu · En Çok Üçü Okunacak`, drawn as a block above the reply. The ho
 line on disk and `bant.js` draws it through `MessageDisplay`, which changes only what is
 shown: the stored message and the model's context stay untouched, so the line costs no
 tokens. Session start, marks, the threshold, the evidence gate, the denylist, a seat read and
-the later-queue each have one.
+the job list each have one.
 
 It also counts processes the session spawned through a shell that have been running for
 more than thirty minutes: `⏳ 2 processes 40 min`. The count is refreshed by a detached
@@ -210,7 +287,7 @@ flowchart TD
 | `scripts/agency.js` | A seat from [agency-agents](https://github.com/msitarzewski/agency-agents), on demand: now the `agency` shelf of the library, same commands: `find ui` picks, `show <slug> --lean` hands the role to a subagent without its personality and metrics blocks, `record` files the exchange under `docs/danisma/`. `show` leaves a seat mark that the next `Stop` prints in the chat as `Seat: <slug> read, <n> KB`; the line never enters the context. Nothing is installed as an agent, so the roster never enters the context. |
 | `scripts/manset.js` | Checks a Markdown report: every number in prose must appear in the same section's table or list. |
 | `scripts/scaffold.js` | License, signature block, language link: fixed texts the model never types. |
-| `scripts/setup.js` | Machine setup: language, chime, private repository, projects folder. |
+| `scripts/setup.js` | Machine setup: language, chime, private repository, projects folder. `--host cursor\|gemini` wires the adapter into that host, `--remove` takes it out. |
 | `scripts/doctor.js` | Seven checks: node, git, version, hooks, statusline, map, logs. |
 | `scripts/scan.js` | Seven read-only checks on the project itself: license surfaces, plan against the five-file threshold, handoff holes, documents against the version, test script, `trash/` references, map. Nothing written, no model, nothing into context; the profile only widens the document set. |
 | `scripts/scout.js` | Prior-art scout, on demand and once: `brief <topic>` writes a bounded brief under `docs/oncul/` (5 searches, 3 pages, 5 candidates, 400 words) and arms the gate; the brief goes to one subagent on sonnet; `record` files the answer, cut at 8,000 characters. The gate in `hooks/scout.js` refuses a second call on the same brief, another model, or a longer prompt. |
@@ -290,20 +367,34 @@ node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js
 Setup writes `~/.claude/teknesyum/config.json` and wires the statusline. It applies at the
 next session start.
 
-### Cursor, Codex And Other Hosts
+### Cursor, Gemini, Codex And Other Hosts
 
-Core runs wherever Claude Code runs. It does not yet run inside another vendor's own agent.
-
-| Where | What works today |
+| Where | What works |
 |---|---|
-| `claude` in Cursor's (or any editor's) terminal | Everything: hooks, banner, statusline, gates. It is plain Claude Code. |
-| Claude Code extension inside Cursor or VS Code | Plugins and hooks are shared with the CLI. The statusline is not shown there; the banner is unverified. |
-| Cursor's own agent chat | Not yet. It reads `.cursor/hooks.json` with a different schema; an adapter is on the roadmap (F2). |
-| OpenAI Codex CLI | Not yet. Its hooks are experimental and absent on Windows (v0.114). |
-| Gemini CLI | Not yet; roadmap F5. |
+| `claude` in any editor's terminal, Cursor included | Everything. It is plain Claude Code. |
+| Claude Code extension in Cursor or VS Code | Plugins and hooks are shared with the CLI; the statusline is not shown there. |
+| Cursor's own agent | Denylist, loop bound, count, job and evidence gates (one follow-up each turn), handoff. The banner shows on a denied command. Marks and the job hand-back need a context channel Cursor's prompt hook does not have. |
+| Gemini CLI | Everything but the statusline: banner through `systemMessage`, marks, denylist, gates, handoff. Run live on 0.58.0. |
+| OpenAI Codex CLI | Rules only, from [adapters/AGENTS.md](adapters/AGENTS.md); its hooks are experimental and absent on Windows (v0.114). |
 
-Install the same way as above, then open Claude Code from the editor's terminal. A
-ready-made prompt for a Cursor user's agent is in
+Cursor and Gemini need only Node.js and a copy of Core; Claude Code is not required. Wire
+from a clone, because the plugin cache path moves on every update:
+
+```bash
+git clone --depth 1 --branch v0.32.2 https://github.com/Teknesyum/Teknesyum-Core "$HOME/Teknesyum-Core"
+```
+
+```bash
+node "$HOME/Teknesyum-Core/core/scripts/setup.js" --host cursor
+```
+
+Both lines run as they are in bash and in PowerShell. Use `--host gemini` for Gemini CLI,
+and add `--remove` to take the entries out again. Restart
+the host afterwards. Then paste the block from [adapters/AGENTS.md](adapters/AGENTS.md) into
+the project's `AGENTS.md` (Cursor) or `GEMINI.md` (Gemini), so the model knows the job list
+the gate asks for; that block is the one part that costs tokens, about 150 per turn.
+
+A ready-made prompt for a Cursor user's agent is in
 [docs/kurulum/cursor-prompt.md](docs/kurulum/cursor-prompt.md) (Turkish).
 
 ---
@@ -321,6 +412,8 @@ the ~200 tokens per turn in the table above.
 - When done, run it and show the output.
 - Small job: none of the above.
 ```
+
+The longer form, with the job list and the handoff, is in [adapters/AGENTS.md](adapters/AGENTS.md).
 
 ---
 
@@ -352,7 +445,7 @@ flowchart LR
   K -->|"yes"| R["Seals the work,<br/>counter reset"]
 ```
 
-The evidence gate above is one of eight hooks. Nine events, eight files, all under
+The evidence gate above is one of nine hooks. Nine events, nine files, all under
 `core/hooks/`:
 
 | Event | Hook | Says |
@@ -371,6 +464,10 @@ The evidence gate above is one of eight hooks. Nine events, eight files, all und
 | `MessageDisplay` | `bant.js` | nothing; draws the queued `Teknesyum Core > …` lines on screen only |
 
 Only `count.js` and `mod.js` can write into the context, and the test suite checks that they are the only ones. Measured: an ordinary turn 0 bytes, `??` about 1.7 KB, `pp` about 3.7 KB, `aa` under 1 KB.
+
+A tenth file, `host.js`, is not wired into Claude Code at all. Cursor and Gemini call it as
+`host.js <host> <event>`; it relays what `count.js` and `mod.js` say and nothing else, and the
+suite checks that too.
 
 A turn, end to end:
 
@@ -399,7 +496,10 @@ sequenceDiagram
 ```
 .claude/
   handoff.md           where the work stands, machine-written, two lines yours
+  jobs.md              the turn's job list, back on the next prompt, then trash/
   map.md               import graph
+adapters/
+  AGENTS.md            the rules as text, for Codex, Cursor and Gemini
 docs/
   plan.md              the plan the hook asks for, when it asks
   netlestirme/         ?? questions and their answers
@@ -427,6 +527,11 @@ reason on its own, and stays quiet when a plan is on disk. The handoff is genera
 git, keeps what the model wrote, and is announced on the next start but not after a
 compaction. Alongside those: the statusline in both languages, the personal-convention gate,
 the scaffold, the map, the chime, doctor, and the bench's own cost and run helpers.
+
+The gates are driven the same way: the denylist and the loop bound, the evidence gate, the
+job gate and its hand-back. The host adapters get their own suite, Cursor and Gemini events
+in and host answers out, and the setup wiring is checked to be idempotent and to leave
+foreign hooks alone.
 
 ---
 

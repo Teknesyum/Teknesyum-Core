@@ -72,12 +72,12 @@ Kaynak: `docs/kutuphane/piyasa-2026-09-08.md` Öncelik bölümü. Ölçü: önce
 
 ## F. Akraba hostlar: tek çekirdek + adaptör (danışma 029, sıra benim: K3'ten hemen sonra)
 
-Tek depo, tek sürüm. Claude banner'ı ve MessageDisplay yolu değişmez. Adaptör `agent_message`
-yazmaz; 0 token kuralı Cursor'da da korunur.
+Tek depo, tek sürüm. Claude banner'ı ve MessageDisplay yolu değişmez. Adaptör `agent_message`'a
+yalnız yasak gerekçesini yazar (Claude'da da modele giden aynı satır); 0 token kuralı korunur.
 
-- [ ] F1 `core/hooks/host.js`: gelen JSON'u Claude şemasına çevir; `lib.js` `sessionId()`/`configRoot()` dalı. Ölçü: 392 test yeşil, kanca süresi aynı.
-- [ ] F2 `adapters/cursor/hooks.json`: yalnız `yasak` + `count` + `loop`. Ölçü: Cursor'da `rm -rf` reddedilir, `user_message` görünür.
-- [ ] F3 Cursor `stop`: kuyruktaki banner'ı `user_message` ile boşalt, `dur.js` blok dener, yoksa uyarı modu.
-- [ ] F4 `setup.js --host cursor` kurulum yolu, README ×2.
-- [ ] F5 Gemini CLI, aynı üçlü.
-- [ ] Codex — hooks Windows'ta yok (v0.114); gelene kadar yalnız `AGENTS.md` şablonu.
+- [x] F1 `core/hooks/host.js`: Cursor/Gemini JSON'u Claude şemasına, cevap geri. 422 test yeşil.
+- [x] F2 Cursor kablolaması `setup.js` `HOSTS.cursor` içinde (ayrı şablon dosyası yok): yasak, loop, count, dur, handoff, mod.expect.
+- [x] F3 Cursor `stop`: `dur.decide` → `followup_message`, `loop_limit: 1`; banner yalnız reddedilen kabukta `user_message`. Canlı deneme Serkan'da (Cursor bu makinede yok).
+- [x] F4 `setup.js --host cursor|gemini [--remove]`, README ×2.
+- [x] F5 Gemini CLI: banner `systemMessage`, yasak `decision:deny`, iş kapısı `AfterAgent`. Canlı: `docs/raporlar/gemini-canli-deneme.md`.
+- [x] Codex — hooks Windows'ta yok (v0.114); kural şablonu `adapters/AGENTS.md` (Cursor/Gemini için de).

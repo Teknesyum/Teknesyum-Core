@@ -8,6 +8,80 @@ Sayar, Gösterir, Bir Kez Konuşur
 
 ---
 
+## 0.33'te Yeni
+
+0.26 ile 0.33 arasında altı şey geldi. Hiçbir şeyin olmadığı turda hiçbiri tek bayt
+tutmuyor, her biri test takımında.
+
+### Tek Çekirdek, Dört Host
+
+Core bir Claude Code eklentisiydi. Hâlâ öyle; artık aynı kancalar Cursor'un kendi ajanında
+ve Gemini CLI içinde de koşuyor. `core/hooks/host.js` ince bir adaptör: hostun kanca
+JSON'unu Claude şemasına çevirir, aynı sayım, yasak liste, döngü, iş ve devir kodunu çağırır,
+cevabı geri çevirir. Tek depo, tek sürüm, tek test takımı.
+
+```mermaid
+flowchart LR
+  CC["Claude Code<br/>hooks.json"] --> H["count · mod · yasak<br/>loop · dur · handoff"]
+  CU["Cursor ajanı<br/>~/.cursor/hooks.json"] --> A["host.js<br/>adaptör"]
+  GE["Gemini CLI<br/>~/.gemini/settings.json"] --> A
+  A --> H
+  CX["Codex CLI"] -.-> R["adapters/AGENTS.md<br/>yalnız kural"]
+```
+
+`setup.js --host cursor` ya da `--host gemini` yalnız kendi girdilerini bağlar, dosyadaki
+başka her şeyi korur; `--remove` onları geri çıkarır. Codex CLI'nin Windows'ta henüz kancası
+yok, kuralları metin olarak alıyor. Gemini 0.58.0 üstünde canlı koşuldu: hard reset reddedildi,
+banner göründü, iş kapısı turu bir kez tuttu ([kayıt](docs/raporlar/gemini-canli-deneme.md)).
+
+### Bedava Banner
+
+Bir kanca iş yapınca tek satır görürsünüz: `Teknesyum Core > Yasak Liste Bir Komutu Durdurdu`.
+Claude Code'da kanca satırı diske kuyruğa yazar, `bant.js` onu `MessageDisplay` ile cevabın
+üstüne çizer; saklanan mesaj ve modelin bağlamı onu hiç görmez. Gemini'de aynı satır
+`systemMessage` ile gelir; Gemini onu size gösterir, modele göndermez. Cursor'da reddedilen
+kabuk komutunda görünür.
+
+### Her İş, Bu Turda
+
+Beş işli bir istem eskiden kırkıncı araç çağrısı civarında birini kaybederdi. Artık model
+işleri `.claude/jobs.md` içine `- [ ] iş` diye yazar, her birini `- [x]` diye işaretler; bir
+işi yalnız gerekçeyle açık bırakabilir: `- [ ] iş — senin kararını bekliyor`.
+
+`Stop`'ta `dur.js` gerekçesiz açık satır varsa ya da istem bir listeydi ve liste yazılmadıysa
+turu bir kez tutar. Sonraki istemde açık satırlar geri gelir, dosya `trash/`'e gider. Arka
+plan görev bildirimi istem değildir, hiçbir şey götürmez.
+
+### "Bitti"den Önce Kanıt
+
+Kod düzenleyip hiçbir şey koşmayan oturum `Stop`'ta bir kez tutulur: koş, çıktıyı göster.
+Aynı ağaç ikinci kez sorulmaz, commit sayacı sıfırlar.
+
+### Gerekçeli Yasak Liste
+
+Her kabuk çağrısından önce yıkıcı komut, yerine ne yapılacağını söyleyen tek satırla
+reddedilir: çalışma klasörünün dışına çıkan silme, disk yazma, force push ve hard reset, depo
+ve sürüm silme, indir-koş boruları, `chmod 777`, makine çapında durdurma. Proje içinde silmek
+serbest.
+
+### İki Uçta İşaret
+
+`??` `++` kütüphane, `pp` özel raf, `aa` ajans, `ff` fable danışma, `hh` yardım. Her biri
+istemin başında da sonunda da okunur; `hh` hepsini örnekle listeler.
+
+| Özellik | Sıradan tur | İş yapınca | Kapatmak |
+|---|---|---|---|
+| Banner | 0 token | 0 token, yalnız ekran | - |
+| İş kapısı | 0 bayt | `Stop`'ta bir blok | `jobs: false` |
+| İş geri verme | 0 bayt | açık satırlar, sonraki istemde | `jobs: false` |
+| Kanıt kapısı | 0 bayt | `Stop`'ta bir blok | `evidence: false` |
+| Yasak liste | 0 bayt | reddedilen komut başına bir gerekçe | - |
+| Host adaptörleri | 0 bayt | Claude Code'dakiyle aynı | `setup.js --host <h> --remove` |
+
+Anahtarlar `~/.claude/teknesyum/config.json` içinde.
+
+---
+
 ## Tarama
 
 Buraya neyin gireceğini tahmin etmedik. Piyasayı okuduk.
@@ -100,6 +174,9 @@ dolduğunda bir devir dosyası yazar; bir sonraki oturum iki kelimeyle sürer: "
 Claude Code'un native yaptığı her şey - alt ajanlar, worktree'ler, plan modu, kancalar,
 statusline - olduğu gibi bırakılır. Hiçbir şey sarılmaz, kapıya alınmaz, yeniden yazılmaz.
 
+Aynı kancalar ince bir adaptörle Cursor'un kendi ajanında ve Gemini CLI'de koşar; Codex CLI
+kuralları metin olarak alır. Bkz. [Diğer Hostlar](#cursor-gemini-codex-ve-diğer-hostlar).
+
 ---
 
 ## Ne Yapar
@@ -129,7 +206,7 @@ Bir kanca iş yapınca kullanıcı sohbette tek satır görür: `Teknesyum Core 
 Kitap Uydu · En Çok Üçü Okunacak`, cevabın üstünde blok olarak. Kanca satırı diske kuyruğa
 yazar, `bant.js` onu `MessageDisplay` ile çizer; bu olay yalnız ekranı değiştirir, saklanan
 mesaj ve modelin bağlamı aynı kalır, satır token tutmaz. Oturum açılışı, işaretler, eşik,
-kanıt kapısı, yasak liste, koltuk okuma ve sonraya bırakılanlar kuyruğu birer satır basar.
+kanıt kapısı, yasak liste, koltuk okuma ve iş listesi birer satır basar.
 
 Oturumun kabuk üzerinden başlattığı ve otuz dakikadan uzun süredir çalışan süreçleri de
 sayar: `⏳ 2 süreç 40 dk`. Sayımı ayrık bir süreç en çok dakikada bir tazeler, statusline
@@ -201,7 +278,7 @@ flowchart TD
 | `scripts/agency.js` | [agency-agents](https://github.com/msitarzewski/agency-agents) deposu artık kütüphanenin `agency` rafı, komutlar aynı: `find ui` seçer, `show <slug> --lean` rolü kişilik ve ölçüt bloklarını atarak alt ajana verir, `record` alışverişi `docs/danisma/` altına yazar. `show` bir koltuk izi bırakır, sonraki `Stop` onu sohbette `Koltuk: <slug> okundu · <n> KB` diye basar; satır bağlama girmez. Hiçbiri ajan olarak kurulmaz; liste bağlama hiç girmez. |
 | `scripts/manset.js` | Markdown raporu denetler: düzyazıdaki her sayı aynı bölümün tablosunda ya da listesinde bulunmalı. |
 | `scripts/scaffold.js` | Lisans, imza bloğu, dil linki: modelin asla yazmadığı sabit metinler. |
-| `scripts/setup.js` | Makine ayarı: dil, zil, özel depo, projeler klasörü. |
+| `scripts/setup.js` | Makine ayarı: dil, zil, özel depo, projeler klasörü. `--host cursor\|gemini` adaptörü o hosta bağlar, `--remove` çıkarır. |
 | `scripts/doctor.js` | Yedi kontrol: node, git, sürüm, kancalar, statusline, harita, günlükler. |
 | `scripts/scan.js` | Projenin kendisine yedi salt okunur kontrol: lisans yüzeyleri, beş dosya eşiğine karşı plan, devir boşlukları, sürüme karşı belgeler, test betiği, `trash/` atıfları, harita. Yazmaz, model çağırmaz, bağlama taşımaz; profil yalnız belge kümesini genişletir. |
 | `scripts/scout.js` | Öncül arama, istenince ve bir kez: `brief <konu>` `docs/oncul/` altına sınırlı bir öncül yazar (5 arama, 3 sayfa, 5 aday, 400 kelime) ve kapıyı kurar; öncül sonnet üstünde tek alt ajana gider; `record` cevabı 8.000 karakterde keserek dosyalar. `hooks/scout.js` kapısı aynı öncüle ikinci çağrıyı, başka modeli ya da uzatılmış istemi reddeder. |
@@ -281,22 +358,35 @@ node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js
 Setup `~/.claude/teknesyum/config.json` yazar ve statusline'ı bağlar. Sonraki oturum
 başında geçerli olur.
 
-### Cursor, Codex Ve Diğer Hostlar
+### Cursor, Gemini, Codex Ve Diğer Hostlar
 
-Core, Claude Code nerede çalışıyorsa orada çalışır. Başka bir üreticinin kendi ajanında henüz
-çalışmaz.
-
-| Nerede | Bugün ne çalışır |
+| Nerede | Ne çalışır |
 |---|---|
-| Cursor'un (ya da herhangi bir editörün) terminalinde `claude` | Hepsi: kancalar, banner, statusline, kapılar. Düz Claude Code. |
-| Cursor ya da VS Code içinde Claude Code eklentisi | Eklentiler ve kancalar CLI ile ortak. Statusline orada görünmez; banner doğrulanmadı. |
-| Cursor'un kendi ajan sohbeti | Henüz değil. Farklı şemalı `.cursor/hooks.json` okur; adaptör yol haritasında (F2). |
-| OpenAI Codex CLI | Henüz değil. Kancaları deneysel ve Windows'ta yok (v0.114). |
-| Gemini CLI | Henüz değil; yol haritası F5. |
+| Herhangi bir editörün terminalinde `claude`, Cursor dahil | Hepsi. Düz Claude Code. |
+| Cursor ya da VS Code içinde Claude Code eklentisi | Eklentiler ve kancalar CLI ile ortak; statusline orada görünmez. |
+| Cursor'un kendi ajanı | Yasak liste, döngü sınırı, sayım, iş ve kanıt kapıları (tur başına bir takip mesajı), devir. Banner reddedilen komutta görünür. İşaretler ve iş geri verme, Cursor'un istem kancasında olmayan bir bağlam kanalı ister. |
+| Gemini CLI | Statusline dışında hepsi: `systemMessage` ile banner, işaretler, yasak liste, kapılar, devir. 0.58.0 üstünde canlı koşuldu. |
+| OpenAI Codex CLI | Yalnız kural, [adapters/AGENTS.md](adapters/AGENTS.md)'den; kancaları deneysel ve Windows'ta yok (v0.114). |
 
-Yukarıdaki gibi kurun, sonra Claude Code'u editörün terminalinden açın. Cursor kullanıcısının
-ajanına verilecek hazır istem [docs/kurulum/cursor-prompt.md](docs/kurulum/cursor-prompt.md)
-içinde.
+Cursor ve Gemini için yalnız Node.js ve Core'un bir kopyası gerekir; Claude Code şart değil.
+Klondan bağlayın, çünkü eklenti önbelleğinin yolu her güncellemede değişir:
+
+```bash
+git clone --depth 1 --branch v0.32.2 https://github.com/Teknesyum/Teknesyum-Core "$HOME/Teknesyum-Core"
+```
+
+```bash
+node "$HOME/Teknesyum-Core/core/scripts/setup.js" --host cursor
+```
+
+İki satır da bash'te ve PowerShell'de olduğu gibi koşar. Gemini CLI için `--host gemini`,
+girdileri geri çıkarmak için `--remove` ekleyin. Sonra hostu yeniden başlatın. Ardından
+[adapters/AGENTS.md](adapters/AGENTS.md)'deki bloğu projenin `AGENTS.md` (Cursor) ya da
+`GEMINI.md` (Gemini) dosyasına yapıştırın; model kapının istediği iş listesini böyle bilir.
+Token tutan tek parça o blok, tur başına yaklaşık 150.
+
+Cursor kullanıcısının ajanına verilecek hazır istem
+[docs/kurulum/cursor-prompt.md](docs/kurulum/cursor-prompt.md) içinde.
 
 ---
 
@@ -313,6 +403,8 @@ başına ~200 token.
 - Bitince çalıştır, çıktıyı göster.
 - Küçük iş: bunların hiçbiri.
 ```
+
+İş listesi ve devirle uzun biçimi [adapters/AGENTS.md](adapters/AGENTS.md) içinde.
 
 ---
 
@@ -345,7 +437,7 @@ flowchart LR
 ```
 
 
-Yukarıdaki kanıt kapısı sekiz kancadan biri. Dokuz olay, sekiz dosya, hepsi
+Yukarıdaki kanıt kapısı dokuz kancadan biri. Dokuz olay, dokuz dosya, hepsi
 `core/hooks/` altında:
 
 | Olay | Kanca | Söyler |
@@ -364,6 +456,9 @@ Yukarıdaki kanıt kapısı sekiz kancadan biri. Dokuz olay, sekiz dosya, hepsi
 | `MessageDisplay` | `bant.js` | hiçbir şey; kuyruktaki `Teknesyum Core > …` satırlarını yalnız ekrana çizer |
 
 Bağlama yalnız `count.js` ve `mod.js` yazabilir; test takımı başkasının yazmadığını denetler. Ölçüm: sıradan tur 0 bayt, `??` ~1,7 KB, `pp` ~3,7 KB, `aa` 1 KB altı.
+
+Onuncu dosya `host.js` Claude Code'a hiç bağlanmaz. Cursor ve Gemini onu `host.js <host> <olay>`
+diye çağırır; yalnız `count.js` ve `mod.js`'in söylediğini aktarır, takım bunu da denetler.
 
 Bir tur, baştan sona:
 
@@ -392,7 +487,10 @@ sequenceDiagram
 ```
 .claude/
   handoff.md           iş nerede kaldı, makine yazar, iki satır sizin
+  jobs.md              turun iş listesi, sonraki istemde geri gelir, sonra trash/
   map.md               import grafiği
+adapters/
+  AGENTS.md            Codex, Cursor ve Gemini için metin olarak kurallar
 docs/
   plan.md              kancanın istediği plan, istediğinde
   netlestirme/         ?? soruları ve cevapları
@@ -419,6 +517,11 @@ yazar, üstünde bir kez konuşur, riskli yolu tek başına sebep sayar, diskte 
 susar. Devir git'ten üretilir, modelin yazdığını korur, sonraki başlangıçta duyurulur ama
 sıkıştırmadan sonra duyurulmaz. Yanında: iki dilde statusline, kişisel kural kapısı,
 scaffold, harita, zil, doctor ve bench'in kendi maliyet ve koşu yardımcıları.
+
+Kapılar da aynı yoldan geçer: yasak liste ve döngü sınırı, kanıt kapısı, iş kapısı ve geri
+vermesi. Host adaptörlerinin kendi takımı var: Cursor ve Gemini olayları girer, host cevabı
+çıkar; setup bağlamasının iki kez koşunca aynı kaldığı ve yabancı kancalara dokunmadığı
+denetlenir.
 
 ---
 

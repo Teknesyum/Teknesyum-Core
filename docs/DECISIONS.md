@@ -662,6 +662,26 @@ Fable's compact bridge (`SessionStart` putting open lines back into context) is 
 the standing law forbids it, and the Stop gate catches what a compact dropped. `jobs: false`
 in `config.json` turns the gate off. Ordinary turn: zero bytes.
 
+## D20 — One core, thin host adapters (2026-09-11)
+
+Cursor and Gemini CLI now have hooks of their own, with other names and other fields
+(`docs/raporlar/cursor-hooks-sema.md`, `gemini-hooks-sema.md`). Fable's verdict in
+`docs/danisma/029` was one core and a thin adapter, not a second release: `core/hooks/host.js
+<host> <event>` turns the host's JSON into the Claude shape, calls the same `count`, `mod`,
+`yasak`, `loop`, `dur` and `handoff` functions in-process, and turns the answer back.
+`setup.js --host cursor|gemini` wires it into `~/.cursor/hooks.json` or
+`~/.gemini/settings.json`, replacing only its own entries; `--remove` takes them out.
+
+Claude Code is untouched: `host.js` is not in `hooks.json`, and the banner there stays on
+`MessageDisplay`. In Gemini the banner rides `systemMessage`, which Gemini shows the user and
+never sends the model, so the zero-token rule holds; the Claude-side law against
+`systemMessage` is about Claude's chip, not this. Cursor has no user-only channel except a
+denied shell command's `user_message`, so its banner shows only there. Cursor's prompt hook
+cannot add context, so marks and the job hand-back are Claude and Gemini only; the job gate
+works in all three, Cursor's through one `followup_message` (`loop_limit: 1`). Codex gets the
+rules template in `adapters/AGENTS.md` until its hooks reach Windows. Live Gemini run:
+`docs/raporlar/gemini-canli-deneme.md`.
+
 ## prefs kancası özel rafa taşındı (2026-09-09)
 
 Yazar kuralları iki yerde duruyordu: `~/.claude/teknesyum/prefs/` (kanca uygular) ve özel

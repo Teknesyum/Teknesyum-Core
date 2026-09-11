@@ -204,6 +204,78 @@ function wireStatusline() {
   return bridge;
 }
 
+const HOSTS = {
+  cursor: {
+    file: ['.cursor', 'hooks.json'],
+    events: {
+      sessionStart: {},
+      beforeSubmitPrompt: {},
+      beforeShellExecution: {},
+      afterShellExecution: {},
+      afterFileEdit: {},
+      stop: { loop_limit: 1 },
+      sessionEnd: {},
+    },
+  },
+  gemini: {
+    file: ['.gemini', 'settings.json'],
+    events: {
+      SessionStart: null,
+      BeforeAgent: null,
+      BeforeTool: 'run_shell_command',
+      AfterTool: 'run_shell_command|write_file|replace',
+      AfterAgent: null,
+      SessionEnd: null,
+    },
+  },
+};
+
+function hostFile(p) {
+  let s = {};
+  let had = false;
+  try {
+    const raw = fs.readFileSync(p, 'utf8');
+    had = true;
+    s = JSON.parse(raw);
+    if (!s || typeof s !== 'object' || Array.isArray(s)) throw new Error('not an object');
+    fs.writeFileSync(p + '.bak', raw, 'utf8');
+  } catch (e) {
+    if (had) throw new Error('refusing to touch ' + p + ' - it is there but cannot be read as JSON (' + String((e && e.message) || e) + '). Nothing was written.');
+    s = {};
+  }
+  return s;
+}
+
+function wireHost(host, home, remove) {
+  const spec = HOSTS[host];
+  if (!spec) throw new Error('unknown host: ' + host + ' (cursor or gemini)');
+  const script = path.join(pluginDir(), 'hooks', 'host.js').replace(/\\/g, '/');
+  const mine = (c) => new RegExp('host\\.js"?\\s+' + host + '\\s').test(String(c || ''));
+  const cmd = (ev) => 'node "' + script + '" ' + host + ' ' + ev;
+  const p = path.join(home, ...spec.file);
+  const s = hostFile(p);
+  if (!s.hooks || typeof s.hooks !== 'object' || Array.isArray(s.hooks)) s.hooks = {};
+  for (const [ev, opt] of Object.entries(spec.events)) {
+    const list = Array.isArray(s.hooks[ev]) ? s.hooks[ev] : [];
+    let kept;
+    if (host === 'cursor') {
+      kept = list.filter((h) => !mine(h && h.command));
+      if (!remove) kept.push({ command: cmd(ev), type: 'command', timeout: 10, ...opt });
+    } else {
+      kept = list
+        .map((g) => (g && Array.isArray(g.hooks) ? { ...g, hooks: g.hooks.filter((h) => !mine(h && h.command)) } : g))
+        .filter((g) => !g || !Array.isArray(g.hooks) || g.hooks.length);
+      if (!remove) kept.push({ ...(opt ? { matcher: opt } : {}), hooks: [{ type: 'command', name: 'teknesyum-core', command: cmd(ev), timeout: 10000 }] });
+    }
+    if (kept.length) s.hooks[ev] = kept;
+    else delete s.hooks[ev];
+  }
+  if (host === 'cursor') s.version = 1;
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+  fs.writeFileSync(p, JSON.stringify(s, null, 2) + '\n', 'utf8');
+  return p.replace(/\\/g, '/');
+}
+
 function apply(answers) {
   const cfg = read(stateFile('config')) || {};
   for (const q of QUESTIONS) {
@@ -277,6 +349,13 @@ function interactive() {
 }
 
 function main() {
+  if (has('host')) {
+    const host = String(flag('host')).toLowerCase();
+    const p = wireHost(host, os.homedir(), has('remove'));
+    const cached = /[\\/]plugins[\\/]cache[\\/]/.test(pluginDir());
+    process.stdout.write((has('remove') ? 'Teknesyum Core hooks removed from ' : 'Teknesyum Core hooks wired into ') + p + '\n' + (has('remove') ? '' : 'Restart ' + host + ' to load them.\n') + (cached && !has('remove') ? 'This path is the plugin cache and moves when the plugin updates; run this again after an update, or wire from a clone.\n' : ''));
+    return;
+  }
   if (has('check')) {
     process.stdout.write(JSON.stringify(inspect(), null, 2) + '\n');
     return;
@@ -304,4 +383,4 @@ function main() {
 }
 
 if (require.main === module) main();
-module.exports = { inspect, apply, QUESTIONS, wireProjectScope, suggestScope, unsafeScope, repoRoot };
+module.exports = { inspect, apply, wireHost, HOSTS, QUESTIONS, wireProjectScope, suggestScope, unsafeScope, repoRoot };

@@ -180,6 +180,7 @@ function expect(session, prompt) {
 function handle(j) {
   if (j.hook_event_name !== 'UserPromptSubmit') return '';
   const prompt = String(j.prompt || '');
+  if (EVENT.test(prompt)) return '';
   shown = [];
   const pre = later(j.cwd || process.cwd());
   expect(j.session_id, mark(prompt) ? mark(prompt).rest : prompt);
@@ -208,4 +209,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { handle, words, mark, later, open, items, JOBS, PREFIX, SUFFIX, configRoot };
+module.exports = { handle, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };

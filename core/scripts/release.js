@@ -95,7 +95,7 @@ function stampPins(version) {
     } catch {
       continue;
     }
-    const out = body.replace(/(Teknesyum-Core\/)v\d+\.\d+\.\d+(\/)/g, '$1' + tag + '$2');
+    const out = body.replace(/(Teknesyum-Core\/)v\d+\.\d+\.\d+(\/)/g, '$1' + tag + '$2').replace(/(--branch )v\d+\.\d+\.\d+( https:\/\/github\.com\/Teknesyum\/Teknesyum-Core)/g, '$1' + tag + '$2');
     if (out !== body) {
       fs.writeFileSync(p, out, 'utf8');
       touched.push(f);

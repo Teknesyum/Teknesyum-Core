@@ -304,7 +304,8 @@ function testWiring() {
   const lib = fs.readFileSync(path.join(CORE, 'hooks', 'lib.js'), 'utf8');
   ok('lib.js no longer knows about the relay', !/relayRoot|liveDir|ensureRelay/.test(lib));
   const speakers = fs.readdirSync(path.join(CORE, 'hooks')).filter((f) => /\.js$/.test(f) && fs.readFileSync(path.join(CORE, 'hooks', f), 'utf8').includes('additionalContext'));
-  ok('only count.js and mod.js write into the context', speakers.join(',') === 'count.js,mod.js', speakers.join(','));
+  ok('only count.js and mod.js write into the context, host.js only relays them', speakers.join(',') === 'count.js,host.js,mod.js', speakers.join(','));
+  ok('host.js is never wired into Claude Code', !/host\.js/.test(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8')));
   const pkg = JSON.parse(fs.readFileSync(path.resolve(CORE, '..', 'package.json'), 'utf8'));
   const plug = JSON.parse(fs.readFileSync(path.join(CORE, '.claude-plugin', 'plugin.json'), 'utf8'));
   const market = JSON.parse(fs.readFileSync(path.resolve(CORE, '..', '.claude-plugin', 'marketplace.json'), 'utf8'));
@@ -585,8 +586,10 @@ function testNotice() {
   ok('bad input exits quietly', junk.stdout === '' && bad.status === 0 && bad.stdout === '');
   const wired = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8'));
   ok('bant.js is wired to MessageDisplay', /bant\.js/.test(JSON.stringify(wired.hooks.MessageDisplay || '')));
-  const hooks = fs.readdirSync(path.join(CORE, 'hooks')).filter((f) => f.endsWith('.js')).map((f) => fs.readFileSync(path.join(CORE, 'hooks', f), 'utf8'));
-  ok('no hook writes systemMessage', !hooks.some((s) => /systemMessage/.test(s)));
+  const hooks = fs.readdirSync(path.join(CORE, 'hooks')).filter((f) => f.endsWith('.js') && f !== 'host.js').map((f) => fs.readFileSync(path.join(CORE, 'hooks', f), 'utf8'));
+  ok('no Claude hook writes systemMessage', !hooks.some((s) => /systemMessage/.test(s)));
+  const gem = /function gemini[\s\S]*?\n}\n/.exec(fs.readFileSync(path.join(CORE, 'hooks', 'host.js'), 'utf8'))[0];
+  ok('host.js writes systemMessage only for gemini, where it never reaches the model', (fs.readFileSync(path.join(CORE, 'hooks', 'host.js'), 'utf8').match(/systemMessage/g) || []).length === (gem.match(/systemMessage/g) || []).length);
   sweep(cfg);
 }
 
@@ -757,6 +760,89 @@ function testJobs() {
     fs.writeFileSync(path.join(cfg, 'teknesyum', 'config.json'), JSON.stringify({ jobs: false }));
     fs.writeFileSync(list, '- [ ] b yap');
     ok('the gate can be switched off in one setting', stop('j3').stdout === '');
+  } finally {
+    if (env === undefined) delete process.env.CLAUDE_CONFIG_DIR; else process.env.CLAUDE_CONFIG_DIR = env;
+    sweep(cfg);
+    sweep(cwd);
+  }
+}
+
+function testHosts() {
+  const HOST = path.join(CORE, 'hooks', 'host.js');
+  const host = require(HOST);
+  const mod = require(path.join(CORE, 'hooks', 'mod.js'));
+  const setup = require(path.join(CORE, 'scripts', 'setup.js'));
+  const cwd = fixture();
+  const cfg = home();
+  const env = process.env.CLAUDE_CONFIG_DIR;
+  process.env.CLAUDE_CONFIG_DIR = cfg;
+  const list = path.join(cwd, mod.JOBS);
+  try {
+    const cur = (ev, extra) => host.run('cursor', ev, { conversation_id: 'c1', workspace_roots: [cwd], hook_event_name: ev, ...extra });
+    const deny = cur('beforeShellExecution', { command: 'rm -rf ~', cwd });
+    ok('cursor: a wipe outside the project is denied', deny && deny.permission === 'deny' && deny.agent_message, JSON.stringify(deny));
+    ok('cursor: the banner line goes to the user, not the model', deny && /^Teknesyum Core > /.test(deny.user_message) && !/Teknesyum Core/.test(deny.agent_message), JSON.stringify(deny));
+    ok('cursor: a safe command prints nothing, so cursor keeps its own approvals', cur('beforeShellExecution', { command: 'git status', cwd }) === null);
+    ok('cursor: a prompt is never held', JSON.stringify(cur('beforeSubmitPrompt', { prompt: 'a yap\nb yap\nc yap' })) === '{"continue":true}');
+    ok('cursor: a list prompt leaves the job marker', fs.existsSync(path.join(cfg, 'teknesyum', 'jobs-c1.json')));
+    const held = cur('stop', { status: 'completed', loop_count: 0 });
+    ok('cursor: a list prompt with no list written sends the agent back once', held && /jobs\.md/.test(held.followup_message), JSON.stringify(held));
+    fs.mkdirSync(path.dirname(list), { recursive: true });
+    fs.writeFileSync(list, '- [ ] b yap');
+    ok('cursor: the follow-up loop is spent after one round', cur('stop', { status: 'completed', loop_count: 1 }) === null);
+    ok('cursor: an aborted turn is never pushed on', cur('stop', { status: 'aborted', loop_count: 0 }) === null);
+    ok('cursor: an open job with no reason sends the agent back', /b yap/.test((cur('stop', { status: 'completed', loop_count: 0 }) || {}).followup_message || ''));
+    fs.unlinkSync(list);
+    fs.writeFileSync(path.join(cwd, 'src', 'ok.js'), 'module.exports = 3;\n');
+    ok('cursor: a file edit prints nothing', cur('afterFileEdit', { file_path: path.join(cwd, 'src', 'ok.js') }) === null);
+    ok('cursor: and is counted', Object.keys(stateOf(cfg, 'c1').files).includes('src/ok.js'), JSON.stringify(stateOf(cfg, 'c1').files));
+
+    const gem = (ev, extra) => host.run('gemini', ev, { session_id: 'g1', cwd, hook_event_name: ev, ...extra });
+    const open = gem('SessionStart', { source: 'startup' });
+    ok('gemini: the session start line goes out as systemMessage', open && /^Teknesyum Core > v\d/.test(open.systemMessage) && !open.decision, JSON.stringify(open));
+    const g = gem('BeforeTool', { tool_name: 'run_shell_command', tool_input: { command: 'git push --force origin main' } });
+    ok('gemini: a force push is denied with the reason for the model', g && g.decision === 'deny' && g.reason && !/Teknesyum Core/.test(g.reason), JSON.stringify(g));
+    ok('gemini: and the banner for the user', g && /^Teknesyum Core > /.test(g.systemMessage), JSON.stringify(g));
+    ok('gemini: other tools pass in silence', gem('BeforeTool', { tool_name: 'read_file', tool_input: { file_path: 'x' } }) === null);
+    gem('BeforeAgent', { prompt: 'a yap\nb yap' });
+    const stop = gem('AfterAgent', { stop_hook_active: false });
+    ok('gemini: the job gate retries the turn', stop && stop.decision === 'deny' && /jobs\.md/.test(stop.reason), JSON.stringify(stop));
+    ok('gemini: never twice in a row', !(gem('AfterAgent', { stop_hook_active: true }) || {}).decision);
+    fs.writeFileSync(list, '- [x] a yap\n- [ ] b yap');
+    const back = gem('BeforeAgent', { prompt: 'devam' });
+    ok('gemini: open jobs come back on the next prompt', back && back.hookSpecificOutput.hookEventName === 'BeforeAgent' && /b yap/.test(back.hookSpecificOutput.additionalContext), JSON.stringify(back));
+    gem('AfterTool', { tool_name: 'run_shell_command', tool_input: { command: 'npm test' }, tool_response: { llmContent: '3 passed' } });
+    ok('gemini: a test run is recorded', stateOf(cfg, 'g1').tests.some((r) => r.cmd === 'npm test' && r.ok === true), JSON.stringify(stateOf(cfg, 'g1').tests));
+
+    fs.writeFileSync(list, '- [ ] kalsın');
+    ok('a task notification does not take the job list away', mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: '<task-notification>\n- a\n- b', cwd }) === '' && fs.existsSync(list));
+
+    const r = run(process.execPath, [HOST, 'gemini', 'BeforeTool'], { cwd, input: JSON.stringify({ session_id: 'g2', cwd, tool_name: 'run_shell_command', tool_input: { command: 'rm -rf /' } }), env: { ...process.env, CLAUDE_CONFIG_DIR: cfg } });
+    ok('host.js answers on stdout from the command line', r.status === 0 && JSON.parse(r.stdout || '{}').decision === 'deny', r.stdout + r.stderr);
+    const bad = run(process.execPath, [HOST, 'cursor', 'stop'], { cwd, input: '{not json', env: { ...process.env, CLAUDE_CONFIG_DIR: cfg } });
+    ok('bad input never blocks a host', bad.status === 0 && bad.stdout === '', bad.stderr);
+
+    const hh = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-hosthome-'));
+    fs.mkdirSync(path.join(hh, '.cursor'));
+    fs.writeFileSync(path.join(hh, '.cursor', 'hooks.json'), JSON.stringify({ version: 1, hooks: { stop: [{ command: 'their.sh' }] } }));
+    setup.wireHost('cursor', hh);
+    setup.wireHost('cursor', hh);
+    const ch = JSON.parse(fs.readFileSync(path.join(hh, '.cursor', 'hooks.json'), 'utf8'));
+    ok('cursor wiring is idempotent and keeps foreign hooks', ch.hooks.stop.length === 2 && ch.hooks.stop[0].command === 'their.sh' && ch.hooks.beforeShellExecution.length === 1, JSON.stringify(ch));
+    ok('cursor stop is capped at one follow-up', ch.hooks.stop[1].loop_limit === 1 && /host\.js" cursor stop$/.test(ch.hooks.stop[1].command), JSON.stringify(ch.hooks.stop));
+    setup.wireHost('cursor', hh, true);
+    const cr = JSON.parse(fs.readFileSync(path.join(hh, '.cursor', 'hooks.json'), 'utf8'));
+    ok('cursor removal takes only ours', cr.hooks.stop.length === 1 && !cr.hooks.sessionStart, JSON.stringify(cr));
+    fs.mkdirSync(path.join(hh, '.gemini'));
+    fs.writeFileSync(path.join(hh, '.gemini', 'settings.json'), JSON.stringify({ theme: 'x', hooks: { BeforeTool: [{ matcher: 'write_file', hooks: [{ type: 'command', command: 'their.sh' }] }] } }));
+    setup.wireHost('gemini', hh);
+    setup.wireHost('gemini', hh);
+    const gs = JSON.parse(fs.readFileSync(path.join(hh, '.gemini', 'settings.json'), 'utf8'));
+    ok('gemini wiring is idempotent and keeps settings and foreign hooks', gs.theme === 'x' && gs.hooks.BeforeTool.length === 2 && gs.hooks.BeforeTool[1].matcher === 'run_shell_command' && gs.hooks.AfterAgent.length === 1, JSON.stringify(gs));
+    setup.wireHost('gemini', hh, true);
+    const gr = JSON.parse(fs.readFileSync(path.join(hh, '.gemini', 'settings.json'), 'utf8'));
+    ok('gemini removal takes only ours', gr.hooks.BeforeTool.length === 1 && !gr.hooks.AfterAgent, JSON.stringify(gr));
+    sweep(hh);
   } finally {
     if (env === undefined) delete process.env.CLAUDE_CONFIG_DIR; else process.env.CLAUDE_CONFIG_DIR = env;
     sweep(cfg);
@@ -1143,6 +1229,7 @@ function main() {
     ['fable mark', testFable],
     ['turkish bridge', testSozluk],
     ['job list', testJobs],
+    ['host adapters', testHosts],
     ['stale processes', testProcs],
     ['agency', testAgency],
     ['library', testKutuphane],
