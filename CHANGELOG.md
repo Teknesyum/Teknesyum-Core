@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.32.0
+
+- The later queue becomes the job list: .claude/sonra.md is now .claude/jobs.md (- [ ] job, - [x] job, - [ ] job — reason). dur.js holds the Stop once for an open job with no reason, or for a list-shaped prompt with no list; it shares one block with the evidence gate. Off with jobs: false.
+
 ## v0.31.0
 
 - Every job in a prompt is done in that turn; .claude/sonra.md keeps only jobs left with a reason, and the hand-back line asks for the ones whose reason has lapsed.
