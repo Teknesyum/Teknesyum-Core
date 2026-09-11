@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.31.0
+
+- Every job in a prompt is done in that turn; .claude/sonra.md keeps only jobs left with a reason, and the hand-back line asks for the ones whose reason has lapsed.
+
 ## v0.30.0
 
 - Banner lines leave systemMessage: hooks queue them on disk and bant.js draws them above the reply through MessageDisplay, display only, zero tokens (DECISIONS D17). The silent MessageDisplay probe moves to trash.
