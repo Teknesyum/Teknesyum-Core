@@ -290,6 +290,22 @@ node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js
 Setup writes `~/.claude/teknesyum/config.json` and wires the statusline. It applies at the
 next session start.
 
+### Cursor, Codex And Other Hosts
+
+Core runs wherever Claude Code runs. It does not yet run inside another vendor's own agent.
+
+| Where | What works today |
+|---|---|
+| `claude` in Cursor's (or any editor's) terminal | Everything: hooks, banner, statusline, gates. It is plain Claude Code. |
+| Claude Code extension inside Cursor or VS Code | Plugins and hooks are shared with the CLI. The statusline is not shown there; the banner is unverified. |
+| Cursor's own agent chat | Not yet. It reads `.cursor/hooks.json` with a different schema; an adapter is on the roadmap (F2). |
+| OpenAI Codex CLI | Not yet. Its hooks are experimental and absent on Windows (v0.114). |
+| Gemini CLI | Not yet; roadmap F5. |
+
+Install the same way as above, then open Claude Code from the editor's terminal. A
+ready-made prompt for a Cursor user's agent is in
+[docs/kurulum/cursor-prompt.md](docs/kurulum/cursor-prompt.md) (Turkish).
+
 ---
 
 ## The Rule For CLAUDE.md

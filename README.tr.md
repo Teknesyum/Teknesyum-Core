@@ -281,6 +281,23 @@ node ~/.claude/plugins/cache/teknesyum/teknesyum-core/*/scripts/setup.js
 Setup `~/.claude/teknesyum/config.json` yazar ve statusline'ı bağlar. Sonraki oturum
 başında geçerli olur.
 
+### Cursor, Codex Ve Diğer Hostlar
+
+Core, Claude Code nerede çalışıyorsa orada çalışır. Başka bir üreticinin kendi ajanında henüz
+çalışmaz.
+
+| Nerede | Bugün ne çalışır |
+|---|---|
+| Cursor'un (ya da herhangi bir editörün) terminalinde `claude` | Hepsi: kancalar, banner, statusline, kapılar. Düz Claude Code. |
+| Cursor ya da VS Code içinde Claude Code eklentisi | Eklentiler ve kancalar CLI ile ortak. Statusline orada görünmez; banner doğrulanmadı. |
+| Cursor'un kendi ajan sohbeti | Henüz değil. Farklı şemalı `.cursor/hooks.json` okur; adaptör yol haritasında (F2). |
+| OpenAI Codex CLI | Henüz değil. Kancaları deneysel ve Windows'ta yok (v0.114). |
+| Gemini CLI | Henüz değil; yol haritası F5. |
+
+Yukarıdaki gibi kurun, sonra Claude Code'u editörün terminalinden açın. Cursor kullanıcısının
+ajanına verilecek hazır istem [docs/kurulum/cursor-prompt.md](docs/kurulum/cursor-prompt.md)
+içinde.
+
 ---
 
 ## CLAUDE.md Kuralı

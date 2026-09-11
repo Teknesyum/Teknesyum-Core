@@ -85,7 +85,7 @@ function stampJson(file, version) {
 
 function stampPins(version) {
   const tag = 'v' + version;
-  const files = ['README.md', 'README.tr.md', 'install.ps1', 'install.sh'];
+  const files = ['README.md', 'README.tr.md', 'install.ps1', 'install.sh', 'docs/kurulum/cursor-prompt.md'];
   const touched = [];
   for (const f of files) {
     const p = path.join(ROOT, f);
