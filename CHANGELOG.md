@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.30.0
+
+- Banner lines leave systemMessage: hooks queue them on disk and bant.js draws them above the reply through MessageDisplay, display only, zero tokens (DECISIONS D17). The silent MessageDisplay probe moves to trash.
+
 ## v0.29.0
 
 - Every hook event now shows the user one 'Teknesyum Core > ...' line through systemMessage; the model never reads it. pp no longer asks the model to echo a banner.
