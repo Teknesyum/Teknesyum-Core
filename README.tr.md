@@ -328,7 +328,7 @@ Yukarıdaki kanıt kapısı sekiz kancadan biri. Dokuz olay, sekiz dosya, hepsi
 | Olay | Kanca | Söyler |
 |---|---|---|
 | `SessionStart` | `count.js` | varsa `Devam: .claude/handoff.md`; varsa `docs/plan.md`nin ilk açık `- [ ]` adımı; yoksa hiçbir şey. Günde bir kez `kutuphane.js fetch all --stale 7`yi arka planda ayrık başlatır, hiçbir raf bir haftadan eski kalmaz; model hiçbirini görmez |
-| `UserPromptSubmit` | `mod.js` | `??` / `++`de kütüphane bulguları, `pp`de özel kitaplar, `aa`da ajans koltukları, `ff`de fable danışma yordamı, `hh`de işaretlerin listesi — işaret cümlenin başında da sonunda da okunur; yoksa hiçbir şey |
+| `UserPromptSubmit` | `mod.js` | `??` / `++`de kütüphane bulguları, `pp`de özel kitaplar, `aa`da ajans koltukları, `ff`de fable danışma yordamı, `hh`de işaretlerin listesi — işaret cümlenin başında da sonunda da okunur; boş olmayan `.claude/sonra.md` (sonraya bırakılan işler) bir kez okunur ve `trash/`'e taşınır; yoksa hiçbir şey |
 | `PostToolUse` | `count.js` | eşikte tek satır, bir kez; yoksa hiçbir şey |
 | `PostToolUseFailure` | `count.js` | hiçbir şey; kalan test komutunu kaydeder |
 | `PreToolUse` | `yasak.js` | tehlikeli komutu tek satır gerekçeyle reddeder. Proje içinde silmek serbest; dışına çıkmak değil — hedefi çalışma klasörünün dışına düşen ya da kökün kendisi olan silme, disk yazma, geçmiş silme, depo/sürüm silme, indir-koş boruları, `chmod 777`, makine çapında durdurma reddedilir; yoksa hiçbir şey |

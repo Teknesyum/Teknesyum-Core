@@ -47,7 +47,9 @@ function render(cwd, st, old) {
   const stat = git(cwd, ['diff', '--stat', 'HEAD']) || '(no diff)';
   const untracked = git(cwd, ['ls-files', '--others', '--exclude-standard']);
   const tests = (st.tests || []).map((x) => '- `' + x.cmd + '` — ' + (x.ok === true ? 'pass' : x.ok === false ? 'fail' : 'unknown') + ' ' + String(x.at).slice(0, 16) + (x.tree ? ' tree ' + x.tree : '')).join('\n') || '- none';
-  const plan = fs.existsSync(path.join(cwd, 'docs', 'plan.md')) ? 'docs/plan.md' : 'none';
+  let later = '';
+  try { later = fs.readFileSync(path.join(cwd, '.claude', 'sonra.md'), 'utf8').trim(); } catch {}
+  const plan = (fs.existsSync(path.join(cwd, 'docs', 'plan.md')) ? 'docs/plan.md' : 'none') + (later ? '\n.claude/sonra.md: ' + later.split('\n').length + ' lines waiting' : '');
   return [
     '# Handoff — ' + new Date().toISOString().slice(0, 16).replace('T', ' '),
     '',

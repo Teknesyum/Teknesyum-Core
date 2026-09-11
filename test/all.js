@@ -676,6 +676,25 @@ function testSozluk() {
   ok('no key carries a Turkish letter', Object.keys(table).every((k) => !/[çğıöşü]/.test(k)), Object.keys(table).filter((k) => /[çğıöşü]/.test(k)).join(','));
 }
 
+function testSonra() {
+  const mod = require(path.join(CORE, 'hooks', 'mod.js'));
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-sonra-'));
+  ok('no file, no bytes', mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'merhaba', cwd }) === '');
+  fs.mkdirSync(path.join(cwd, '.claude'), { recursive: true });
+  fs.writeFileSync(path.join(cwd, mod.SONRA), '   \n');
+  ok('an empty file costs nothing', mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'merhaba', cwd }) === '');
+  fs.writeFileSync(path.join(cwd, mod.SONRA), '- issue 2 şablonu\n- README');
+  const out = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'merhaba', cwd });
+  const ctx = out ? JSON.parse(out).hookSpecificOutput.additionalContext : '';
+  ok('a full file reaches the context', /issue 2 şablonu/.test(ctx) && /README/.test(ctx), ctx);
+  ok('and leaves the project', !fs.existsSync(path.join(cwd, mod.SONRA)));
+  ok('into trash, not deleted', fs.readdirSync(path.join(cwd, 'trash')).some((n) => /^sonra-.*\.md$/.test(n)));
+  ok('the next turn is free again', mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'merhaba', cwd }) === '');
+  fs.writeFileSync(path.join(cwd, mod.SONRA), '- bench');
+  const both = JSON.parse(mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'hh', cwd })).hookSpecificOutput.additionalContext;
+  ok('rides along with a mark', /bench/.test(both) && both.includes('`pp`'), both);
+}
+
 function testFable() {
   const mod = require(path.join(CORE, 'hooks', 'mod.js'));
   const out = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'ff redis kilidi' });
@@ -1049,6 +1068,7 @@ function main() {
     ['prompt marks', testMark],
     ['fable mark', testFable],
     ['turkish bridge', testSozluk],
+    ['later queue', testSonra],
     ['stale processes', testProcs],
     ['agency', testAgency],
     ['library', testKutuphane],

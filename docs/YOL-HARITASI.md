@@ -19,6 +19,16 @@ Aynı anda tek madde açık kalır.
 
 ## Açık maddeler
 
+- [ ] **Issue #1 ve #2, standart iskelet, preread/postread (2026-09-11).** Sahibin sözü: "issue 1 i
+      fable incelesin en uygun önerdiğini yapalım"; issue 2 için aynısı + VidShrink tarzı ince üst
+      çubuk, Teknesyum imzası, sponsor düğmesi, standart güncelleme paneli; yığın sorusu (Electron /
+      Avalonia / hızlı, 3 platform, animatif); bilgiler `pp` rafında. preread.md / postread.md fikri
+      fable'a. Danışma: `docs/danisma/025-*`. Fable'ın önerisi uygulanır.
+- [x] **Maliyet kuralının yanlış okunması (2026-09-11).** Uyarı turlar için değil, her turda maliyet
+      getiren özellikler için: "mantıklı ama ~%X artış, yine de ekleyelim mi". CLAUDE.md ve RULES.md
+      düzeltildi.
+- [x] **HydraFusion araştırması (2026-09-11).** Rapor `docs/raporlar/hydrafusion.md`.
+
 - [ ] **Piyasa taraması sonrası yapım sırası (2026-09-08).** 1000 depo tarandı, 963 okundu, 93 Al;
       rapor ve fiyatlı öncelik listesi `docs/kutuphane/piyasa-2026-09-08.md`. Karar bekleyen üç
       paket: K1–K5 kancalar (~550K token), B1–B7 betikler (~720K), 3. bölümdeki kitaplar (raf add,

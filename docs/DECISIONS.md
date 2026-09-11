@@ -629,3 +629,20 @@ silindi, `testPrefs` süiti kaldırıldı (369 -> 360 test). `prefs/signature.ht
 
 Bedel: README yazımını bloklayan kapı yok artık. Kurallar `pp` ile okunuyor, zorlanmıyor.
 
+
+## Sonraya bırakılanlar kuyruğu ve iskelet kararı (2026-09-11)
+
+Sahip iki dosya önerdi: `preread.md` (sonraki istemden önce okunur, sonra silinir) ve
+`postread.md` (durmadan hemen önce okunur). Fable'a danışıldı (`docs/danisma/025`).
+
+Karar: yalnız preread, adı `.claude/sonra.md`. `mod.js` boş değilse bir kez bağlama koyar,
+dosyayı `trash/sonra-<ts>.md`'ye taşır; `handoff.js` oturum önce biterse satır düşer.
+Postread yok: modelin aynı turda yazdığını okumasının bilgi değeri sıfır, Stop'ta bağlama
+yazmanın tek yolu blok ve o `dur.js` kanıt kapısıyla çakışır. Sınıf A: boşken 0 bayt.
+
+Aynı danışmada issue #1 ve #2: ilke, scan kuralları ve şablonlar Core'a değil Teknesyum-UI'ye
+gitti (`templates/kur`, `templates/ustcubuk`, `templates/durum`). Yığın: yeni web arayüzlü iş
+Tauri 2 + React, yerel ağır iş Avalonia, Electron dondurulur. Tercihler özel rafta
+(`tercihler/ui.md`, `tercihler/depo.md`), kod rafta değil — `pp` her okumada bağlama girer.
+
+Maliyet kuralı da düzeltildi: uyarı tur için değil, her turda ödenecek bir özellik için.

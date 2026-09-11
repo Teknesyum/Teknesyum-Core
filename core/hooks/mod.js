@@ -111,14 +111,34 @@ function privateShelf() {
   return head + '\n\n' + books.map((b) => '### ' + b.file + '\n' + b.text.trim()).join('\n\n');
 }
 
+const SONRA = path.join('.claude', 'sonra.md');
+
+function later(cwd) {
+  const file = path.join(cwd, SONRA);
+  let body = '';
+  try { body = fs.readFileSync(file, 'utf8').trim(); } catch { return ''; }
+  if (!body) return '';
+  try {
+    const bin = path.join(cwd, 'trash');
+    fs.mkdirSync(bin, { recursive: true });
+    fs.renameSync(file, path.join(bin, 'sonra-' + new Date().toISOString().replace(/[:.]/g, '-') + '.md'));
+  } catch {}
+  return t('mod.sonra') + '\n' + body;
+}
+
 function handle(j) {
   if (j.hook_event_name !== 'UserPromptSubmit') return '';
   const prompt = String(j.prompt || '');
+  const pre = later(j.cwd || process.cwd());
   const m = mark(prompt);
-  if (!m) return '';
-  const { rest, key } = m;
-  const text = key === 'hh' ? help() : key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : library(rest);
-  return JSON.stringify({ hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: text } });
+  let text = '';
+  if (m) {
+    const { rest, key } = m;
+    text = key === 'hh' ? help() : key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : library(rest);
+  }
+  const all = [pre, text].filter(Boolean).join('\n\n');
+  if (!all) return '';
+  return JSON.stringify({ hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: all } });
 }
 
 if (require.main === module) {
@@ -134,4 +154,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { handle, words, mark, PREFIX, SUFFIX, configRoot };
+module.exports = { handle, words, mark, later, SONRA, PREFIX, SUFFIX, configRoot };
