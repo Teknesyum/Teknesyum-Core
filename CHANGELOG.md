@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.29.0
+
+- Every hook event now shows the user one 'Teknesyum Core > ...' line through systemMessage; the model never reads it. pp no longer asks the model to echo a banner.
+
 ## v0.28.0
 
 - Work left for later: a non-empty .claude/sonra.md is handed back on the next prompt and moved to trash/; handoff notes it if the session ends first
