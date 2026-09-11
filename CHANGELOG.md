@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.32.2
+
+- The opening plan step no longer picks a done box that quotes an empty box in its text
+
 ## v0.32.1
 
 - The job counter no longer reads a background task notification as a multi-job prompt
