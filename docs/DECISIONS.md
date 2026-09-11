@@ -628,6 +628,21 @@ filled mid-message is drawn under the final flush. No hook writes `systemMessage
 test enforces it. The event was confirmed live on CC 2.1.251 desktop by the silent probe
 before the probe went to `trash/`.
 
+## D18 — Every job in a prompt is done in that turn (2026-09-11)
+
+The later queue (025) reached the handoff routine as "do one, write the rest". The model
+took it literally: of five jobs it did one, queued four, took one more and queued three, so
+the owner had to prompt again for each. That is the scope-narrowing RULES.md forbids; 025
+said "don't forget what you defer", never "do one" (`docs/netlestirme/005`,
+`docs/danisma/027`).
+
+Every job in a prompt is done in that turn, in order or in parallel subagents when
+independent and not touching the same files. `.claude/sonra.md` holds only reasoned
+exceptions (`- job — reason`): waiting on the owner, blocked outside the repo, or the
+context handoff. Size and count are not reasons; five files or more means `docs/plan.md`,
+then the build goes on. `mod.sonra` now tells the model to do whatever's reason has lapsed.
+No hook changed; the ordinary turn cost stays zero.
+
 ## prefs kancası özel rafa taşındı (2026-09-09)
 
 Yazar kuralları iki yerde duruyordu: `~/.claude/teknesyum/prefs/` (kanca uygular) ve özel

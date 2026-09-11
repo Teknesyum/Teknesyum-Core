@@ -342,7 +342,7 @@ The evidence gate above is one of eight hooks. Nine events, eight files, all und
 | Event | Hook | Says |
 |---|---|---|
 | `SessionStart` | `count.js` | `Resume: .claude/handoff.md` if one exists; the first open `- [ ]` step of `docs/plan.md` if one exists; else nothing. Once a day it also starts `kutuphane.js fetch all --stale 7` detached in the background, so no shelf is older than a week; the model sees none of it |
-| `UserPromptSubmit` | `mod.js` | library hits on `??` / `++`, private books on `pp`, agency seats on `aa`, the consult recipe on `ff`, the list of marks on `hh` — the mark is read at the start or at the end of the prompt; a non-empty `.claude/sonra.md` (work left for later) is read once and moved to `trash/`; else nothing |
+| `UserPromptSubmit` | `mod.js` | library hits on `??` / `++`, private books on `pp`, agency seats on `aa`, the consult recipe on `ff`, the list of marks on `hh` — the mark is read at the start or at the end of the prompt; a non-empty `.claude/sonra.md` (jobs left with a reason: waiting on the owner, blocked, or at the handoff) is read once and moved to `trash/`; else nothing |
 | `PostToolUse` | `count.js` | one line at the threshold, once; else nothing |
 | `PostToolUseFailure` | `count.js` | nothing; files a failed test command |
 | `PreToolUse` | `yasak.js` | a denied command with one line on what to do instead. Deleting inside the project is free; leaving it is not — a delete whose target resolves outside the working directory, or is the root itself, is denied, along with disk writes, history rewrites, repo and release deletion, download-and-run pipes, `chmod 777` and machine-wide kills; else nothing |
