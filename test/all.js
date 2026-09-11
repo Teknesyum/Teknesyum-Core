@@ -732,6 +732,7 @@ function testJobs() {
   ok('short lines are counted as jobs', mod.items('neden reddediyor\nbide cursorda kullanılır mı\nadları ingilizce olsun') === 3);
   ok('a pasted stack trace is not a list', mod.items('TypeError: x\n    at foo (a.js:1)\n    at bar (b.js:2)') === 0);
   ok('a pasted code block is not a list', mod.items('bak:\n```\nconst a = 1;\n```') === 0);
+  ok('a task notification is not a prompt', mod.items('<task-notification>\n<result>\n- a\n- b\n- c\n</result>') === 0);
 
   const cfg = home();
   const env = process.env.CLAUDE_CONFIG_DIR;

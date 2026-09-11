@@ -156,8 +156,10 @@ function later(cwd) {
 
 const LIST = /^\s*(\d+[.)]|[-*•])\s+\S/;
 const RAW = /^\s|^(at |File "|Traceback|PS |\$ |[{}<>\[\]#])|```/;
+const EVENT = /<(task-notification|system-reminder|ci-monitor-event)\b/;
 
 function items(prompt) {
+  if (EVENT.test(String(prompt || ''))) return 0;
   const lines = String(prompt || '').split(/\r?\n/).filter((l) => l.trim());
   const listed = lines.filter((l) => LIST.test(l)).length;
   if (listed >= 2) return listed;
