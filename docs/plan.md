@@ -59,7 +59,7 @@ Kaynak: `docs/kutuphane/piyasa-2026-09-08.md` Öncelik bölümü. Ölçü: önce
 - [x] Banner ölçütü ve rename kararı: `docs/banner.md` (2026-09-09). Sohbet adı rename iptal.
 - [x] Banner kanalı D15'e döner: kancalar satırı `banner-<oturum>.json` kuyruğuna yazar, `hooks/bant.js` `MessageDisplay` ilk akışında mesajın üstüne blok çizer (0 token). `systemMessage` ve modele bastırma yok (Standing law). `sonda.js` trash'e. Dosyalar: lib, mod, count, dur, yasak, loop, bant, hooks.json, strings, test, banner.md, README×2, CHANGELOG, DECISIONS, yordam (0.30.0).
 - [x] İş kapısı (danışma 028, 0.32.0): `.claude/sonra.md` → `.claude/jobs.md` (`- [ ]` / `- [x]` / `- [ ] iş — gerekçe`). `mod.js` istemde ≥2 madde görürse bağlama yazmadan durum işareti bırakır ve gelen dosyadan yalnız açıkları geri verir; `dur.js` Stop'ta gerekçesiz açık iş ya da yazılmamış liste için bir kez blok, kanıt kapısıyla tek reason. Compact köprüsü yok (Standing law), kapı onu karşılar. Dosyalar: mod, dur, handoff, strings, test, README×2, banner.md, DECISIONS, yordam, CLAUDE.md.
-- [ ] K3 Kanca hijyeni: aynı metni ikinci kez basma, bayt bütçesi testi, Windows `python3` stub, stdin boşaltma.
+- [ ] K3 Kanca hijyeni: aynı metni ikinci kez basma, bayt bütçesi testi, Windows `python3` stub, stdin boşaltma. İş kapısı: koşan arka plan ajanı geçerli gerekçe sayılsın (2026-09-11'de canlıda görüldü).
 - [ ] B1 `npm test` içinde kanca şema denetimi + kuru çalıştırıcı.
 - [ ] K4 SessionStart `startup|clear|compact` + PreCompact özet yaması.
 - [ ] B5 Kütüphane: tek katalog, kaynak SHA ile tazeleme, `last_verified`, BM25 `ara`.
@@ -69,3 +69,15 @@ Kaynak: `docs/kutuphane/piyasa-2026-09-08.md` Öncelik bölümü. Ölçü: önce
 - [ ] B6 Statusline widget'ları.
 - [ ] B2 AGENTS.md lint, B7 README ikizleri pre-commit.
 - [ ] Bench: baseline × skilled, yargıçsız A/B.
+
+## F. Akraba hostlar: tek çekirdek + adaptör (danışma 029, sıra benim: K3'ten hemen sonra)
+
+Tek depo, tek sürüm. Claude banner'ı ve MessageDisplay yolu değişmez. Adaptör `agent_message`
+yazmaz; 0 token kuralı Cursor'da da korunur.
+
+- [ ] F1 `core/hooks/host.js`: gelen JSON'u Claude şemasına çevir; `lib.js` `sessionId()`/`configRoot()` dalı. Ölçü: 392 test yeşil, kanca süresi aynı.
+- [ ] F2 `adapters/cursor/hooks.json`: yalnız `yasak` + `count` + `loop`. Ölçü: Cursor'da `rm -rf` reddedilir, `user_message` görünür.
+- [ ] F3 Cursor `stop`: kuyruktaki banner'ı `user_message` ile boşalt, `dur.js` blok dener, yoksa uyarı modu.
+- [ ] F4 `setup.js --host cursor` kurulum yolu, README ×2.
+- [ ] F5 Gemini CLI, aynı üçlü.
+- [ ] Codex — hooks Windows'ta yok (v0.114); gelene kadar yalnız `AGENTS.md` şablonu.
