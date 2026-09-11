@@ -19,7 +19,7 @@ Aynı anda tek madde açık kalır.
 
 ## Açık maddeler
 
-- [ ] **Issue #1 ve #2, standart iskelet, preread/postread (2026-09-11).** Sahibin sözü: "issue 1 i
+- [x] **Issue #1 ve #2, standart iskelet, preread/postread (2026-09-11, Core v0.28.0, UI 47508fc).** Sahibin sözü: "issue 1 i
       fable incelesin en uygun önerdiğini yapalım"; issue 2 için aynısı + VidShrink tarzı ince üst
       çubuk, Teknesyum imzası, sponsor düğmesi, standart güncelleme paneli; yığın sorusu (Electron /
       Avalonia / hızlı, 3 platform, animatif); bilgiler `pp` rafında. preread.md / postread.md fikri
