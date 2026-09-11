@@ -705,23 +705,62 @@ function testSozluk() {
   ok('no key carries a Turkish letter', Object.keys(table).every((k) => !/[çğıöşü]/.test(k)), Object.keys(table).filter((k) => /[çğıöşü]/.test(k)).join(','));
 }
 
-function testSonra() {
+function testJobs() {
   const mod = require(path.join(CORE, 'hooks', 'mod.js'));
-  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-sonra-'));
+  const DUR = path.join(CORE, 'hooks', 'dur.js');
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-jobs-'));
+  const list = path.join(cwd, mod.JOBS);
   ok('no file, no bytes', mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'merhaba', cwd }) === '');
   fs.mkdirSync(path.join(cwd, '.claude'), { recursive: true });
-  fs.writeFileSync(path.join(cwd, mod.SONRA), '   \n');
+  fs.writeFileSync(list, '   \n');
   ok('an empty file costs nothing', mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'merhaba', cwd }) === '');
-  fs.writeFileSync(path.join(cwd, mod.SONRA), '- issue 2 şablonu\n- README');
+  fs.writeFileSync(list, '- [x] README\n- [ ] issue 2 şablonu — sahip kararı\n- [X] bench');
   const out = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'merhaba', cwd });
   const ctx = out ? JSON.parse(out).hookSpecificOutput.additionalContext : '';
-  ok('a full file reaches the context', /issue 2 şablonu/.test(ctx) && /README/.test(ctx), ctx);
-  ok('and leaves the project', !fs.existsSync(path.join(cwd, mod.SONRA)));
-  ok('into trash, not deleted', fs.readdirSync(path.join(cwd, 'trash')).some((n) => /^sonra-.*\.md$/.test(n)));
+  ok('only the open jobs come back', /issue 2 şablonu/.test(ctx) && !/README|bench/.test(ctx), ctx);
+  ok('and the file leaves the project', !fs.existsSync(list));
+  ok('into trash, not deleted', fs.readdirSync(path.join(cwd, 'trash')).some((n) => /^jobs-.*\.md$/.test(n)));
   ok('the next turn is free again', mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'merhaba', cwd }) === '');
-  fs.writeFileSync(path.join(cwd, mod.SONRA), '- bench');
+  fs.writeFileSync(list, '- [x] a\n- [x] b');
+  ok('a list with every job done goes to trash in silence', mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'merhaba', cwd }) === '' && !fs.existsSync(list));
+  fs.writeFileSync(list, '- bench');
   const both = JSON.parse(mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'hh', cwd })).hookSpecificOutput.additionalContext;
-  ok('rides along with a mark', /bench/.test(both) && both.includes('`pp`'), both);
+  ok('an old plain line still counts as open and rides along with a mark', /bench/.test(both) && both.includes('`pp`'), both);
+
+  ok('one line is one job', mod.items('README düzelt ve push et') === 0);
+  ok('a numbered list is counted', mod.items('şunlar:\n1. a\n2. b\n3) c') === 3);
+  ok('short lines are counted as jobs', mod.items('neden reddediyor\nbide cursorda kullanılır mı\nadları ingilizce olsun') === 3);
+  ok('a pasted stack trace is not a list', mod.items('TypeError: x\n    at foo (a.js:1)\n    at bar (b.js:2)') === 0);
+  ok('a pasted code block is not a list', mod.items('bak:\n```\nconst a = 1;\n```') === 0);
+
+  const cfg = home();
+  const env = process.env.CLAUDE_CONFIG_DIR;
+  process.env.CLAUDE_CONFIG_DIR = cfg;
+  const stop = (sid, extra) => hook(DUR, { hook_event_name: 'Stop', session_id: sid, cwd, ...extra }, cfg);
+  const said = (r) => { try { return JSON.parse(r.stdout); } catch { return {}; } };
+  try {
+    mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'tek iş', cwd, session_id: 'j1' });
+    ok('a one-job turn is never held', stop('j1').stdout === '');
+    mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'a yap\nb yap\nc yap', cwd, session_id: 'j2' });
+    const miss = said(stop('j2'));
+    ok('a list prompt with no list written is held once', miss.decision === 'block' && /3/.test(miss.reason) && /jobs\.md/.test(miss.reason), JSON.stringify(miss));
+    ok('and the queue gets the gate line', /^Teknesyum Core > (Job Gate|İş Kapısı)/m.test(take(cfg, 'j2')));
+    ok('the second stop goes through', stop('j2').stdout === '');
+    mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'a yap\nb yap', cwd, session_id: 'j3' });
+    fs.writeFileSync(list, '- [x] a yap\n- [ ] b yap\n- [ ] c yap — sahip kararı');
+    const held = said(stop('j3'));
+    ok('an open job with no reason is held and named', held.decision === 'block' && /b yap/.test(held.reason) && !/c yap/.test(held.reason), JSON.stringify(held));
+    ok('the next stop of the same turn goes through', stop('j3', { stop_hook_active: true }).stdout === '');
+    fs.writeFileSync(list, '- [x] a yap\n- [ ] b yap — depo dışında takılı');
+    ok('every job done or reasoned lets the turn end', stop('j3').stdout === '');
+    fs.writeFileSync(path.join(cfg, 'teknesyum', 'config.json'), JSON.stringify({ jobs: false }));
+    fs.writeFileSync(list, '- [ ] b yap');
+    ok('the gate can be switched off in one setting', stop('j3').stdout === '');
+  } finally {
+    if (env === undefined) delete process.env.CLAUDE_CONFIG_DIR; else process.env.CLAUDE_CONFIG_DIR = env;
+    sweep(cfg);
+    sweep(cwd);
+  }
 }
 
 function testFable() {
@@ -1102,7 +1141,7 @@ function main() {
     ['prompt marks', testMark],
     ['fable mark', testFable],
     ['turkish bridge', testSozluk],
-    ['later queue', testSonra],
+    ['job list', testJobs],
     ['stale processes', testProcs],
     ['agency', testAgency],
     ['library', testKutuphane],

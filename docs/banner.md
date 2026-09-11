@@ -36,7 +36,8 @@ doğrulandı (2026-09-11, `index`, `final`, `delta` alanları geliyor).
 | `aa` | `Ajans · N Koltuk Uydu · Cevap docs/danisma/ Altına Yazılacak` |
 | `pp` | `Özel Raf Açıldı · N Kitap · K KB` (modelin "◆" yankısı kalktı) |
 | `ff` `hh` | `Fable Danışması · …` / `İşaret Listesi Geliyor` |
-| sonra.md | `Sonraya Bırakılan N İş Geri Geldi · Dosya trash/'e Taşındı` |
+| jobs.md (`mod.js`) | `N Açık İş Geri Geldi · Dosya trash/'te` |
+| İş kapısı (`dur.js`) | `İş Kapısı · N Açık, Gerekçesiz` / `İş Kapısı · N Madde, Liste Yok` |
 | Eşik (`count.js`) | `Eşik · N dosyaya dokunuldu · Sırada Plan Var Ya Da Atla De` |
 | Bağlam eşiği | `Bağlam %N · Devir Notu Hazırlandı` |
 | Kanıt kapısı (`dur.js`) | `Kanıt Kapısı · N Kod Dosyası Değişti, Hiçbir Şey Koşmadı · Sırada Kanıt Var` |

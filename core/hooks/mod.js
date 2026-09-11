@@ -131,21 +131,48 @@ function privateShelf() {
   return head + '\n\n' + books.map((b) => '### ' + b.file + '\n' + b.text.trim()).join('\n\n');
 }
 
-const SONRA = path.join('.claude', 'sonra.md');
+const JOBS = path.join('.claude', 'jobs.md');
+const ITEM = /^\s*[-*]\s+\S/;
+const DONE = /^\s*[-*]\s+\[[xX]\]/;
+
+function open(body) {
+  return String(body || '').split(/\r?\n/).filter((l) => ITEM.test(l) && !DONE.test(l)).map((l) => l.trim());
+}
 
 function later(cwd) {
-  const file = path.join(cwd, SONRA);
+  const file = path.join(cwd, JOBS);
   let body = '';
   try { body = fs.readFileSync(file, 'utf8').trim(); } catch { return ''; }
-  if (!body) return '';
   try {
     const bin = path.join(cwd, 'trash');
     fs.mkdirSync(bin, { recursive: true });
-    fs.renameSync(file, path.join(bin, 'sonra-' + new Date().toISOString().replace(/[:.]/g, '-') + '.md'));
+    fs.renameSync(file, path.join(bin, 'jobs-' + new Date().toISOString().replace(/[:.]/g, '-') + '.md'));
   } catch {}
-  const n = body.split(/\r?\n/).filter((l) => /^\s*[-*]\s+\S/.test(l)).length || 1;
-  shown.push(banner('banner.sonra', { '%N': n }));
-  return t('mod.sonra') + '\n' + body;
+  const left = open(body);
+  if (!left.length) return '';
+  shown.push(banner('banner.jobs', { '%N': left.length }));
+  return t('mod.jobs') + '\n' + left.join('\n');
+}
+
+const LIST = /^\s*(\d+[.)]|[-*•])\s+\S/;
+const RAW = /^\s|^(at |File "|Traceback|PS |\$ |[{}<>\[\]#])|```/;
+
+function items(prompt) {
+  const lines = String(prompt || '').split(/\r?\n/).filter((l) => l.trim());
+  const listed = lines.filter((l) => LIST.test(l)).length;
+  if (listed >= 2) return listed;
+  if (lines.length >= 2 && lines.length <= 8 && lines.every((l) => l.length <= 300 && !RAW.test(l))) return lines.length;
+  return 0;
+}
+
+function expect(session, prompt) {
+  const f = stateFile('jobs-' + String(session || 'none'));
+  const n = items(prompt);
+  try {
+    if (!n) { fs.unlinkSync(f); return; }
+    fs.mkdirSync(path.dirname(f), { recursive: true });
+    fs.writeFileSync(f, JSON.stringify({ n, at: new Date().toISOString() }));
+  } catch {}
 }
 
 function handle(j) {
@@ -153,6 +180,7 @@ function handle(j) {
   const prompt = String(j.prompt || '');
   shown = [];
   const pre = later(j.cwd || process.cwd());
+  expect(j.session_id, mark(prompt) ? mark(prompt).rest : prompt);
   const m = mark(prompt);
   let text = '';
   if (m) {
@@ -178,4 +206,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { handle, words, mark, later, SONRA, PREFIX, SUFFIX, configRoot };
+module.exports = { handle, words, mark, later, open, items, JOBS, PREFIX, SUFFIX, configRoot };

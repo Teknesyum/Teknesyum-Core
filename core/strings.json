@@ -195,9 +195,17 @@
     "en": "Mark List On The Way",
     "tr": "İşaret Listesi Geliyor"
   },
-  "banner.sonra": {
-    "en": "%N Deferred Items Came Back · The File Moved To trash/",
-    "tr": "Sonraya Bırakılan %N İş Geri Geldi · Dosya trash/'e Taşındı"
+  "banner.jobs": {
+    "en": "%N Open Jobs Back · File In trash/",
+    "tr": "%N Açık İş Geri Geldi · Dosya trash/'te"
+  },
+  "banner.jobsOpen": {
+    "en": "Job Gate · %N Open, No Reason",
+    "tr": "İş Kapısı · %N Açık, Gerekçesiz"
+  },
+  "banner.jobsMissing": {
+    "en": "Job Gate · %N Items, No List",
+    "tr": "İş Kapısı · %N Madde, Liste Yok"
   },
   "banner.plan": {
     "en": "Threshold · %W · A Plan Comes Next, Or Say Skip",
@@ -267,9 +275,9 @@
     "en": "Nothing matches in the catalog.",
     "tr": "Katalogda uyan yok."
   },
-  "mod.sonra": {
-    "en": "Left on the previous turn with a reason (the file is now in trash/). Do this turn whatever's reason no longer holds, say in one line what still waits, then take the prompt:",
-    "tr": "Önceki turdan gerekçesiyle bırakılanlar (dosya trash/'e taşındı). Gerekçesi düşmüş olanı bu turda yap, hâlâ bekleyeni tek satır söyle, sonra isteğe geç:"
+  "mod.jobs": {
+    "en": "Open jobs from last turn (file now in trash/). Do any whose reason lapsed, name the rest in a line, then the prompt:",
+    "tr": "Önceki turdan açık işler (dosya trash/'te). Gerekçesi düşeni yap, kalanı tek satır söyle, sonra isteğe geç:"
   },
   "mod.noneSeat": {
     "en": "The agency has a seat for this, though. Say so in one line and offer it before you carry on:",
@@ -298,6 +306,14 @@
   "mod.big": {
     "en": "The shelf is over %K KB, so only the list is here; read what you need with show.",
     "tr": "Raf %K KB üstünde, burada yalnız liste var; gerekeni show ile oku."
+  },
+  "dur.jobs": {
+    "en": "%N open jobs in .claude/jobs.md have no reason. Finish and tick - [x], or add \" — reason\". Asked once:",
+    "tr": ".claude/jobs.md içinde %N açık iş gerekçesiz. Bitirip - [x] yap ya da \" — gerekçe\" ekle. Bir kez soruldu:"
+  },
+  "dur.jobsMissing": {
+    "en": "The prompt had %N items, no .claude/jobs.md. List them (- [ ] job), tick the done, reason the rest.",
+    "tr": "İstemde %N madde vardı, .claude/jobs.md yok. Listele (- [ ] iş), biteni işaretle, kalana gerekçe yaz. Bir kez soruldu."
   },
   "dur.evidence": {
     "en": "You edited files and nothing ran afterwards: no test, no command output. Run what proves it and show the output, or say in one line why you cannot. Asked once; the next stop goes through.",

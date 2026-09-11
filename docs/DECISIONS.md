@@ -643,6 +643,25 @@ context handoff. Size and count are not reasons; five files or more means `docs/
 then the build goes on. `mod.sonra` now tells the model to do whatever's reason has lapsed.
 No hook changed; the ordinary turn cost stays zero.
 
+## D19 — The job list and the job gate (2026-09-11)
+
+A rule read once at session start does not keep five large jobs alive through dozens of tool
+calls; a user of another editor saw the model drop some (`docs/danisma/028`). The later queue
+becomes a checklist, in English: `.claude/sonra.md` is now `.claude/jobs.md`, one file that is
+both the turn's list and what the next prompt gets back. There never was an "önce" file; 025's
+postread was not built.
+
+`mod.js` counts the items of a prompt (two or more list lines, or two to eight short plain
+lines with no code or trace in them) and leaves a state marker; it writes no context. On
+`Stop`, `dur.js` holds the turn once if `jobs.md` has an open line with no reason, naming the
+lines, or if the marker is there and no list was written. The evidence gate shares the same
+block and reason, which removes 025's objection that two gates would fight. On the next prompt
+only the open lines come back; a list with every job done goes to `trash/` in silence.
+
+Fable's compact bridge (`SessionStart` putting open lines back into context) is not built:
+the standing law forbids it, and the Stop gate catches what a compact dropped. `jobs: false`
+in `config.json` turns the gate off. Ordinary turn: zero bytes.
+
 ## prefs kancası özel rafa taşındı (2026-09-09)
 
 Yazar kuralları iki yerde duruyordu: `~/.claude/teknesyum/prefs/` (kanca uygular) ve özel
