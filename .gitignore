@@ -20,3 +20,4 @@ bench/oturumlar/
 .claude/handoff.md
 bench/ab-kosu.err
 bench/ab-kosu.pid
+.claude/jobs.md
