@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.28.0
+
+- Work left for later: a non-empty .claude/sonra.md is handed back on the next prompt and moved to trash/; handoff notes it if the session ends first
+
 ## v0.27.0
 
 - `hh` lists every mark with a line on what it does and an example of how to type it, and says out loud that a turn with no mark writes nothing into the context.
