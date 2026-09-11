@@ -161,7 +161,7 @@ function step(cwd) {
   try { text = fs.readFileSync(path.join(cwd, 'docs', 'plan.md'), 'utf8'); } catch { return ''; }
   const boxes = text.split(/\r?\n/).filter((l) => /^\s*[-*]\s+\[[ xX]\]/.test(l));
   if (!boxes.length) return '';
-  const i = boxes.findIndex((l) => /\[ \]/.test(l));
+  const i = boxes.findIndex((l) => /^\s*[-*]\s+\[ \]/.test(l));
   if (i === -1) return '';
   const label = boxes[i].replace(/^\s*[-*]\s+\[ \]\s*/, '').replace(/\*\*/g, '').slice(0, 100);
   const fill = (s) => s.replace('%I', String(i + 1)).replace('%N', String(boxes.length)).replace('%T', label);

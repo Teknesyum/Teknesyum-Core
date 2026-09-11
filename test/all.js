@@ -990,7 +990,7 @@ function testPrivate() {
   ok('push refuses off the owner machine', /no private shelf/.test(run(process.execPath, [LIB, 'push'], { cwd: CORE, env: { ...process.env, CLAUDE_CONFIG_DIR: bare } }).stdout));
   const root = fixture();
   fs.mkdirSync(path.join(root, 'docs'), { recursive: true });
-  fs.writeFileSync(path.join(root, 'docs', 'plan.md'), '# Plan\n\n- [x] **Birinci.** hazır\n- [ ] **İkinci adım.** sıra bunda\n- [ ] Üçüncü\n');
+  fs.writeFileSync(path.join(root, 'docs', 'plan.md'), '# Plan\n\n- [x] **Birinci.** `- [ ]` biçimini anlatır\n- [ ] **İkinci adım.** sıra bunda\n- [ ] Üçüncü\n');
   const start = hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 'st', cwd: root }, cfg).stdout;
   ok('SessionStart names the first open plan step', /2\/3/.test(start) && /İkinci adım\./.test(start) && !/\*\*/.test(start), start);
   fs.writeFileSync(path.join(root, 'docs', 'plan.md'), '# Plan\n\n- [x] one\n- [x] two\n');
