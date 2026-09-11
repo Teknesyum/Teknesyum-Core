@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { read, write, stateFile, configRoot, safe, t } = require('./lib.js');
+const { read, write, stateFile, configRoot, safe, t, banner } = require('./lib.js');
 
 const FILE_MAX = 5;
 const DIFF_MAX = 150;
@@ -70,8 +70,13 @@ function reason(st) {
   return '';
 }
 
-function speak(text) {
-  return JSON.stringify({ hookSpecificOutput: { hookEventName: 'PostToolUse', additionalContext: text } });
+function speak(text, line) {
+  return JSON.stringify({ systemMessage: line, hookSpecificOutput: { hookEventName: 'PostToolUse', additionalContext: text } });
+}
+
+function version() {
+  const p = read(path.join(__dirname, '..', '.claude-plugin', 'plugin.json'));
+  return (p && p.version) || '?';
 }
 
 function onEdit(j, st) {
@@ -85,7 +90,7 @@ function onEdit(j, st) {
   const why = reason(st);
   if (!why) return '';
   st.warned.plan = true;
-  return speak(why + ' ' + t('cue.plan'));
+  return speak(why + ' ' + t('cue.plan'), banner('banner.plan', { '%W': why }));
 }
 
 function tree(cwd) {
@@ -118,16 +123,36 @@ function onContext(st) {
   if (st.warned.ctx || Number(st.ctx) < CTX_MAX) return '';
   st.warned.ctx = true;
   require('./handoff.js').generate(st.cwd, st);
-  return speak(t('cue.context').replace('%N', String(Math.round(st.ctx))));
+  const n = String(Math.round(st.ctx));
+  return speak(t('cue.context').replace('%N', n), banner('banner.context', { '%N': n }));
 }
 
 function onSeat(st) {
   const seat = read(path.join(configRoot(), 'teknesyum', 'seat.json'));
   if (!seat || !seat.at || seat.at === st.seat) return '';
   st.seat = seat.at;
+  if (seat.shown) return '';
   const kb = (Number(seat.bytes || 0) / 1024).toFixed(1);
   const names = (seat.slugs || []).map((s) => (seat.private ? s.replace(/^private\//, '') : s));
-  return JSON.stringify({ systemMessage: t(seat.private ? 'banner.private' : 'banner.seat').replace('%S', names.join(', ')).replace('%K', kb) });
+  return JSON.stringify({ systemMessage: banner(seat.private ? 'banner.private' : 'banner.seat', { '%S': names.join(', '), '%K': kb }) });
+}
+
+function opening(j, cwd) {
+  const lines = [];
+  const parts = [banner('banner.start', { '%V': version() })];
+  if (j.source !== 'compact' && fs.existsSync(path.join(cwd, '.claude', 'handoff.md'))) {
+    lines.push(t('cue.resume'));
+    parts.push(t('banner.resume'));
+  }
+  const s = step(cwd);
+  if (s) {
+    lines.push(s.text);
+    parts.push(s.line);
+  }
+  const out = {};
+  if (j.source !== 'compact') out.systemMessage = parts.join(' · ');
+  if (lines.length) out.hookSpecificOutput = { hookEventName: 'SessionStart', additionalContext: lines.join('\n') };
+  return Object.keys(out).length ? JSON.stringify(out) : '';
 }
 
 function step(cwd) {
@@ -138,7 +163,8 @@ function step(cwd) {
   const i = boxes.findIndex((l) => /\[ \]/.test(l));
   if (i === -1) return '';
   const label = boxes[i].replace(/^\s*[-*]\s+\[ \]\s*/, '').replace(/\*\*/g, '').slice(0, 100);
-  return t('cue.step').replace('%I', String(i + 1)).replace('%N', String(boxes.length)).replace('%T', label);
+  const fill = (s) => s.replace('%I', String(i + 1)).replace('%N', String(boxes.length)).replace('%T', label);
+  return { text: fill(t('cue.step')), line: fill(t('banner.step')) };
 }
 
 function handle(j) {
@@ -149,11 +175,7 @@ function handle(j) {
     if (!st || j.source === 'startup' || j.source === 'clear') write(f, fresh(j));
     const cwd = j.cwd || process.cwd();
     if (j.source !== 'compact' && !process.env.TEKNESYUM_NO_REFRESH) try { require('../scripts/kutuphane.js').refresh(cwd); } catch {}
-    const lines = [];
-    if (j.source !== 'compact' && fs.existsSync(path.join(cwd, '.claude', 'handoff.md'))) lines.push(t('cue.resume'));
-    const s = step(cwd);
-    if (s) lines.push(s);
-    return lines.length ? lines.join('\n') + '\n' : '';
+    return opening(j, cwd);
   }
   const st = read(f) || fresh(j);
   if (j.cwd) st.cwd = j.cwd;

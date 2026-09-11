@@ -140,8 +140,84 @@
     "tr": "Bağlam %%N. .claude/handoff.md içinde decisions ve next_action doldur."
   },
   "banner.seat": {
-    "en": "Seat: %S read, %K KB",
-    "tr": "Koltuk: %S okundu · %K KB"
+    "en": "Seat Read · %S · %K KB",
+    "tr": "Koltuk Okundu · %S · %K KB"
+  },
+  "banner.start": {
+    "en": "v%V Running",
+    "tr": "v%V Çalışıyor"
+  },
+  "banner.resume": {
+    "en": "Handoff Note Waiting",
+    "tr": "Devir Notu Bekliyor"
+  },
+  "banner.step": {
+    "en": "Plan %I/%N: %T",
+    "tr": "Plan %I/%N: %T"
+  },
+  "banner.library": {
+    "en": "Library Ran · %N Books Matched · Up To Three Get Read",
+    "tr": "Kütüphane Döndü · %N Kitap Uydu · En Çok Üçü Okunacak"
+  },
+  "banner.libraryNone": {
+    "en": "Library Ran · No Book Matched",
+    "tr": "Kütüphane Döndü · Uyan Kitap Yok"
+  },
+  "banner.seats": {
+    "en": "The Agency Has %N Seats For It",
+    "tr": "Ajansta %N Koltuk Var"
+  },
+  "banner.agency": {
+    "en": "Agency · %N Seats Matched · The Reply Lands In docs/danisma/",
+    "tr": "Ajans · %N Koltuk Uydu · Cevap docs/danisma/ Altına Yazılacak"
+  },
+  "banner.agencyNone": {
+    "en": "Agency · No Seat Matched · The Answer Comes Without It",
+    "tr": "Ajans · Uyan Koltuk Yok · Ajanssız Cevap Gelecek"
+  },
+  "banner.shelf": {
+    "en": "Private Shelf Open · %N Books · %K KB",
+    "tr": "Özel Raf Açıldı · %N Kitap · %K KB"
+  },
+  "banner.shelfNone": {
+    "en": "No Private Shelf On This Machine",
+    "tr": "Bu Makinede Özel Raf Yok"
+  },
+  "banner.shelfEmpty": {
+    "en": "Private Shelf Empty · The Model Asks What To Record",
+    "tr": "Özel Raf Boş · Model Ne Kaydedileceğini Soracak"
+  },
+  "banner.fable": {
+    "en": "Fable Consult · A Question File Goes Out, The Reply Gets Filed",
+    "tr": "Fable Danışması · Soru Dosyası Gidecek, Cevap Kaydedilecek"
+  },
+  "banner.help": {
+    "en": "Mark List On The Way",
+    "tr": "İşaret Listesi Geliyor"
+  },
+  "banner.sonra": {
+    "en": "%N Deferred Items Came Back · The File Moved To trash/",
+    "tr": "Sonraya Bırakılan %N İş Geri Geldi · Dosya trash/'e Taşındı"
+  },
+  "banner.plan": {
+    "en": "Threshold · %W · A Plan Comes Next, Or Say Skip",
+    "tr": "Eşik · %W · Sırada Plan Var Ya Da Atla De"
+  },
+  "banner.context": {
+    "en": "Context %N% · Handoff Note Prepared",
+    "tr": "Bağlam %%N · Devir Notu Hazırlandı"
+  },
+  "banner.evidence": {
+    "en": "Evidence Gate · %N Code Files Changed, Nothing Ran · Proof Comes Next",
+    "tr": "Kanıt Kapısı · %N Kod Dosyası Değişti, Hiçbir Şey Koşmadı · Sırada Kanıt Var"
+  },
+  "banner.deny": {
+    "en": "Denylist Stopped A Command · %R",
+    "tr": "Yasak Liste Bir Komutu Durdurdu · %R"
+  },
+  "banner.loop": {
+    "en": "Endless Wait Stopped · It Reruns With A Bound",
+    "tr": "Sınırsız Bekleme Durduruldu · Sınırla Yeniden Koşacak"
   },
   "cue.resume": {
     "en": "Resume: .claude/handoff.md",
@@ -176,8 +252,8 @@
     "tr": "%ID numaralı soru bir kez gitti. docs/netlestirme/ altındakini oku ya da yeni soru yaz."
   },
   "banner.private": {
-    "en": "Teknesyum · private shelf: %S · %K KB",
-    "tr": "Teknesyum · özel raf: %S · %K KB"
+    "en": "Private Shelf Read · %S · %K KB",
+    "tr": "Özel Raf Okundu · %S · %K KB"
   },
   "cue.step": {
     "en": "Plan step %I/%N: %T",
@@ -208,8 +284,8 @@
     "tr": "Özel raf boş: %D. Ne kaydedileceğini sor, oraya .md yaz, sonra push çalıştır."
   },
   "mod.private": {
-    "en": "Private mode. Open the reply with the line \"◆ Teknesyum · private shelf\" and close it with the books you used. The books below are the owner's identity and preferences: apply them, never ask the owner to repeat them. When a preference changes or a new one appears, edit the matching file under %D and run: %C",
-    "tr": "Özel mod. Cevabın ilk satırı \"◆ Teknesyum · özel raf\" olsun, son satırı kullandığın kitaplar. Aşağıdaki kitaplar sahibin kimliği ve tercihleri: uygula, sahibine kendini anlattırma. Bir tercih değişir ya da yenisi çıkarsa %D altındaki ilgili dosyayı düzenle ve çalıştır: %C"
+    "en": "Private mode. Close the reply with the books you used. The books below are the owner's identity and preferences: apply them, never ask the owner to repeat them. When a preference changes or a new one appears, edit the matching file under %D and run: %C",
+    "tr": "Özel mod. Cevabın son satırı kullandığın kitaplar. Aşağıdaki kitaplar sahibin kimliği ve tercihleri: uygula, sahibine kendini anlattırma. Bir tercih değişir ya da yenisi çıkarsa %D altındaki ilgili dosyayı düzenle ve çalıştır: %C"
   },
   "mod.agency": {
     "en": "Agency. The seats below match (slug, name, description). Pick one to three, read each with %C, hand the body plus the user's question to an Agent in Turkish, and write the reply under docs/danisma/ with %R. Give the path and the cost on one line. Never alter the user's sentence.",

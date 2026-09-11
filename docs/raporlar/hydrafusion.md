@@ -95,6 +95,9 @@ değil.
   başarısız olursa otomatik olarak güçlü modele geçiyor — kullanıcı hiç
   müdahale etmiyor. Core'da `ff` (fable) danışması kullanıcı/model tetikli,
   otomatik "başarısız oldum, yükseliyorum" mekanizması yok.
+  *Not (2026-09-11, sahip):* "altın inek yok". Cascade'in her tur ödenen hâli alınmaz,
+  ama yükseltme deseninin kendisi alınabilir: ajan başarısız olunca opus'a geçiş kanca ya
+  da betik ile 0 tokenle kurulabilir. Fable'a sorulacak (yol haritası).
 
 ## 6. Bizden Geride Oldukları Yerler
 

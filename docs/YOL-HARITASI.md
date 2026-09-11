@@ -11,6 +11,9 @@ Aynı anda tek madde açık kalır.
 
 - **Altın kural: maliyet.** Mümkünse 0. Sıradan bir turda hiçbir kanca modelin
   bağlamına token yazmaz. Bir özellik bunu bozuyorsa özellik değildir.
+  **Altın inek yok (2026-09-11):** ucuza yüksek kalite de aranır; kalite çok ucuza
+  alınabiliyorsa o yola gidilir. Sahibin sözü: "kaliteyi aşırı ucuza alabileceksek bu
+  yönteme başvuruyoruz projede altın inek yok".
 - **Fable karar ortağıdır**, sadece denetçi değil. Plan kurulurken —
   seçim yapılmadan önce — görüşü alınır. Önemli işte onay makamı da olabilir;
   ama birincil rolü karar ve plan.
@@ -18,6 +21,16 @@ Aynı anda tek madde açık kalır.
   dosyasına yazılır, maliyeti minimum tutulur, unutulmaz.
 
 ## Açık maddeler
+
+- [ ] **Sıfır tokenli yükseltme desenleri — fable araştırması (2026-09-11).** Sahibin sözü:
+      "misal bir sonnet ajanın başarısız olması durumunda opusa geçmesi 0 tokenle de yapılabilir
+      sanki bu tarz desenleri düşünmemiz gerekir fable a sorarak araştıracağız". Yeniden
+      başlatmadan sonra `ff` ile. HydraFusion Cascade'inin ucuz karşılığı arandığı için rapor
+      (`docs/raporlar/hydrafusion.md` §5) girdi olur.
+- [x] **Banner kullanıcıya görünmüyordu (2026-09-11, v0.29.0).** Sahibin sözü: "halen banner
+      kullanılmadığını görüyorum Teknesyum Core > Şeklindeki açıklamaları ne zaman görüceğim".
+      Neden: satırlar yalnız modele gidiyordu (`additionalContext`). Bütün kancalar artık
+      `systemMessage` ile "Teknesyum Core > …" basıyor. Ayrıntı `docs/banner.md`.
 
 - [x] **Issue #1 ve #2, standart iskelet, preread/postread (2026-09-11, Core v0.28.0, UI 47508fc).** Sahibin sözü: "issue 1 i
       fable incelesin en uygun önerdiğini yapalım"; issue 2 için aynısı + VidShrink tarzı ince üst

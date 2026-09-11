@@ -125,6 +125,11 @@ Statusline aynı durumu okur: dokunulan dosyalar eklenen ve silinen satırlarla,
 oturumun koştuğu testler ve kaçının düştüğü, bağlam yüzdesi, bekleyen devir var mı, açık
 hata günlükleri, varsa kanca hataları. Düz metin; burada renk ya da ölçü uydurulmaz.
 
+Bir kanca iş yapınca kullanıcı sohbette tek satır görür: `Teknesyum Core > Kütüphane Döndü · 3
+Kitap Uydu · En Çok Üçü Okunacak`. Satır kancanın `systemMessage` alanıyla gider; sohbet
+gösterir, model okumaz, token tutmaz. Oturum açılışı, işaretler, eşik, kanıt kapısı, yasak
+liste ve sonraya bırakılanlar kuyruğu birer satır basar.
+
 Oturumun kabuk üzerinden başlattığı ve otuz dakikadan uzun süredir çalışan süreçleri de
 sayar: `⏳ 2 süreç 40 dk`. Sayımı ayrık bir süreç en çok dakikada bir tazeler, statusline
 onu hiç beklemez; ilk takılı süreç göründüğünde zil bir kez çalar. Hiçbir şey durdurulmaz;
@@ -165,7 +170,7 @@ için sessizlik. Tek ayarla kapanır.
 bağlamına girer; model en çok üç kitabı lean okur, kaynağı tek satırda söyler ve o uzmanlıkla
 çalışır. Türkçe kelimeler İngilizce kataloğa çevrilir, eşleşme tam kelimedir. `pp` ile
 başlayan istem ise özel rafı açar: sahibin kendi kitapları, `~/.claude/teknesyum-private/private/`
-altında, bütün (8 KB tavan), cevap bandı `◆ Teknesyum · özel raf`; raf yalnız o aynanın
+altında, bütün (8 KB tavan), kullanıcıya `Teknesyum Core > Özel Raf Açıldı` satırıyla; raf yalnız o aynanın
 uzak deposu sahibinse vardır, başka makinede `pp` bunu söyler ve durur. `aa` ile başlayan istem ajansı açar: kelimeler `agency.js find`e gider, en çok üç koltuk ve bir kural
 bağlama girer; model koltuğu lean okur, soruyla birlikte Türkçe bir alt ajana verir, cevabı `docs/danisma/`
 altına kaydeder. Sıradan tur hiçbirinden bir şey almaz. `netleştir` sözcüğü ise

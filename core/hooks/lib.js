@@ -197,6 +197,14 @@ function t(key) {
   return row[lang()] || row.en || key;
 }
 
+const BANNER = 'Teknesyum Core > ';
+
+function banner(key, vars) {
+  let s = t(key);
+  for (const [k, v] of Object.entries(vars || {})) s = s.split(k).join(String(v));
+  return BANNER + s;
+}
+
 function rewire() {
   const here = path.resolve(__dirname, '..');
   const bridge = path.join(here, 'scripts', 'bridge.js').replace(/\\/g, '/');
@@ -337,6 +345,8 @@ module.exports = {
   coreRepo,
   lang,
   t,
+  banner,
+  BANNER,
   openLogs,
   openLogCount,
 };

@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { configRoot, stateFile, t } = require('./lib.js');
+const { configRoot, stateFile, t, banner } = require('./lib.js');
 const lib = require('../scripts/kutuphane.js');
 const ag = require('../scripts/agency.js');
 
@@ -61,25 +61,34 @@ function words(text) {
   return out;
 }
 
+let shown = [];
+
 function seats(text) {
   let rows = [];
   try { rows = ag.find(words(text)).slice(0, MAX_SEATS); } catch {}
   if (!rows.length) return '';
+  shown[shown.length - 1] += ' · ' + t('banner.seats').replace('%N', String(rows.length));
   return '\n' + t('mod.noneSeat') + '\n' + rows.join('\n');
 }
 
 function library(text) {
   const hits = lib.catalog().books.length ? lib.find(words(text)).slice(0, MAX_HITS) : [];
   const head = t('mod.library').replace('%C', cmd('show <slug> --lean'));
-  if (!hits.length) return head + '\n' + t('mod.none') + seats(text);
+  if (!hits.length) {
+    shown.push(banner('banner.libraryNone'));
+    return head + '\n' + t('mod.none') + seats(text);
+  }
+  shown.push(banner('banner.library', { '%N': hits.length }));
   return head + '\n' + hits.join('\n');
 }
 
 function help() {
+  shown.push(banner('banner.help'));
   return t('mod.help');
 }
 
 function fable(text) {
+  shown.push(banner('banner.fable'));
   const q = text.trim();
   const head = t('mod.fable').replace('%C', cmd('ask "<soru>" --facts <olgu dosyasi>', 'advice.js')).replace('%R', cmd('record --reply <dosya> --cost "<token, sure>"', 'advice.js'));
   return q ? head + '\n' + t('mod.fableAsk').replace('%Q', q) : head;
@@ -89,23 +98,34 @@ function agency(text) {
   let rows = [];
   try { rows = ag.find(words(text)).slice(0, MAX_SEATS); } catch {}
   const head = t('mod.agency').replace('%C', cmd('show <slug> --lean', 'agency.js')).replace('%R', cmd('record --topic T --agents a,b --ask f --reply f --cost c', 'agency.js'));
-  if (!rows.length) return head + '\n' + t('mod.agencyNone');
+  if (!rows.length) {
+    shown.push(banner('banner.agencyNone'));
+    return head + '\n' + t('mod.agencyNone');
+  }
+  shown.push(banner('banner.agency', { '%N': rows.length }));
   return head + '\n' + rows.join('\n');
 }
 
 function seat(books, bytes) {
   try {
     fs.mkdirSync(path.dirname(lib.seatFile()), { recursive: true });
-    fs.writeFileSync(lib.seatFile(), JSON.stringify({ slugs: books, bytes, at: new Date().toISOString(), private: true }));
+    fs.writeFileSync(lib.seatFile(), JSON.stringify({ slugs: books, bytes, at: new Date().toISOString(), private: true, shown: true }));
   } catch {}
 }
 
 function privateShelf() {
-  if (!lib.owner()) return t('mod.notOwner');
+  if (!lib.owner()) {
+    shown.push(banner('banner.shelfNone'));
+    return t('mod.notOwner');
+  }
   const books = lib.privateBooks();
-  if (!books.length) return t('mod.empty').replace('%D', lib.privateDir());
+  if (!books.length) {
+    shown.push(banner('banner.shelfEmpty'));
+    return t('mod.empty').replace('%D', lib.privateDir());
+  }
   const total = books.reduce((n, b) => n + b.bytes, 0);
   seat(books.map((b) => b.slug), total);
+  shown.push(banner('banner.shelf', { '%N': books.length, '%K': (total / 1024).toFixed(1) }));
   const head = t('mod.private').replace('%C', cmd('push private')).replace('%D', lib.privateDir());
   if (!books[0].text) return head + '\n' + t('mod.big').replace('%K', String(Math.round(total / 1024))) + '\n' + books.map((b) => '- ' + b.slug + ' (' + b.bytes + ' B)').join('\n');
   return head + '\n\n' + books.map((b) => '### ' + b.file + '\n' + b.text.trim()).join('\n\n');
@@ -123,12 +143,15 @@ function later(cwd) {
     fs.mkdirSync(bin, { recursive: true });
     fs.renameSync(file, path.join(bin, 'sonra-' + new Date().toISOString().replace(/[:.]/g, '-') + '.md'));
   } catch {}
+  const n = body.split(/\r?\n/).filter((l) => /^\s*[-*]\s+\S/.test(l)).length || 1;
+  shown.push(banner('banner.sonra', { '%N': n }));
   return t('mod.sonra') + '\n' + body;
 }
 
 function handle(j) {
   if (j.hook_event_name !== 'UserPromptSubmit') return '';
   const prompt = String(j.prompt || '');
+  shown = [];
   const pre = later(j.cwd || process.cwd());
   const m = mark(prompt);
   let text = '';
@@ -138,7 +161,9 @@ function handle(j) {
   }
   const all = [pre, text].filter(Boolean).join('\n\n');
   if (!all) return '';
-  return JSON.stringify({ hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: all } });
+  const out = { hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: all } };
+  if (shown.length) out.systemMessage = shown.join('\n');
+  return JSON.stringify(out);
 }
 
 if (require.main === module) {

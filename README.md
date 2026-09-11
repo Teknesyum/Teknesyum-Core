@@ -130,6 +130,11 @@ plan exists, the tests the session ran and how many failed, the context percenta
 a handoff is waiting, open bug logs, and hook errors if any. Plain text, no colours or
 measures invented here.
 
+When a hook acts, the user sees one chat line such as `Teknesyum Core > Kütüphane Döndü · 3
+Kitap Uydu · En Çok Üçü Okunacak`. It travels in the hook's `systemMessage`, which the chat
+shows and the model never reads, so the line costs no tokens. Session start, marks, the
+threshold, the evidence gate, the denylist and the later-queue each have one.
+
 It also counts processes the session spawned through a shell that have been running for
 more than thirty minutes: `⏳ 2 processes 40 min`. The count is refreshed by a detached
 process at most once a minute, so the statusline never waits on it, and the chime rings
@@ -174,7 +179,7 @@ three-line rule into that turn's context; the model reads at most three books le
 source on one line and works with that expertise. Turkish words are folded and mapped to the
 English catalog, and matches are whole words. A prompt that starts with `pp` opens the
 private shelf instead: the owner's own books under `~/.claude/teknesyum-private/private/`,
-whole (8 KB cap), with the answer banner `◆ Teknesyum · özel raf`; the shelf exists only
+whole (8 KB cap), announced to the user as `Teknesyum Core > Özel Raf Açıldı`; the shelf exists only
 when that mirror's remote is the owner's, so on any other machine `pp` says so and stops.
 A prompt that starts with `aa` opens the agency: `agency.js find` on the words, at most three seats and one rule in the context; the model reads the seat lean, hands it with the question to a subagent in Turkish and records the reply under `docs/danisma/`. An ordinary turn gets nothing from any of them. The word `netleştir` asks instead to sharpen
 the question: `advice.js ask` writes it under `docs/netlestirme/`, the gate in

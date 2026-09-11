@@ -13,15 +13,30 @@ Kullanıcının 2026-09-09'da koyduğu altı ölçü. Eklentinin bastığı her 
    döndüğünü görmek gibi: banner hem "makine çalıştı" der, hem birazdan ne olacağını
    söyler. Sonucu haber vermeyen banner yarım banner'dır.
 
-## Bugünkü banner'lar bu ölçüde nerede
+## Kanal: `systemMessage` (2026-09-11 düzeltmesi)
 
-| Nerede | 1 | 2 | 3 | 4 | 5 | 6 |
-| --- | --- | --- | --- | --- | --- | --- |
-| Eşik uyarısı (`count.js`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ ("plan yaz ya da atla de") |
-| İşaret bulguları (`mod.js`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ (komutu içinde yazar) |
-| Kanıt kapısı (`dur.js`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ ("bir kez soruldu; sonraki geçer") |
-| Denylist (`yasak.js`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ (ne yapılacağını yazar) |
-| Ajans koltuğu (Stop) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+Eski tablo her satıra ✓ vermişti ama yanlıştı: eşik, işaret, kanıt kapısı ve denylist
+satırları `additionalContext` / `reason` ile yalnız **modele** gidiyordu. Kullanıcı bunları hiç
+görmedi; ekranda "Teknesyum Core > …" yoktu. Kullanıcıya giden tek kanal kancanın
+`systemMessage` alanı. Sohbette `hook_system_message` diye görünür, modelin bağlamına girmez.
+v0.29.0'dan beri her kanca olayı, modele söylediğinin yanında kullanıcıya da tek satır basıyor.
+Her satır `lib.banner()` ile `Teknesyum Core > ` önekini alıyor.
+
+| Olay | Kullanıcının gördüğü satır |
+| --- | --- |
+| Oturum açılışı (`count.js`) | `Teknesyum Core > v0.29.0 Çalışıyor · Devir Notu Bekliyor · Plan 14/23: …` |
+| `??` `++` (`mod.js`) | `Kütüphane Döndü · N Kitap Uydu · En Çok Üçü Okunacak` |
+| `aa` | `Ajans · N Koltuk Uydu · Cevap docs/danisma/ Altına Yazılacak` |
+| `pp` | `Özel Raf Açıldı · N Kitap · K KB` (modelin "◆" yankısı kalktı) |
+| `ff` `hh` | `Fable Danışması · …` / `İşaret Listesi Geliyor` |
+| sonra.md | `Sonraya Bırakılan N İş Geri Geldi · Dosya trash/'e Taşındı` |
+| Eşik (`count.js`) | `Eşik · N dosyaya dokunuldu · Sırada Plan Var Ya Da Atla De` |
+| Bağlam eşiği | `Bağlam %N · Devir Notu Hazırlandı` |
+| Kanıt kapısı (`dur.js`) | `Kanıt Kapısı · N Kod Dosyası Değişti, Hiçbir Şey Koşmadı · Sırada Kanıt Var` |
+| Denylist / döngü | `Yasak Liste Bir Komutu Durdurdu · <neden>` / `Sınırsız Bekleme Durduruldu · …` |
+| Koltuk (Stop) | `Koltuk Okundu · slug · K KB` |
+
+Ölçü 1: sıradan tur hâlâ 0 bayt, satır yalnız olay olunca basılır ve bağlama girmez.
 
 ## Kapanan yol
 
