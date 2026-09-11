@@ -74,6 +74,13 @@ function edit(root, cfg, rel, sid, text) {
   return hook(COUNT, { hook_event_name: 'PostToolUse', tool_name: 'Edit', session_id: sid || 's1', cwd: root, tool_input: { file_path: file } }, cfg);
 }
 
+function take(cfg, sid) {
+  const f = path.join(cfg, 'teknesyum', 'banner-' + (sid || 'none') + '.json');
+  let lines = [];
+  try { lines = JSON.parse(fs.readFileSync(f, 'utf8')).lines || []; fs.unlinkSync(f); } catch {}
+  return lines.join('\n');
+}
+
 function stateOf(cfg, sid) {
   return JSON.parse(fs.readFileSync(path.join(cfg, 'teknesyum', 'state-' + (sid || 's1') + '.json'), 'utf8'));
 }
@@ -84,7 +91,7 @@ function testCountSilence() {
   const start = hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 's1', cwd: root }, cfg);
   const opened = start.stdout ? JSON.parse(start.stdout) : {};
   ok('a fresh session start writes nothing to context', !opened.hookSpecificOutput && start.status === 0, start.stdout);
-  ok('and shows the user one Teknesyum Core line with the version', /^Teknesyum Core > v\d+\.\d+\.\d+ /.test(opened.systemMessage || ''), start.stdout);
+  ok('and queues one Teknesyum Core line with the version for the display', /^Teknesyum Core > v\d+\.\d+\.\d+ /.test(take(cfg, 's1')) && !opened.systemMessage, start.stdout);
   ok('the session start leaves a state file', fs.existsSync(path.join(cfg, 'teknesyum', 'state-s1.json')));
 
   for (const rel of ['src/a.js', 'src/b.js', 'src/c.js']) {
@@ -131,7 +138,7 @@ function testCountThreshold() {
   const line = j ? j.hookSpecificOutput.additionalContext : '';
   ok('the line says how many files and asks for a plan', /5 files touched/.test(line) && /docs\/plan\.md/.test(line), line);
   ok('the line stays under 40 tokens', line.split(/\s+/).length <= 40, String(line.split(/\s+/).length));
-  ok('and the user sees the threshold', /^Teknesyum Core > Threshold · 5 files touched · /.test(j ? j.systemMessage || '' : ''), fifth.stdout);
+  ok('and the display queue gets the threshold, the model does not', /^Teknesyum Core > Threshold · 5 files touched · /m.test(take(cfg, 's1')) && !/Teknesyum Core/.test(line) && !(j && j.systemMessage), fifth.stdout);
   const sixth = edit(root, cfg, 'src/f.js', 's1', 'x\n');
   ok('the sixth file is silent again', sixth.stdout === '', sixth.stdout);
 
@@ -517,7 +524,7 @@ function testDur() {
   const first = stop();
   ok('an edit with no run is blocked, with nothing to arm', blocks(first), first.stdout);
   ok('the block says what would settle it', /kanıt|evidence|test/i.test(first.stdout), first.stdout);
-  ok('and the user sees the gate close', /^Teknesyum Core > Evidence Gate · 1 Code Files/.test(JSON.parse(first.stdout).systemMessage || ''), first.stdout);
+  ok('and the display queue gets the gate, the reason carries no banner', /^Teknesyum Core > Evidence Gate · 1 Code Files/m.test(take(cfg, 's1')) && !/Teknesyum Core|systemMessage/.test(first.stdout), first.stdout);
   ok('the second stop of the same turn goes through', stop({ stop_hook_active: true }).stdout === '');
 
   const notes = fixture();
@@ -557,20 +564,30 @@ function testDur() {
   sweep(cfg);
 }
 
-function testSonda() {
-  const SONDA = path.join(CORE, 'hooks', 'sonda.js');
-  const sonda = require(SONDA);
-  const at = sonda.file();
-  try { fs.unlinkSync(at); } catch {}
-  const r = run(process.execPath, [SONDA], { cwd: process.cwd(), input: JSON.stringify({ hook_event_name: 'MessageDisplay', turn_id: 't1', final: true }) });
-  ok('the probe prints nothing on any event', r.status === 0 && r.stdout === '', r.stdout);
-  const log = fs.readFileSync(at, 'utf8');
-  ok('the probe records the event name and its fields', /MessageDisplay/.test(log) && /turn_id/.test(log), log);
-  const junk = run(process.execPath, [SONDA], { cwd: process.cwd(), input: '{nope' });
-  ok('bad input still exits quietly', junk.status === 0 && junk.stdout === '');
+function testNotice() {
+  const NOTICE = path.join(CORE, 'hooks', 'bant.js');
+  const cfg = home();
+  const q = path.join(cfg, 'teknesyum', 'banner-n1.json');
+  const show = (j) => hook(NOTICE, { hook_event_name: 'MessageDisplay', session_id: 'n1', cwd: CORE, ...j }, cfg);
+  const drawn = (r) => { try { return JSON.parse(r.stdout).hookSpecificOutput.displayContent; } catch { return ''; } };
+  ok('an ordinary message is drawn untouched', show({ index: 0, final: true, delta: 'Hi' }).stdout === '');
+  fs.writeFileSync(q, JSON.stringify({ lines: ['Teknesyum Core > Library Ran · 3 Books Matched'] }));
+  ok('a flush in the middle leaves the queue alone', show({ index: 2, final: false, delta: 'mid' }).stdout === '' && fs.existsSync(q));
+  const top = drawn(show({ index: 0, final: false, delta: 'Hello' }));
+  ok('the first flush draws the queued line as a block above the message', top === '`Teknesyum Core > Library Ran · 3 Books Matched`\n\nHello', top);
+  ok('and the queue is spent', !fs.existsSync(q));
+  ok('the next message is drawn untouched', show({ index: 0, final: true, delta: 'Again' }).stdout === '');
+  fs.writeFileSync(q, JSON.stringify({ lines: ['Teknesyum Core > A', 'Teknesyum Core > B'] }));
+  const foot = drawn(show({ index: 4, final: true, delta: 'end  ' }));
+  ok('a line queued mid-message lands under the last flush', foot === 'end\n\n`Teknesyum Core > A`\n\n`Teknesyum Core > B`', foot);
+  const junk = hook(NOTICE, {}, cfg);
+  const bad = run(process.execPath, [NOTICE], { cwd: CORE, input: '{nope', env: { ...process.env, CLAUDE_CONFIG_DIR: cfg } });
+  ok('bad input exits quietly', junk.stdout === '' && bad.status === 0 && bad.stdout === '');
   const wired = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8'));
-  ok('the probe is wired to MessageDisplay', /sonda\.js/.test(JSON.stringify(wired.hooks.MessageDisplay || '')));
-  try { fs.unlinkSync(at); } catch {}
+  ok('bant.js is wired to MessageDisplay', /bant\.js/.test(JSON.stringify(wired.hooks.MessageDisplay || '')));
+  const hooks = fs.readdirSync(path.join(CORE, 'hooks')).filter((f) => f.endsWith('.js')).map((f) => fs.readFileSync(path.join(CORE, 'hooks', f), 'utf8'));
+  ok('no hook writes systemMessage', !hooks.some((s) => /systemMessage/.test(s)));
+  sweep(cfg);
 }
 
 function testYasak() {
@@ -624,7 +641,14 @@ function testYasak() {
   ];
   for (const cmd of passed) ok('lets through ' + cmd, yasak.forbidden(cmd, GARDEN) === null, String(yasak.forbidden(cmd, GARDEN)));
 
-  ok('a denial shows the user a Teknesyum Core line', /^Teknesyum Core > Denylist Stopped A Command · /.test((yasak.decide({ tool_name: 'Bash', cwd: GARDEN, tool_input: { command: 'rm -rf /' } }) || {}).systemMessage || ''));
+  const was = process.env.CLAUDE_CONFIG_DIR;
+  const dh = home();
+  process.env.CLAUDE_CONFIG_DIR = dh;
+  const shut = yasak.decide({ tool_name: 'Bash', session_id: 'y1', cwd: GARDEN, tool_input: { command: 'rm -rf /' } }) || {};
+  if (was === undefined) delete process.env.CLAUDE_CONFIG_DIR;
+  else process.env.CLAUDE_CONFIG_DIR = was;
+  ok('a denial queues a Teknesyum Core line for the display', /^Teknesyum Core > Denylist Stopped A Command · /.test(take(dh, 'y1')) && !/Teknesyum Core/.test(JSON.stringify(shut)), JSON.stringify(shut));
+  sweep(dh);
   ok('only Bash and PowerShell are read', yasak.decide({ tool_name: 'Write', cwd: GARDEN, tool_input: { command: 'rm -rf /' } }) === null);
   ok('an empty command is not a rule', yasak.forbidden('', GARDEN) === null && yasak.forbidden(undefined, GARDEN) === null);
 
@@ -783,8 +807,7 @@ function testAgency() {
   ok('show leaves a seat mark with the slug and the size', seat.slugs.join() === 'design-ui-designer' && seat.bytes > 20 && /^\d{4}-/.test(seat.at), JSON.stringify(seat));
   const COUNT = path.join(CORE, 'hooks', 'count.js');
   const first = hook(COUNT, { hook_event_name: 'Stop', session_id: 's9', cwd: CORE }, cfg);
-  const banner = first.stdout ? JSON.parse(first.stdout) : {};
-  ok('the next Stop prints the seat as a chat line, not into the context', /^Teknesyum Core > Seat Read · design-ui-designer · \d+\.\d KB$/.test(banner.systemMessage || '') && !first.stdout.includes('additionalContext'), first.stdout);
+  ok('the next Stop queues the seat for the display, not into the context', /^Teknesyum Core > Seat Read · design-ui-designer · \d+\.\d KB$/.test(take(cfg, 's9')) && first.stdout === '', first.stdout);
   const second = hook(COUNT, { hook_event_name: 'Stop', session_id: 's9', cwd: CORE }, cfg);
   ok('and only once', second.stdout === '', second.stdout);
   const root = fixture();
@@ -906,7 +929,8 @@ function testPrivate() {
   ok('an ordinary prompt gets nothing from mod.js', mod('hello there').stdout === '');
   const qj = JSON.parse(mod('?? ui tasarım denetle').stdout);
   const q = qj.hookSpecificOutput;
-  ok('?? shows the user a Teknesyum Core line with the hit count', /^Teknesyum Core > Library Ran · \d+ Books Matched/.test(qj.systemMessage || ''), qj.systemMessage);
+  const ql = take(cfg);
+  ok('?? queues a Teknesyum Core line with the hit count, the model never sees it', /^Teknesyum Core > Library Ran · \d+ Books Matched/.test(ql) && !qj.systemMessage && !/Teknesyum Core/.test(q.additionalContext), ql);
   ok('?? injects the library hits with the read instruction', q.hookEventName === 'UserPromptSubmit' && /show <slug> --lean/.test(q.additionalContext) && /design-ui-designer/.test(q.additionalContext), q.additionalContext);
   ok('++ is the same key', /design-ui-designer/.test(JSON.parse(mod('++ ui').stdout).hookSpecificOutput.additionalContext));
   const a = JSON.parse(mod('aa ui tasarım').stdout).hookSpecificOutput.additionalContext;
@@ -914,7 +938,8 @@ function testPrivate() {
   ok('aa says so when no seat matches', /No seat|Uyan koltuk yok/.test(JSON.parse(mod('aa zzqqx').stdout).hookSpecificOutput.additionalContext));
   const pj = JSON.parse(mod('pp hangi dili konuşuyoruz').stdout);
   const p = pj.hookSpecificOutput.additionalContext;
-  ok('pp shows the user the shelf line, the model echoes nothing', /^Teknesyum Core > Private Shelf Open · 2 Books · /.test(pj.systemMessage || '') && !/◆/.test(p), pj.systemMessage);
+  const pl = take(cfg);
+  ok('pp queues the shelf line, the model echoes nothing', /^Teknesyum Core > Private Shelf Open · 2 Books · /m.test(pl) && !/◆|Teknesyum Core/.test(p), pl);
   ok('pp injects the private books whole', /Türkçe konuş/.test(p) && /token dışına/.test(p) && /push private/.test(p), p);
   const seat = JSON.parse(fs.readFileSync(path.join(cfg, 'teknesyum', 'seat.json'), 'utf8'));
   ok('pp leaves a private seat mark', seat.private === true && seat.slugs.join() === 'private/kimlik,private/tercihler/ui', JSON.stringify(seat));
@@ -1072,7 +1097,7 @@ function main() {
     ['chime', testChime],
     ['loop gate', testLoop],
     ['evidence gate', testDur],
-    ['display probe', testSonda],
+    ['display notice', testNotice],
     ['denylist', testYasak],
     ['prompt marks', testMark],
     ['fable mark', testFable],

@@ -107,7 +107,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/sonda.js\""
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/bant.js\""
           }
         ]
       }

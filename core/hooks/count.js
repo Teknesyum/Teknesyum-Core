@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { read, write, stateFile, configRoot, safe, t, banner } = require('./lib.js');
+const { read, write, stateFile, configRoot, safe, t, banner, say } = require('./lib.js');
 
 const FILE_MAX = 5;
 const DIFF_MAX = 150;
@@ -70,8 +70,9 @@ function reason(st) {
   return '';
 }
 
-function speak(text, line) {
-  return JSON.stringify({ systemMessage: line, hookSpecificOutput: { hookEventName: 'PostToolUse', additionalContext: text } });
+function speak(st, text, line) {
+  say(st.session, line);
+  return JSON.stringify({ hookSpecificOutput: { hookEventName: 'PostToolUse', additionalContext: text } });
 }
 
 function version() {
@@ -90,7 +91,7 @@ function onEdit(j, st) {
   const why = reason(st);
   if (!why) return '';
   st.warned.plan = true;
-  return speak(why + ' ' + t('cue.plan'), banner('banner.plan', { '%W': why }));
+  return speak(st, why + ' ' + t('cue.plan'), banner('banner.plan', { '%W': why }));
 }
 
 function tree(cwd) {
@@ -124,7 +125,7 @@ function onContext(st) {
   st.warned.ctx = true;
   require('./handoff.js').generate(st.cwd, st);
   const n = String(Math.round(st.ctx));
-  return speak(t('cue.context').replace('%N', n), banner('banner.context', { '%N': n }));
+  return speak(st, t('cue.context').replace('%N', n), banner('banner.context', { '%N': n }));
 }
 
 function onSeat(st) {
@@ -134,7 +135,8 @@ function onSeat(st) {
   if (seat.shown) return '';
   const kb = (Number(seat.bytes || 0) / 1024).toFixed(1);
   const names = (seat.slugs || []).map((s) => (seat.private ? s.replace(/^private\//, '') : s));
-  return JSON.stringify({ systemMessage: banner(seat.private ? 'banner.private' : 'banner.seat', { '%S': names.join(', '), '%K': kb }) });
+  say(st.session, banner(seat.private ? 'banner.private' : 'banner.seat', { '%S': names.join(', '), '%K': kb }));
+  return '';
 }
 
 function opening(j, cwd) {
@@ -149,10 +151,9 @@ function opening(j, cwd) {
     lines.push(s.text);
     parts.push(s.line);
   }
-  const out = {};
-  if (j.source !== 'compact') out.systemMessage = parts.join(' · ');
-  if (lines.length) out.hookSpecificOutput = { hookEventName: 'SessionStart', additionalContext: lines.join('\n') };
-  return Object.keys(out).length ? JSON.stringify(out) : '';
+  if (j.source !== 'compact') say(j.session_id, parts.join(' · '));
+  if (!lines.length) return '';
+  return JSON.stringify({ hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext: lines.join('\n') } });
 }
 
 function step(cwd) {
@@ -183,7 +184,10 @@ function handle(j) {
   let out = '';
   if (ev === 'PostToolUse') {
     if (EDITS.test(j.tool_name)) out = onEdit(j, st);
-    else if (SHELLS.test(j.tool_name)) out = onShell(j, st);
+    else if (SHELLS.test(j.tool_name)) {
+      out = onShell(j, st);
+      onSeat(st);
+    }
     if (!out) out = onContext(st);
   } else if (ev === 'PostToolUseFailure') {
     if (SHELLS.test(j.tool_name)) onShell(j, st, true);

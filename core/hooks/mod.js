@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { configRoot, stateFile, t, banner } = require('./lib.js');
+const { configRoot, stateFile, t, banner, say } = require('./lib.js');
 const lib = require('../scripts/kutuphane.js');
 const ag = require('../scripts/agency.js');
 
@@ -159,11 +159,10 @@ function handle(j) {
     const { rest, key } = m;
     text = key === 'hh' ? help() : key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : library(rest);
   }
+  say(j.session_id, shown);
   const all = [pre, text].filter(Boolean).join('\n\n');
   if (!all) return '';
-  const out = { hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: all } };
-  if (shown.length) out.systemMessage = shown.join('\n');
-  return JSON.stringify(out);
+  return JSON.stringify({ hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: all } });
 }
 
 if (require.main === module) {

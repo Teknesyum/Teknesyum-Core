@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const { t, banner } = require('./lib.js');
+const { t, banner, say } = require('./lib.js');
 
 const LOOP = /\b(until|while)\b[\s\S]*\b(sleep|Start-Sleep)\b|\b(sleep|Start-Sleep)\b[\s\S]*\b(until|while)\b/i;
 const BOUND = [
@@ -29,8 +29,8 @@ function decide(j) {
   if (!/^(Bash|PowerShell)$/.test(j.tool_name || '')) return null;
   const cmd = (j.tool_input || {}).command;
   if (!unbounded(cmd)) return null;
+  say(j.session_id, banner('banner.loop'));
   return {
-    systemMessage: banner('banner.loop'),
     hookSpecificOutput: {
       hookEventName: 'PreToolUse',
       permissionDecision: 'deny',

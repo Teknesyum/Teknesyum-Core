@@ -27,10 +27,17 @@ Aynı anda tek madde açık kalır.
       sanki bu tarz desenleri düşünmemiz gerekir fable a sorarak araştıracağız". Yeniden
       başlatmadan sonra `ff` ile. HydraFusion Cascade'inin ucuz karşılığı arandığı için rapor
       (`docs/raporlar/hydrafusion.md` §5) girdi olur.
+      **Fable cevapladı (`docs/danisma/026-*`):** sıra a+b (deterministik kapı + düşüşte opus'a
+      tek yükselme, `yukselt.js` PostToolUse/Agent, başarıda sessiz), sonra c (yalnız düşen
+      parça), sonra d (`ff` önbelleği). Çelişki: fable kontratı `core/agents/*.md`'ye koyuyor,
+      o klasör 0.16'da söküldü ve test yokluğunu arıyor; kontrat ajan istemine ya da CLAUDE.md
+      satırına taşınacak. Yapım sırası: K3'ten hemen sonra.
 - [x] **Banner kullanıcıya görünmüyordu (2026-09-11, v0.29.0).** Sahibin sözü: "halen banner
       kullanılmadığını görüyorum Teknesyum Core > Şeklindeki açıklamaları ne zaman görüceğim".
-      Neden: satırlar yalnız modele gidiyordu (`additionalContext`). Bütün kancalar artık
-      `systemMessage` ile "Teknesyum Core > …" basıyor. Ayrıntı `docs/banner.md`.
+      Neden: satırlar yalnız modele gidiyordu (`additionalContext`). v0.29.0 `systemMessage`
+      denedi, katlanmış notice çipine düştü ("malesef istediğim gibi gözükmüyor notice ın
+      altında gözüküyor"); D11/D15 bunu zaten yasaklamıştı. v0.30.0 D15'e döndü: kuyruk +
+      `bant.js` `MessageDisplay`, cevabın üstünde blok, 0 token. Ayrıntı `docs/banner.md`.
 
 - [x] **Issue #1 ve #2, standart iskelet, preread/postread (2026-09-11, Core v0.28.0, UI 47508fc).** Sahibin sözü: "issue 1 i
       fable incelesin en uygun önerdiğini yapalım"; issue 2 için aynısı + VidShrink tarzı ince üst

@@ -613,6 +613,21 @@ What is built: `agency.js show` writes `teknesyum/seat.json`; `count.js` on `Sto
 `Seat: <slug> read, <n> KB` once and marks it seen. One line, one fact, only after a seat
 was actually read. Other facts can join the same line later on the same terms.
 
+## D17 — The banner goes back to MessageDisplay (2026-09-11)
+
+v0.29.0 sent every `Teknesyum Core > …` line through `systemMessage`. On the desktop it
+landed in the folded notice chip as `UserPromptSubmit says: …`, and on `SessionStart` and
+`UserPromptSubmit` it also entered the model's context — the two failures D11 and D15 had
+already recorded. Asking the model to echo the line, Base's approach, is refused by the
+standing law.
+
+v0.30.0 restores D15's channel. A hook calls `lib.say(session, line)`, which appends to
+`teknesyum/banner-<session>.json`. `hooks/bant.js` answers `MessageDisplay`: on the first
+flush it drains the queue and draws the lines above the message as code spans; a queue
+filled mid-message is drawn under the final flush. No hook writes `systemMessage`, and a
+test enforces it. The event was confirmed live on CC 2.1.251 desktop by the silent probe
+before the probe went to `trash/`.
+
 ## prefs kancası özel rafa taşındı (2026-09-09)
 
 Yazar kuralları iki yerde duruyordu: `~/.claude/teknesyum/prefs/` (kanca uygular) ve özel

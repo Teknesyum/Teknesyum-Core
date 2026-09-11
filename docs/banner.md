@@ -13,14 +13,21 @@ Kullanıcının 2026-09-09'da koyduğu altı ölçü. Eklentinin bastığı her 
    döndüğünü görmek gibi: banner hem "makine çalıştı" der, hem birazdan ne olacağını
    söyler. Sonucu haber vermeyen banner yarım banner'dır.
 
-## Kanal: `systemMessage` (2026-09-11 düzeltmesi)
+## Kanal: `MessageDisplay` (v0.30.0)
 
-Eski tablo her satıra ✓ vermişti ama yanlıştı: eşik, işaret, kanıt kapısı ve denylist
-satırları `additionalContext` / `reason` ile yalnız **modele** gidiyordu. Kullanıcı bunları hiç
-görmedi; ekranda "Teknesyum Core > …" yoktu. Kullanıcıya giden tek kanal kancanın
-`systemMessage` alanı. Sohbette `hook_system_message` diye görünür, modelin bağlamına girmez.
-v0.29.0'dan beri her kanca olayı, modele söylediğinin yanında kullanıcıya da tek satır basıyor.
-Her satır `lib.banner()` ile `Teknesyum Core > ` önekini alıyor.
+v0.29.0 satırları `systemMessage` ile bastı ve yanlıştı. Masaüstünde katlanmış bir "Claude
+Code notice" çipine düşüyor, başına `UserPromptSubmit says:` ekleniyor, açılamıyor. Üstelik
+`SessionStart` ve `UserPromptSubmit`'te harness bu alanı modelin bağlamına da ekliyor
+(DECISIONS D11, D15, Standing law). Base'in "modele ters tırnakla bastır" yolu da Standing
+law'a göre kapalı: modele banner bastırmak C sınıfı.
+
+v0.30.0 D15'e döndü. Kanca satırı modele değil diskteki kuyruğa yazar:
+`lib.say(oturum, satır)` → `~/.claude/teknesyum/banner-<oturum>.json`. `hooks/bant.js`
+`MessageDisplay`'in ilk akışında (`index 0`) kuyruğu boşaltır ve satırı mesajın üstüne ters
+tırnaklı blok olarak çizer; kuyruk mesajın ortasında dolduysa son akışın altına çizer.
+`displayContent` yalnız ekranı değiştirir: saklanan mesaj ve modelin gördüğü aynı kalır.
+Maliyet 0 token, mesaj başına bir node koşusu. Kanal CC 2.1.251 masaüstünde sondayla
+doğrulandı (2026-09-11, `index`, `final`, `delta` alanları geliyor).
 
 | Olay | Kullanıcının gördüğü satır |
 | --- | --- |
@@ -34,9 +41,10 @@ Her satır `lib.banner()` ile `Teknesyum Core > ` önekini alıyor.
 | Bağlam eşiği | `Bağlam %N · Devir Notu Hazırlandı` |
 | Kanıt kapısı (`dur.js`) | `Kanıt Kapısı · N Kod Dosyası Değişti, Hiçbir Şey Koşmadı · Sırada Kanıt Var` |
 | Denylist / döngü | `Yasak Liste Bir Komutu Durdurdu · <neden>` / `Sınırsız Bekleme Durduruldu · …` |
-| Koltuk (Stop) | `Koltuk Okundu · slug · K KB` |
+| Koltuk (`show` sonrası ya da Stop) | `Koltuk Okundu · slug · K KB` |
 
-Ölçü 1: sıradan tur hâlâ 0 bayt, satır yalnız olay olunca basılır ve bağlama girmez.
+Ölçü 1: sıradan tur 0 bayt; satır yalnız olay olunca kuyruğa girer, bağlama hiç girmez.
+Test takımı hiçbir kancanın `systemMessage` yazmadığını denetler.
 
 ## Kapanan yol
 

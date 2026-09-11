@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const path = require('path');
-const { read, merge, configRoot, t, banner } = require('./lib.js');
+const { read, merge, configRoot, t, banner, say } = require('./lib.js');
 const { file, tree } = require('./count.js');
 
 function off() {
@@ -33,7 +33,8 @@ function decide(j) {
     merge(f, { stopTree: now });
     return null;
   }
-  return { decision: 'block', reason: t('dur.evidence'), systemMessage: banner('banner.evidence', { '%N': code(st).length }) };
+  say(j.session_id, banner('banner.evidence', { '%N': code(st).length }));
+  return { decision: 'block', reason: t('dur.evidence') };
 }
 
 if (require.main === module) {

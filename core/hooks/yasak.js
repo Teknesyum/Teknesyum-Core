@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const path = require('path');
-const { t, banner } = require('./lib.js');
+const { t, banner, say } = require('./lib.js');
 
 const WIPE = [
   /\brm\s+(?:-\S+\s+)*-\S*[rR]\S*f|\brm\s+(?:-\S+\s+)*-\S*f\S*[rR]/,
@@ -61,8 +61,8 @@ function decide(j) {
   if (!/^(Bash|PowerShell)$/.test(j.tool_name || '')) return null;
   const key = forbidden((j.tool_input || {}).command, j.cwd);
   if (!key) return null;
+  say(j.session_id, banner('banner.deny', { '%R': t(key) }));
   return {
-    systemMessage: banner('banner.deny', { '%R': t(key) }),
     hookSpecificOutput: {
       hookEventName: 'PreToolUse',
       permissionDecision: 'deny',

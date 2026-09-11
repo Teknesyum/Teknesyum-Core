@@ -205,6 +205,35 @@ function banner(key, vars) {
   return BANNER + s;
 }
 
+function queue(session) {
+  return stateFile('banner-' + String(session || 'none'));
+}
+
+function say(session, lines) {
+  const add = [].concat(lines || []).filter(Boolean);
+  if (!add.length) return;
+  try {
+    merge(queue(session), (b) => {
+      const now = Array.isArray(b.lines) ? b.lines : [];
+      return { lines: now.concat(add.filter((l) => !now.includes(l))).slice(-6) };
+    });
+  } catch {}
+}
+
+function drain(session) {
+  const f = queue(session);
+  if (!fs.existsSync(f)) return [];
+  let lines = [];
+  try {
+    lock(f, () => {
+      const b = read(f);
+      lines = (b && Array.isArray(b.lines) && b.lines) || [];
+      fs.unlinkSync(f);
+    });
+  } catch {}
+  return lines;
+}
+
 function rewire() {
   const here = path.resolve(__dirname, '..');
   const bridge = path.join(here, 'scripts', 'bridge.js').replace(/\\/g, '/');
@@ -346,6 +375,9 @@ module.exports = {
   lang,
   t,
   banner,
+  queue,
+  say,
+  drain,
   BANNER,
   openLogs,
   openLogCount,

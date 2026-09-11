@@ -131,9 +131,11 @@ a handoff is waiting, open bug logs, and hook errors if any. Plain text, no colo
 measures invented here.
 
 When a hook acts, the user sees one chat line such as `Teknesyum Core > Kütüphane Döndü · 3
-Kitap Uydu · En Çok Üçü Okunacak`. It travels in the hook's `systemMessage`, which the chat
-shows and the model never reads, so the line costs no tokens. Session start, marks, the
-threshold, the evidence gate, the denylist and the later-queue each have one.
+Kitap Uydu · En Çok Üçü Okunacak`, drawn as a block above the reply. The hook queues the
+line on disk and `bant.js` draws it through `MessageDisplay`, which changes only what is
+shown: the stored message and the model's context stay untouched, so the line costs no
+tokens. Session start, marks, the threshold, the evidence gate, the denylist, a seat read and
+the later-queue each have one.
 
 It also counts processes the session spawned through a shell that have been running for
 more than thirty minutes: `⏳ 2 processes 40 min`. The count is refreshed by a detached
@@ -350,7 +352,7 @@ The evidence gate above is one of eight hooks. Nine events, eight files, all und
 | `Stop` | `dur.js` | a session that edited files and ran nothing is blocked once; the same tree is never asked twice. Off with `evidence: false` |
 | `SessionEnd` | `handoff.js` | nothing; writes the handoff |
 | `Notification` | `notify.js` | nothing; rings |
-| `MessageDisplay` | `sonda.js` | nothing; a silent probe that records which fields the event carries, so a future banner can be built on measurement instead of a guess |
+| `MessageDisplay` | `bant.js` | nothing; draws the queued `Teknesyum Core > …` lines on screen only |
 
 Only `count.js` and `mod.js` can write into the context, and the test suite checks that they are the only ones. Measured: an ordinary turn 0 bytes, `??` about 1.7 KB, `pp` about 3.7 KB, `aa` under 1 KB.
 

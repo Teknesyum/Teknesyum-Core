@@ -126,9 +126,10 @@ oturumun koştuğu testler ve kaçının düştüğü, bağlam yüzdesi, bekleye
 hata günlükleri, varsa kanca hataları. Düz metin; burada renk ya da ölçü uydurulmaz.
 
 Bir kanca iş yapınca kullanıcı sohbette tek satır görür: `Teknesyum Core > Kütüphane Döndü · 3
-Kitap Uydu · En Çok Üçü Okunacak`. Satır kancanın `systemMessage` alanıyla gider; sohbet
-gösterir, model okumaz, token tutmaz. Oturum açılışı, işaretler, eşik, kanıt kapısı, yasak
-liste ve sonraya bırakılanlar kuyruğu birer satır basar.
+Kitap Uydu · En Çok Üçü Okunacak`, cevabın üstünde blok olarak. Kanca satırı diske kuyruğa
+yazar, `bant.js` onu `MessageDisplay` ile çizer; bu olay yalnız ekranı değiştirir, saklanan
+mesaj ve modelin bağlamı aynı kalır, satır token tutmaz. Oturum açılışı, işaretler, eşik,
+kanıt kapısı, yasak liste, koltuk okuma ve sonraya bırakılanlar kuyruğu birer satır basar.
 
 Oturumun kabuk üzerinden başlattığı ve otuz dakikadan uzun süredir çalışan süreçleri de
 sayar: `⏳ 2 süreç 40 dk`. Sayımı ayrık bir süreç en çok dakikada bir tazeler, statusline
@@ -343,7 +344,7 @@ Yukarıdaki kanıt kapısı sekiz kancadan biri. Dokuz olay, sekiz dosya, hepsi
 | `Stop` | `dur.js` | Dosya düzenleyip hiçbir şey koşmayan oturum bir kez durdurulur; aynı ağaç ikinci kez sorulmaz. Kapatmak: `evidence: false` |
 | `SessionEnd` | `handoff.js` | hiçbir şey; devri yazar |
 | `Notification` | `notify.js` | hiçbir şey; çalar |
-| `MessageDisplay` | `sonda.js` | hiçbir şey; sessiz sonda, olayın hangi alanları taşıdığını kaydeder ki ileride bir banner tahminle değil ölçümle kurulsun |
+| `MessageDisplay` | `bant.js` | hiçbir şey; kuyruktaki `Teknesyum Core > …` satırlarını yalnız ekrana çizer |
 
 Bağlama yalnız `count.js` ve `mod.js` yazabilir; test takımı başkasının yazmadığını denetler. Ölçüm: sıradan tur 0 bayt, `??` ~1,7 KB, `pp` ~3,7 KB, `aa` 1 KB altı.
 
