@@ -35,7 +35,7 @@ doğrulandı (2026-09-11, `index`, `final`, `delta` alanları geliyor).
 | `??` `++` (`mod.js`) | `Kütüphane Döndü · N Kitap Uydu · En Çok Üçü Okunacak` |
 | `aa` | `Ajans · N Koltuk Uydu · Cevap docs/danisma/ Altına Yazılacak` |
 | `pp` | `Özel Raf Açıldı · N Kitap · K KB` (modelin "◆" yankısı kalktı) |
-| `ff` `hh` | `Fable Danışması · …` / `İşaret Listesi Geliyor` |
+| `ff` `hh` | `Fable'a Danışılıyor · Soru Gidiyor, Cevap Kaydedilecek` / `İşaret Listesi Geliyor` |
 | jobs.md (`mod.js`) | `N Açık İş Geri Geldi · Dosya trash/'te` |
 | İş kapısı (`dur.js`) | `İş Kapısı · N Açık, Gerekçesiz` / `İş Kapısı · N Madde, Liste Yok` |
 | Eşik (`count.js`) | `Eşik · N dosyaya dokunuldu · Sırada Plan Var Ya Da Atla De` |
@@ -46,6 +46,17 @@ doğrulandı (2026-09-11, `index`, `final`, `delta` alanları geliyor).
 
 Ölçü 1: sıradan tur 0 bayt; satır yalnız olay olunca kuyruğa girer, bağlama hiç girmez.
 Test takımı hiçbir kancanın `systemMessage` yazmadığını denetler.
+
+## Ne zaman görünür
+
+Satır kuyruğa istem anında girer, ekrana **modelin ilk metin parçası aktığında** çizilir.
+Arada yalnız araç çağrısı varsa `MessageDisplay` tetiklenmez; 2026-09-12'de ölçüldü, `ff`
+turunda kuyruk dosyası sekiz araç çağrısı boyunca dolu bekledi ve ilk metinle boşaldı.
+
+Enter'a basıldığı anda çizmenin yolu yok: `UserPromptSubmit` yalnız bağlama yazabilir,
+`systemMessage` masaüstünde katlanmış çipe düşer (D15), statusline'ı masaüstü hiç çizmez.
+Modelden banner bastırmak Standing law'a aykırı. Erken görünmesinin tek yolu, işaretli turda
+modelin ilk araçtan önce bir satır yazması — o satır modelin kendi işi, kancanın değil.
 
 ## Kapanan yol
 
