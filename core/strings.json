@@ -348,8 +348,8 @@
     "tr": "Bu, makineyi ya da bütün süreçleri durdurur. Tek süreci yaz."
   },
   "mod.fable": {
-    "en": "Consult fable before you start. Gather the facts you already have into one file, then %C. Give the Agent tool the file it writes, verbatim, model fable. File the answer with %R and print its path and cost in one line.",
-    "tr": "İşe başlamadan önce fable'a danış. Elindeki olguları tek dosyaya topla, sonra %C. Yazdığı dosyayı Agent aracına olduğu gibi ver, model fable. Cevabı %R ile kaydet, yolunu ve maliyetini tek satır yaz."
+    "en": "Consult fable before you start. Say so in one line before the first tool call.Gather the facts you already have into one file, then %C. Give the Agent tool the file it writes, verbatim, model fable. File the answer with %R and print its path and cost in one line.",
+    "tr": "İşe başlamadan önce fable'a danış. İlk araç çağrısından önce tek satırla söyle.Elindeki olguları tek dosyaya topla, sonra %C. Yazdığı dosyayı Agent aracına olduğu gibi ver, model fable. Cevabı %R ile kaydet, yolunu ve maliyetini tek satır yaz."
   },
   "mod.fableAsk": {
     "en": "The question: %Q",

@@ -58,6 +58,11 @@ Enter'a basıldığı anda çizmenin yolu yok: `UserPromptSubmit` yalnız bağla
 Modelden banner bastırmak Standing law'a aykırı. Erken görünmesinin tek yolu, işaretli turda
 modelin ilk araçtan önce bir satır yazması — o satır modelin kendi işi, kancanın değil.
 
+`ff` yordamı (v0.33.2) bunu istiyor: "İlk araç çağrısından önce tek satırla söyle." Satırın
+içeriği modele bırakılır, banner'ı model basmaz; yalnız çizimin tetikleneceği bir metin olur.
+Bedel yalnız `ff` turunda ve yalnız yordamın içinde: TR tarafında 54 bayt. Metin tablosu
+14.078 bayta çıktı, testteki tavan 14.000'den 14.200'e alındı.
+
 ## Kapanan yol
 
 Sohbet adını rename ile canlı güncellemek **iptal edildi**: her turda token harcar, 1. ölçüyü

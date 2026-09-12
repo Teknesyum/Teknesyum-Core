@@ -320,7 +320,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 14000, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 14200, String(JSON.stringify(table).length));
   ok('no relay strings are left', !keys.some((k) => /^(role\.|notice\.|line\.(contracts|agents|open|blocked))/.test(k)), keys.join(' '));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
@@ -858,6 +858,7 @@ function testFable() {
   ok('and names the model', /fable/i.test(ctx), ctx);
   ok('and carries the question', /redis kilidi/.test(ctx), ctx);
   ok('and tells where the answer is filed', /record/.test(ctx), ctx);
+  ok('and asks for a line before the first tool, so the banner is drawn early', /ilk araç çağrısından önce|before the first tool call/.test(ctx), ctx);
   const help = JSON.parse(mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'hh' })).hookSpecificOutput.additionalContext;
   for (const k of ['??', '++', 'pp', 'aa', 'ff', 'hh']) ok('hh explains ' + k, help.includes('`' + k + '`'), help);
   ok('hh says where the mark stands', /başında|sonunda|start|end/i.test(help), help);
