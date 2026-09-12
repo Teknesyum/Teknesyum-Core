@@ -1,6 +1,6 @@
 {
   "name": "teknesyum-core",
-  "version": "0.33.1",
+  "version": "0.33.2",
   "description": "Counts touched files, shows them on the statusline, speaks once at a threshold, hands the next session a machine-written handoff. Zero tokens on an ordinary turn.",
   "author": {
     "name": "Teknesyum",

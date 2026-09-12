@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.33.2
+
+- The ff recipe asks the model for one line before the first tool call, so the queued banner is drawn at the top of the turn instead of above the last answer. Costs 54 bytes, only on an ff turn.
+
 ## v0.33.1
 
 - The ff banner now says the consult is happening, not that it will: Consulting Fable, The Question Goes Out, The Reply Gets Filed. banner.md records when a queued line is drawn and why nothing can be drawn the instant a prompt is sent.

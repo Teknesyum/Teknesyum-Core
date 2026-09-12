@@ -24,9 +24,9 @@ ne yapacağımı tek satırla söyle.
 
 2. Claude Code için Teknesyum Core'u kur:
    Windows PowerShell:
-   `irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.33.1/install.ps1 | iex`
+   `irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.33.2/install.ps1 | iex`
    macOS / Linux:
-   `curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.33.1/install.sh | bash`
+   `curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.33.2/install.sh | bash`
 
 3. Doğrula: `claude plugin list` çıktısında `teknesyum-core` görünmeli. Görünmüyorsa
    `claude plugin marketplace add Teknesyum/Teknesyum-Core` ve
@@ -34,7 +34,7 @@ ne yapacağımı tek satırla söyle.
 
 4. Cursor Agent adaptörü. Core'u ev klasörüne klonla (`$HOME/Teknesyum-Core` zaten varsa
    dokunmadan önce bana sor), sonra kancaları bağla:
-   `git clone --depth 1 --branch v0.33.1 https://github.com/Teknesyum/Teknesyum-Core "$HOME/Teknesyum-Core"`
+   `git clone --depth 1 --branch v0.33.2 https://github.com/Teknesyum/Teknesyum-Core "$HOME/Teknesyum-Core"`
    `node "$HOME/Teknesyum-Core/core/scripts/setup.js" --host cursor`
    Çıktı `~/.cursor/hooks.json` yolunu söylemeli. Dosyayı aç ve bana göster; başka kancalar
    varsa yerinde kalmış olmalı, yanında `.bak` yedeği durmalı.
