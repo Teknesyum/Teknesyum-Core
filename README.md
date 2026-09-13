@@ -291,6 +291,7 @@ flowchart TD
 | `scripts/doctor.js` | Seven checks: node, git, version, hooks, statusline, map, logs. |
 | `scripts/scan.js` | Seven read-only checks on the project itself: license surfaces, plan against the five-file threshold, handoff holes, documents against the version, test script, `trash/` references, map. Nothing written, no model, nothing into context; the profile only widens the document set. |
 | `scripts/scout.js` | Prior-art scout, on demand and once: `brief <topic>` writes a bounded brief under `docs/oncul/` (5 searches, 3 pages, 5 candidates, 400 words) and arms the gate; the brief goes to one subagent on sonnet; `record` files the answer, cut at 8,000 characters. The gate in `hooks/scout.js` refuses a second call on the same brief, another model, or a longer prompt. |
+| `scripts/cop.js` | Measures `<project>/trash`: `node cop.js .` prints the total and the ten largest files, exits `1` over 100 MB. `--sil` sends the folder to the recycle bin. Nothing is ever deleted without that flag. |
 | `scripts/release.js` | Bumps the version from the notes left in `.changes/`, rewrites the install lines, tags; `publish` creates the GitHub release titled `vX.Y.Z` and uploads both installers with their `.sha256` files. |
 
 ---
@@ -450,7 +451,7 @@ The evidence gate above is one of nine hooks. Nine events, nine files, all under
 
 | Event | Hook | Says |
 |---|---|---|
-| `SessionStart` | `count.js` | `Resume: .claude/handoff.md` if one exists; the first open `- [ ]` step of `docs/plan.md` if one exists; else nothing. Once a day it also starts `kutuphane.js fetch all --stale 7` detached in the background, so no shelf is older than a week; the model sees none of it |
+| `SessionStart` | `count.js` | `Resume: .claude/handoff.md` if one exists; the first open `- [ ]` step of `docs/plan.md` if one exists; the trash offer when `<project>/trash` is over 100 MB, at most once a day per project — the line carries the exact emptying command and the hook never deletes anything itself; else nothing. Once a day it also starts `kutuphane.js fetch all --stale 7` detached in the background, so no shelf is older than a week; the model sees none of it |
 | `UserPromptSubmit` | `mod.js` | library hits on `??` / `++`, private books on `pp`, agency seats on `aa`, the consult recipe on `ff`, the list of marks on `hh` — the mark is read at the start or at the end of the prompt; the open lines of `.claude/jobs.md` (the job list, `- [ ] job — reason`) come back once and the file moves to `trash/`; a prompt with several items leaves a state marker, no context; else nothing |
 | `PostToolUse` | `count.js` | one line at the threshold, once; else nothing |
 | `PostToolUseFailure` | `count.js` | nothing; files a failed test command |

@@ -139,6 +139,35 @@ function onSeat(st) {
   return '';
 }
 
+function trash(cwd) {
+  let cop;
+  try {
+    cop = require('../scripts/cop.js');
+  } catch {
+    return '';
+  }
+  const gun = new Date().toISOString().slice(0, 10);
+  const damga = stateFile('cop');
+  const gecmis = read(damga) || {};
+  const anahtar = safe(cwd);
+  if (gecmis[anahtar] === gun) return '';
+  const over = cop.asar(cwd);
+  if (!over) return '';
+  gecmis[anahtar] = gun;
+  write(damga, gecmis);
+  const script = path.join(__dirname, '..', 'scripts', 'cop.js');
+  const ev = require('os').homedir();
+  const kisa = script.toLowerCase().startsWith(ev.toLowerCase()) ? '~' + script.slice(ev.length) : script;
+  const vars = {
+    '%M': String(cop.mb(over.bytes)),
+    '%N': String(over.count),
+    '%C': 'node "' + kisa + '" . --sil',
+  };
+  let line = t('banner.trash');
+  for (const [k, v] of Object.entries(vars)) line = line.split(k).join(v);
+  return line;
+}
+
 function opening(j, cwd) {
   const lines = [];
   const parts = [banner('banner.start', { '%V': version() })];
@@ -151,6 +180,8 @@ function opening(j, cwd) {
     lines.push(s.text);
     parts.push(s.line);
   }
+  const cop = trash(cwd);
+  if (cop) parts.push(cop);
   if (j.source !== 'compact') say(j.session_id, parts.join(' · '));
   if (!lines.length) return '';
   return JSON.stringify({ hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext: lines.join('\n') } });

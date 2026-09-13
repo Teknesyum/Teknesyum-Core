@@ -650,7 +650,8 @@ function testYasak() {
   const shut = yasak.decide({ tool_name: 'Bash', session_id: 'y1', cwd: GARDEN, tool_input: { command: 'rm -rf /' } }) || {};
   if (was === undefined) delete process.env.CLAUDE_CONFIG_DIR;
   else process.env.CLAUDE_CONFIG_DIR = was;
-  ok('a denial queues a Teknesyum Core line for the display', /^Teknesyum Core > Denylist Stopped A Command · /.test(take(dh, 'y1')) && !/Teknesyum Core/.test(JSON.stringify(shut)), JSON.stringify(shut));
+  const denyHead = require(path.join(CORE, 'hooks', 'lib.js')).banner('banner.deny', { '%R': '' }).trim();
+  ok('a denial queues a Teknesyum Core line for the display', take(dh, 'y1').startsWith(denyHead.replace(/·$/, '').trim()) && !/Teknesyum Core/.test(JSON.stringify(shut)), JSON.stringify(shut));
   sweep(dh);
   ok('only Bash and PowerShell are read', yasak.decide({ tool_name: 'Write', cwd: GARDEN, tool_input: { command: 'rm -rf /' } }) === null);
   ok('an empty command is not a rule', yasak.forbidden('', GARDEN) === null && yasak.forbidden(undefined, GARDEN) === null);
@@ -858,7 +859,7 @@ function testFable() {
   ok('and names the model', /fable/i.test(ctx), ctx);
   ok('and carries the question', /redis kilidi/.test(ctx), ctx);
   ok('and tells where the answer is filed', /record/.test(ctx), ctx);
-  ok('and asks for a line before the first tool, so the banner is drawn early', /ilk araç çağrısından önce|before the first tool call/.test(ctx), ctx);
+  ok('and asks for a line before the first tool, so the banner is drawn early', /lk araç çağrısından önce|before the first tool call/.test(ctx), ctx);
   const help = JSON.parse(mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'hh' })).hookSpecificOutput.additionalContext;
   for (const k of ['??', '++', 'pp', 'aa', 'ff', 'hh']) ok('hh explains ' + k, help.includes('`' + k + '`'), help);
   ok('hh says where the mark stands', /başında|sonunda|start|end/i.test(help), help);
@@ -1209,6 +1210,46 @@ function testScout() {
   sweep(cfg);
 }
 
+function testCop() {
+  const cop = require(path.join(CORE, 'scripts', 'cop.js'));
+  const root = fixture();
+  const cfg = home();
+
+  const bos = hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 'c1', cwd: root }, cfg);
+  ok('no trash folder, no line', !/(Trash|Çöp)/.test(take(cfg, 'c1')), bos.stdout);
+
+  const trash = path.join(root, 'trash');
+  fs.mkdirSync(trash, { recursive: true });
+  fs.writeFileSync(path.join(trash, 'kucuk.bin'), Buffer.alloc(1024));
+  const kucuk = hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 'c2', cwd: root }, cfg);
+  ok('a small trash folder says nothing', !/(Trash|Çöp)/.test(take(cfg, 'c2')), kucuk.stdout);
+  ok('cop.asar is silent under the ceiling', cop.asar(root) === null);
+
+  fs.writeFileSync(path.join(trash, 'buyuk.bin'), Buffer.alloc(cop.CEILING + 1024));
+  const over = cop.asar(root);
+  ok('cop.asar reports over the ceiling', over && over.count === 2 && over.bytes > cop.CEILING, JSON.stringify(over && { c: over.count, b: over.bytes }));
+
+  const dolu = hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 'c3', cwd: root }, cfg);
+  const line = take(cfg, 'c3');
+  ok('a full trash folder offers the command', /cop\.js/.test(line) && /--sil/.test(line), line || dolu.stdout);
+  ok('the line names the size and the count', /100/.test(line) && /2/.test(line), line);
+
+  hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 'c4', cwd: root }, cfg);
+  ok('it offers once a day, not every session', !/--sil/.test(take(cfg, 'c4')));
+
+  ok('nothing was deleted', fs.existsSync(path.join(trash, 'buyuk.bin')));
+
+  const r = run(process.execPath, [path.join(CORE, 'scripts', 'cop.js'), root], { env: { ...process.env, NO_COLOR: '1' } });
+  ok('cop.js exits 1 over the ceiling', r.status === 1, r.stdout + r.stderr);
+  ok('cop.js lists the largest file first', /buyuk\.bin/.test(String(r.stdout).split(/\r?\n/)[1] || ''), r.stdout);
+
+  const yok = run(process.execPath, [path.join(CORE, 'scripts', 'cop.js'), fixture()], { env: { ...process.env, NO_COLOR: '1' } });
+  ok('cop.js exits 2 without a trash folder', yok.status === 2, yok.stderr);
+
+  sweep(root);
+  sweep(cfg);
+}
+
 function main() {
   const root = fixture();
   const suites = [
@@ -1238,6 +1279,7 @@ function main() {
     ['doctor', testDoctor],
     ['scan', testScan],
     ['scout', testScout],
+    ['trash', testCop],
   ];
   for (const [name, fn] of suites) {
     try {

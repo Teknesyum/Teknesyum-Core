@@ -38,6 +38,7 @@ doğrulandı (2026-09-11, `index`, `final`, `delta` alanları geliyor).
 | `ff` `hh` | `Fable'a Danışılıyor · Soru Gidiyor, Cevap Kaydedilecek` / `İşaret Listesi Geliyor` |
 | jobs.md (`mod.js`) | `N Açık İş Geri Geldi · Dosya trash/'te` |
 | İş kapısı (`dur.js`) | `İş Kapısı · N Açık, Gerekçesiz` / `İş Kapısı · N Madde, Liste Yok` |
+| Çöp (`count.js`) | `Çöp 158 Dosyada 391 MB · Silmek İçin: node "~\...\cop.js" . --sil` |
 | Eşik (`count.js`) | `Eşik · N dosyaya dokunuldu · Sırada Plan Var Ya Da Atla De` |
 | Bağlam eşiği | `Bağlam %N · Devir Notu Hazırlandı` |
 | Kanıt kapısı (`dur.js`) | `Kanıt Kapısı · N Kod Dosyası Değişti, Hiçbir Şey Koşmadı · Sırada Kanıt Var` |
