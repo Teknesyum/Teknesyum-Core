@@ -34,17 +34,37 @@ function run(cmd, args, opts) {
   });
 }
 
+let template = null;
+
 function fixture() {
+  if (!template) {
+    template = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-template-'));
+    fs.mkdirSync(path.join(template, 'src', 'auth'), { recursive: true });
+    fs.writeFileSync(path.join(template, 'src', 'ok.js'), 'module.exports = 1;\n');
+    fs.writeFileSync(path.join(template, 'src', 'auth', 'token.js'), 'module.exports = 2;\n');
+    run('git', ['init', '-q', '.'], { cwd: template });
+    run('git', ['config', 'user.email', 't@t.t'], { cwd: template });
+    run('git', ['config', 'user.name', 't'], { cwd: template });
+    run('git', ['add', '-A'], { cwd: template });
+    run('git', ['commit', '-qm', 'init'], { cwd: template });
+  }
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-'));
-  fs.mkdirSync(path.join(root, 'src', 'auth'), { recursive: true });
-  fs.writeFileSync(path.join(root, 'src', 'ok.js'), 'module.exports = 1;\n');
-  fs.writeFileSync(path.join(root, 'src', 'auth', 'token.js'), 'module.exports = 2;\n');
-  run('git', ['init', '-q', '.'], { cwd: root });
-  run('git', ['config', 'user.email', 't@t.t'], { cwd: root });
-  run('git', ['config', 'user.name', 't'], { cwd: root });
-  run('git', ['add', '-A'], { cwd: root });
-  run('git', ['commit', '-qm', 'init'], { cwd: root });
+  copyTree(template, root);
   return root;
+}
+
+function copyTree(from, to) {
+  fs.mkdirSync(to, { recursive: true });
+  for (const e of fs.readdirSync(from, { withFileTypes: true })) {
+    const a = path.join(from, e.name);
+    const b = path.join(to, e.name);
+    try {
+      if (e.isDirectory()) copyTree(a, b);
+      else fs.copyFileSync(a, b);
+    } catch (err) {
+      if (err.code !== 'ENOENT') throw err;
+    }
+  }
 }
 
 function home() {
@@ -203,7 +223,8 @@ function testCountTests() {
   const moved = line();
   ok('and calls it stale once the cache runs out', /tests stale/.test(moved), moved);
   sh('npm test', { stdout: '12 passing', stderr: '' });
-  ok('a fresh run on the moved tree passes', /tests pass/.test(line()), line());
+  const r1 = line();
+  ok('a fresh run on the moved tree passes', /tests pass/.test(r1), r1);
   edit(root, cfg, 'src/ok.js', 's1', 'module.exports = 4;\n');
   fs.writeFileSync(cache, JSON.stringify({ ...JSON.parse(fs.readFileSync(cache, 'utf8')), at: Date.now() + 60000 }));
   const edited = line();
@@ -279,9 +300,10 @@ function testContextCue() {
       input: JSON.stringify({ session_id: 's1', workspace: { current_dir: root }, context_window: { used_percentage: pct } }),
       env: { ...process.env, CLAUDE_CONFIG_DIR: cfg, NO_COLOR: '1' },
     }).stdout;
-  ok('the statusline shows the count', /1 files \+1-0/.test(line(30)), line(30));
-  ok('and says there is no plan', /no plan/.test(line(30)), line(30));
-  ok('and the context percentage', /context 30%/.test(line(30)), line(30));
+  const r2 = line(30);
+  ok('the statusline shows the count', /1 files \+1-0/.test(r2), r2);
+  ok('and says there is no plan', /no plan/.test(r2), r2);
+  ok('and the context percentage', /context 30%/.test(r2), r2);
   ok('the statusline files the percentage into state', stateOf(cfg).ctx === 30, String(stateOf(cfg).ctx));
   line(64);
   const cue = edit(root, cfg, 'src/b.js', 's1', 'y\n');
@@ -289,10 +311,12 @@ function testContextCue() {
   ok('and the handoff is already on disk', fs.existsSync(path.join(root, '.claude', 'handoff.md')));
   const after = edit(root, cfg, 'src/c.js', 's1', 'z\n');
   ok('it does not repeat', after.stdout === '', after.stdout);
-  ok('the statusline shows the handoff', /handoff/.test(line(64)), line(64));
+  const r5 = line(64);
+  ok('the statusline shows the handoff', /handoff/.test(r5), r5);
   fs.mkdirSync(path.join(root, 'docs'), { recursive: true });
   fs.writeFileSync(path.join(root, 'docs', 'plan.md'), 'p');
-  ok('a plan on disk shows as plan', /· plan ·/.test(line(64)), line(64));
+  const r6 = line(64);
+  ok('a plan on disk shows as plan', /· plan ·/.test(r6), r6);
   const quiet = run(process.execPath, [STATUSLINE], { cwd: root, input: JSON.stringify({ workspace: { current_dir: root } }), env: { ...process.env, CLAUDE_CONFIG_DIR: cfg, NO_COLOR: '1' } });
   ok('nothing is printed when the client did not send a percentage', !/%/.test(quiet.stdout), quiet.stdout);
   sweep(root);
@@ -519,7 +543,8 @@ function testDur() {
   };
 
   hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 's1', cwd: root }, cfg);
-  ok('a session that touched nothing is never blocked', stop().stdout === '', stop().stdout);
+  const r7 = stop();
+  ok('a session that touched nothing is never blocked', r7.stdout === '', r7.stdout);
 
   edit(root, cfg, 'src/ok.js', 's1', 'module.exports = 2;' + String.fromCharCode(10));
   const first = stop();
@@ -547,14 +572,18 @@ function testDur() {
   ok('a stop that is not a stop event is ignored', hook(DUR, { hook_event_name: 'SubagentStop', session_id: 's1', cwd: root }, cfg).stdout === '');
 
   hook(COUNT, { hook_event_name: 'PostToolUse', tool_name: 'Bash', session_id: 's1', cwd: root, tool_input: { command: 'npm test' }, tool_response: { stdout: '12 passing', stderr: '' } }, cfg);
-  ok('a test run on this tree opens the gate', stop().stdout === '', stop().stdout);
-  ok('and the same tree is never asked again', stop().stdout === '', stop().stdout);
+  const r8 = stop();
+  ok('a test run on this tree opens the gate', r8.stdout === '', r8.stdout);
+  const r9 = stop();
+  ok('and the same tree is never asked again', r9.stdout === '', r9.stdout);
 
   edit(root, cfg, 'src/two.js', 's1', 'module.exports = 3;' + String.fromCharCode(10));
-  ok('an edit after the run closes it again', blocks(stop()), stop().stdout);
+  const r10 = stop();
+  ok('an edit after the run closes it again', blocks(r10), r10.stdout);
 
   hook(COUNT, { hook_event_name: 'PostToolUseFailure', tool_name: 'Bash', session_id: 's1', cwd: root, tool_input: { command: 'npm test' }, error: '1 failed' }, cfg);
-  ok('a failed run is not evidence', blocks(stop()), stop().stdout);
+  const r11 = stop();
+  ok('a failed run is not evidence', blocks(r11), r11.stdout);
 
   fs.writeFileSync(path.join(cfg, 'teknesyum', 'seat.json'), JSON.stringify({ at: '2026-09-16T00:00:00Z', slugs: ['design-ui-designer'], bytes: 2048 }));
   take(cfg, 's1');
@@ -1016,12 +1045,15 @@ function testProcs() {
   fs.writeFileSync(path.join(cfg, 'teknesyum', 'procs.json'), JSON.stringify({ at: Date.now(), count: 3, oldest: 40, names: ['bash.exe'] }));
   const line = (extra) =>
     run(process.execPath, [STATUSLINE], { cwd: root, input: JSON.stringify({ workspace: { current_dir: root } }), env: { ...process.env, CLAUDE_CONFIG_DIR: cfg, NO_COLOR: '1', TEKNESYUM_PROCS_OFF: '', ...extra } }).stdout;
-  ok('the statusline shows the stale count', /⏳ 3 processes 40 min/.test(line()), line());
+  const r12 = line();
+  ok('the statusline shows the stale count', /⏳ 3 processes 40 min/.test(r12), r12);
   fs.writeFileSync(path.join(cfg, 'teknesyum', 'config.json'), JSON.stringify({ lang: 'tr' }));
-  ok('and says it in Turkish', /⏳ 3 süreç 40 dk/.test(line()), line());
+  const r13 = line();
+  ok('and says it in Turkish', /⏳ 3 süreç 40 dk/.test(r13), r13);
   fs.writeFileSync(path.join(cfg, 'teknesyum', 'config.json'), '{}');
   fs.writeFileSync(path.join(cfg, 'teknesyum', 'procs.json'), JSON.stringify({ at: Date.now(), count: 0, oldest: 0, names: [] }));
-  ok('zero stays off the line', !/⏳/.test(line()), line());
+  const r14 = line();
+  ok('zero stays off the line', !/⏳/.test(r14), r14);
   sweep(root);
   sweep(cfg);
 }
@@ -1205,13 +1237,17 @@ function testPrivate() {
 }
 
 function testDoctor() {
-  const r = run(process.execPath, [path.join(CORE, 'scripts', 'doctor.js'), '--json'], { cwd: path.resolve(CORE, '..') });
+  const root = fixture();
+  const cfg = home();
+  const r = run(process.execPath, [path.join(CORE, 'scripts', 'doctor.js'), '--json'], { cwd: root, env: { ...process.env, CLAUDE_CONFIG_DIR: cfg } });
   let rows = [];
   try {
     rows = JSON.parse(r.stdout);
   } catch {}
   const names = rows.map((x) => x.name).join(',');
   ok('doctor runs the seven checks that are left', names === 'node,git,version,hooks,statusline,map,logs', names + ' ' + r.stderr);
+  sweep(root);
+  sweep(cfg);
 }
 
 function testScan() {
@@ -1473,6 +1509,7 @@ function main() {
     }
   }
   sweep(root);
+  if (template) sweep(template);
   process.stdout.write(pass + ' passed, ' + fail + ' failed\n');
   for (const f of failures) process.stdout.write('  FAIL ' + f + '\n');
   process.exit(fail ? 1 : 0);

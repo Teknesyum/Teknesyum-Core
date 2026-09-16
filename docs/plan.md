@@ -122,7 +122,7 @@ Sıra: önce riski sıfır olan ölü kod, sonra ortak yardımcılar (sonraki da
 - [x] I4 Süreç birleştirme: Bash tek süreç (yasak içinden loop), Agent tek süreç, Stop tek süreç (dur içinden count) (032-C, 033-9).
 - [x] I5 agency.js kutuphane sarmalayıcısı (033-6); doctor/scan ortak koşucu (033-10).
 - [x] I6 statusline git yerine state; bridge önbelleği (033-11); strings kısaltma (033-12).
-- [ ] I7 Test hızı: çift spawn, fixture şablonu, run.js dar kopya, doctor testi sandbox'ta (033-13).
+- [x] I7 Test hızı: çift spawn, fixture şablonu, run.js dar kopya, doctor testi sandbox'ta (033-13).
 - [ ] I8 Makine: SessionStart'ta 7 günden eski state/banner/advice süpürme, eklenti önbelleğinde son iki sürüm, kütüphane sığ klon + gc (032-D, E, F).
 - [x] I9 RULES.md / CLAUDE.md tekrarları (032-G).
 - [ ] I10 İki README, AGENTS.md, CHANGELOG, sürüm, push, eklenti güncelle.

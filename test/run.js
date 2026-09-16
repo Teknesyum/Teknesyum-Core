@@ -6,9 +6,8 @@ const source = path.resolve(__dirname, '..');
 const sandbox = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-suite-'));
 const repo = path.join(sandbox, 'repo');
 fs.mkdirSync(repo);
-const excluded = new Set(['.git', '.claude', 'node_modules', 'Teknesyum-Base']);
-for (const item of fs.readdirSync(source))
-  if (!excluded.has(item)) fs.cpSync(path.join(source, item), path.join(repo, item), { recursive: true });
+for (const item of ['core', 'test', 'package.json'])
+  fs.cpSync(path.join(source, item), path.join(repo, item), { recursive: true });
 const config = path.join(sandbox, 'config');
 fs.mkdirSync(config);
 const env = { ...process.env, CLAUDE_CONFIG_DIR: config, TEKNESYUM_BEEP_SESSIZ: '1', TEKNESYUM_PROCS_OFF: '1' };
