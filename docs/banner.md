@@ -35,6 +35,7 @@ doğrulandı (2026-09-11, `index`, `final`, `delta` alanları geliyor).
 | `??` `++` (`mod.js`) | `Kütüphane Döndü · N Kitap Uydu · En Çok Üçü Okunacak` |
 | `aa` | `Ajans · N Koltuk Uydu · Cevap docs/danisma/ Altına Yazılacak` |
 | `pp` | `Özel Raf Açıldı · N Kitap · K KB` (modelin "◆" yankısı kalktı) |
+| `mc` | `Bellek Taraması · Geçmiş İstekler Taranıyor` |
 | `ff` `hh` | `Fable'a Danışılıyor · Soru Gidiyor, Cevap Kaydedilecek` / `İşaret Listesi Geliyor` |
 | jobs.md (`mod.js`) | `N Açık İş Geri Geldi · Dosya trash/'te` |
 | İş kapısı (`dur.js`) | `İş Kapısı · N Açık, Gerekçesiz` / `İş Kapısı · N Madde, Liste Yok` |

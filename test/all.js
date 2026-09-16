@@ -320,7 +320,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 14400, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 16000, String(JSON.stringify(table).length));
   ok('no relay strings are left', !keys.some((k) => /^(role\.|notice\.|line\.(contracts|agents|open|blocked))/.test(k)), keys.join(' '));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
@@ -728,8 +728,8 @@ function testJobs() {
   fs.writeFileSync(list, '- [x] a\n- [x] b');
   ok('a list with every job done goes to trash in silence', mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'merhaba', cwd }) === '' && !fs.existsSync(list));
   fs.writeFileSync(list, '- bench');
-  const both = JSON.parse(mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'hh', cwd })).hookSpecificOutput.additionalContext;
-  ok('an old plain line still counts as open and rides along with a mark', /bench/.test(both) && both.includes('`pp`'), both);
+  const both = JSON.parse(mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'hh', cwd, session_id: 'tkc-jobs-' + process.pid })).hookSpecificOutput.additionalContext;
+  ok('an old plain line still counts as open and rides along with a mark', /bench/.test(both) && !both.includes('`pp`'), both);
 
   ok('one line is one job', mod.items('README düzelt ve push et') === 0);
   ok('a numbered list is counted', mod.items('şunlar:\n1. a\n2. b\n3) c') === 3);
@@ -860,7 +860,14 @@ function testFable() {
   ok('and carries the question', /redis kilidi/.test(ctx), ctx);
   ok('and tells where the answer is filed', /record/.test(ctx), ctx);
   ok('and asks for a line before the first tool, so the banner is drawn early', /lk araç çağrısından önce|before the first tool call/.test(ctx), ctx);
-  const help = JSON.parse(mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'hh' })).hookSpecificOutput.additionalContext;
+  const bant = require(path.join(CORE, 'hooks', 'bant.js'));
+  const seans = 'tkc-hh-' + process.pid;
+  const hhOut = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'hh', session_id: seans });
+  const hhCtx = hhOut ? JSON.parse(hhOut).hookSpecificOutput.additionalContext || '' : '';
+  ok('hh puts not one letter of the list into the context', !hhCtx.includes('`pp`'), hhCtx);
+  const drawn = bant.build({ hook_event_name: 'MessageDisplay', session_id: seans, index: 0, delta: 'merhaba' });
+  const help = drawn ? JSON.parse(drawn).hookSpecificOutput.displayContent : '';
+  ok('hh draws the list on the display channel instead', help.includes('merhaba'), help);
   for (const k of ['??', '++', 'pp', 'aa', 'ff', 'hh']) ok('hh explains ' + k, help.includes('`' + k + '`'), help);
   ok('hh says where the mark stands', /başında|sonunda|start|end/i.test(help), help);
   ok('hh shows how to use one', /`\?\? redis/.test(help), help);
@@ -868,6 +875,50 @@ function testFable() {
 
   const bare = JSON.parse(mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'ff' })).hookSpecificOutput.additionalContext;
   ok('a bare ff still gives the recipe', /advice\.js/.test(bare) && !/Soru:/.test(bare), bare);
+}
+
+function testHatirla() {
+  const h = require(path.join(CORE, 'scripts', 'hatirla.js'));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-mc-'));
+  const kayit = path.join(root, 'konusma.jsonl');
+  const satir = [
+    JSON.stringify({ type: 'user', message: { content: 'issue sablonunu yaz' } }),
+    JSON.stringify({ type: 'user', isMeta: true, message: { content: 'bu meta' } }),
+    JSON.stringify({ type: 'user', message: { content: '<system-reminder>gurultu</system-reminder>' } }),
+    JSON.stringify({ type: 'assistant', message: { content: 'cevap' } }),
+    JSON.stringify({ type: 'user', message: { content: [{ type: 'tool_result', content: 'ciktı' }, { type: 'text', text: 'panel testini kos' }] } }),
+  ].join('\n');
+  fs.writeFileSync(kayit, satir + '\n');
+
+  const asked = h.prompts(kayit);
+  ok('only my own prompts come out of the transcript', asked.length === 2 && asked[0] === 'issue sablonunu yaz' && asked[1] === 'panel testini kos', JSON.stringify(asked));
+
+  fs.mkdirSync(path.join(root, 'trash'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'trash', 'jobs-2026.md'), '- [x] biten\n- [ ] duran is — karar bekliyor\n');
+  ok('an old job list still counts as open work', h.jobs(root).length === 1 && /duran is/.test(h.jobs(root)[0]), JSON.stringify(h.jobs(root)));
+
+  const g = h.gather(root, kayit);
+  ok('the gathered file carries both', /panel testini kos/.test(g.text) && /duran is/.test(g.text) && !/gurultu/.test(g.text), g.text);
+
+  const cwd0 = process.cwd();
+  process.chdir(root);
+  try {
+    ok('topla writes under tmp', h.cli(['topla', '--transcript', kayit]) === 0 && fs.existsSync(path.join(root, 'tmp', 'gecmis.md')));
+    const cevap = path.join(root, 'cevap.md');
+    fs.writeFileSync(cevap, '- [ ] issue sablonu — yazilmadi\n');
+    ok('record files the reply as the reminder', h.cli(['record', '--reply', cevap]) === 0 && /issue sablonu/.test(fs.readFileSync(path.join(root, 'tmp', 'hatirlatici.md'), 'utf8')));
+    ok('record without a reply is a usage error', h.cli(['record']) === 2);
+  } finally {
+    process.chdir(cwd0);
+  }
+
+  const mod = require(path.join(CORE, 'hooks', 'mod.js'));
+  const out = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'mc', cwd: root, session_id: 'mc1' });
+  const ctx = JSON.parse(out).hookSpecificOutput.additionalContext;
+  ok('mc writes the sweep recipe', /hatirla\.js/.test(ctx) && /topla/.test(ctx) && /record/.test(ctx), ctx);
+  ok('and names the file it ends in', /hatirlatici\.md/.test(ctx), ctx);
+  ok('and keeps the temporary files in tmp', /tmp\//.test(ctx), ctx);
+  sweep(root);
 }
 
 function testProcs() {
@@ -1112,7 +1163,7 @@ function testScan() {
     return { status: r.status, profile: out.profile, rows: Object.fromEntries(out.rows.map((x) => [x.name, x])), raw: r.stdout + r.stderr };
   };
   let s = scan();
-  ok('scan names the seven checks', Object.keys(s.rows).join(',') === 'license,plan,handoff,docs,tests,trash,map', s.raw);
+  ok('scan names the seven checks', Object.keys(s.rows).join(',') === 'license,plan,handoff,docs,tests,trash,tmp,map', s.raw);
   ok('scan defaults to normal when config has no profile', s.profile === 'normal', s.profile);
   ok('scan takes the profile from the argument', scan('eco').profile === 'eco');
   ok('a bare repo is short on license', s.rows.license.ok === false && /no LICENSE/.test(s.rows.license.measure), s.rows.license.measure);
@@ -1143,6 +1194,15 @@ function testScan() {
   ok('an install line on an old tag is named', s.rows.docs.ok === false && /v1\.0\.0, not v1\.2\.3/.test(s.rows.docs.measure), s.rows.docs.measure);
   ok('the license check is quiet once surfaces agree', s.rows.license.ok === true, s.rows.license.measure);
   ok('exit is 1 while anything is short', s.status === 1);
+  ok('a clean root leaves the tmp check quiet', s.rows.tmp.ok === true, s.rows.tmp.measure);
+  fs.writeFileSync(path.join(root, 'rapor-1.md'), 'x\n');
+  ok('a stray temporary file at the root is named', scan('eco').rows.tmp.ok === false, JSON.stringify(scan('eco').rows.tmp));
+  fs.unlinkSync(path.join(root, 'rapor-1.md'));
+  fs.mkdirSync(path.join(root, 'tmp'), { recursive: true });
+  ok('a tmp folder outside .gitignore is named', scan('eco').rows.tmp.ok === false && /gitignore/.test(scan('eco').rows.tmp.measure), JSON.stringify(scan('eco').rows.tmp));
+  fs.writeFileSync(path.join(root, '.gitignore'), 'tmp/\n');
+  ok('and goes quiet once tmp/ is ignored', scan('eco').rows.tmp.ok === true, JSON.stringify(scan('eco').rows.tmp));
+
   const help = run(process.execPath, [SCAN, '--help'], { cwd: root, env });
   ok('help says nothing is written and no model runs', /Nothing is written, no model runs/.test(help.stdout), help.stdout);
   sweep(root);
@@ -1333,6 +1393,7 @@ function main() {
     ['scout', testScout],
     ['trash', testCop],
     ['higher model', testUst],
+    ['memory check', testHatirla],
   ];
   for (const [name, fn] of suites) {
     try {

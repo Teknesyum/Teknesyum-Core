@@ -66,8 +66,10 @@ serbest.
 
 ### İki Uçta İşaret
 
-`??` `++` kütüphane, `pp` özel raf, `aa` ajans, `ff` fable danışma, `hh` yardım. Her biri
-istemin başında da sonunda da okunur; `hh` hepsini örnekle listeler.
+`??` `++` kütüphane, `pp` özel raf, `aa` ajans, `ff` fable danışma, `mc` bellek taraması,
+`hh` yardım. Her biri istemin başında da sonunda da okunur; `hh` hepsini örnekle listeler.
+`hh` listesi ekran kanalına çizilir: bağlama tek harf gitmez, basılıp basılmayacağına
+model karar vermez.
 
 | Özellik | Sıradan tur | İş yapınca | Kapatmak |
 |---|---|---|---|
@@ -280,8 +282,9 @@ flowchart TD
 | `scripts/scaffold.js` | Lisans, imza bloğu, dil linki: modelin asla yazmadığı sabit metinler. |
 | `scripts/setup.js` | Makine ayarı: dil, zil, özel depo, projeler klasörü. `--host cursor\|gemini` adaptörü o hosta bağlar, `--remove` çıkarır. |
 | `scripts/doctor.js` | Yedi kontrol: node, git, sürüm, kancalar, statusline, harita, günlükler. |
-| `scripts/scan.js` | Projenin kendisine yedi salt okunur kontrol: lisans yüzeyleri, beş dosya eşiğine karşı plan, devir boşlukları, sürüme karşı belgeler, test betiği, `trash/` atıfları, harita. Yazmaz, model çağırmaz, bağlama taşımaz; profil yalnız belge kümesini genişletir. |
+| `scripts/scan.js` | Projenin kendisine sekiz salt okunur kontrol: lisans yüzeyleri, beş dosya eşiğine karşı plan, devir boşlukları, sürüme karşı belgeler, test betiği, `trash/` atıfları, `tmp/` dışında kalmış geçici dosyalar, harita. Yazmaz, model çağırmaz, bağlama taşımaz; profil yalnız belge kümesini genişletir. |
 | `scripts/scout.js` | Öncül arama, istenince ve bir kez: `brief <konu>` `docs/oncul/` altına sınırlı bir öncül yazar (5 arama, 3 sayfa, 5 aday, 400 kelime) ve kapıyı kurar; öncül sonnet üstünde tek alt ajana gider; `record` cevabı 8.000 karakterde keserek dosyalar. `hooks/scout.js` kapısı aynı öncüle ikinci çağrıyı, başka modeli ya da uzatılmış istemi reddeder. |
+| `scripts/hatirla.js` | Bellek taraması: `topla` geçmiş isteklerimi projenin en yeni üç konuşma kaydından ve eski iş listelerinin açık satırlarından `tmp/gecmis.md` dosyasına süzer; bitmemiş olanları bir alt ajan adlandırır, `record --reply <dosya>` o listeyi `tmp/hatirlatici.md` olarak dosyalar. Geçici dosyalar `tmp/` altında durur, git'e girmez. |
 | `scripts/cop.js` | `<proje>/trash` klasörünü ölçer: `node cop.js .` toplamı ve en büyük on dosyayı basar, 100 MB üstünde `1` ile çıkar. `--sil` klasörü geri dönüşüm kutusuna gönderir. Bu bayrak olmadan hiçbir şey silinmez. |
 | `scripts/release.js` | Sürümü `.changes/` altındaki notlardan artırır, kurulum satırlarını yeniler, etiketler; `publish` GitHub sürümünü `vX.Y.Z` başlığıyla açar, iki kurucuyu `.sha256` dosyalarıyla yükler. |
 
@@ -444,7 +447,7 @@ Yukarıdaki kanıt kapısı on üç kanca kaydından biri. Dokuz olay, on bir do
 | Olay | Kanca | Söyler |
 |---|---|---|
 | `SessionStart` | `count.js` | varsa `Devam: .claude/handoff.md`; varsa `docs/plan.md`nin ilk açık `- [ ]` adımı; `<proje>/trash` 100 MB'ı aştıysa proje başına günde en çok bir kez çöp teklifi — satır tam silme komutunu taşır, kanca hiçbir şeyi kendi silmez; yoksa hiçbir şey. Günde bir kez `kutuphane.js fetch all --stale 7`yi arka planda ayrık başlatır, hiçbir raf bir haftadan eski kalmaz; model hiçbirini görmez |
-| `UserPromptSubmit` | `mod.js` | `??` / `++`de kütüphane bulguları, `pp`de özel kitaplar, `aa`da ajans koltukları, `ff`de fable danışma yordamı, `hh`de işaretlerin listesi — işaret cümlenin başında da sonunda da okunur; `.claude/jobs.md`'nin (iş listesi, `- [ ] iş — gerekçe`) açık satırları bir kez geri gelir, dosya `trash/`'e taşınır; çok maddeli istem bağlama yazmadan durum işareti bırakır; yoksa hiçbir şey |
+| `UserPromptSubmit` | `mod.js` | `??` / `++`de kütüphane bulguları, `pp`de özel kitaplar, `aa`da ajans koltukları, `ff`de fable danışma yordamı, `mc`de bellek tarama yordamı, `hh`de işaretlerin listesi (liste bağlama değil ekran kanalına gider) — işaret cümlenin başında da sonunda da okunur; `.claude/jobs.md`'nin (iş listesi, `- [ ] iş — gerekçe`) açık satırları bir kez geri gelir, dosya `trash/`'e taşınır; çok maddeli istem bağlama yazmadan durum işareti bırakır; yoksa hiçbir şey |
 | `PostToolUse` | `count.js` | eşikte tek satır, bir kez; yoksa hiçbir şey |
 | `PostToolUseFailure` | `count.js` | hiçbir şey; kalan test komutunu kaydeder |
 | `PreToolUse` | `yasak.js` | tehlikeli komutu tek satır gerekçeyle reddeder. Proje içinde silmek serbest; dışına çıkmak değil — hedefi çalışma klasörünün dışına düşen ya da kökün kendisi olan silme, disk yazma, geçmiş silme, depo/sürüm silme, indir-koş boruları, `chmod 777`, makine çapında durdurma reddedilir; yoksa hiçbir şey |

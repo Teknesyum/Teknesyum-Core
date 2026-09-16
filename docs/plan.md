@@ -81,3 +81,18 @@ yalnız yasak gerekçesini yazar (Claude'da da modele giden aynı satır); 0 tok
 - [x] F4 `setup.js --host cursor|gemini [--remove]`, README ×2.
 - [x] F5 Gemini CLI: banner `systemMessage`, yasak `decision:deny`, iş kapısı `AfterAgent`. Canlı: `docs/raporlar/gemini-canli-deneme.md`.
 - [x] Codex — hooks Windows'ta yok (v0.114); kural şablonu `adapters/AGENTS.md` (Cursor/Gemini için de).
+
+## G. Yardım listesi ekrana, geçici iş toplayıcı, tmp standardı (2026-09-16, sıra benim)
+
+`hh` bugüne kadar listeyi bağlama yazdı ve basmayı modele bıraktı; model basmayınca satır
+kayboldu. Liste ekran kanalına taşınıyor: bedel 0 token, basılması modele bağlı değil.
+
+- [x] G1 `lib.sayBlock` + `bant.js`: kuyruk düz metin bloğu taşıyabilsin, ters tırnaklı satıra
+  dönüştürülmesin.
+- [x] G2 `mod.js` `hh`: `additionalContext` yazmaz, listeyi bloğa koyar. Test: `hh` turunda
+  bağlama tek harf gitmez.
+- [x] G3 `mc` işareti + `core/scripts/hatirla.js`: geçmiş istemleri dökümden toplar, bir alt
+  ajana verir, dönen listeyi `tmp/hatirlatici.md` altına yazar.
+- [x] G4 `tmp/` standardı: pp rafına yazılır, `.gitignore` şablonuna girer, `scan.js` kökte
+  başıboş geçici dosya görürse söyler.
+- [x] G5 Testler, iki README, `docs/banner.md`, CHANGELOG, sürüm, push.

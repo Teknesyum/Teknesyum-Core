@@ -1,11 +1,11 @@
 const fs = require('fs');
 const path = require('path');
-const { configRoot, stateFile, t, banner, say } = require('./lib.js');
+const { configRoot, stateFile, t, banner, say, sayBlock } = require('./lib.js');
 const lib = require('../scripts/kutuphane.js');
 const ag = require('../scripts/agency.js');
 
-const PREFIX = /^\s*(\?\?|\+\+|pp|aa|ff|hh)(?=\s|$)/i;
-const SUFFIX = /(^|\s)(\?\?|\+\+|pp|aa|ff|hh)\s*$/i;
+const PREFIX = /^\s*(\?\?|\+\+|pp|aa|ff|hh|mc)(?=\s|$)/i;
+const SUFFIX = /(^|\s)(\?\?|\+\+|pp|aa|ff|hh|mc)\s*$/i;
 
 function mark(prompt) {
   const head = PREFIX.exec(prompt);
@@ -82,9 +82,17 @@ function library(text) {
   return head + '\n' + hits.join('\n');
 }
 
-function help() {
+function help(session) {
   shown.push(banner('banner.help'));
-  return t('mod.help');
+  sayBlock(session, t('mod.help'));
+  return '';
+}
+
+function memory() {
+  shown.push(banner('banner.memory'));
+  return t('mod.memory')
+    .replace('%C', cmd('topla', 'hatirla.js'))
+    .replace('%R', cmd('record --reply <dosya>', 'hatirla.js'));
 }
 
 function fable(text) {
@@ -188,7 +196,7 @@ function handle(j) {
   let text = '';
   if (m) {
     const { rest, key } = m;
-    text = key === 'hh' ? help() : key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : library(rest);
+    text = key === 'hh' ? help(j.session_id) : key === 'mc' ? memory() : key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : library(rest);
   }
   say(j.session_id, shown);
   const all = [pre, text].filter(Boolean).join('\n\n');

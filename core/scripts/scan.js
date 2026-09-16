@@ -165,6 +165,17 @@ function trashOk(root) {
   return names.size + ' retired files, none referenced by live code';
 }
 
+function tmpOk(root) {
+  const strays = fs.readdirSync(root, { withFileTypes: true })
+    .filter((e) => e.isFile() && /^(gecmis|hatirlatici|olcum|rapor|cikti|out|tmp)[-.]|[.](tmp|bak|orig)$/i.test(e.name))
+    .map((e) => e.name);
+  const ignored = read(path.join(root, '.gitignore'));
+  const kapali = ignored.split('\n').some((l) => l.trim().replace('\r', '').replace(/[/]$/, '') === 'tmp');
+  if (!kapali && fs.existsSync(path.join(root, 'tmp'))) return { ok: false, measure: 'tmp/ is not in .gitignore', fix: 'add tmp/ to .gitignore; temporary files never enter git' };
+  if (strays.length) return { ok: false, measure: strays.slice(0, 5).join(', '), fix: 'move temporary files under tmp/' };
+  return fs.existsSync(path.join(root, 'tmp')) ? 'tmp/ holds the temporary files' : 'no stray temporary file at the root';
+}
+
 function mapOk(root) {
   const st = require('./map.js').staleness(root, path.join(root, '.claude'));
   if (st.state === 'missing') return { ok: false, measure: 'no import map', fix: 'node <plugin>/scripts/map.js .' };
@@ -181,6 +192,7 @@ function run(root, profile) {
     check('docs', () => docsOk(root, profile)),
     check('tests', () => testsOk(root)),
     check('trash', () => trashOk(root)),
+    check('tmp', () => tmpOk(root)),
     check('map', () => mapOk(root)),
   ];
 }

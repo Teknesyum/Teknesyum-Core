@@ -220,6 +220,18 @@ function say(session, lines) {
   } catch {}
 }
 
+function sayBlock(session, text) {
+  const body = String(text || '').trim();
+  if (!body) return;
+  try {
+    merge(queue(session), (b) => {
+      const now = Array.isArray(b.lines) ? b.lines : [];
+      if (now.some((l) => l && typeof l === 'object' && l.block === body)) return { lines: now };
+      return { lines: now.concat([{ block: body }]).slice(-6) };
+    });
+  } catch {}
+}
+
 function drain(session) {
   const f = queue(session);
   if (!fs.existsSync(f)) return [];
@@ -377,6 +389,7 @@ module.exports = {
   banner,
   queue,
   say,
+  sayBlock,
   drain,
   BANNER,
   openLogs,
