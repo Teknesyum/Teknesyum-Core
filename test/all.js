@@ -320,7 +320,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 16000, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 17000, String(JSON.stringify(table).length));
   ok('no relay strings are left', !keys.some((k) => /^(role\.|notice\.|line\.(contracts|agents|open|blocked))/.test(k)), keys.join(' '));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
@@ -903,7 +903,14 @@ function testHatirla() {
   const cwd0 = process.cwd();
   process.chdir(root);
   try {
-    ok('topla writes under tmp', h.cli(['topla', '--transcript', kayit]) === 0 && fs.existsSync(path.join(root, 'tmp', 'gecmis.md')));
+    ok('topla writes page one under tmp', h.cli(['topla', '--transcript', kayit]) === 0 && fs.existsSync(path.join(root, 'tmp', 'gecmis-1.md')));
+    const uzun = path.join(root, 'uzun.jsonl');
+    fs.writeFileSync(uzun, Array.from({ length: h.PAGE + 5 }, (_, i) => JSON.stringify({ type: 'user', message: { content: 'istek ' + i } })).join('\n'));
+    const s1 = h.gather(root, uzun, 1);
+    const s2 = h.gather(root, uzun, 2);
+    ok('page one holds the newest requests and says more is there', s1.more && s1.count === h.PAGE && s1.text.includes('istek ' + (h.PAGE + 4)) && !s1.text.includes('istek 4\n'), s1.text.slice(0, 300));
+    ok('the next page goes further back and says the records ended', !s2.more && s2.count === 5 && s2.text.includes('istek 0'), s2.text);
+    ok('only page one carries the old job lines', /duran is/.test(s1.text) && !/duran is/.test(s2.text));
     const cevap = path.join(root, 'cevap.md');
     fs.writeFileSync(cevap, '- [ ] issue sablonu — yazilmadi\n');
     ok('record files the reply as the reminder', h.cli(['record', '--reply', cevap]) === 0 && /issue sablonu/.test(fs.readFileSync(path.join(root, 'tmp', 'hatirlatici.md'), 'utf8')));

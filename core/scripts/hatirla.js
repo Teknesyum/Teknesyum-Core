@@ -3,8 +3,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const MAX_PROMPTS = 200;
-const MAX_FILES = 3;
+const PAGE = 60;
 const MAX_CHARS = 1200;
 const TMP = 'tmp';
 const SKIP = /<(system-reminder|task-notification|ci-monitor-event|command-name|local-command-stdout)\b/;
@@ -19,7 +18,7 @@ function projectDir(cwd) {
   return path.join(root, 'projects', slug);
 }
 
-function files(cwd, n) {
+function files(cwd) {
   const dir = projectDir(cwd);
   let rows = [];
   try {
@@ -27,13 +26,13 @@ function files(cwd, n) {
       .filter((f) => f.endsWith('.jsonl'))
       .map((f) => path.join(dir, f))
       .map((f) => ({ f, at: fs.statSync(f).mtimeMs }))
-      .sort((a, b) => a.at - b.at);
+      .sort((a, b) => b.at - a.at);
   } catch { return []; }
-  return rows.slice(-(n || MAX_FILES)).map((r) => r.f);
+  return rows.map((r) => r.f);
 }
 
 function newest(cwd) {
-  const all = files(cwd, 1);
+  const all = files(cwd);
   return all.length ? all[0] : '';
 }
 
@@ -57,7 +56,7 @@ function prompts(file) {
     const kisa = body.length > MAX_CHARS ? body.slice(0, MAX_CHARS) + ' ...' : body;
     if (!out.includes(kisa)) out.push(kisa);
   }
-  return out.slice(-MAX_PROMPTS);
+  return out;
 }
 
 function jobs(cwd) {
@@ -78,17 +77,25 @@ function jobs(cwd) {
   return out;
 }
 
-function gather(cwd, transcript) {
+function gather(cwd, transcript, sayfa) {
+  const n = Math.max(1, parseInt(sayfa, 10) || 1);
   const list = transcript ? [transcript] : files(cwd);
-  let asked = [];
-  for (const f of list) for (const p of prompts(f)) if (!asked.includes(p)) asked.push(p);
-  asked = asked.slice(-MAX_PROMPTS);
-  const file = list.join(', ');
-  const left = jobs(cwd);
-  const head = ['# Geçmiş istekler', '', 'Kaynak: ' + (file || 'bulunamadı'), 'İstek sayısı: ' + asked.length, ''];
-  const body = asked.map((p, i) => '## ' + (i + 1) + '\n' + p).join('\n\n');
+  const want = n * PAGE + 1;
+  const asked = [];
+  const used = [];
+  for (const f of list) {
+    if (asked.length >= want) break;
+    used.push(f);
+    const ps = prompts(f).reverse();
+    for (const p of ps) if (!asked.includes(p)) asked.push(p);
+  }
+  const more = asked.length > n * PAGE;
+  const page = asked.slice((n - 1) * PAGE, n * PAGE).reverse();
+  const left = n === 1 ? jobs(cwd) : [];
+  const head = ['# Geçmiş istekler · sayfa ' + n, '', 'Kaynak: ' + (used.join(', ') || 'bulunamadı'), 'İstek sayısı: ' + page.length, more ? 'Devamı var: topla --sayfa ' + (n + 1) : 'Kayıtların başına varıldı', ''];
+  const body = page.map((p, i) => '## ' + (i + 1) + '\n' + p).join('\n\n');
   const tail = left.length ? ['', '# Kapanmamış iş satırları', ''].concat(left) : [];
-  return { file, count: asked.length, text: head.concat(body, tail).join('\n') + '\n' };
+  return { page: n, more, count: page.length, text: head.concat(body, tail).join('\n') + '\n' };
 }
 
 function write(cwd, name, body) {
@@ -110,9 +117,10 @@ function cli(argv) {
   const flag = (n) => { const i = argv.indexOf(n); return i > -1 ? argv[i + 1] : ''; };
   const cwd = flag('--cwd') || process.cwd();
   if (cmd === 'topla') {
-    const g = gather(cwd, flag('--transcript'));
-    const out = write(cwd, 'gecmis.md', g.text);
-    process.stdout.write(out + '\n' + g.count + ' istek\n');
+    const g = gather(cwd, flag('--transcript'), flag('--sayfa'));
+    const out = write(cwd, 'gecmis-' + g.page + '.md', g.text);
+    const next = g.more ? 'devamı var: node "' + __filename + '" topla --sayfa ' + (g.page + 1) : 'kayıtların başına varıldı';
+    process.stdout.write(out + '\n' + g.count + ' istek · ' + next + '\n');
     return 0;
   }
   if (cmd === 'record') {
@@ -121,10 +129,10 @@ function cli(argv) {
     process.stdout.write(record(cwd, reply) + '\n');
     return 0;
   }
-  process.stdout.write('kullanim: hatirla.js topla [--transcript <dosya>] [--cwd <klasor>]\n         hatirla.js record --reply <dosya> [--cwd <klasor>]\n');
+  process.stdout.write('kullanim: hatirla.js topla [--sayfa N] [--transcript <dosya>] [--cwd <klasor>]\n         hatirla.js record --reply <dosya> [--cwd <klasor>]\n');
   return cmd ? 2 : 0;
 }
 
 if (require.main === module) process.exit(cli(process.argv.slice(2)));
 
-module.exports = { gather, prompts, files, jobs, newest, record, write, tmpDir, cli, TMP, MAX_PROMPTS };
+module.exports = { gather, prompts, files, jobs, newest, record, write, tmpDir, cli, TMP, PAGE };
