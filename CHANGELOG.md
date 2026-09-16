@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.36.0
+
+- The hh list is drawn on the display channel at no context cost, mc sweeps past requests into a reminder, tmp/ becomes the standard folder for temporary files
+
 ## v0.35.0
 
 - Higher-model banner: ust.js says one line when the turn hands work to a model above the session's own, whatever the reason
