@@ -1415,6 +1415,63 @@ function testCop() {
   sweep(cfg);
 }
 
+function testMachine() {
+  const cfg = home();
+  const tek = path.join(cfg, 'teknesyum');
+  const old = (Date.now() - 8 * 24 * 60 * 60 * 1000) / 1000;
+  const put = (name, aged) => {
+    const f = path.join(tek, name);
+    fs.writeFileSync(f, '{}');
+    if (aged) fs.utimesSync(f, old, old);
+    return f;
+  };
+  for (const n of ['state-gone.json', 'banner-gone.json', 'advice-abc123.json', 'tree-gone.json', 'state-live.json', 'banner-live.json', 'gorus-abc123.json', 'config.json']) put(n, true);
+  put('state-fresh.json', false);
+  const cache = path.join(cfg, 'plugins', 'cache');
+  for (const v of ['0.9.0', '0.10.0', '0.36.1', '0.37.0', '0.38.0']) fs.mkdirSync(path.join(cache, 'teknesyum', 'teknesyum-core', v, 'hooks'), { recursive: true });
+  for (const v of ['1.0.0', '1.1.0', '1.2.0']) fs.mkdirSync(path.join(cache, 'other', 'thing', v), { recursive: true });
+  fs.writeFileSync(path.join(cfg, 'plugins', 'installed_plugins.json'), JSON.stringify({ version: 2, plugins: { 'teknesyum-core@teknesyum': [{ installPath: path.join(cache, 'teknesyum', 'teknesyum-core', '0.36.1') }] } }));
+  const root = fixture();
+  hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 'live', cwd: root }, cfg);
+  const left = fs.readdirSync(tek);
+  ok('the session start sweeps state, banner, advice and tree files older than a week', !['state-gone.json', 'banner-gone.json', 'advice-abc123.json', 'tree-gone.json'].some((n) => left.includes(n)), left.join(','));
+  ok('it leaves the live session, fresh files and everything else', ['state-live.json', 'state-fresh.json', 'gorus-abc123.json', 'config.json'].every((n) => left.includes(n)), left.join(','));
+  const kept = fs.readdirSync(path.join(cache, 'teknesyum', 'teknesyum-core')).sort().join(',');
+  ok('the plugin cache keeps the two newest versions and the installed one', kept === '0.36.1,0.37.0,0.38.0', kept);
+  const binned = path.join(tek, 'trash', 'plugin-cache', 'teknesyum', 'teknesyum-core');
+  ok('older versions move to the trash instead of being deleted', fs.existsSync(path.join(binned, '0.9.0', 'hooks')) && fs.existsSync(path.join(binned, '0.10.0')));
+  ok('other marketplaces are not touched', fs.readdirSync(path.join(cache, 'other', 'thing')).length === 3);
+  put('state-later.json', true);
+  hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 'next', cwd: root }, cfg);
+  ok('the sweep runs once a day', fs.existsSync(path.join(tek, 'state-later.json')));
+  sweep(root);
+  sweep(cfg);
+
+  const LIB = path.join(CORE, 'scripts', 'kutuphane.js');
+  const src = fixture();
+  const lib = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lib-'));
+  const gitIn = (cwd, ...a) => run('git', a, { cwd });
+  fs.writeFileSync(path.join(src, 'guide.md'), '# One\n');
+  gitIn(src, 'add', '-A');
+  gitIn(src, 'commit', '-qm', 'two');
+  fs.writeFileSync(path.join(lib, 'raflar.json'), JSON.stringify({ raflar: [{ slug: 'src', url: 'file:///' + src.replace(/\\/g, '/'), kind: 'docs' }] }));
+  const env = { ...process.env, TEKNESYUM_KUTUPHANE: lib, TEKNESYUM_PRIVATE: path.join(lib, 'none'), CLAUDE_CONFIG_DIR: home() };
+  const call = (...a) => run(process.execPath, [LIB, ...a], { cwd: lib, env });
+  const shelf = path.join(lib, 'src');
+  const depth = () => gitIn(shelf, 'rev-list', '--count', 'HEAD').stdout.trim();
+  const first = call('fetch', 'src').stdout;
+  ok('a new shelf is a shallow clone', /src: fetched/.test(first) && fs.existsSync(path.join(shelf, '.git', 'shallow')) && depth() === '1', first + depth());
+  fs.writeFileSync(path.join(src, 'guide.md'), '# Two\n');
+  gitIn(src, 'commit', '-qam', 'three');
+  const second = call('fetch', 'src').stdout;
+  ok('an update stays shallow and lands the new commit', /src: updated/.test(second) && depth() === '1' && fs.readFileSync(path.join(shelf, 'guide.md'), 'utf8').trim() === '# Two', second + depth());
+  const slimmed = call('slim').stdout;
+  ok('slim gc-s a shelf and keeps it shallow', /src: slim/.test(slimmed) && depth() === '1', slimmed);
+  sweep(src);
+  sweep(lib);
+  sweep(env.CLAUDE_CONFIG_DIR);
+}
+
 function testUst() {
   const cfg = home();
   const root = fixture();
@@ -1497,6 +1554,7 @@ function main() {
     ['scan', testScan],
     ['consult gate', testConsult],
     ['trash', testCop],
+    ['machine sweep', testMachine],
     ['higher model', testUst],
     ['memory check', testHatirla],
   ];

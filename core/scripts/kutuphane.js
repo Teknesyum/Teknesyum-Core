@@ -154,8 +154,10 @@ function fetchOne(r) {
   }
   const at = shelfDir(r.slug);
   if (fs.existsSync(path.join(at, '.git'))) {
-    const p = git(['pull', '-q', '--ff-only'], at);
-    return r.slug + ': ' + (p.ok ? 'updated' : 'pull failed: ' + p.out.trim());
+    const p = git(['fetch', '-q', '--depth', '1', 'origin'], at);
+    if (!p.ok) return r.slug + ': fetch failed: ' + p.out.trim();
+    const s = git(['reset', '-q', '--hard', 'FETCH_HEAD'], at);
+    return r.slug + ': ' + (s.ok ? 'updated' : 'reset failed: ' + s.out.trim());
   }
   fs.mkdirSync(home(), { recursive: true });
   const c = git(['clone', '-q', '--depth', '1', r.url, at]);
@@ -176,6 +178,22 @@ function fetch(which, days) {
   const cat = build();
   lines.push(cat.books.length + ' books in ' + cat.shelves + ' shelves -> ' + catalogFile());
   return lines;
+}
+
+function slim() {
+  return shelves()
+    .filter((r) => r.slug !== PRIVATE && fs.existsSync(path.join(shelfDir(r.slug), '.git')))
+    .map((r) => {
+      const at = shelfDir(r.slug);
+      if (!fs.existsSync(path.join(at, '.git', 'shallow'))) {
+        const p = git(['fetch', '-q', '--depth', '1', 'origin'], at);
+        if (!p.ok) return r.slug + ': fetch failed: ' + p.out.trim();
+        git(['reset', '-q', '--hard', 'FETCH_HEAD'], at);
+      }
+      git(['reflog', 'expire', '--expire=now', '--all'], at);
+      const g = git(['gc', '-q', '--prune=now'], at);
+      return r.slug + ': ' + (g.ok ? 'slim' : 'gc failed: ' + g.out.trim());
+    });
 }
 
 function push() {
@@ -457,7 +475,7 @@ function refresh(root, dry) {
 }
 
 function usage() {
-  return 'kutuphane.js fetch [raf|all] [--stale <days>] | stale [days] | push private | raf list | raf add <slug> <url> [--kind agents|skills|prompts|docs] [--scan a,b] [--skip a,b] | list [raf] | find <words> | show <slug...> [--lean] | record --topic T --books a,b --ask f --reply f [--cost c]';
+  return 'kutuphane.js fetch [raf|all] [--stale <days>] | stale [days] | slim | push private | raf list | raf add <slug> <url> [--kind agents|skills|prompts|docs] [--scan a,b] [--skip a,b] | list [raf] | find <words> | show <slug...> [--lean] | record --topic T --books a,b --ask f --reply f [--cost c]';
 }
 
 function main(argv) {
@@ -470,6 +488,10 @@ function main(argv) {
   if (cmd === 'stale') {
     const days = Number(argv[1] || STALE_DAYS);
     console.log(stale(days).map((x) => x.slug.padEnd(24) + (x.age === Infinity ? 'never' : x.age.toFixed(1) + ' days') + (x.stale ? '  stale' : '')).join('\n'));
+    return 0;
+  }
+  if (cmd === 'slim') {
+    console.log(slim().join('\n'));
     return 0;
   }
   if (cmd === 'push') {
@@ -512,4 +534,4 @@ function main(argv) {
 }
 
 if (require.main === module) process.exit(main(process.argv.slice(2)));
-module.exports = { git, front, row, home, shelves, shelfDir, fetch, push, stale, refresh, ageDays, STALE_DAYS, build, catalog, list, find, show, lean, record, addShelf, seatFile, owner, privateRoot, privateDir, privateBooks, expand, PRIVATE, PRIVATE_MAX, MAX_BOOKS, MAX_BYTES };
+module.exports = { git, front, row, home, shelves, shelfDir, fetch, slim, push, stale, refresh, ageDays, STALE_DAYS, build, catalog, list, find, show, lean, record, addShelf, seatFile, owner, privateRoot, privateDir, privateBooks, expand, PRIVATE, PRIVATE_MAX, MAX_BOOKS, MAX_BYTES };

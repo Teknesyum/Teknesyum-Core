@@ -169,6 +169,18 @@ function trash(cwd) {
   return line;
 }
 
+function tidy(j) {
+  try {
+    const day = new Date().toISOString().slice(0, 10);
+    const stamp = stateFile('sweep');
+    if ((read(stamp) || {}).day === day) return;
+    write(stamp, { day });
+    const cop = require('../scripts/cop.js');
+    cop.sweepState(path.dirname(stamp), j.session_id);
+    cop.pruneCache(configRoot(), 2);
+  } catch {}
+}
+
 function opening(j, cwd) {
   const lines = [];
   const parts = [banner('banner.start', { '%V': version() })];
@@ -207,6 +219,7 @@ function handle(j) {
     const st = read(f);
     if (!st || j.source === 'startup' || j.source === 'clear') write(f, fresh(j));
     const cwd = j.cwd || process.cwd();
+    if (j.source !== 'compact') tidy(j);
     if (j.source !== 'compact' && !process.env.TEKNESYUM_NO_REFRESH) try { require('../scripts/kutuphane.js').refresh(cwd); } catch {}
     return opening(j, cwd);
   }

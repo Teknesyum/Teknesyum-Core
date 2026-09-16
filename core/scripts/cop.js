@@ -92,6 +92,89 @@ function report(s) {
   return lines.join('\n');
 }
 
+const WEEK = 7 * 24 * 60 * 60 * 1000;
+const LEFTOVER = /^(state|banner|advice|tree)-(.+)\.json$/;
+
+function sweepState(dir, session, now) {
+  const keep = session ? String(session).replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 80) : null;
+  const gone = [];
+  let names = [];
+  try {
+    names = fs.readdirSync(dir);
+  } catch {
+    return gone;
+  }
+  const limit = (now || Date.now()) - WEEK;
+  for (const n of names) {
+    const m = LEFTOVER.exec(n);
+    if (!m || (keep && (m[2] === keep || m[2] === String(session)))) continue;
+    const full = path.join(dir, n);
+    try {
+      const s = fs.statSync(full);
+      if (!s.isFile() || s.mtimeMs >= limit) continue;
+      fs.unlinkSync(full);
+      gone.push(n);
+    } catch {}
+  }
+  return gone;
+}
+
+function semver(v) {
+  return String(v)
+    .split(/[.+-]/)
+    .slice(0, 3)
+    .map((x) => Number(x) || 0);
+}
+
+function newer(a, b) {
+  const x = semver(a);
+  const y = semver(b);
+  for (let i = 0; i < 3; i += 1) if (x[i] !== y[i]) return y[i] - x[i];
+  return 0;
+}
+
+function pinned(config) {
+  const out = new Set([path.resolve(__dirname, '..').toLowerCase()]);
+  try {
+    const j = JSON.parse(fs.readFileSync(path.join(config, 'plugins', 'installed_plugins.json'), 'utf8'));
+    for (const rows of Object.values(j.plugins || {}))
+      for (const r of [].concat(rows)) if (r && r.installPath) out.add(path.resolve(r.installPath).toLowerCase());
+  } catch {}
+  return out;
+}
+
+function list(dir) {
+  try {
+    return fs.readdirSync(dir, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name);
+  } catch {
+    return [];
+  }
+}
+
+function pruneCache(config, keep) {
+  const cache = path.join(config, 'plugins', 'cache');
+  const bin = path.join(config, 'teknesyum', 'trash', 'plugin-cache');
+  const hold = pinned(config);
+  const moved = [];
+  for (const market of list(cache).filter((m) => /teknesyum/i.test(m)))
+    for (const plugin of list(path.join(cache, market))) {
+      const base = path.join(cache, market, plugin);
+      const versions = list(base).sort(newer);
+      for (const v of versions.slice(keep || 2)) {
+        const from = path.join(base, v);
+        if (hold.has(path.resolve(from).toLowerCase())) continue;
+        let to = path.join(bin, market, plugin, v);
+        if (fs.existsSync(to)) to += '-' + Date.now();
+        try {
+          fs.mkdirSync(path.dirname(to), { recursive: true });
+          fs.renameSync(from, to);
+          moved.push(market + '/' + plugin + '/' + v);
+        } catch {}
+      }
+    }
+  return moved;
+}
+
 function main(argv) {
   const args = argv.slice(2);
   if (args.includes('--help') || args.includes('-h')) {
@@ -122,6 +205,6 @@ function main(argv) {
   return s.bytes >= CEILING ? 1 : 0;
 }
 
-module.exports = { CEILING, dir, olc, asar, mb, report };
+module.exports = { CEILING, WEEK, dir, olc, asar, mb, report, sweepState, pruneCache, newer };
 
 if (require.main === module) process.exitCode = main(process.argv);
