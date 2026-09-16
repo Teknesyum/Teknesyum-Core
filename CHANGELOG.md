@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.37.0
+
+- fable consults hand the agent a file path and file the reply with its measure from the transcript; mc matches every past request to its closing reply and commits, prints only an index, and files open, awaiting-decision and unclear work; hh and mc no longer fire at the start of a sentence
+
 ## v0.36.1
 
 - mc pages through every transcript newest first and the session model decides how far back to read
