@@ -362,5 +362,13 @@
   "banner.trash": {
     "en": "Trash %M MB In %N Files · Empty It: %C",
     "tr": "Çöp %N Dosyada %M MB · Silmek İçin: %C"
+  },
+  "banner.upper": {
+    "en": "Higher Model Called · %M · %D",
+    "tr": "Üst Model Çağrıldı · %M · %D"
+  },
+  "banner.upperWork": {
+    "en": "The Answer Comes Back Into This Turn",
+    "tr": "Cevap Bu Tura Dönecek"
   }
 }

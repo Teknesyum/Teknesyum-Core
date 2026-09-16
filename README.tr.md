@@ -438,7 +438,7 @@ flowchart LR
 ```
 
 
-Yukarıdaki kanıt kapısı dokuz kancadan biri. Dokuz olay, dokuz dosya, hepsi
+Yukarıdaki kanıt kapısı on üç kanca kaydından biri. Dokuz olay, on bir dosya, hepsi
 `core/hooks/` altında:
 
 | Olay | Kanca | Söyler |
@@ -448,6 +448,7 @@ Yukarıdaki kanıt kapısı dokuz kancadan biri. Dokuz olay, dokuz dosya, hepsi
 | `PostToolUse` | `count.js` | eşikte tek satır, bir kez; yoksa hiçbir şey |
 | `PostToolUseFailure` | `count.js` | hiçbir şey; kalan test komutunu kaydeder |
 | `PreToolUse` | `yasak.js` | tehlikeli komutu tek satır gerekçeyle reddeder. Proje içinde silmek serbest; dışına çıkmak değil — hedefi çalışma klasörünün dışına düşen ya da kökün kendisi olan silme, disk yazma, geçmiş silme, depo/sürüm silme, indir-koş boruları, `chmod 777`, makine çapında durdurma reddedilir; yoksa hiçbir şey |
+| `PreToolUse` | `ust.js` | tur, işi oturumun kendi modelinin üstündeki bir modele verdiğinde tek satır — çağrılan model ve işin ne olduğu. Oturumun kendi modeli dökümün sonundan okunur; aynı ya da alt model, model adı geçmeyen çağrı ve istem anında zaten duyurulmuş danışma susar. Hiçbir şey reddedilmez, modele hiçbir şey gitmez |
 | `PreToolUse` | `loop.js` | bekleme döngüsünün üst sınırı yoksa tek satır; yoksa hiçbir şey |
 | `PreToolUse` | `scout.js` | hiçbir şey; bütçesini aşan öncül ya da `netleştir` çağrısını reddeder |
 | `Stop` | `count.js` | bağlama hiçbir şey; diff'i tazeler, `agency.js show` sonrası koltuğu bir kez sohbet satırı olarak basar |

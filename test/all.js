@@ -320,7 +320,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 14200, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 14400, String(JSON.stringify(table).length));
   ok('no relay strings are left', !keys.some((k) => /^(role\.|notice\.|line\.(contracts|agents|open|blocked))/.test(k)), keys.join(' '));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
@@ -1250,6 +1250,58 @@ function testCop() {
   sweep(cfg);
 }
 
+function testUst() {
+  const cfg = home();
+  const root = fixture();
+  const tr = (model) => {
+    const f = path.join(root, 'tr-' + model + '.jsonl');
+    fs.writeFileSync(f, JSON.stringify({ type: 'assistant', message: { model: 'claude-' + model + '-5' } }) + '\n');
+    return f;
+  };
+  const call = (sid, own, model, extra) =>
+    hook(path.join(CORE, 'hooks', 'ust.js'), {
+      hook_event_name: 'PreToolUse',
+      tool_name: 'Agent',
+      session_id: sid,
+      cwd: root,
+      transcript_path: tr(own),
+      tool_input: { model, description: 'Zor karar', prompt: 'is', ...(extra || {}) },
+    }, cfg);
+
+  call('u1', 'sonnet', 'opus');
+  const yukari = take(cfg, 'u1');
+  ok('a higher model is announced', /opus/.test(yukari) && yukari.startsWith('Teknesyum Core > '), yukari);
+  ok('and the line says what the work is', /Zor karar/.test(yukari), yukari);
+
+  call('u2', 'opus', 'sonnet');
+  ok('a lower model says nothing', take(cfg, 'u2') === '');
+
+  call('u3', 'opus', 'opus');
+  ok('the same model says nothing', take(cfg, 'u3') === '');
+
+  call('u4', 'opus', 'fable');
+  ok('fable above opus is announced', /fable/.test(take(cfg, 'u4')));
+
+  call('u5', 'sonnet', 'opus', { prompt: 'is [[advice-001]] var' });
+  ok('an already announced consult is not announced twice', take(cfg, 'u5') === '');
+
+  call('u6', 'sonnet', undefined);
+  ok('an agent without a model says nothing', take(cfg, 'u6') === '');
+
+  const out = hook(path.join(CORE, 'hooks', 'ust.js'), {
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Agent',
+    session_id: 'u7',
+    cwd: root,
+    transcript_path: tr('sonnet'),
+    tool_input: { model: 'opus', description: 'Zor karar', prompt: 'is' },
+  }, cfg);
+  ok('the hook writes nothing into the context', out.stdout.trim() === '', out.stdout);
+
+  sweep(root);
+  sweep(cfg);
+}
+
 function main() {
   const root = fixture();
   const suites = [
@@ -1280,6 +1332,7 @@ function main() {
     ['scan', testScan],
     ['scout', testScout],
     ['trash', testCop],
+    ['higher model', testUst],
   ];
   for (const [name, fn] of suites) {
     try {

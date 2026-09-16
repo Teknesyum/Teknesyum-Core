@@ -42,6 +42,7 @@ doğrulandı (2026-09-11, `index`, `final`, `delta` alanları geliyor).
 | Eşik (`count.js`) | `Eşik · N dosyaya dokunuldu · Sırada Plan Var Ya Da Atla De` |
 | Bağlam eşiği | `Bağlam %N · Devir Notu Hazırlandı` |
 | Kanıt kapısı (`dur.js`) | `Kanıt Kapısı · N Kod Dosyası Değişti, Hiçbir Şey Koşmadı · Sırada Kanıt Var` |
+| Üst model (`ust.js`) | `Üst Model Çağrıldı · fable · Zor karar` |
 | Denylist / döngü | `Yasak Liste Bir Komutu Durdurdu · <neden>` / `Sınırsız Bekleme Durduruldu · …` |
 | Koltuk (`show` sonrası ya da Stop) | `Koltuk Okundu · slug · K KB` |
 
