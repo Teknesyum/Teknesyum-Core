@@ -202,8 +202,8 @@ function handle(j) {
   if (EVENT.test(prompt)) return '';
   shown = [];
   const pre = later(j.cwd || process.cwd());
-  expect(j.session_id, mark(prompt) ? mark(prompt).rest : prompt);
   const m = mark(prompt);
+  expect(j.session_id, m ? m.rest : prompt);
   let text = '';
   if (m) {
     const { rest, key } = m;

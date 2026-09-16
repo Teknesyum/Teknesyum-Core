@@ -295,22 +295,12 @@ function testWiring() {
         const m = /hooks\/([a-z]+\.js)/.exec(h.command);
         ok(ev + ' points at a file that exists', m && fs.existsSync(path.join(CORE, 'hooks', m[1])), h.command);
       }
-  for (const gone of ['guard.js', 'cue.js', 'watch.js', 'seal.js', 'closure.js', 'autoclose.js', 'embed.js', 'schema.js', 'notice.js'])
-    ok('the relay hook is out of the tree: ' + gone, !fs.existsSync(path.join(CORE, 'hooks', gone)));
-  for (const gone of ['contract.js', 'risk.js', 'verify-runner.js'])
-    ok('the contract script is out of the tree: ' + gone, !fs.existsSync(path.join(CORE, 'scripts', gone)));
-  for (const gone of ['roles', 'agents', 'skills', 'tiers.json'])
-    ok('the relay folder is out of the tree: ' + gone, !fs.existsSync(path.join(CORE, gone)));
-  const lib = fs.readFileSync(path.join(CORE, 'hooks', 'lib.js'), 'utf8');
-  ok('lib.js no longer knows about the relay', !/relayRoot|liveDir|ensureRelay/.test(lib));
   const speakers = fs.readdirSync(path.join(CORE, 'hooks')).filter((f) => /\.js$/.test(f) && fs.readFileSync(path.join(CORE, 'hooks', f), 'utf8').includes('additionalContext'));
   ok('only count.js and mod.js write into the context, host.js only relays them', speakers.join(',') === 'count.js,host.js,mod.js', speakers.join(','));
   ok('host.js is never wired into Claude Code', !/host\.js/.test(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8')));
   const pkg = JSON.parse(fs.readFileSync(path.resolve(CORE, '..', 'package.json'), 'utf8'));
   const plug = JSON.parse(fs.readFileSync(path.join(CORE, '.claude-plugin', 'plugin.json'), 'utf8'));
-  const market = JSON.parse(fs.readFileSync(path.resolve(CORE, '..', '.claude-plugin', 'marketplace.json'), 'utf8'));
   ok('the two version fields agree', pkg.version === plug.version, [pkg.version, plug.version].join(' '));
-  ok('no description still sells a contract gate', ![pkg.description, plug.description, market.plugins[0].description, market.description].some((d) => /contract|relay/i.test(d)), plug.description);
 }
 
 function testLanguage(root) {
@@ -321,7 +311,6 @@ function testLanguage(root) {
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
   ok('the table is small', JSON.stringify(table).length < 19000, String(JSON.stringify(table).length));
-  ok('no relay strings are left', !keys.some((k) => /^(role\.|notice\.|line\.(contracts|agents|open|blocked))/.test(k)), keys.join(' '));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
   fs.mkdirSync(path.join(h, 'teknesyum'), { recursive: true });
@@ -445,19 +434,16 @@ function testChime() {
   fs.mkdirSync(h, { recursive: true });
   const notify = path.join(CORE, 'hooks', 'notify.js');
   const n = require(notify);
-  const settings = n.resolveSettings(root);
-  ok('no turn is too short to announce by default', !settings.events.done.minMs);
-  ok('waiting and error carry no delay either', !settings.events.waiting.minMs && !settings.events.error.minMs);
 
   const old = process.env.CLAUDE_CONFIG_DIR;
   process.env.CLAUDE_CONFIG_DIR = h;
   const iki = path.join(root, 'ikinci-proje');
   const beep = Date.now();
-  n.stamp('done', beep, root);
-  ok('a bell just rung here is not rung again', n.recently('done', beep + 1000, root));
-  ok('but the next project still gets its own', !n.recently('done', beep + 1000, iki));
-  n.stamp('done', beep + 1000, iki);
-  ok('and each project keeps its own last bell', n.recently('done', beep + 2000, iki));
+  n.stamp('waiting', beep, root);
+  ok('a bell just rung here is not rung again', n.recently('waiting', beep + 1000, root));
+  ok('but the next project still gets its own', !n.recently('waiting', beep + 1000, iki));
+  n.stamp('waiting', beep + 1000, iki);
+  ok('and each project keeps its own last bell', n.recently('waiting', beep + 2000, iki));
   if (old === undefined) delete process.env.CLAUDE_CONFIG_DIR;
   else process.env.CLAUDE_CONFIG_DIR = old;
 

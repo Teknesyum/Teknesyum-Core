@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const { execFileSync } = require('child_process');
 
 function home() {
   return process.env.USERPROFILE || process.env.HOME || '.';
@@ -106,68 +105,10 @@ function merge(f, patch) {
   });
 }
 
-function norm(p) {
-  return path.normalize(String(p)).replace(/\\/g, '/');
-}
-
 function safe(s) {
   return String(s)
     .replace(/[^a-zA-Z0-9._-]/g, '_')
     .slice(0, 80);
-}
-
-function exists(...p) {
-  try {
-    return fs.existsSync(path.join(...p));
-  } catch {
-    return false;
-  }
-}
-
-const _gitCache = new Map();
-
-function gitInfo(start) {
-  const key = path.resolve(start);
-  if (_gitCache.has(key)) return _gitCache.get(key);
-  const out = askGit(key);
-  _gitCache.set(key, out);
-  return out;
-}
-
-function askGit(start) {
-  try {
-    const top = path.resolve(
-      execFileSync('git', ['-C', path.resolve(start), 'rev-parse', '--show-toplevel'], {
-        encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'ignore'],
-      }).trim()
-    );
-    let common = execFileSync('git', ['-C', top, 'rev-parse', '--git-common-dir'], {
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }).trim();
-    common = path.resolve(top, common);
-    if (path.basename(common).toLowerCase() === '.git') common = path.dirname(common);
-    return { top, common };
-  } catch {
-    return null;
-  }
-}
-
-function pluginRoot(id) {
-  const name = id || 'teknesyum-core@teknesyum';
-  try {
-    const j = read(path.join(configRoot(), 'plugins', 'installed_plugins.json'));
-    const k = j && j.plugins && j.plugins[name] && j.plugins[name][0];
-    if (!k) return null;
-    if (k.installPath && fs.existsSync(k.installPath)) return k.installPath;
-    if (!k.version) return null;
-    const [market, pkg] = name.split('@').reverse();
-    const p = path.join(configRoot(), 'plugins', 'cache', market, pkg, k.version);
-    return fs.existsSync(p) ? p : null;
-  } catch {
-    return null;
-  }
 }
 
 function settings() {
@@ -247,27 +188,6 @@ function drain(session) {
   return lines;
 }
 
-function rewire() {
-  const here = path.resolve(__dirname, '..');
-  const bridge = path.join(here, 'scripts', 'bridge.js').replace(/\\/g, '/');
-  const p = path.join(configRoot(), 'settings.json');
-  const s = read(p);
-  if (!s || !s.statusLine || typeof s.statusLine.command !== 'string') return false;
-  const cur = s.statusLine.command;
-  if (cur.indexOf('bridge.js') < 0 || cur.indexOf(bridge) >= 0) return false;
-  const at = /"([^"]+bridge\.js)"/.exec(cur);
-  const dead = at ? !fs.existsSync(at[1]) : false;
-  if (!/teknesyum[\\/-]/i.test(cur)){
-    if (!dead) return false;
-  }
-  if (!fs.existsSync(bridge)) return false;
-  s.statusLine = { type: 'command', command: 'node "' + bridge + '"', padding: 0 };
-  if (!write(p, s)) return false;
-  const cfg = read(stateFile('config')) || {};
-  cfg.pluginDir = here;
-  write(stateFile('config'), cfg);
-  return true;
-}
 function coreRepo() {
   const seen = [process.env.TEKNESYUM_CORE, settings().coreRepo];
   let d = path.resolve(__dirname, '..', '..');
@@ -300,45 +220,6 @@ function openLogCount() {
   }
 }
 
-const PINNED = {
-  win32: [
-    'HKCU\\Environment',
-    'HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment',
-  ],
-};
-
-const RC = ['.bashrc', '.bash_profile', '.zshrc', '.profile'];
-
-function pinnedInShell(name) {
-  const at = home();
-  if (!at) return false;
-  const re = new RegExp('^[ \\t]*(export[ \\t]+)?' + name + '[ \\t]*=', 'm');
-  for (const f of RC) {
-    try {
-      if (re.test(fs.readFileSync(path.join(at, f), 'utf8'))) return true;
-    } catch {}
-  }
-  return false;
-}
-
-function envPinned(name, probe = {}) {
-  if (!/^[A-Z_][A-Z0-9_]*$/i.test(String(name || ''))) return false;
-  if ((probe.pinnedInShell || pinnedInShell)(name)) return true;
-  const keys = PINNED[probe.platform || process.platform];
-  if (!keys) return false;
-  for (const key of keys) {
-    try {
-      const out = (probe.execFileSync || execFileSync)('reg', ['query', key, '/v', name], {
-        encoding: 'utf8',
-        windowsHide: true,
-        stdio: ['ignore', 'pipe', 'ignore'],
-      });
-      if (new RegExp('\\b' + name + '\\b', 'i').test(out || '')) return true;
-    } catch {}
-  }
-  return false;
-}
-
 function slot(name, root) {
   return name + '-' + require('crypto').createHash('sha1').update(path.resolve(String(root || process.cwd()))).digest('hex').slice(0, 12);
 }
@@ -368,7 +249,6 @@ function makeGate(o) {
 module.exports = {
   makeGate,
   slot,
-  envPinned,
   home,
   configRoot,
   sessionId,
@@ -377,13 +257,8 @@ module.exports = {
   write,
   lock,
   merge,
-  norm,
   safe,
-  exists,
-  gitInfo,
-  pluginRoot,
   settings,
-  rewire,
   coreRepo,
   lang,
   t,

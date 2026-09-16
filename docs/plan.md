@@ -116,7 +116,7 @@ Sıra: önce 031, çünkü 032 sistem eleştirisi yeni yolla gidecek; eleştiri 
 Kaynak: [032](danisma/032-fable-sistem-hantalligi.md), [033](danisma/033-fable-core-tam-tarama.md).
 Sıra: önce riski sıfır olan ölü kod, sonra ortak yardımcılar (sonraki dalgalar onları kullanır), sonra süreç birleştirme ve özellik kaldırma, en sonda testler ve makine temizliği. Her dalga yeşil testle commit.
 
-- [ ] I1 Ölü kod: lib.js ölü dışa aktarımlar, notify.js ölü sesler, dur.setting, mod.mark tekrarı, doctor yorumu, tarihi koruma testleri (033-1, 2, 5).
+- [x] I1 Ölü kod: lib.js ölü dışa aktarımlar, notify.js ölü sesler, dur.setting, mod.mark tekrarı, doctor yorumu, tarihi koruma testleri (033-1, 2, 5).
 - [ ] I2 Ortak yardımcılar: `lib.main`, tek `errorLog`, `lib.argv`, `lib.fold`, `lib.nextNumber`; kopyaları kaldır (033-7, 8).
 - [ ] I3 Özellik kaldırma: scout öncül kapısı ve netleştirme modu `trash/`'e; danışma kapısı tek (033-3, 4).
 - [ ] I4 Süreç birleştirme: Bash tek süreç (yasak içinden loop), Agent tek süreç, Stop tek süreç (dur içinden count) (032-C, 033-9).
@@ -124,5 +124,5 @@ Sıra: önce riski sıfır olan ölü kod, sonra ortak yardımcılar (sonraki da
 - [ ] I6 statusline git yerine state; bridge önbelleği (033-11); strings kısaltma (033-12).
 - [ ] I7 Test hızı: çift spawn, fixture şablonu, run.js dar kopya, doctor testi sandbox'ta (033-13).
 - [ ] I8 Makine: SessionStart'ta 7 günden eski state/banner/advice süpürme, eklenti önbelleğinde son iki sürüm, kütüphane sığ klon + gc (032-D, E, F).
-- [ ] I9 RULES.md / CLAUDE.md tekrarları (032-G).
+- [x] I9 RULES.md / CLAUDE.md tekrarları (032-G).
 - [ ] I10 İki README, AGENTS.md, CHANGELOG, sürüm, push, eklenti güncelle.

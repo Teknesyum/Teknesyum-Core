@@ -54,8 +54,6 @@ function statuslineOk() {
   return 'wired';
 }
 
-// The update check is gone. This much of it stays because a different check
-// needs it: whether the statusline still points at an older installed version.
 function installedVersion() {
   try {
     const j = JSON.parse(fs.readFileSync(path.join(CORE, '.claude-plugin', 'plugin.json'), 'utf8'));
