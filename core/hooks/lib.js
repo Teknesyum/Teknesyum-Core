@@ -239,8 +239,7 @@ function makeGate(o) {
     });
     if (st.id !== id) return deny(t(o.state + '.unknown').replace('%ID', id));
     if (st.spent) return deny(t(o.state + '.spent').replace('%ID', id));
-    if (o.model && String(input.model || '') !== o.model) return deny(t(o.state + '.model').split('%MODEL').join(o.model));
-    if (String(input.prompt).length > o.max) return deny(t(o.long || 'scout.long'));
+    if (String(input.prompt).length > o.max) return deny(t(o.state + '.long'));
     write(file, { ...st, spent: true, spentAt: new Date().toISOString() });
     return null;
   };

@@ -118,7 +118,7 @@ Sıra: önce riski sıfır olan ölü kod, sonra ortak yardımcılar (sonraki da
 
 - [x] I1 Ölü kod: lib.js ölü dışa aktarımlar, notify.js ölü sesler, dur.setting, mod.mark tekrarı, doctor yorumu, tarihi koruma testleri (033-1, 2, 5).
 - [x] I2 Ortak yardımcılar: `lib.main`, tek `errorLog`, `lib.argv`, `lib.fold`, `lib.nextNumber`; kopyaları kaldır (033-7, 8).
-- [ ] I3 Özellik kaldırma: scout öncül kapısı ve netleştirme modu `trash/`'e; danışma kapısı tek (033-3, 4).
+- [x] I3 Özellik kaldırma: scout öncül kapısı ve netleştirme modu `trash/`'e; danışma kapısı tek (033-3, 4).
 - [ ] I4 Süreç birleştirme: Bash tek süreç (yasak içinden loop), Agent tek süreç, Stop tek süreç (dur içinden count) (032-C, 033-9).
 - [ ] I5 agency.js kutuphane sarmalayıcısı (033-6); doctor/scan ortak koşucu (033-10).
 - [ ] I6 statusline git yerine state; bridge önbelleği (033-11); strings kısaltma (033-12).

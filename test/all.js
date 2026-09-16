@@ -1248,9 +1248,9 @@ function testScan() {
   sweep(cfg);
 }
 
-function testScout() {
-  const SCOUT = path.join(CORE, 'scripts', 'scout.js');
+function testConsult() {
   const GATE = path.join(CORE, 'hooks', 'scout.js');
+  const ADVICE = path.join(CORE, 'scripts', 'advice.js');
   const root = fixture();
   const cfg = home();
   const env = { ...process.env, CLAUDE_CONFIG_DIR: cfg };
@@ -1262,39 +1262,10 @@ function testScout() {
       return '';
     }
   };
-  const b = run(process.execPath, [SCOUT, 'brief', 'sıfır bağımlılık CLI ayrıştırıcı'], { cwd: root, env });
-  const file = b.stdout.split('\n')[0];
-  ok('brief lands under docs/oncul with an ascii slug', file === 'docs/oncul/001-sifir-bagimlilik-cli-ayristirici-girdi.md', file + b.stderr);
-  const prompt = fs.readFileSync(path.join(root, file), 'utf8');
-  ok('the brief carries its marker and its bounds', /\[\[oncul:001\]\]/.test(prompt) && /En fazla 5 arama/.test(prompt), prompt.slice(0, 80));
   ok('the gate ignores an agent call without a marker', gate('hello', 'opus') === '');
-  const wrong = gate(prompt, 'opus');
-  ok('the gate refuses a model other than sonnet', /sonnet/.test(wrong) && !/%MODEL/.test(wrong), wrong);
-  ok('the gate refuses a prompt with things added', /nothing added/.test(gate(prompt + 'x'.repeat(6000), 'sonnet')));
-  ok('the gate lets the brief through once', gate(prompt, 'sonnet') === '');
-  const again = gate(prompt, 'sonnet');
-  ok('the second call on the same brief is refused', /already ran once/.test(again), again);
-  ok('a marker nobody armed is refused', /No brief 002/.test(gate('[[oncul:002]] go', 'sonnet')));
-  fs.writeFileSync(path.join(root, 'cevap.md'), 'a · x · MIT · 08/2026 · uyar\n' + 'y'.repeat(9000));
-  const r = run(process.execPath, [SCOUT, 'record', '--reply', 'cevap.md', '--cost', '12k token, 40 s'], { cwd: root, env });
-  ok('record files the answer next to the brief and says it cut', /docs\/oncul\/001-sifir-bagimlilik-cli-ayristirici\.md \(reply cut at 8000/.test(r.stdout), r.stdout + r.stderr);
-  const rec = fs.readFileSync(path.join(root, 'docs', 'oncul', '001-sifir-bagimlilik-cli-ayristirici.md'), 'utf8');
-  ok('the record names the cost and the cut', /12k token, 40 s/.test(rec) && /karakter kesildi/.test(rec));
-
-  const ADVICE = path.join(CORE, 'scripts', 'advice.js');
-  fs.writeFileSync(path.join(root, 'olgular.md'), '- bench 06 tabanı 0.37 $');
-  const q = run(process.execPath, [ADVICE, 'ask', 'planı mı kesmeli yoksa ölçmeli mi', '--facts', 'olgular.md'], { cwd: root, env });
-  const qfile = q.stdout.split('\n')[0];
-  ok('ask lands under docs/netlestirme with an ascii slug', qfile === 'docs/netlestirme/001-plani-mi-kesmeli-yoksa-olcmeli-mi-girdi.md', qfile + q.stderr);
-  const qprompt = fs.readFileSync(path.join(root, qfile), 'utf8');
-  ok('the question carries its marker, the question and the facts', /\[\[netlestirme:001\]\]/.test(qprompt) && /ölçmeli mi/.test(qprompt) && /0\.37/.test(qprompt), qprompt.slice(0, 120));
-  ok('the same gate lets the question out once on any model', gate(qprompt, 'opus') === '');
-  const qagain = gate(qprompt, 'opus');
-  ok('and refuses the second call on it', /went out once/.test(qagain), qagain);
-  ok('a question nobody armed is refused', /No question 002/.test(gate('[[netlestirme:002]] go', 'opus')));
-  fs.writeFileSync(path.join(root, 'cevap2.md'), 'net');
-  const qr = run(process.execPath, [ADVICE, 'record', '--reply', 'cevap2.md', '--cost', '3k token, 20 s'], { cwd: root, env });
-  ok('record files the answer next to the question', qr.stdout.trim() === 'docs/netlestirme/001-plani-mi-kesmeli-yoksa-olcmeli-mi.md' && /3k token/.test(fs.readFileSync(path.join(root, 'docs', 'netlestirme', '001-plani-mi-kesmeli-yoksa-olcmeli-mi.md'), 'utf8')), qr.stdout + qr.stderr);
+  ok('a clarification marker is no longer a gate of its own', gate('[[netlestirme:002]] go', 'opus') === '' && gate('[[oncul:002]] go', 'sonnet') === '');
+  const help = run(process.execPath, [ADVICE], { cwd: root, env });
+  ok('advice.js help names only the consult flow', !/netlestirme|--facts/.test(help.stdout) && /--mod gorus/.test(help.stdout), help.stdout);
   fs.writeFileSync(path.join(root, 'danisma-girdi.md'), '# Sistem Hantallığı\n\nNeresi hantal?');
   const ga = run(process.execPath, [ADVICE, 'ask', '--mod', 'gorus', '--konu', 'sistem-hantalligi', '--girdi', 'danisma-girdi.md'], { cwd: root, env });
   const glines = ga.stdout.split('\n');
@@ -1303,10 +1274,13 @@ function testScout() {
   ok('and the scratch input is gone', !fs.existsSync(path.join(root, 'danisma-girdi.md')));
   const gprompt = glines.find((l) => l.startsWith('[[danisma:001]]')) || '';
   ok('it prints a short prompt that names the file', gprompt.length < 600 && gprompt.includes('001-fable-sistem-hantalligi-girdi.md'), ga.stdout);
-  ok('the gate refuses the whole input pasted', gate(gprompt + ' ' + 'z'.repeat(700), 'fable') !== '');
+  const pasted = gate(gprompt + ' ' + 'z'.repeat(700), 'fable');
+  ok('the gate refuses the whole input pasted', /more than the path|yoldan fazlasını/.test(pasted), pasted);
   ok('the gate lets the short prompt out once', gate(gprompt, 'fable') === '');
-  ok('and refuses it the second time', gate(gprompt, 'fable') !== '');
-  ok('an unknown consult is refused', gate('[[danisma:009]] oku', 'fable') !== '');
+  const again = gate(gprompt, 'fable');
+  ok('and refuses it the second time', /already went out once|bir kez gitti/.test(again), again);
+  const unknown = gate('[[danisma:009]] oku', 'fable');
+  ok('an unknown consult is refused', /009/.test(unknown) && /advice\.js ask --mod gorus/.test(unknown), unknown);
   const sub = path.join(cfg, 'projects', path.resolve(root).split(/[\\/:]/).join('-'), 'oturum', 'subagents');
   fs.mkdirSync(sub, { recursive: true });
   fs.writeFileSync(path.join(sub, 'agent-ab12.jsonl'), [
@@ -1320,13 +1294,14 @@ function testScout() {
   ok('gorus record takes the reply and the measure from the agent transcript', /kancalar hantal/.test(grec) && /claude-fable-5-1/.test(grec) && /1\.200 çıktı token/.test(grec) && /60 sn/.test(grec), gr.stdout + gr.stderr + grec);
   ok('and links the input', /\(001-fable-sistem-hantalligi-girdi\.md\)/.test(grec));
   const other = fixture();
-  fs.writeFileSync(path.join(other, 'olgular.md'), '- baska proje');
-  run(process.execPath, [ADVICE, 'ask', 'bambaska bir soru', '--facts', 'olgular.md'], { cwd: other, env });
+  fs.writeFileSync(path.join(other, 'girdi.md'), '# Baska\n\nbaska proje');
+  run(process.execPath, [ADVICE, 'ask', '--mod', 'gorus', '--konu', 'baska', '--girdi', 'girdi.md'], { cwd: other, env });
+  fs.writeFileSync(path.join(root, 'girdi2.md'), '# Ikinci\n\nikinci soru');
+  const q2 = run(process.execPath, [ADVICE, 'ask', '--mod', 'gorus', '--konu', 'ikinci', '--girdi', 'girdi2.md'], { cwd: root, env });
+  ok('a second consult here numbers itself 002', q2.stdout.split(String.fromCharCode(10))[0].endsWith('002-fable-ikinci-girdi.md'), q2.stdout + q2.stderr);
   fs.writeFileSync(path.join(root, 'cevap3.md'), 'ikinci');
-  const q2 = run(process.execPath, [ADVICE, 'ask', 'ikinci soru', '--facts', 'olgular.md'], { cwd: root, env });
-  ok('a second question here numbers itself 002', q2.stdout.split(String.fromCharCode(10))[0] === 'docs/netlestirme/002-ikinci-soru-girdi.md', q2.stdout + q2.stderr);
-  const q3 = run(process.execPath, [ADVICE, 'record', '--reply', 'cevap3.md', '--cost', '1k, 1 s'], { cwd: root, env });
-  ok('a consult in another project cannot steal the record', q3.stdout.trim() === 'docs/netlestirme/002-ikinci-soru.md', q3.stdout + q3.stderr);
+  const q3 = run(process.execPath, [ADVICE, 'record', '--mod', 'gorus', '--reply', 'cevap3.md', '--cost', '1k, 1 s'], { cwd: root, env });
+  ok('a consult in another project cannot steal the record', /^docs\/danisma\/002-fable-ikinci\.md · /.test(q3.stdout.trim()), q3.stdout + q3.stderr);
   sweep(other);
 
   sweep(root);
@@ -1453,7 +1428,7 @@ function main() {
     ['private shelf', testPrivate],
     ['doctor', testDoctor],
     ['scan', testScan],
-    ['scout', testScout],
+    ['consult gate', testConsult],
     ['trash', testCop],
     ['higher model', testUst],
     ['memory check', testHatirla],

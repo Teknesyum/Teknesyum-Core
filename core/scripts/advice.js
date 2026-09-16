@@ -3,9 +3,6 @@ const path = require('path');
 const lib = require('../hooks/lib.js');
 
 const DIR = 'docs/danisma';
-const ASK_DIR = 'docs/netlestirme';
-const MARK = '[[netlestirme:';
-const PROMPT_MAX = 12000;
 const REPLY_MAX = 12000;
 
 function dir(root) {
@@ -31,39 +28,6 @@ function list(relay) {
   return names.sort();
 }
 
-function askText(id, question, facts) {
-  return [
-    MARK + id + ']]',
-    '',
-    '# Netleştirme: ' + question.split('\n')[0].slice(0, 80),
-    '',
-    'İşe başlamadan önce soruyu keskinleştir. Görüş verme, plan yazma, kod yazma.',
-    'Yalnız şunu döndür: soruda belirsiz kalan yerler, her biri için tek satırlık bir netleştirme sorusu, en fazla beş. Belirsizlik yoksa "net" yaz.',
-    '',
-    '## Soru',
-    '',
-    question,
-    '',
-    '## Elde olan olgular',
-    '',
-    facts || '- yok',
-    '',
-  ].join('\n');
-}
-
-function ask(root, question, facts) {
-  if (!question) throw new Error('question is empty');
-  const at = path.join(root, ASK_DIR);
-  fs.mkdirSync(at, { recursive: true });
-  const id = String(lib.nextNumber(at)).padStart(3, '0');
-  const slug = slugOf(lib.fold(question));
-  const file = path.join(at, id + '-' + slug + '-girdi.md');
-  fs.writeFileSync(file, askText(id, question, facts));
-  lib.write(lib.stateFile(lib.slot('advice', root)), { id, slug, question, at: new Date().toISOString(), spent: false, session: lib.sessionId() });
-  return { id, file: path.relative(root, file).split(path.sep).join('/') };
-}
-
-const netGate = lib.makeGate({ mark: MARK, state: 'advice', model: '', max: PROMPT_MAX });
 const GORUS_MARK = '[[danisma:';
 const GORUS_MAX = 600;
 
@@ -150,26 +114,7 @@ function gorusRecord(root, o) {
   return { file: path.relative(root, file).split(path.sep).join('/'), cut, olcu };
 }
 
-const gorusGate = lib.makeGate({ mark: GORUS_MARK, state: 'gorus', model: '', max: GORUS_MAX, long: 'gorus.long' });
-
-function gate(j) {
-  return netGate(j) || gorusGate(j);
-}
-
-function record(root, o) {
-  const st = lib.read(lib.stateFile(lib.slot('advice', root))) || {};
-  const id = o.id || st.id;
-  if (!id) throw new Error('no question to record against');
-  const at = path.join(root, ASK_DIR);
-  const input = fs.readdirSync(at).find((n) => n.startsWith(id + '-') && n.endsWith('-girdi.md'));
-  if (!input) throw new Error('no question ' + id + ' under ' + ASK_DIR);
-  let reply = o.reply ? fs.readFileSync(o.reply, 'utf8').trim() : '';
-  const cut = reply.length > REPLY_MAX;
-  if (cut) reply = reply.slice(0, REPLY_MAX) + '\n\n[' + (reply.length - REPLY_MAX) + ' karakter kesildi]';
-  const file = path.join(at, input.replace(/-girdi\.md$/, '.md'));
-  fs.writeFileSync(file, ['# Netleştirme: ' + (st.question || id).split('\n')[0].slice(0, 80), '', '- tarih: ' + new Date().toISOString().slice(0, 10), '- girdi: ' + input, '- maliyet: ' + (o.cost || '-'), '', '## Dönen', '', reply, ''].join('\n'));
-  return { file: path.relative(root, file).split(path.sep).join('/'), cut };
-}
+const gate = lib.makeGate({ mark: GORUS_MARK, state: 'gorus', max: GORUS_MAX });
 
 function main(argv) {
   const cmd = argv[0];
@@ -192,25 +137,12 @@ function main(argv) {
     process.stdout.write(r.file + ' · ' + r.olcu + (r.cut ? ' (reply cut at ' + REPLY_MAX + ' characters)' : '') + '\n');
     return 0;
   }
-  if (cmd === 'ask') {
-    const facts = lib.arg(argv, '--facts');
-    const r = ask(root, argv.slice(1).filter((x, i, all) => !x.startsWith('--') && all[i - 1] !== '--facts').join(' ').trim(), facts ? fs.readFileSync(facts, 'utf8').trim() : '');
-    process.stdout.write(r.file + '\n\nGive the Agent tool the file above as the prompt, verbatim. The gate lets it through once; a second call on the same question or a longer prompt is refused.\nThen: advice.js record --reply <file with the answer> --cost "<tokens, seconds>"\n');
-    return 0;
-  }
-  if (cmd === 'record') {
-    const r = record(root, { id: lib.arg(argv, '--id'), reply: lib.arg(argv, '--reply'), cost: lib.arg(argv, '--cost') });
-    process.stdout.write(r.file + (r.cut ? ' (reply cut at ' + REPLY_MAX + ' characters)' : '') + '\n');
-    return 0;
-  }
   process.stdout.write([
     'advice.js list                                   the consultation records under ' + DIR + '/',
-    'advice.js ask <question> [--facts <file>]        write a ?? question under ' + ASK_DIR + '/, arm the gate for one call',
-    'advice.js record --reply <file> [--cost <s>]     file the answer next to the question, cut at ' + REPLY_MAX + ' characters',
     'advice.js ask --mod gorus --konu <slug> --girdi <file>   number an opinion consult under ' + DIR + '/, print the short Agent prompt that points at it',
     'advice.js record --mod gorus --ajan <agentId>            read the reply, model, tokens and time from the agent transcript and file them',
     '',
-    'The PreToolUse gate in hooks/scout.js lets each question out once; the model is yours to pick.',
+    'The PreToolUse gate in hooks/scout.js lets each consult out once; the model is yours to pick.',
     'Nothing runs unless you ask, and nothing here enters the context on an ordinary turn.',
   ].join('\n') + '\n');
   return 1;
@@ -225,4 +157,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { ask, askText, gate, gorusAsk, gorusRecord, agentReply, agentFile, GORUS_MARK, GORUS_MAX, record, list, slugOf, DIR, ASK_DIR, MARK, REPLY_MAX };
+module.exports = { gate, gorusAsk, gorusRecord, agentReply, agentFile, GORUS_MARK, GORUS_MAX, list, slugOf, DIR, REPLY_MAX };
