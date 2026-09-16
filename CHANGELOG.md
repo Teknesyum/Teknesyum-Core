@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.40.0
+
+- One ledger for everything put off: .claude/acik.md takes the open lines of jobs.md, an agent line per Agent call and an old sonra.md once, rides on every prompt and SessionStart while a line is open (at most 600 characters, nothing when empty), prunes [x] lines to trash/, and Stop holds a reply of 40 characters or less once while lines are open and a job list shorter than the prompt
+
 ## v0.39.0
 
 - Cleanup from consults 032 and 033: dead code removed, shared hook helpers, the scout gate and the clarification mode retired, Bash, Agent and Stop each run one node process, agency.js wraps the library, the statusline reads test staleness from state, the test suite runs in about 16 s instead of 20 s, week-old state files are swept once a day, the plugin cache keeps two versions, library updates stay shallow and kutuphane.js slim compacts existing clones.
