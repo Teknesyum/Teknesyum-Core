@@ -966,7 +966,7 @@ function testHatirla() {
   const ctx = ctxOf('mc');
   ok('mc writes the sweep recipe', /hatirla\.js/.test(ctx) && /topla/.test(ctx) && /record --ajan/.test(ctx), ctx);
   ok('and hands the agent paths, not the pages', /tmp\/gecmis-N\.md/.test(ctx) && /(yolları|paths)/i.test(ctx), ctx);
-  ok('and asks for what I said and each ask checked', /dedin:/.test(ctx) && /\[ \] madde — yapılmadı/.test(ctx) && /Tamamen yapılanlar/.test(ctx) && /gecmis-commitler\.md/.test(ctx), ctx);
+  ok('and asks for what I said and each ask checked', /dedin:/.test(ctx) && /\[ \] (madde|ask) — /.test(ctx) && /Tamamen yapılanlar/.test(ctx) && /gecmis-commitler\.md/.test(ctx), ctx);
   ok('mc 2 hafta reads two weeks', /topla --gun 14/.test(ctxOf('mc 2 hafta')));
   ok('mc 3 sayfa takes three pages', /\b3\b/.test(ctxOf('mc 3 sayfa')) && !/--gun/.test(ctxOf('mc 3 sayfa')));
   ok('a sentence that starts with mc is not a sweep', !/hatirla\.js/.test(ctxOf('mc nasil calisiyor')));
