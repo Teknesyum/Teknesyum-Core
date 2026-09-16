@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
-const { main, read, merge, settings, stateFile, t, banner, say } = require('./lib.js');
-const { file, tree } = require('./count.js');
+const { main, read, merge, settings, stateFile, errorLog, t, banner, say } = require('./lib.js');
+const count = require('./count.js');
+const { file, tree } = count;
 
 function off() {
   return settings().evidence === false || process.env.TEKNESYUM_KANIT === '0';
@@ -63,6 +64,13 @@ function decide(j) {
   return why.length ? { decision: 'block', reason: why.join('\n\n') } : null;
 }
 
-if (require.main === module) main(decide);
+function stop(j) {
+  if (j.hook_event_name === 'Stop') {
+    try { count.handle(j); } catch (e) { errorLog('count.js', e); }
+  }
+  return decide(j);
+}
 
-module.exports = { decide, proven, off, code, jobs, CODE };
+if (require.main === module) main(stop);
+
+module.exports = { stop, decide, proven, off, code, jobs, CODE };

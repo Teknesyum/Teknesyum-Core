@@ -18,7 +18,7 @@ function why(d) {
 
 function guard(j) {
   const p = { ...j, hook_event_name: 'PreToolUse', tool_name: 'Bash' };
-  return load('yasak').decide(p) || load('loop').decide(p);
+  return load('yasak').decide(p);
 }
 
 function text(res) {

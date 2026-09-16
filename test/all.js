@@ -466,7 +466,7 @@ function testChime() {
 }
 
 function testLoop() {
-  const LOOP = path.join(CORE, 'hooks', 'loop.js');
+  const LOOP = path.join(CORE, 'hooks', 'yasak.js');
   const call = (tool, command) =>
     run(process.execPath, [LOOP], { cwd: CORE, input: JSON.stringify({ tool_name: tool, tool_input: { command } }), env: { ...process.env, CLAUDE_CONFIG_DIR: home() } });
   const deny = (r) => {
@@ -542,6 +542,12 @@ function testDur() {
   hook(COUNT, { hook_event_name: 'PostToolUseFailure', tool_name: 'Bash', session_id: 's1', cwd: root, tool_input: { command: 'npm test' }, error: '1 failed' }, cfg);
   ok('a failed run is not evidence', blocks(stop()), stop().stdout);
 
+  fs.writeFileSync(path.join(cfg, 'teknesyum', 'seat.json'), JSON.stringify({ at: '2026-09-16T00:00:00Z', slugs: ['design-ui-designer'], bytes: 2048 }));
+  take(cfg, 's1');
+  const seated = stop({ stop_hook_active: true });
+  ok('the stop runs the count work in the same process: the seat line is queued once', /Seat Read · design-ui-designer · 2\.0 KB/.test(take(cfg, 's1')) && seated.stdout === '', seated.stdout);
+  stop({ stop_hook_active: true });
+  ok('and not twice', !/Seat Read/.test(take(cfg, 's1')));
   const quiet = run(process.execPath, [DUR], { cwd: root, input: JSON.stringify({ hook_event_name: 'Stop', session_id: 's1', cwd: root }), env: { ...process.env, CLAUDE_CONFIG_DIR: cfg, TEKNESYUM_KANIT: '0' } });
   ok('the gate can be switched off in one setting', quiet.stdout === '', quiet.stdout);
 
@@ -653,7 +659,13 @@ function testYasak() {
 
   const cfgHooks = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8'));
   const bash = cfgHooks.hooks.PreToolUse.find((g) => g.matcher === 'Bash|PowerShell');
-  ok('the denylist runs before the loop gate', /yasak\.js/.test(bash.hooks[0].command), JSON.stringify(bash.hooks));
+  ok('a shell call starts one process, the loop gate runs inside the denylist', bash.hooks.length === 1 && /yasak\.js/.test(bash.hooks[0].command), JSON.stringify(bash.hooks));
+  const agent = cfgHooks.hooks.PreToolUse.find((g) => g.matcher === 'Agent');
+  ok('an agent call starts one process, the consult gate runs inside ust.js', agent.hooks.length === 1 && /ust\.js/.test(agent.hooks[0].command), JSON.stringify(agent.hooks));
+  ok('a stop starts one process, count runs inside dur.js', cfgHooks.hooks.Stop.length === 1 && cfgHooks.hooks.Stop[0].hooks.length === 1 && /dur\.js/.test(cfgHooks.hooks.Stop[0].hooks[0].command), JSON.stringify(cfgHooks.hooks.Stop));
+  const bothRun = run(process.execPath, [YASAK], { input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'Bash', cwd: GARDEN, tool_input: { command: 'while true; do rm -rf ' + '/; sleep 1; done' } }), env: { ...process.env, CLAUDE_CONFIG_DIR: home() } });
+  const both = (() => { try { return JSON.parse(bothRun.stdout).hookSpecificOutput; } catch { return {}; } })();
+  ok('a command both forbidden and unbounded is denied by the denylist first', both.permissionDecision === 'deny' && !/timeout/.test(both.permissionDecisionReason), bothRun.stdout);
 }
 
 function testMark() {
@@ -1249,7 +1261,7 @@ function testScan() {
 }
 
 function testConsult() {
-  const GATE = path.join(CORE, 'hooks', 'scout.js');
+  const GATE = path.join(CORE, 'hooks', 'ust.js');
   const ADVICE = path.join(CORE, 'scripts', 'advice.js');
   const root = fixture();
   const cfg = home();
@@ -1263,6 +1275,11 @@ function testConsult() {
     }
   };
   ok('the gate ignores an agent call without a marker', gate('hello', 'opus') === '');
+  const tr = path.join(root, 'tr-sonnet.jsonl');
+  fs.writeFileSync(tr, JSON.stringify({ type: 'assistant', message: { model: 'claude-sonnet-5' } }) + '\n');
+  const denied = run(process.execPath, [GATE], { cwd: root, env, input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'Agent', session_id: 'g1', cwd: root, transcript_path: tr, tool_input: { prompt: '[[danisma:077]] oku', model: 'fable', description: 'Danisma' } }) });
+  const deniedWhy = (() => { try { return JSON.parse(denied.stdout).hookSpecificOutput.permissionDecision; } catch { return ''; } })();
+  ok('one process both denies an unarmed consult and announces the higher model', deniedWhy === 'deny' && /fable/.test(take(cfg, 'g1')), denied.stdout);
   ok('a clarification marker is no longer a gate of its own', gate('[[netlestirme:002]] go', 'opus') === '' && gate('[[oncul:002]] go', 'sonnet') === '');
   const help = run(process.execPath, [ADVICE], { cwd: root, env });
   ok('advice.js help names only the consult flow', !/netlestirme|--facts/.test(help.stdout) && /--mod gorus/.test(help.stdout), help.stdout);

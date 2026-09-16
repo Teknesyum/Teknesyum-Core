@@ -142,7 +142,7 @@ function main(argv) {
     'advice.js ask --mod gorus --konu <slug> --girdi <file>   number an opinion consult under ' + DIR + '/, print the short Agent prompt that points at it',
     'advice.js record --mod gorus --ajan <agentId>            read the reply, model, tokens and time from the agent transcript and file them',
     '',
-    'The PreToolUse gate in hooks/scout.js lets each consult out once; the model is yours to pick.',
+    'The PreToolUse gate in hooks/ust.js lets each consult out once; the model is yours to pick.',
     'Nothing runs unless you ask, and nothing here enters the context on an ordinary turn.',
   ].join('\n') + '\n');
   return 1;

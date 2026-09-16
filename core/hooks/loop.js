@@ -1,5 +1,4 @@
-#!/usr/bin/env node
-const { main, t, banner, say } = require('./lib.js');
+const { t, banner, say } = require('./lib.js');
 
 const LOOP = /\b(until|while)\b[\s\S]*\b(sleep|Start-Sleep)\b|\b(sleep|Start-Sleep)\b[\s\S]*\b(until|while)\b/i;
 const BOUND = [
@@ -38,7 +37,5 @@ function decide(j) {
     },
   };
 }
-
-if (require.main === module) main(decide);
 
 module.exports = { unbounded, decide, LOOP, BOUND };

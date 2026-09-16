@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const { main, t, say, BANNER } = require('./lib.js');
+const advice = require('../scripts/advice.js');
 
 const RANK = { haiku: 1, sonnet: 2, opus: 3, fable: 4 };
 const MARK = /\[\[[a-z]+-\d{3}\]\]/i;
@@ -60,11 +61,12 @@ function line(j) {
 }
 
 function gate(j) {
+  const deny = advice.gate(j);
   const l = line(j);
   if (l) say(j.session_id, l);
-  return null;
+  return deny;
 }
 
-if (require.main === module) main((j) => { gate(j); });
+if (require.main === module) main(gate);
 
 module.exports = { gate, line, rank };

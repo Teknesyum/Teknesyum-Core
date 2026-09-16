@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const path = require('path');
 const { main, t, banner, say } = require('./lib.js');
+const loop = require('./loop.js');
 
 const WIPE = [
   /\brm\s+(?:-\S+\s+)*-\S*[rR]\S*f|\brm\s+(?:-\S+\s+)*-\S*f\S*[rR]/,
@@ -56,7 +57,7 @@ function forbidden(cmd, cwd) {
   return null;
 }
 
-function decide(j) {
+function forbid(j) {
   if (j.hook_event_name && j.hook_event_name !== 'PreToolUse') return null;
   if (!/^(Bash|PowerShell)$/.test(j.tool_name || '')) return null;
   const key = forbidden((j.tool_input || {}).command, j.cwd);
@@ -69,6 +70,10 @@ function decide(j) {
       permissionDecisionReason: t(key),
     },
   };
+}
+
+function decide(j) {
+  return forbid(j) || loop.decide(j);
 }
 
 if (require.main === module) main(decide);
