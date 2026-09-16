@@ -6,7 +6,7 @@ const ag = require('../scripts/agency.js');
 
 const PREFIX = /^\s*(\?\?|\+\+|pp|aa|ff|hh|mc)(?=\s|$)/i;
 const SUFFIX = /(^|\s)(\?\?|\+\+|pp|aa|ff|hh|mc)\s*$/i;
-const WORD_MARK = /^(hh|mc)$/;
+const WORD_MARK = /^mc$/;
 const SCOPE = /^\s*(\d+\s*(sayfa|g[uü]n|hafta)\s*)?$/i;
 
 function mark(prompt) {

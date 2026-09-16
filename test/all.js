@@ -690,9 +690,10 @@ function testMark() {
   at('guvenlik icin rollere bak aa', 'aa', 'guvenlik icin rollere bak');
   at('  ??  ', '??', '');
   at('mc', 'mc', '');
+  at('hh bu ne demek', 'hh', 'bu ne demek');
   at('mc 2 hafta', 'mc', '2 hafta');
   at('nerede kaldik mc', 'mc', 'nerede kaldik');
-  for (const quiet of ['const x = a ?? b', 'a ?? b sonra devam', 'i++ dedim ve devam', 'npm test', '', 'appa bak', 'ppt dosyasi', 'off dedim', 'ff.js dosyasi', 'mc nasil calisiyor', 'hh bu ne demek']) {
+  for (const quiet of ['const x = a ?? b', 'a ?? b sonra devam', 'i++ dedim ve devam', 'npm test', '', 'appa bak', 'ppt dosyasi', 'off dedim', 'ff.js dosyasi', 'mc nasil calisiyor']) {
     ok('leaves alone ' + JSON.stringify(quiet), mark(quiet) === null, JSON.stringify(mark(quiet)));
   }
 }
