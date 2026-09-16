@@ -6,10 +6,16 @@ const ag = require('../scripts/agency.js');
 
 const PREFIX = /^\s*(\?\?|\+\+|pp|aa|ff|hh|mc)(?=\s|$)/i;
 const SUFFIX = /(^|\s)(\?\?|\+\+|pp|aa|ff|hh|mc)\s*$/i;
+const WORD_MARK = /^(hh|mc)$/;
+const SCOPE = /^\s*(\d+\s*(sayfa|g[uü]n|hafta)\s*)?$/i;
 
 function mark(prompt) {
   const head = PREFIX.exec(prompt);
-  if (head) return { key: head[1].toLowerCase(), rest: prompt.slice(head[0].length) };
+  if (head) {
+    const key = head[1].toLowerCase();
+    const rest = prompt.slice(head[0].length);
+    if (!WORD_MARK.test(key) || SCOPE.test(rest)) return { key, rest };
+  }
   const tail = SUFFIX.exec(prompt);
   if (tail) return { key: tail[2].toLowerCase(), rest: prompt.slice(0, tail.index) };
   return null;
@@ -88,17 +94,22 @@ function help(session) {
   return '';
 }
 
-function memory() {
+function memory(rest) {
   shown.push(banner('banner.memory'));
+  const k = /(\d+)\s*(sayfa|g[uü]n|hafta)/i.exec(rest || '');
+  const unit = k ? k[2].toLowerCase() : '';
+  const gun = unit === 'hafta' ? Number(k[1]) * 7 : unit && unit !== 'sayfa' ? Number(k[1]) : 0;
+  const scope = !k ? '' : unit === 'sayfa' ? t('mod.memoryPages').replace('%N', k[1]) : t('mod.memoryDays').replace('%N', String(gun));
   return t('mod.memory')
-    .replace('%C', cmd('topla', 'hatirla.js'))
-    .replace('%R', cmd('record --reply <dosya>', 'hatirla.js'));
+    .replace('%C', cmd(gun ? 'topla --gun ' + gun : 'topla', 'hatirla.js'))
+    .replace('%S', scope)
+    .replace('%R', cmd('record --ajan <agentId> --sayfa <okunan>', 'hatirla.js'));
 }
 
 function fable(text) {
   shown.push(banner('banner.fable'));
   const q = text.trim();
-  const head = t('mod.fable').replace('%C', cmd('ask "<soru>" --facts <olgu dosyasi>', 'advice.js')).replace('%R', cmd('record --reply <dosya> --cost "<token, sure>"', 'advice.js'));
+  const head = t('mod.fable').replace('%C', cmd('ask --mod gorus --konu <slug> --girdi tmp/<dosya>.md', 'advice.js')).replace('%R', cmd('record --mod gorus --ajan <agentId>', 'advice.js'));
   return q ? head + '\n' + t('mod.fableAsk').replace('%Q', q) : head;
 }
 
@@ -196,7 +207,7 @@ function handle(j) {
   let text = '';
   if (m) {
     const { rest, key } = m;
-    text = key === 'hh' ? help(j.session_id) : key === 'mc' ? memory() : key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : library(rest);
+    text = key === 'hh' ? help(j.session_id) : key === 'mc' ? memory(rest) : key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : library(rest);
   }
   say(j.session_id, shown);
   const all = [pre, text].filter(Boolean).join('\n\n');

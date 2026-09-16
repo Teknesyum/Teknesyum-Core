@@ -96,3 +96,17 @@ kayboldu. Liste ekran kanalına taşınıyor: bedel 0 token, basılması modele 
 - [x] G4 `tmp/` standardı: pp rafına yazılır, `.gitignore` şablonuna girer, `scan.js` kökte
   başıboş geçici dosya görürse söyler.
 - [x] G5 Testler, iki README, `docs/banner.md`, CHANGELOG, sürüm, push.
+
+## H. Danışma yolu ve `mc` yeniden (2026-09-16, sıra benim)
+
+Kaynak: [030](danisma/030-fable-mc-tasarim.md), [031](danisma/031-fable-danisma-okumasi.md).
+Sıra: önce 031, çünkü 032 sistem eleştirisi yeni yolla gidecek; eleştiri arka planda koşarken 030.
+
+- [x] H1 `advice.js ask --mod gorus --konu <slug> --girdi <dosya>`: `docs/danisma/NNN-fable-<konu>-girdi.md` yazar, stdout'a yol + tarif. `--mod netlestir` bugünkü davranış.
+- [x] H2 `advice.js record --konu --cevap --model --token --sure`: `NNN-fable-<konu>.md`. Kapı yol taşıyan kısa istemi geçirir.
+- [x] H3 `yordam.md` ff bölümü ve `mod.fable` tarifi: betiği okuma, yol ver.
+- [x] H4 032 sistem eleştirisi yeni yolla, arka planda.
+- [x] H5 `hatirla.js`: kesme yok, 40 bin karakterlik sayfa, stdout dizin; her isteğe kapanış (tool_use'suz son asistan metni, 800 kr), commit başlıkları (tek `git log`), jobs/plan satırları.
+- [x] H6 `record` üç bölüm (Açık / Kararını bekliyor / Belirsiz), ekrana tek bant `sayBlock`.
+- [x] H7 Tetik: `mc` tek başına, sonda ya da `mc <sayı> sayfa|gün|hafta`; başta cümleyle gelirse tetiklemez. `hh` aynı.
+- [x] H8 Testler, iki README, CHANGELOG, sürüm, push, eklenti güncelle.

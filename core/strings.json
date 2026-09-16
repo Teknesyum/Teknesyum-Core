@@ -348,16 +348,16 @@
     "tr": "Bu, makineyi ya da bütün süreçleri durdurur. Tek süreci yaz."
   },
   "mod.fable": {
-    "en": "Consult fable before you start. Say so in one line before the first tool call.Gather the facts you already have into one file, then %C. Give the Agent tool the file it writes, verbatim, model fable. File the answer with %R and print its path and cost in one line.",
-    "tr": "İşe başlamadan önce fable'a danış. İlk araç çağrısından önce tek satırla söyle. Elindeki olguları tek dosyaya topla, sonra %C. Yazdığı dosyayı Agent aracına olduğu gibi ver, model fable. Cevabı %R ile kaydet, yolunu ve maliyetini tek satır yaz."
+    "en": "Consult fable before you start. Say so in one line before the first tool call. Write the facts and the question into one file under tmp/, then %C. Give the Agent tool the one line it prints, verbatim, model fable: the agent reads the file itself, never paste the text. Do not read advice.js or older consults. When the agent returns, run %R and print the path and the measure it prints in one line.",
+    "tr": "İşe başlamadan önce fable'a danış. İlk araç çağrısından önce tek satırla söyle. Olguları ve soruyu tmp/ altında tek dosyaya yaz, sonra %C. Bastığı tek satırı Agent aracına olduğu gibi ver, model fable: ajan dosyayı kendisi okur, metni yapıştırma. advice.js'i ve eski danışmaları okuma. Ajan dönünce %R çalıştır, bastığı yolu ve ölçüyü tek satır yaz."
   },
   "mod.fableAsk": {
     "en": "The question: %Q",
     "tr": "Soru: %Q"
   },
   "mod.help": {
-    "en": "Teknesyum marks. Each one stands alone at the **start or the end** of the prompt; a mid-sentence `a ?? b` does not trigger anything.\n\n`??` or `++` — The library. Searches the rest of the sentence across 34 shelves and puts up to eight books, with the command that opens them, into this turn. Before entering a subject: `?? redis distributed lock`.\n\n`pp` — The private shelf. Brings the books under the private repo's `private/` folder; it opens for the owner only. To fold your own notes into the work: `pp`.\n\n`aa` — The agency. Names up to three advisor seats matching the topic and where the answer is filed. When a field's own eye is needed: `security architecture aa`.\n\n`ff` — Consult fable. Puts the recipe into the turn: gather the facts, write the question, hand it to the agent, file the answer. When the decision is expensive: `ff which of the two roads`.\n\n`mc` — Memory check. Sweeps my past requests out of the transcripts, has a subagent name the ones never finished, and files the list in `tmp/hatirlatici.md`. When the thread is long: `mc`.\n\n`hh` — This list.\n\nOn a turn with none of them, the plugin writes not one letter into the context.",
-    "tr": "Teknesyum işaretleri. Her biri cümlenin **başında ya da sonunda**, tek başına durur; ortada geçen `a ?? b` gibi yazımlar tetiklemez.\n\n`??` ya da `++` — Kütüphane. Cümlenin kalan sözcüklerini 34 rafta arar ve en çok sekiz kitabı, açma komutuyla birlikte o tura koyar. Bir konuya girmeden önce elde ne olduğunu görmek için: `?? redis dagitik kilit`.\n\n`pp` — Özel raf. Özel deponun `private/` klasöründeki kitapları getirir; yalnız sahibine açılır. Kendi notlarını işin içine katmak için: `pp`.\n\n`aa` — Ajans. Konuya uyan en fazla üç danışman koltuğunu ve cevabı nereye yazacağını söyler. Bir alanın gözüyle bakılması gerektiğinde: `guvenlik mimarisi aa`.\n\n`ff` — Fable'a danış. Olguları toplama, soruyu yazma, ajana verme ve cevabı kaydetme yordamını o tura koyar. Karar pahalıysa: `ff iki yoldan hangisi`.\n\n`mc` — Bellek taraması. Geçmiş isteklerimi konuşma kayıtlarından süzer, bitmemiş olanları bir alt ajana saydırır ve listeyi `tmp/hatirlatici.md` dosyasına yazar. İş uzadıysa: `mc`.\n\n`hh` — Bu liste.\n\nHiçbiri yazılmayan turda eklenti bağlama tek harf yazmaz."
+    "en": "Teknesyum marks. Each one stands alone at the **start or the end** of the prompt; a mid-sentence `a ?? b` does not trigger anything.\n\n`??` or `++` — The library. Searches the rest of the sentence across 34 shelves and puts up to eight books, with the command that opens them, into this turn. Before entering a subject: `?? redis distributed lock`.\n\n`pp` — The private shelf. Brings the books under the private repo's `private/` folder; it opens for the owner only. To fold your own notes into the work: `pp`.\n\n`aa` — The agency. Names up to three advisor seats matching the topic and where the answer is filed. When a field's own eye is needed: `security architecture aa`.\n\n`ff` — Consult fable. Puts the recipe into the turn: gather the facts, write the question, hand it to the agent, file the answer. When the decision is expensive: `ff which of the two roads`.\n\n`mc` — Memory check. Matches my past requests to their closing replies and commits, and files the unfinished ones as open / awaiting decision / unclear in `tmp/hatirlatici.md`. Alone or at the end: `mc`, `mc 2 hafta`, `mc 3 sayfa`.\n\n`hh` — This list.\n\nOn a turn with none of them, the plugin writes not one letter into the context.",
+    "tr": "Teknesyum işaretleri. Her biri cümlenin **başında ya da sonunda**, tek başına durur; ortada geçen `a ?? b` gibi yazımlar tetiklemez.\n\n`??` ya da `++` — Kütüphane. Cümlenin kalan sözcüklerini 34 rafta arar ve en çok sekiz kitabı, açma komutuyla birlikte o tura koyar. Bir konuya girmeden önce elde ne olduğunu görmek için: `?? redis dagitik kilit`.\n\n`pp` — Özel raf. Özel deponun `private/` klasöründeki kitapları getirir; yalnız sahibine açılır. Kendi notlarını işin içine katmak için: `pp`.\n\n`aa` — Ajans. Konuya uyan en fazla üç danışman koltuğunu ve cevabı nereye yazacağını söyler. Bir alanın gözüyle bakılması gerektiğinde: `guvenlik mimarisi aa`.\n\n`ff` — Fable'a danış. Olguları toplama, soruyu yazma, ajana verme ve cevabı kaydetme yordamını o tura koyar. Karar pahalıysa: `ff iki yoldan hangisi`.\n\n`mc` — Bellek taraması. Geçmiş isteklerimi kapanış cevabı ve commit'leriyle eşleştirir, bitmemişleri Açık / Kararını bekliyor / Belirsiz diye `tmp/hatirlatici.md` dosyasına yazar. Tek başına ya da sonda: `mc`, `mc 2 hafta`, `mc 3 sayfa`.\n\n`hh` — Bu liste.\n\nHiçbiri yazılmayan turda eklenti bağlama tek harf yazmaz."
   },
   "banner.trash": {
     "en": "Trash %M MB In %N Files · Empty It: %C",
@@ -372,11 +372,31 @@
     "tr": "Cevap Bu Tura Dönecek"
   },
   "mod.memory": {
-    "en": "Memory check. %C writes my newest 60 requests to tmp/gecmis-1.md, newest page first. You decide how far back to go: skim the page, and if unfinished work may lie further back, run it again with --sayfa 2, 3 and on; stop once older pages only show settled work, the start of the records is not a target. Hand the pages you kept to the Agent tool verbatim, model sonnet, and ask it in Turkish which requests were never finished. It answers with `- [ ] job - why it is open` lines only, nothing the files do not show. File the answer with %R; the list lands in tmp/hatirlatici.md, then say the path and how many pages you read in one line.",
-    "tr": "Bellek taraması. %C en yeni 60 isteğimi tmp/gecmis-1.md dosyasına yazar, sayfalar yeniden eskiye gider. Ne kadar geriye gidileceğine sen karar ver: sayfaya göz at, daha geride bitmemiş iş olabilirse --sayfa 2, 3 diye devam et; eski sayfalar yalnız kapanmış iş gösteriyorsa dur, kayıtların başına varmak hedef değil. Tuttuğun sayfaları olduğu gibi Agent aracına ver, model sonnet, görevi Türkçe yaz: bu isteklerden hangisi bitmemiş? Yalnızca `- [ ] iş — neden açık` satırlarıyla cevap versin, dosyalarda görmediğini yazmasın. Cevabı %R ile kaydet; liste tmp/hatirlatici.md dosyasına yazılır, yolunu ve kaç sayfa okuduğunu tek satır söyle."
+    "en": "Memory sweep. %C writes every past request with its evidence (closing reply, commits, open job lines) into tmp/gecmis-N.md and prints only an index: page, dates, count, unclosed. Do not read the pages.%S Give the Agent tool the paths of the pages you chose, model sonnet; over 8 pages, parallel agents of 4 and one merger. Task in Turkish: match each request to its evidence, the newest copy of a repeated request wins. Answer only under ## Açık, ## Kararını bekliyor, ## Belirsiz as `- [ ] job — evidence` lines. Open: a concrete action, no done in the closing, no commit. Awaiting decision: a reason on the job line or Senden istediklerim in the closing. Unclear: no closing but a commit, or a doubtful match. No evidence, no open; never write what the files do not show. When it returns run %R; it prints the summary on screen, write nothing else.",
+    "tr": "Bellek taraması. %C geçmiş her isteği kanıtıyla (kapanış cevabı, commit'ler, açık iş satırları) tmp/gecmis-N.md sayfalarına yazar, yalnız dizin basar: sayfa, tarih, istek, kapanışsız. Sayfaları okuma.%S Seçtiğin sayfaların yollarını Agent aracına ver, model sonnet; 8 sayfadan fazlaysa 4'erli paralel ajanlar ve bir birleştirici. Görev Türkçe: her isteği kanıtıyla eşleştir, tekrarlanan istekte en yenisi esas. Cevap yalnız ## Açık, ## Kararını bekliyor, ## Belirsiz başlıkları altında `- [ ] iş — kanıt` satırları. Açık: somut eylem, kapanışta yapıldı yok, commit yok. Kararını bekliyor: iş satırında neden ya da kapanışta Senden istediklerim. Belirsiz: kapanış yok ama commit var, ya da eşleme şüpheli. Kanıt yoksa açık deme, dosyada görmediğini yazma. Ajan dönünce %R; özeti ekrana kendisi basar, sen ayrıca bir şey yazma."
+  },
+  "mod.memoryPages": {
+    "en": " Scope given: take the newest %N pages without weighing the index.",
+    "tr": " Kapsam verildi: dizini tartmadan en yeni %N sayfayı al."
+  },
+  "mod.memoryDays": {
+    "en": " Scope given: the last %N days, take every page.",
+    "tr": " Kapsam verildi: son %N gün, bütün sayfaları al."
   },
   "banner.memory": {
     "en": "Memory Check · Past Requests Are Being Swept",
     "tr": "Bellek Taraması · Geçmiş İstekler Taranıyor"
+  },
+  "gorus.unknown": {
+    "en": "No consult %ID is armed. Run advice.js ask --mod gorus first and send the prompt it prints.",
+    "tr": "%ID numaralı danışma hazır değil. Önce advice.js ask --mod gorus çalıştır, bastığı istemi ver."
+  },
+  "gorus.spent": {
+    "en": "Consult %ID already went out once. Read its record under docs/danisma/ or write a new one.",
+    "tr": "%ID numaralı danışma bir kez gitti. docs/danisma/ altındaki kaydı oku ya da yenisini yaz."
+  },
+  "gorus.long": {
+    "en": "The prompt carries more than the path. Send the line advice.js printed; the agent reads the file itself.",
+    "tr": "İstem yoldan fazlasını taşıyor. advice.js'in bastığı satırı ver; ajan dosyayı kendisi okur."
   }
 }

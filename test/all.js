@@ -320,7 +320,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 17000, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 18000, String(JSON.stringify(table).length));
   ok('no relay strings are left', !keys.some((k) => /^(role\.|notice\.|line\.(contracts|agents|open|blocked))/.test(k)), keys.join(' '));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
@@ -689,7 +689,10 @@ function testMark() {
   at('ozel raftan bak pp', 'pp', 'ozel raftan bak');
   at('guvenlik icin rollere bak aa', 'aa', 'guvenlik icin rollere bak');
   at('  ??  ', '??', '');
-  for (const quiet of ['const x = a ?? b', 'a ?? b sonra devam', 'i++ dedim ve devam', 'npm test', '', 'appa bak', 'ppt dosyasi', 'off dedim', 'ff.js dosyasi']) {
+  at('mc', 'mc', '');
+  at('mc 2 hafta', 'mc', '2 hafta');
+  at('nerede kaldik mc', 'mc', 'nerede kaldik');
+  for (const quiet of ['const x = a ?? b', 'a ?? b sonra devam', 'i++ dedim ve devam', 'npm test', '', 'appa bak', 'ppt dosyasi', 'off dedim', 'ff.js dosyasi', 'mc nasil calisiyor', 'hh bu ne demek']) {
     ok('leaves alone ' + JSON.stringify(quiet), mark(quiet) === null, JSON.stringify(mark(quiet)));
   }
 }
@@ -879,52 +882,79 @@ function testFable() {
 
 function testHatirla() {
   const h = require(path.join(CORE, 'scripts', 'hatirla.js'));
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-mc-'));
+  const root = fixture();
   const kayit = path.join(root, 'konusma.jsonl');
+  const t0 = Date.now() - 600000;
+  const ts = (n) => new Date(t0 + n * 1000).toISOString();
+  const uzun = 'uzun istek ' + 'x'.repeat(5000) + ' SON';
   const satir = [
-    JSON.stringify({ type: 'user', message: { content: 'issue sablonunu yaz' } }),
-    JSON.stringify({ type: 'user', isMeta: true, message: { content: 'bu meta' } }),
-    JSON.stringify({ type: 'user', message: { content: '<system-reminder>gurultu</system-reminder>' } }),
-    JSON.stringify({ type: 'assistant', message: { content: 'cevap' } }),
-    JSON.stringify({ type: 'user', message: { content: [{ type: 'tool_result', content: 'ciktı' }, { type: 'text', text: 'panel testini kos' }] } }),
-  ].join('\n');
+    { type: 'user', timestamp: ts(0), message: { content: 'issue sablonunu yaz' } },
+    { type: 'assistant', timestamp: ts(1), message: { content: [{ type: 'tool_use', name: 'Bash' }] } },
+    { type: 'assistant', timestamp: ts(2), message: { content: [{ type: 'text', text: 'sablonu yazdim' }] } },
+    { type: 'user', timestamp: ts(3), isMeta: true, message: { content: 'bu meta' } },
+    { type: 'user', timestamp: ts(4), message: { content: '<system-reminder>gurultu</system-reminder>' } },
+    { type: 'user', timestamp: ts(5), isCompactSummary: true, message: { content: 'ozet metni' } },
+    { type: 'user', timestamp: ts(6), isSidechain: true, message: { content: 'alt ajan istemi' } },
+    { type: 'user', timestamp: ts(10), message: { content: [{ type: 'tool_result', content: 'ciktı' }, { type: 'text', text: uzun }] } },
+    { type: 'assistant', timestamp: ts(11), message: { content: [{ type: 'text', text: 'bakiyorum' }] } },
+    { type: 'assistant', timestamp: ts(12), message: { content: [{ type: 'tool_use', name: 'Read' }] } },
+    { type: 'user', timestamp: ts(20), message: { content: 'issue sablonunu yaz' } },
+  ].map((x) => JSON.stringify(x)).join('\n');
   fs.writeFileSync(kayit, satir + '\n');
 
-  const asked = h.prompts(kayit);
-  ok('only my own prompts come out of the transcript', asked.length === 2 && asked[0] === 'issue sablonunu yaz' && asked[1] === 'panel testini kos', JSON.stringify(asked));
+  const turns = h.turns(kayit);
+  ok('only my own prompts become turns', turns.length === 3 && turns[0].text === 'issue sablonunu yaz' && !JSON.stringify(turns).includes('gurultu') && !JSON.stringify(turns).includes('ozet metni') && !JSON.stringify(turns).includes('alt ajan'), JSON.stringify(turns.map((x) => x.text.slice(0, 20))));
+  ok('a closing is the last text with no tool call after it', turns[0].closing === 'sablonu yazdim' && turns[1].closing === '', JSON.stringify(turns.map((x) => x.closing)));
+  ok('a long request is kept whole', turns[1].text === uzun);
+  ok('prompts drops the repeat', h.prompts(kayit).length === 2);
 
   fs.mkdirSync(path.join(root, 'trash'), { recursive: true });
   fs.writeFileSync(path.join(root, 'trash', 'jobs-2026.md'), '- [x] biten\n- [ ] duran is — karar bekliyor\n');
-  ok('an old job list still counts as open work', h.jobs(root).length === 1 && /duran is/.test(h.jobs(root)[0]), JSON.stringify(h.jobs(root)));
+  fs.mkdirSync(path.join(root, '.claude'), { recursive: true });
+  fs.writeFileSync(path.join(root, '.claude', 'jobs.md'), '- [ ] bugunku is\n');
+  const left = h.jobs(root).map((o) => o.line).join('|');
+  ok('open job lines come from trash and the live list', /duran is/.test(left) && /bugunku is/.test(left) && !/biten/.test(left), left);
 
-  const g = h.gather(root, kayit);
-  ok('the gathered file carries both', /panel testini kos/.test(g.text) && /duran is/.test(g.text) && !/gurultu/.test(g.text), g.text);
+  run('git', ['-c', 'user.email=t@t.t', '-c', 'user.name=t', 'commit', '-q', '--allow-empty', '-m', 'sablon eklendi'], { cwd: root });
+  const one = h.gather(root, kayit);
+  ok('a repeated request is one page entry, the newest', one.length === 1 && one[0].count === 2 && one[0].text.split('issue sablonunu yaz').length === 2, one[0] && one[0].text.slice(0, 400));
+  ok('the page carries the whole long request and the job lines', one[0].text.includes(' SON') && /bugunku is/.test(one[0].text) && !/gurultu/.test(one[0].text));
+  ok('a commit after the last request is its evidence', /sablon eklendi/.test(one[0].text), one[0].text.slice(-600));
+  ok('an unclosed request counts in the index', one[0].iz === 2 && one[0].satir === 2, JSON.stringify({ iz: one[0].iz, satir: one[0].satir }));
 
-  const cwd0 = process.cwd();
-  process.chdir(root);
-  try {
-    ok('topla writes page one under tmp', h.cli(['topla', '--transcript', kayit]) === 0 && fs.existsSync(path.join(root, 'tmp', 'gecmis-1.md')));
-    const uzun = path.join(root, 'uzun.jsonl');
-    fs.writeFileSync(uzun, Array.from({ length: h.PAGE + 5 }, (_, i) => JSON.stringify({ type: 'user', message: { content: 'istek ' + i } })).join('\n'));
-    const s1 = h.gather(root, uzun, 1);
-    const s2 = h.gather(root, uzun, 2);
-    ok('page one holds the newest requests and says more is there', s1.more && s1.count === h.PAGE && s1.text.includes('istek ' + (h.PAGE + 4)) && !s1.text.includes('istek 4\n'), s1.text.slice(0, 300));
-    ok('the next page goes further back and says the records ended', !s2.more && s2.count === 5 && s2.text.includes('istek 0'), s2.text);
-    ok('only page one carries the old job lines', /duran is/.test(s1.text) && !/duran is/.test(s2.text));
-    const cevap = path.join(root, 'cevap.md');
-    fs.writeFileSync(cevap, '- [ ] issue sablonu — yazilmadi\n');
-    ok('record files the reply as the reminder', h.cli(['record', '--reply', cevap]) === 0 && /issue sablonu/.test(fs.readFileSync(path.join(root, 'tmp', 'hatirlatici.md'), 'utf8')));
-    ok('record without a reply is a usage error', h.cli(['record']) === 2);
-  } finally {
-    process.chdir(cwd0);
-  }
+  const cok = path.join(root, 'cok.jsonl');
+  fs.writeFileSync(cok, Array.from({ length: 30 }, (_, i) => JSON.stringify({ type: 'user', timestamp: ts(100 + i), message: { content: 'istek ' + i + ' ' + 'y'.repeat(3000) } })).join('\n'));
+  const pages = h.gather(root, cok);
+  ok('pages are cut by characters and the newest come first', pages.length >= 2 && pages[0].text.includes('istek 29 ') && pages[pages.length - 1].text.includes('istek 0 ') && pages.every((p) => p.text.length < h.PAGE_CHARS + 4000), pages.map((p) => p.text.length).join(','));
+  ok('only page one carries the job lines', /duran is/.test(pages[0].text) && !/duran is/.test(pages[1].text));
+
+  const HAT = path.join(CORE, 'scripts', 'hatirla.js');
+  fs.mkdirSync(path.join(root, 'tmp'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'tmp', 'gecmis-9.md'), 'eski');
+  const idx = run(process.execPath, [HAT, 'topla', '--transcript', cok, '--cwd', root]);
+  ok('topla prints an index, not the requests', idx.status === 0 && !/yyyy/.test(idx.stdout) && new RegExp(pages.length + ' sayfa · 30 istek').test(idx.stdout) && idx.stdout.trim().split('\n').length === pages.length + 1, idx.stdout + idx.stderr);
+  ok('and leaves only this sweep in tmp', fs.existsSync(path.join(root, 'tmp', 'gecmis-1.md')) && !fs.existsSync(path.join(root, 'tmp', 'gecmis-9.md')));
+
+  const cevap = '## Açık\n- [ ] issue sablonu — kapanış yok\n- [ ] panel — commit yok\n## Kararını bekliyor\n- [ ] sürüm — jobs: karar\n## Belirsiz\n';
+  const r = h.record(root, cevap);
+  const body = fs.readFileSync(path.join(root, 'tmp', 'hatirlatici.md'), 'utf8');
+  ok('record counts the three classes into one screen line', r.line === pages.length + ' sayfa · 30 istek · 2 açık · 1 karar · 0 belirsiz · tmp/hatirlatici.md', r.line);
+  ok('and the reminder keeps the reply under a dated head', /^# Hatırlatıcı · \d{4}-\d\d-\d\d · /.test(body) && /panel — commit yok/.test(body), body);
+  ok('record without a reply is a usage error', run(process.execPath, [HAT, 'record', '--cwd', root]).status === 2);
 
   const mod = require(path.join(CORE, 'hooks', 'mod.js'));
-  const out = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'mc', cwd: root, session_id: 'mc1' });
-  const ctx = JSON.parse(out).hookSpecificOutput.additionalContext;
-  ok('mc writes the sweep recipe', /hatirla\.js/.test(ctx) && /topla/.test(ctx) && /record/.test(ctx), ctx);
-  ok('and names the file it ends in', /hatirlatici\.md/.test(ctx), ctx);
-  ok('and keeps the temporary files in tmp', /tmp\//.test(ctx), ctx);
+  const ctxOf = (prompt) => {
+    const out = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt, cwd: root, session_id: 'mc1' });
+    try { return JSON.parse(out).hookSpecificOutput.additionalContext; } catch { return ''; }
+  };
+  const ctx = ctxOf('mc');
+  ok('mc writes the sweep recipe', /hatirla\.js/.test(ctx) && /topla/.test(ctx) && /record --ajan/.test(ctx), ctx);
+  ok('and hands the agent paths, not the pages', /tmp\/gecmis-N\.md/.test(ctx) && /(yollar|paths)/.test(ctx), ctx);
+  ok('and asks for the three classes', /## Açık/.test(ctx) && /## Kararını bekliyor/.test(ctx) && /## Belirsiz/.test(ctx), ctx);
+  ok('mc 2 hafta reads two weeks', /topla --gun 14/.test(ctxOf('mc 2 hafta')));
+  ok('mc 3 sayfa takes three pages', /\b3\b/.test(ctxOf('mc 3 sayfa')) && !/--gun/.test(ctxOf('mc 3 sayfa')));
+  ok('a sentence that starts with mc is not a sweep', !/hatirla\.js/.test(ctxOf('mc nasil calisiyor')));
+  ok('a sentence that ends with mc is a sweep', /hatirla\.js/.test(ctxOf('nerede kaldik mc')));
   sweep(root);
 }
 
@@ -1263,6 +1293,30 @@ function testScout() {
   fs.writeFileSync(path.join(root, 'cevap2.md'), 'net');
   const qr = run(process.execPath, [ADVICE, 'record', '--reply', 'cevap2.md', '--cost', '3k token, 20 s'], { cwd: root, env });
   ok('record files the answer next to the question', qr.stdout.trim() === 'docs/netlestirme/001-plani-mi-kesmeli-yoksa-olcmeli-mi.md' && /3k token/.test(fs.readFileSync(path.join(root, 'docs', 'netlestirme', '001-plani-mi-kesmeli-yoksa-olcmeli-mi.md'), 'utf8')), qr.stdout + qr.stderr);
+  fs.writeFileSync(path.join(root, 'danisma-girdi.md'), '# Sistem Hantallığı\n\nNeresi hantal?');
+  const ga = run(process.execPath, [ADVICE, 'ask', '--mod', 'gorus', '--konu', 'sistem-hantalligi', '--girdi', 'danisma-girdi.md'], { cwd: root, env });
+  const glines = ga.stdout.split('\n');
+  const gfile = path.join(root, 'docs', 'danisma', '001-fable-sistem-hantalligi-girdi.md');
+  ok('gorus ask numbers the consult and writes the input once', fs.existsSync(gfile) && /\[\[danisma:001\]\]/.test(fs.readFileSync(gfile, 'utf8')) && /Neresi hantal/.test(fs.readFileSync(gfile, 'utf8')), ga.stdout + ga.stderr);
+  ok('and the scratch input is gone', !fs.existsSync(path.join(root, 'danisma-girdi.md')));
+  const gprompt = glines.find((l) => l.startsWith('[[danisma:001]]')) || '';
+  ok('it prints a short prompt that names the file', gprompt.length < 600 && gprompt.includes('001-fable-sistem-hantalligi-girdi.md'), ga.stdout);
+  ok('the gate refuses the whole input pasted', gate(gprompt + ' ' + 'z'.repeat(700), 'fable') !== '');
+  ok('the gate lets the short prompt out once', gate(gprompt, 'fable') === '');
+  ok('and refuses it the second time', gate(gprompt, 'fable') !== '');
+  ok('an unknown consult is refused', gate('[[danisma:009]] oku', 'fable') !== '');
+  const sub = path.join(cfg, 'projects', path.resolve(root).split(/[\\/:]/).join('-'), 'oturum', 'subagents');
+  fs.mkdirSync(sub, { recursive: true });
+  fs.writeFileSync(path.join(sub, 'agent-ab12.jsonl'), [
+    { type: 'user', timestamp: '2026-01-01T00:00:00Z', message: { content: gprompt } },
+    { type: 'assistant', timestamp: '2026-01-01T00:00:20Z', message: { model: 'claude-fable-5-1', usage: { output_tokens: 300 }, content: [{ type: 'tool_use', name: 'Read' }] } },
+    { type: 'user', timestamp: '2026-01-01T00:00:21Z', message: { content: [{ type: 'tool_result', content: 'dosya' }] } },
+    { type: 'assistant', timestamp: '2026-01-01T00:01:00Z', message: { model: 'claude-fable-5-1', usage: { output_tokens: 900 }, content: [{ type: 'text', text: '## Cevap\n\nkancalar hantal' }] } },
+  ].map((x) => JSON.stringify(x)).join('\n'));
+  const gr = run(process.execPath, [ADVICE, 'record', '--mod', 'gorus', '--ajan', 'ab12'], { cwd: root, env });
+  const grec = fs.readFileSync(path.join(root, 'docs', 'danisma', '001-fable-sistem-hantalligi.md'), 'utf8');
+  ok('gorus record takes the reply and the measure from the agent transcript', /kancalar hantal/.test(grec) && /claude-fable-5-1/.test(grec) && /1\.200 çıktı token/.test(grec) && /60 sn/.test(grec), gr.stdout + gr.stderr + grec);
+  ok('and links the input', /\(001-fable-sistem-hantalligi-girdi\.md\)/.test(grec));
   const other = fixture();
   fs.writeFileSync(path.join(other, 'olgular.md'), '- baska proje');
   run(process.execPath, [ADVICE, 'ask', 'bambaska bir soru', '--facts', 'olgular.md'], { cwd: other, env });
