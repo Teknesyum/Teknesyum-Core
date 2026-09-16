@@ -49,8 +49,20 @@ model lists them in `.claude/jobs.md` as `- [ ] job`, ticks each one `- [x]`, an
 one open only with a reason: `- [ ] job — waits on your decision`.
 
 On `Stop`, `dur.js` holds the turn once if a line is open with no reason, or if the prompt
-was a list and no list was written. On the next prompt the open lines come back and the file
-moves to `trash/`. A background task notification is not a prompt and takes nothing away.
+was a list and no list was written, or listed fewer lines than the prompt had items. On the
+next prompt the open lines move into the ledger and the file moves to `trash/`. A background
+task notification is not a prompt and takes nothing away.
+
+### One Ledger For Everything Put Off
+
+Everything put off goes to `.claude/acik.md` as `- [ ] job — time — reason`; there is no
+`sonra.md`. The hooks write it: `mod.js` moves the open lines of `jobs.md` in, `ust.js` opens
+`- [ ] ajan: <description>` for every Agent call, and an old `.claude/sonra.md` is moved in once
+and sent to `trash/`. While a line is open the ledger rides on every prompt and on every
+`SessionStart` (startup, resume, compact), at most 12 lines and 600 characters; `[x]` lines are
+pruned to `trash/acik-<ts>.md`. When the ledger shows, tick `[x]` what you did and give a
+reason for what you did not; a line never leaves without one. A reply of 40 characters or less
+with open lines is held once at `Stop`. An empty ledger costs nothing.
 
 ### Evidence Before "Done"
 
@@ -75,7 +87,8 @@ nothing and no model decides whether to print it.
 |---|---|---|---|
 | Banner | 0 tokens | 0 tokens, screen only | - |
 | Job gate | 0 bytes | one block at `Stop` | `jobs: false` |
-| Job hand-back | 0 bytes | the open lines, on the next prompt | `jobs: false` |
+| Job hand-back | 0 bytes | the open lines move to the ledger | `jobs: false` |
+| Ledger | 0 bytes when empty | at most 600 characters per prompt while a line is open | `jobs: false` |
 | Evidence gate | 0 bytes | one block at `Stop` | `evidence: false` |
 | Denylist | 0 bytes | one reason per denied command | - |
 | Host adapters | 0 bytes | the same as in Claude Code | `setup.js --host <h> --remove` |
@@ -451,13 +464,13 @@ The evidence gate above is one of thirteen hook entries. Nine events, eleven fil
 
 | Event | Hook | Says |
 |---|---|---|
-| `SessionStart` | `count.js` | `Resume: .claude/handoff.md` if one exists; the first open `- [ ]` step of `docs/plan.md` if one exists; the trash offer when `<project>/trash` is over 100 MB, at most once a day per project — the line carries the exact emptying command and the hook never empties it itself; else nothing. Once a day it also starts `kutuphane.js fetch all --stale 7` detached in the background, so no shelf is older than a week, and runs the `cop.js` sweep of week-old state files and old plugin versions; the model sees none of it |
-| `UserPromptSubmit` | `mod.js` | library hits on `??` / `++`, private books on `pp`, agency seats on `aa`, the consult recipe on `ff`, the memory-check recipe on `mc`, the list of marks on `hh` (that list goes to the display channel, not into the context) — the mark is read at the start or at the end of the prompt, and `mc` at the start counts only alone or before a scope such as `2 hafta`; the open lines of `.claude/jobs.md` (the job list, `- [ ] job — reason`) come back once and the file moves to `trash/`; a prompt with several items leaves a state marker, no context; else nothing |
+| `SessionStart` | `count.js` | `Resume: .claude/handoff.md` if one exists; the first open `- [ ]` step of `docs/plan.md` if one exists; the trash offer when `<project>/trash` is over 100 MB, at most once a day per project — the line carries the exact emptying command and the hook never empties it itself; the open lines of `.claude/acik.md` on every source, compact included; else nothing. Once a day it also starts `kutuphane.js fetch all --stale 7` detached in the background, so no shelf is older than a week, and runs the `cop.js` sweep of week-old state files and old plugin versions; the model sees none of it |
+| `UserPromptSubmit` | `mod.js` | library hits on `??` / `++`, private books on `pp`, agency seats on `aa`, the consult recipe on `ff`, the memory-check recipe on `mc`, the list of marks on `hh` (that list goes to the display channel, not into the context) — the mark is read at the start or at the end of the prompt, and `mc` at the start counts only alone or before a scope such as `2 hafta`; the open lines of `.claude/jobs.md` (the job list, `- [ ] job — reason`) and of an old `.claude/sonra.md` move into the ledger `.claude/acik.md` and the file moves to `trash/`, `[x]` ledger lines are pruned to `trash/`, and the open ledger lines ride along; a prompt with several items leaves a state marker, no context; else nothing |
 | `PostToolUse` | `count.js` | one line at the threshold, once; else nothing |
 | `PostToolUseFailure` | `count.js` | nothing; files a failed test command |
 | `PreToolUse` | `yasak.js` | a denied command with one line on what to do instead. Deleting inside the project is free; leaving it is not — a delete whose target resolves outside the working directory, or is the root itself, is denied, along with disk writes, history rewrites, repo and release deletion, download-and-run pipes, `chmod 777` and machine-wide kills; then, in the same process, the loop gate: one line when a wait loop has no upper bound; else nothing |
-| `PreToolUse` | `ust.js` | one line when the turn hands work to a model above the session's own — the called model and what the work is. The session's own model is read from the tail of the transcript; a same or lower model, a model the call does not name, and a consult already announced at the prompt all stay silent. In the same process it refuses a fable consult that is unarmed, spent, or longer than its path line; nothing reaches the model |
-| `Stop` | `dur.js` | first, in the same process, the count Stop work: refreshes the diff, and after `agency.js show` prints the seat once as a chat line. Then a session that edited files and ran nothing is blocked once; the same tree is never asked twice. Off with `evidence: false`. The job gate shares the block: an open line in `.claude/jobs.md` with no reason, or a list-shaped prompt with no list, holds the turn once. Off with `jobs: false` |
+| `PreToolUse` | `ust.js` | one line when the turn hands work to a model above the session's own — the called model and what the work is. The session's own model is read from the tail of the transcript; a same or lower model, a model the call does not name, and a consult already announced at the prompt all stay silent. In the same process it refuses a fable consult that is unarmed, spent, or longer than its path line; an Agent call that goes through opens `- [ ] ajan: <description>` in `.claude/acik.md`; nothing reaches the model |
+| `Stop` | `dur.js` | first, in the same process, the count Stop work: refreshes the diff, and after `agency.js show` prints the seat once as a chat line. Then a session that edited files and ran nothing is blocked once; the same tree is never asked twice. Off with `evidence: false`. The job gate shares the block: an open line in `.claude/jobs.md` with no reason, a list-shaped prompt with no list or a shorter list, or a reply of 40 characters or less while `.claude/acik.md` has open lines, holds the turn once. Off with `jobs: false` |
 | `SessionEnd` | `handoff.js` | nothing; writes the handoff |
 | `Notification` | `notify.js` | nothing; rings |
 | `MessageDisplay` | `bant.js` | nothing; draws the queued `Teknesyum Core > …` lines on screen only |
@@ -495,7 +508,8 @@ sequenceDiagram
 ```
 .claude/
   handoff.md           where the work stands, machine-written, two lines yours
-  jobs.md              the turn's job list, back on the next prompt, then trash/
+  acik.md              the ledger: open lines put off, machine-written, ticked by the model
+  jobs.md              the turn's job list, into the ledger on the next prompt, then trash/
   map.md               import graph
 adapters/
   AGENTS.md            the rules as text, for Codex, Cursor and Gemini

@@ -110,6 +110,7 @@ function jobs(cwd) {
     for (const s of openLines(file)) if (!out.some((o) => o.line === s)) out.push({ label, line: s });
   };
   for (const n of names) add('trash/' + n, path.join(bin, n));
+  add('.claude/acik.md', path.join(root, '.claude', 'acik.md'));
   add('.claude/jobs.md', path.join(root, '.claude', 'jobs.md'));
   add('docs/plan.md', path.join(root, 'docs', 'plan.md'));
   return out;

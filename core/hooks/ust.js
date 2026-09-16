@@ -62,6 +62,10 @@ function line(j) {
 
 function gate(j) {
   const deny = advice.gate(j);
+  if (!deny && j.tool_name === 'Agent') {
+    const input = j.tool_input || {};
+    require('./defter.js').agent(j.cwd || process.cwd(), input.description || input.subagent_type || '');
+  }
   const l = line(j);
   if (l) say(j.session_id, l);
   return deny;

@@ -193,6 +193,12 @@ function opening(j, cwd) {
     lines.push(s.text);
     parts.push(s.line);
   }
+  let book = { text: '' };
+  try { book = require('./defter.js').ledger(cwd); } catch {}
+  if (book.text) {
+    lines.push(book.text);
+    parts.push(banner('banner.ledger', { '%N': require('./defter.js').open(cwd).length }));
+  }
   const cop = trash(cwd);
   if (cop) parts.push(cop);
   if (j.source !== 'compact') say(j.session_id, parts.join(' · '));

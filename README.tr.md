@@ -49,8 +49,20 @@ işleri `.claude/jobs.md` içine `- [ ] iş` diye yazar, her birini `- [x]` diye
 işi yalnız gerekçeyle açık bırakabilir: `- [ ] iş — senin kararını bekliyor`.
 
 `Stop`'ta `dur.js` gerekçesiz açık satır varsa ya da istem bir listeydi ve liste yazılmadıysa
-turu bir kez tutar. Sonraki istemde açık satırlar geri gelir, dosya `trash/`'e gider. Arka
-plan görev bildirimi istem değildir, hiçbir şey götürmez.
+ya da istemdeki maddeden az satır yazıldıysa turu bir kez tutar. Sonraki istemde açık satırlar
+deftere geçer, dosya `trash/`'e gider. Arka plan görev bildirimi istem değildir, hiçbir şey
+götürmez.
+
+### Ertelenen Her Şey İçin Tek Defter
+
+Ertelenen her şey `.claude/acik.md`'ye `- [ ] iş — zaman — gerekçe` olarak gider; `sonra.md`
+kalkar. Defteri kancalar yazar: `mod.js` `jobs.md`'nin açık satırlarını taşır, `ust.js` her
+Agent çağrısına `- [ ] ajan: <açıklama>` açar, eski `.claude/sonra.md` bir kez taşınıp
+`trash/`'e gider. Açık satır oldukça defter her istemde ve her `SessionStart`'ta (startup,
+resume, compact) en çok 12 satır ve 600 karakterle gelir; `[x]` satırlar
+`trash/acik-<zaman>.md`'ye budanır. Defter göründüğünde yaptığını `[x]` işaretle, yapmadığına
+gerekçe yaz; gerekçesiz satır silinmez. Açık satır varken 40 karakteri geçmeyen yanıt `Stop`'ta
+bir kez tutulur. Boş defterin maliyeti sıfır.
 
 ### "Bitti"den Önce Kanıt
 
@@ -443,13 +455,13 @@ Yukarıdaki kanıt kapısı on üç kanca kaydından biri. Dokuz olay, on bir do
 
 | Olay | Kanca | Söyler |
 |---|---|---|
-| `SessionStart` | `count.js` | varsa `Devam: .claude/handoff.md`; varsa `docs/plan.md`nin ilk açık `- [ ]` adımı; `<proje>/trash` 100 MB'ı aştıysa proje başına günde en çok bir kez çöp teklifi — satır tam silme komutunu taşır, kanca çöpü kendi boşaltmaz; yoksa hiçbir şey. Günde bir kez `kutuphane.js fetch all --stale 7`yi arka planda ayrık başlatır, hiçbir raf bir haftadan eski kalmaz, ve `cop.js`'in eski state dosyası ve eski eklenti sürümü süpürmesini koşar; model hiçbirini görmez |
-| `UserPromptSubmit` | `mod.js` | `??` / `++`de kütüphane bulguları, `pp`de özel kitaplar, `aa`da ajans koltukları, `ff`de fable danışma yordamı, `mc`de bellek tarama yordamı, `hh`de işaretlerin listesi (liste bağlama değil ekran kanalına gider) — işaret cümlenin başında da sonunda da okunur, `mc` başta yalnız tek başına ya da `2 hafta` gibi kapsamla sayılır; `.claude/jobs.md`'nin (iş listesi, `- [ ] iş — gerekçe`) açık satırları bir kez geri gelir, dosya `trash/`'e taşınır; çok maddeli istem bağlama yazmadan durum işareti bırakır; yoksa hiçbir şey |
+| `SessionStart` | `count.js` | varsa `Devam: .claude/handoff.md`; varsa `docs/plan.md`nin ilk açık `- [ ]` adımı; `<proje>/trash` 100 MB'ı aştıysa proje başına günde en çok bir kez çöp teklifi — satır tam silme komutunu taşır, kanca çöpü kendi boşaltmaz; her kaynakta, compact dahil, `.claude/acik.md`'nin açık satırları; yoksa hiçbir şey. Günde bir kez `kutuphane.js fetch all --stale 7`yi arka planda ayrık başlatır, hiçbir raf bir haftadan eski kalmaz, ve `cop.js`'in eski state dosyası ve eski eklenti sürümü süpürmesini koşar; model hiçbirini görmez |
+| `UserPromptSubmit` | `mod.js` | `??` / `++`de kütüphane bulguları, `pp`de özel kitaplar, `aa`da ajans koltukları, `ff`de fable danışma yordamı, `mc`de bellek tarama yordamı, `hh`de işaretlerin listesi (liste bağlama değil ekran kanalına gider) — işaret cümlenin başında da sonunda da okunur, `mc` başta yalnız tek başına ya da `2 hafta` gibi kapsamla sayılır; `.claude/jobs.md`'nin (iş listesi, `- [ ] iş — gerekçe`) ve eski `.claude/sonra.md`'nin açık satırları `.claude/acik.md` defterine geçer, dosya `trash/`'e taşınır, defterin `[x]` satırları `trash/`'e budanır, açık satırları bağlama eklenir; çok maddeli istem bağlama yazmadan durum işareti bırakır; yoksa hiçbir şey |
 | `PostToolUse` | `count.js` | eşikte tek satır, bir kez; yoksa hiçbir şey |
 | `PostToolUseFailure` | `count.js` | hiçbir şey; kalan test komutunu kaydeder |
 | `PreToolUse` | `yasak.js` | tehlikeli komutu tek satır gerekçeyle reddeder. Proje içinde silmek serbest; dışına çıkmak değil — hedefi çalışma klasörünün dışına düşen ya da kökün kendisi olan silme, disk yazma, geçmiş silme, depo/sürüm silme, indir-koş boruları, `chmod 777`, makine çapında durdurma reddedilir; ardından aynı süreçte döngü kapısı: bekleme döngüsünün üst sınırı yoksa tek satır; yoksa hiçbir şey |
 | `PreToolUse` | `ust.js` | tur, işi oturumun kendi modelinin üstündeki bir modele verdiğinde tek satır — çağrılan model ve işin ne olduğu. Oturumun kendi modeli dökümün sonundan okunur; aynı ya da alt model, model adı geçmeyen çağrı ve istem anında zaten duyurulmuş danışma susar. Aynı süreçte kurulmamış, harcanmış ya da yol satırından uzun fable danışmasını reddeder; modele hiçbir şey gitmez |
-| `Stop` | `dur.js` | Önce aynı süreçte count'un Stop işi: diff'i tazeler, `agency.js show` sonrası koltuğu bir kez sohbet satırı olarak basar. Sonra dosya düzenleyip hiçbir şey koşmayan oturum bir kez durdurulur; aynı ağaç ikinci kez sorulmaz. Kapatmak: `evidence: false`. İş kapısı aynı bloğu paylaşır: `.claude/jobs.md`'de gerekçesiz açık satır ya da liste yazılmamış çok maddeli istem turu bir kez tutar. Kapatmak: `jobs: false` |
+| `Stop` | `dur.js` | Önce aynı süreçte count'un Stop işi: diff'i tazeler, `agency.js show` sonrası koltuğu bir kez sohbet satırı olarak basar. Sonra dosya düzenleyip hiçbir şey koşmayan oturum bir kez durdurulur; aynı ağaç ikinci kez sorulmaz. Kapatmak: `evidence: false`. İş kapısı aynı bloğu paylaşır: `.claude/jobs.md`'de gerekçesiz açık satır, liste yazılmamış ya da eksik yazılmış çok maddeli istem, ya da `.claude/acik.md`'de açık satır varken 40 karakteri geçmeyen yanıt turu bir kez tutar. Kapatmak: `jobs: false` |
 | `SessionEnd` | `handoff.js` | hiçbir şey; devri yazar |
 | `Notification` | `notify.js` | hiçbir şey; çalar |
 | `MessageDisplay` | `bant.js` | hiçbir şey; kuyruktaki `Teknesyum Core > …` satırlarını yalnız ekrana çizer |
@@ -486,7 +498,8 @@ sequenceDiagram
 ```
 .claude/
   handoff.md           iş nerede kaldı, makine yazar, iki satır sizin
-  jobs.md              turun iş listesi, sonraki istemde geri gelir, sonra trash/
+  acik.md              defter: ertelenen açık satırlar, makine yazar, model işaretler
+  jobs.md              turun iş listesi, sonraki istemde deftere geçer, sonra trash/
   map.md               import grafiği
 adapters/
   AGENTS.md            Codex, Cursor ve Gemini için metin olarak kurallar

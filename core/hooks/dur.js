@@ -34,7 +34,12 @@ function jobs(j) {
     say(j.session_id, banner('banner.jobsMissing', { '%N': want.n }));
     return t('dur.jobsMissing').replace('%N', String(want.n));
   }
-  const left = body.split(/\r?\n/).filter((l) => ITEM.test(l) && !DONE.test(l) && !REASON.test(l)).map((l) => l.trim());
+  const rows = body.split(/\r?\n/).filter((l) => ITEM.test(l));
+  if (want && want.n > rows.length) {
+    say(j.session_id, banner('banner.jobsShort', { '%N': want.n, '%M': rows.length }));
+    return t('dur.jobsShort').replace('%N', String(want.n)).replace('%M', String(rows.length));
+  }
+  const left = rows.filter((l) => !DONE.test(l) && !REASON.test(l)).map((l) => l.trim());
   if (!left.length) return '';
   say(j.session_id, banner('banner.jobsOpen', { '%N': left.length }));
   return t('dur.jobs').replace('%N', String(left.length)) + '\n' + left.join('\n');
@@ -60,7 +65,7 @@ function evidence(j) {
 function decide(j) {
   if (j.hook_event_name !== 'Stop') return null;
   if (j.stop_hook_active) return null;
-  const why = [jobs(j), evidence(j)].filter(Boolean);
+  const why = [jobs(j), require('./defter.js').short(j), evidence(j)].filter(Boolean);
   return why.length ? { decision: 'block', reason: why.join('\n\n') } : null;
 }
 

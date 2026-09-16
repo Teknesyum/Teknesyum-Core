@@ -150,7 +150,8 @@ function privateShelf() {
   return head + '\n\n' + books.map((b) => '### ' + b.file + '\n' + b.text.trim()).join('\n\n');
 }
 
-const JOBS = path.join('.claude', 'jobs.md');
+const defter = require('./defter.js');
+const JOBS = defter.JOBS;
 const ITEM = /^\s*[-*]\s+\S/;
 const DONE = /^\s*[-*]\s+\[[xX]\]/;
 
@@ -159,18 +160,9 @@ function open(body) {
 }
 
 function later(cwd) {
-  const file = path.join(cwd, JOBS);
-  let body = '';
-  try { body = fs.readFileSync(file, 'utf8').trim(); } catch { return ''; }
-  try {
-    const bin = path.join(cwd, 'trash');
-    fs.mkdirSync(bin, { recursive: true });
-    fs.renameSync(file, path.join(bin, 'jobs-' + new Date().toISOString().replace(/[:.]/g, '-') + '.md'));
-  } catch {}
-  const left = open(body);
-  if (!left.length) return '';
-  shown.push(banner('banner.jobs', { '%N': left.length }));
-  return t('mod.jobs') + '\n' + left.join('\n');
+  const { text, moved } = defter.ledger(cwd);
+  if (moved) shown.push(banner('banner.jobs', { '%N': moved }));
+  return text;
 }
 
 const LIST = /^\s*(\d+[.)]|[-*•])\s+\S/;

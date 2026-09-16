@@ -21,6 +21,8 @@ It costs its own length on every turn, about 150 tokens.
 - More than one job in a prompt: list them in .claude/jobs.md as "- [ ] job", tick "- [x]"
   as each is done, and leave one open only as "- [ ] job — reason" when it waits on the
   user, is blocked outside the repo, or hits the handoff. Size or count is no reason.
+- Everything put off goes to .claude/acik.md as "- [ ] job — time — reason"; no sonra.md.
+  When the ledger shows, tick [x] what you did, reason the rest; no line leaves without one.
 - Before ending a long session, write .claude/handoff.md: task, changed files, tests run,
   decisions, next_action. The next session reads it first.
 ```
