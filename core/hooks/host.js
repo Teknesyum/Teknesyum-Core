@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-const fs = require('fs');
-const { stateFile, drain } = require('./lib.js');
+const { main, drain } = require('./lib.js');
 
 const SHELL = /^run_shell_command$/;
 const WRITE = /^(write_file|replace)$/;
@@ -108,17 +107,7 @@ function run(host, ev, raw) {
 
 if (require.main === module) {
   const [host, ev] = process.argv.slice(2);
-  let raw = '';
-  process.stdin.on('data', (d) => (raw += d));
-  process.stdin.on('end', () => {
-    let out = null;
-    try { out = run(host, ev, JSON.parse(raw || '{}')); } catch (e) {
-      try { fs.appendFileSync(stateFile('hook-errors').replace(/\.json$/, '.log'), new Date().toISOString() + ' host.js ' + host + ' ' + ev + ' ' + String((e && e.stack) || e) + '\n'); } catch {}
-    }
-    if (out) process.stdout.write(JSON.stringify(out));
-    process.exit(0);
-  });
-  process.stdin.on('error', () => process.exit(0));
+  main((j) => run(host, ev, j), { log: 'host.js ' + host + ' ' + ev, empty: '{}' });
 }
 
 module.exports = { run, cursor, gemini, HOSTS };

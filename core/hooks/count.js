@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { read, write, stateFile, configRoot, safe, t, banner, say } = require('./lib.js');
+const { main, read, write, stateFile, configRoot, safe, t, banner, say } = require('./lib.js');
 
 const FILE_MAX = 5;
 const DIFF_MAX = 150;
@@ -230,21 +230,6 @@ function handle(j) {
   return out;
 }
 
-function errorLog(e) {
-  try {
-    fs.appendFileSync(stateFile('hook-errors').replace(/\.json$/, '.log'), new Date().toISOString() + ' count.js ' + String((e && e.stack) || e) + '\n');
-  } catch {}
-}
-
-if (require.main === module) {
-  let raw = '';
-  process.stdin.on('data', (d) => (raw += d));
-  process.stdin.on('end', () => {
-    let out = '';
-    try { out = handle(JSON.parse(raw)); } catch (e) { errorLog(e); }
-    if (out) process.stdout.write(out);
-    process.exit(0);
-  });
-}
+if (require.main === module) main(handle, { log: 'count.js' });
 
 module.exports = { handle, reason, file, tree, step, FILE_MAX, DIFF_MAX, CTX_MAX, RISK, TEST };

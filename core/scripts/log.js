@@ -2,18 +2,12 @@
 
 const fs = require('fs');
 const path = require('path');
-const { openLogs, coreRepo, stateFile } = require('../hooks/lib.js');
+const { openLogs, coreRepo, stateFile, fold } = require('../hooks/lib.js');
 
 const PREFIX = 'BUG-';
 
 function slug(s) {
-  return String(s)
-    .replace(/[ıİ]/g, 'i')
-    .replace(/[ğĞ]/g, 'g')
-    .replace(/[üÜ]/g, 'u')
-    .replace(/[şŞ]/g, 's')
-    .replace(/[öÖ]/g, 'o')
-    .replace(/[çÇ]/g, 'c')
+  return fold(String(s))
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')

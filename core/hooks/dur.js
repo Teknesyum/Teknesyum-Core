@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
-const { read, merge, settings, stateFile, t, banner, say } = require('./lib.js');
+const { main, read, merge, settings, stateFile, t, banner, say } = require('./lib.js');
 const { file, tree } = require('./count.js');
 
 function off() {
@@ -63,17 +63,6 @@ function decide(j) {
   return why.length ? { decision: 'block', reason: why.join('\n\n') } : null;
 }
 
-if (require.main === module) {
-  let raw = '';
-  process.stdin.on('data', (d) => (raw += d));
-  process.stdin.on('end', () => {
-    try {
-      const out = decide(JSON.parse(raw));
-      if (out) process.stdout.write(JSON.stringify(out));
-    } catch {}
-    process.exit(0);
-  });
-  process.stdin.on('error', () => process.exit(0));
-}
+if (require.main === module) main(decide);
 
 module.exports = { decide, proven, off, code, jobs, CODE };

@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { configRoot, read } = require('./lib.js');
+const { main, configRoot, read } = require('./lib.js');
 
 const EVENTS = ['waiting'];
 
@@ -224,15 +224,4 @@ module.exports = {
   stamp,
 };
 
-if (require.main === module) {
-  let raw = '';
-  process.stdin.setEncoding('utf8');
-  process.stdin.on('data', (d) => (raw += d));
-  process.stdin.on('end', () => {
-    try {
-      run(JSON.parse(raw));
-    } catch {}
-    process.exit(0);
-  });
-  process.stdin.on('error', () => process.exit(0));
-}
+if (require.main === module) main((j) => { run(j); });

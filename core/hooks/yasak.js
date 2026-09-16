@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const path = require('path');
-const { t, banner, say } = require('./lib.js');
+const { main, t, banner, say } = require('./lib.js');
 
 const WIPE = [
   /\brm\s+(?:-\S+\s+)*-\S*[rR]\S*f|\brm\s+(?:-\S+\s+)*-\S*f\S*[rR]/,
@@ -71,17 +71,6 @@ function decide(j) {
   };
 }
 
-if (require.main === module) {
-  let raw = '';
-  process.stdin.on('data', (d) => (raw += d));
-  process.stdin.on('end', () => {
-    try {
-      const out = decide(JSON.parse(raw));
-      if (out) process.stdout.write(JSON.stringify(out));
-    } catch {}
-    process.exit(0);
-  });
-  process.stdin.on('error', () => process.exit(0));
-}
+if (require.main === module) main(decide);
 
 module.exports = { forbidden, decide, outside, targets, RULES, WIPE };

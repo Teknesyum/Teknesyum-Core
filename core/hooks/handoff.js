@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { read, stateFile, safe, t } = require('./lib.js');
+const { main, read, stateFile, safe, t } = require('./lib.js');
 
 const FILE = path.join('.claude', 'handoff.md');
 const FILL = '(fill)';
@@ -101,15 +101,6 @@ function handle(j) {
   return generate(cwd, st);
 }
 
-if (require.main === module) {
-  let raw = '';
-  process.stdin.on('data', (d) => (raw += d));
-  process.stdin.on('end', () => {
-    try { handle(JSON.parse(raw)); } catch (e) {
-      try { fs.appendFileSync(stateFile('hook-errors').replace(/\.json$/, '.log'), new Date().toISOString() + ' handoff.js ' + String((e && e.stack) || e) + '\n'); } catch {}
-    }
-    process.exit(0);
-  });
-}
+if (require.main === module) main((j) => { handle(j); }, { log: 'handoff.js' });
 
 module.exports = { generate, render, section, firstPrompt, steer, handle, FILE, FILL };

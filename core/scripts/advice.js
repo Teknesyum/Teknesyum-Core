@@ -21,21 +21,6 @@ function slugOf(text) {
   return s || 'danisma';
 }
 
-function nextNumber(at) {
-  let top = 0;
-  let names = [];
-  try {
-    names = fs.readdirSync(at);
-  } catch {
-    return 1;
-  }
-  for (const n of names) {
-    const m = /^(\d{3})-/.exec(n);
-    if (m) top = Math.max(top, Number(m[1]));
-  }
-  return top + 1;
-}
-
 function list(relay) {
   let names = [];
   try {
@@ -44,10 +29,6 @@ function list(relay) {
     return [];
   }
   return names.sort();
-}
-
-function ascii(text) {
-  return String(text || '').replace(/[çÇ]/g, 'c').replace(/[ğĞ]/g, 'g').replace(/[ıİ]/g, 'i').replace(/[öÖ]/g, 'o').replace(/[şŞ]/g, 's').replace(/[üÜ]/g, 'u');
 }
 
 function askText(id, question, facts) {
@@ -74,8 +55,8 @@ function ask(root, question, facts) {
   if (!question) throw new Error('question is empty');
   const at = path.join(root, ASK_DIR);
   fs.mkdirSync(at, { recursive: true });
-  const id = String(nextNumber(at)).padStart(3, '0');
-  const slug = slugOf(ascii(question));
+  const id = String(lib.nextNumber(at)).padStart(3, '0');
+  const slug = slugOf(lib.fold(question));
   const file = path.join(at, id + '-' + slug + '-girdi.md');
   fs.writeFileSync(file, askText(id, question, facts));
   lib.write(lib.stateFile(lib.slot('advice', root)), { id, slug, question, at: new Date().toISOString(), spent: false, session: lib.sessionId() });
@@ -91,8 +72,8 @@ function gorusAsk(root, konu, girdi) {
   if (!body) throw new Error('girdi is empty');
   const at = dir(root);
   fs.mkdirSync(at, { recursive: true });
-  const id = String(nextNumber(at)).padStart(3, '0');
-  const slug = slugOf(ascii(konu || body.split('\n')[0]));
+  const id = String(lib.nextNumber(at)).padStart(3, '0');
+  const slug = slugOf(lib.fold(konu || body.split('\n')[0]));
   const first = body.split('\n').find((l) => l.startsWith('# '));
   const title = (first ? first.slice(2) : konu || slug).trim().slice(0, 90);
   const file = path.join(at, id + '-fable-' + slug + '-girdi.md');
@@ -190,11 +171,6 @@ function record(root, o) {
   return { file: path.relative(root, file).split(path.sep).join('/'), cut };
 }
 
-function arg(argv, flag) {
-  const i = argv.indexOf(flag);
-  return i === -1 || i === argv.length - 1 ? '' : argv[i + 1];
-}
-
 function main(argv) {
   const cmd = argv[0];
   const root = process.cwd();
@@ -203,27 +179,27 @@ function main(argv) {
     process.stdout.write(rows.length ? rows.join('\n') + '\n' : 'nothing recorded\n');
     return 0;
   }
-  if (cmd === 'ask' && arg(argv, '--mod') === 'gorus') {
-    const girdi = arg(argv, '--girdi');
+  if (cmd === 'ask' && lib.arg(argv, '--mod') === 'gorus') {
+    const girdi = lib.arg(argv, '--girdi');
     if (!girdi) throw new Error('ask --mod gorus needs --girdi <file>');
-    const r = gorusAsk(root, arg(argv, '--konu'), fs.readFileSync(girdi, 'utf8'));
+    const r = gorusAsk(root, lib.arg(argv, '--konu'), fs.readFileSync(girdi, 'utf8'));
     try { fs.unlinkSync(girdi); } catch {}
     process.stdout.write(r.file + '\nAgent istemi, olduğu gibi:\n' + r.prompt + '\nSonra: advice.js record --mod gorus --ajan <agentId>\n');
     return 0;
   }
-  if (cmd === 'record' && (arg(argv, '--mod') === 'gorus' || arg(argv, '--ajan'))) {
-    const r = gorusRecord(root, { id: arg(argv, '--id'), agent: arg(argv, '--ajan'), reply: arg(argv, '--reply'), model: arg(argv, '--model'), cost: arg(argv, '--cost') });
+  if (cmd === 'record' && (lib.arg(argv, '--mod') === 'gorus' || lib.arg(argv, '--ajan'))) {
+    const r = gorusRecord(root, { id: lib.arg(argv, '--id'), agent: lib.arg(argv, '--ajan'), reply: lib.arg(argv, '--reply'), model: lib.arg(argv, '--model'), cost: lib.arg(argv, '--cost') });
     process.stdout.write(r.file + ' · ' + r.olcu + (r.cut ? ' (reply cut at ' + REPLY_MAX + ' characters)' : '') + '\n');
     return 0;
   }
   if (cmd === 'ask') {
-    const facts = arg(argv, '--facts');
+    const facts = lib.arg(argv, '--facts');
     const r = ask(root, argv.slice(1).filter((x, i, all) => !x.startsWith('--') && all[i - 1] !== '--facts').join(' ').trim(), facts ? fs.readFileSync(facts, 'utf8').trim() : '');
     process.stdout.write(r.file + '\n\nGive the Agent tool the file above as the prompt, verbatim. The gate lets it through once; a second call on the same question or a longer prompt is refused.\nThen: advice.js record --reply <file with the answer> --cost "<tokens, seconds>"\n');
     return 0;
   }
   if (cmd === 'record') {
-    const r = record(root, { id: arg(argv, '--id'), reply: arg(argv, '--reply'), cost: arg(argv, '--cost') });
+    const r = record(root, { id: lib.arg(argv, '--id'), reply: lib.arg(argv, '--reply'), cost: lib.arg(argv, '--cost') });
     process.stdout.write(r.file + (r.cut ? ' (reply cut at ' + REPLY_MAX + ' characters)' : '') + '\n');
     return 0;
   }

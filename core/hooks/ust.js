@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const fs = require('fs');
-const { t, say, BANNER } = require('./lib.js');
+const { main, t, say, BANNER } = require('./lib.js');
 
 const RANK = { haiku: 1, sonnet: 2, opus: 3, fable: 4 };
 const MARK = /\[\[[a-z]+-\d{3}\]\]/i;
@@ -65,16 +65,6 @@ function gate(j) {
   return null;
 }
 
-if (require.main === module) {
-  let raw = '';
-  process.stdin.on('data', (d) => (raw += d));
-  process.stdin.on('end', () => {
-    try {
-      gate(JSON.parse(raw));
-    } catch {}
-    process.exit(0);
-  });
-  process.stdin.on('error', () => process.exit(0));
-}
+if (require.main === module) main((j) => { gate(j); });
 
 module.exports = { gate, line, rank };

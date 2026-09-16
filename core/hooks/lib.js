@@ -246,7 +246,54 @@ function makeGate(o) {
   };
 }
 
+function arg(argv, flag) {
+  const i = argv.indexOf(flag);
+  return i === -1 || i === argv.length - 1 ? '' : argv[i + 1];
+}
+
+function fold(text) {
+  return String(text || '').replace(/[çÇ]/g, 'c').replace(/[ğĞ]/g, 'g').replace(/[ıİ]/g, 'i').replace(/[öÖ]/g, 'o').replace(/[şŞ]/g, 's').replace(/[üÜ]/g, 'u');
+}
+
+function nextNumber(dir) {
+  let top = 0;
+  try {
+    for (const n of fs.readdirSync(dir)) {
+      const m = /^(\d{3})-/.exec(n);
+      if (m) top = Math.max(top, Number(m[1]));
+    }
+  } catch {}
+  return top + 1;
+}
+
+function errorLog(name, e) {
+  try {
+    fs.appendFileSync(stateFile('hook-errors').replace(/\.json$/, '.log'), new Date().toISOString() + ' ' + name + ' ' + String((e && e.stack) || e) + '\n');
+  } catch {}
+}
+
+function main(handle, o = {}) {
+  let raw = '';
+  process.stdin.setEncoding('utf8');
+  process.stdin.on('data', (d) => (raw += d));
+  process.stdin.on('end', () => {
+    try {
+      const out = handle(JSON.parse(raw || o.empty || ''));
+      if (out) process.stdout.write(typeof out === 'string' ? out : JSON.stringify(out));
+    } catch (e) {
+      if (o.log) errorLog(o.log, e);
+    }
+    process.exit(0);
+  });
+  process.stdin.on('error', () => process.exit(0));
+}
+
 module.exports = {
+  main,
+  errorLog,
+  arg,
+  fold,
+  nextNumber,
   makeGate,
   slot,
   home,

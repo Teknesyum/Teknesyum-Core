@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const { t, banner, say } = require('./lib.js');
+const { main, t, banner, say } = require('./lib.js');
 
 const LOOP = /\b(until|while)\b[\s\S]*\b(sleep|Start-Sleep)\b|\b(sleep|Start-Sleep)\b[\s\S]*\b(until|while)\b/i;
 const BOUND = [
@@ -39,17 +39,6 @@ function decide(j) {
   };
 }
 
-if (require.main === module) {
-  let raw = '';
-  process.stdin.on('data', (d) => (raw += d));
-  process.stdin.on('end', () => {
-    try {
-      const out = decide(JSON.parse(raw));
-      if (out) process.stdout.write(JSON.stringify(out));
-    } catch {}
-    process.exit(0);
-  });
-  process.stdin.on('error', () => process.exit(0));
-}
+if (require.main === module) main(decide);
 
 module.exports = { unbounded, decide, LOOP, BOUND };

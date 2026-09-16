@@ -3,6 +3,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { execFileSync } = require('child_process');
+const { arg } = require('../hooks/lib.js');
 
 const PAGE_CHARS = 40000;
 const CLOSING = 4000;
@@ -252,7 +253,7 @@ function show(cwd, text) {
 
 function cli(argv) {
   const cmd = argv[0] || '';
-  const flag = (n) => { const i = argv.indexOf(n); return i > -1 ? argv[i + 1] : ''; };
+  const flag = (n) => arg(argv, n);
   const cwd = flag('--cwd') || process.cwd();
   if (cmd === 'topla') {
     const r = topla(cwd, flag('--transcript'), Number(flag('--gun')) || 0);

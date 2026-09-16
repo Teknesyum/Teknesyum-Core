@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { configRoot } = require('../hooks/lib.js');
+const { configRoot, arg, nextNumber } = require('../hooks/lib.js');
 const { slugOf } = require('./advice.js');
 
 const REPO = 'https://github.com/msitarzewski/agency-agents.git';
@@ -135,21 +135,6 @@ function show(slugs, opts) {
   return out;
 }
 
-function nextNumber(at) {
-  let top = 0;
-  let names = [];
-  try {
-    names = fs.readdirSync(at);
-  } catch {
-    return 1;
-  }
-  for (const n of names) {
-    const m = /^(\d{3})-/.exec(n);
-    if (m) top = Math.max(top, Number(m[1]));
-  }
-  return top + 1;
-}
-
 function record(root, o) {
   const dir = path.join(root, RECORDS);
   fs.mkdirSync(dir, { recursive: true });
@@ -173,11 +158,6 @@ function record(root, o) {
   ].join('\n');
   fs.writeFileSync(path.join(dir, name), body);
   return path.join(RECORDS, name);
-}
-
-function arg(argv, flag) {
-  const i = argv.indexOf(flag);
-  return i === -1 || i === argv.length - 1 ? '' : argv[i + 1];
 }
 
 function main(argv) {

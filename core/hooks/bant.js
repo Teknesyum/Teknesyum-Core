@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const { drain } = require('./lib.js');
+const { main, drain } = require('./lib.js');
 
 function build(j) {
   if (!j || j.hook_event_name !== 'MessageDisplay') return '';
@@ -15,16 +15,6 @@ function build(j) {
   return JSON.stringify({ hookSpecificOutput: { hookEventName: 'MessageDisplay', displayContent: body } });
 }
 
-if (require.main === module) {
-  let raw = '';
-  process.stdin.on('data', (d) => (raw += d));
-  process.stdin.on('end', () => {
-    let out = '';
-    try { out = build(JSON.parse(raw)); } catch {}
-    if (out) process.stdout.write(out);
-    process.exit(0);
-  });
-  process.stdin.on('error', () => process.exit(0));
-}
+if (require.main === module) main(build);
 
 module.exports = { build };

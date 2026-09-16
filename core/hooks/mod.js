@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { configRoot, stateFile, t, banner, say, sayBlock } = require('./lib.js');
+const { main, configRoot, stateFile, t, banner, say, sayBlock } = require('./lib.js');
 const lib = require('../scripts/kutuphane.js');
 const ag = require('../scripts/agency.js');
 
@@ -215,17 +215,6 @@ function handle(j) {
   return JSON.stringify({ hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: all } });
 }
 
-if (require.main === module) {
-  let raw = '';
-  process.stdin.on('data', (d) => (raw += d));
-  process.stdin.on('end', () => {
-    let out = '';
-    try { out = handle(JSON.parse(raw)); } catch (e) {
-      try { fs.appendFileSync(stateFile('hook-errors').replace(/\.json$/, '.log'), new Date().toISOString() + ' mod.js ' + String((e && e.stack) || e) + '\n'); } catch {}
-    }
-    if (out) process.stdout.write(out);
-    process.exit(0);
-  });
-}
+if (require.main === module) main(handle, { log: 'mod.js' });
 
 module.exports = { handle, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };

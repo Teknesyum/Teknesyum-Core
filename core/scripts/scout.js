@@ -18,17 +18,6 @@ function stateFile(root) {
   return lib.stateFile(lib.slot('scout', root));
 }
 
-function nextNumber(dir) {
-  let top = 0;
-  try {
-    for (const n of fs.readdirSync(dir)) {
-      const m = /^(\d{3})-/.exec(n);
-      if (m) top = Math.max(top, Number(m[1]));
-    }
-  } catch {}
-  return top + 1;
-}
-
 function idOf(text) {
   const m = new RegExp(MARK.replace(/[[\]]/g, '\\$&') + '(\\d{3})\\]\\]').exec(String(text || ''));
   return m ? m[1] : '';
@@ -64,8 +53,8 @@ function brief(root, topic) {
   if (!topic) throw new Error('topic is empty');
   const dir = path.join(root, DIR);
   fs.mkdirSync(dir, { recursive: true });
-  const id = String(nextNumber(dir)).padStart(3, '0');
-  const slug = slugOf(topic.replace(/[çÇ]/g, 'c').replace(/[ğĞ]/g, 'g').replace(/[ıİ]/g, 'i').replace(/[öÖ]/g, 'o').replace(/[şŞ]/g, 's').replace(/[üÜ]/g, 'u'));
+  const id = String(lib.nextNumber(dir)).padStart(3, '0');
+  const slug = slugOf(lib.fold(topic));
   const file = path.join(dir, id + '-' + slug + '-girdi.md');
   fs.writeFileSync(file, briefText(id, topic));
   lib.write(stateFile(root), { id, slug, topic, at: new Date().toISOString(), spent: false, session: lib.sessionId() });
@@ -104,11 +93,6 @@ function record(root, o) {
   return { file: path.relative(root, file).split(path.sep).join('/'), cut };
 }
 
-function arg(argv, flag) {
-  const i = argv.indexOf(flag);
-  return i === -1 || i === argv.length - 1 ? '' : argv[i + 1];
-}
-
 function main(argv) {
   const cmd = argv[0];
   const root = process.cwd();
@@ -126,7 +110,7 @@ function main(argv) {
     return;
   }
   if (cmd === 'record') {
-    const r = record(root, { id: arg(argv, '--id'), reply: arg(argv, '--reply'), cost: arg(argv, '--cost') });
+    const r = record(root, { id: lib.arg(argv, '--id'), reply: lib.arg(argv, '--reply'), cost: lib.arg(argv, '--cost') });
     process.stdout.write(r.file + (r.cut ? ' (reply cut at ' + REPLY_MAX + ' characters)' : '') + '\n');
     return;
   }
