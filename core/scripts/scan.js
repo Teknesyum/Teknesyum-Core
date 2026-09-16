@@ -58,13 +58,7 @@ function version(root) {
 }
 
 function check(name, fn) {
-  try {
-    const r = fn();
-    if (typeof r === 'string') return { name, ok: true, measure: r, fix: '' };
-    return { name, ok: !!r.ok, measure: String(r.measure || ''), fix: String(r.fix || '') };
-  } catch (e) {
-    return { name, ok: false, measure: String((e && e.message) || e), fix: '' };
-  }
+  return require('./doctor.js').check(name, fn, ['measure', 'fix']);
 }
 
 function licenseOk(root) {

@@ -120,7 +120,7 @@ Sıra: önce riski sıfır olan ölü kod, sonra ortak yardımcılar (sonraki da
 - [x] I2 Ortak yardımcılar: `lib.main`, tek `errorLog`, `lib.argv`, `lib.fold`, `lib.nextNumber`; kopyaları kaldır (033-7, 8).
 - [x] I3 Özellik kaldırma: scout öncül kapısı ve netleştirme modu `trash/`'e; danışma kapısı tek (033-3, 4).
 - [x] I4 Süreç birleştirme: Bash tek süreç (yasak içinden loop), Agent tek süreç, Stop tek süreç (dur içinden count) (032-C, 033-9).
-- [ ] I5 agency.js kutuphane sarmalayıcısı (033-6); doctor/scan ortak koşucu (033-10).
+- [x] I5 agency.js kutuphane sarmalayıcısı (033-6); doctor/scan ortak koşucu (033-10).
 - [ ] I6 statusline git yerine state; bridge önbelleği (033-11); strings kısaltma (033-12).
 - [ ] I7 Test hızı: çift spawn, fixture şablonu, run.js dar kopya, doctor testi sandbox'ta (033-13).
 - [ ] I8 Makine: SessionStart'ta 7 günden eski state/banner/advice süpürme, eklenti önbelleğinde son iki sürüm, kütüphane sığ klon + gc (032-D, E, F).

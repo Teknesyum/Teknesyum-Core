@@ -375,8 +375,10 @@ function locate(books, s) {
 }
 
 function show(slugs, opts) {
-  if (slugs.length > MAX_BOOKS) return 'cap: ' + MAX_BOOKS + ' books per show, ' + slugs.length + ' asked - narrow with find\n';
-  const books = catalog().books;
+  const capped = opts.cap !== false;
+  if (capped && slugs.length > MAX_BOOKS) return 'cap: ' + MAX_BOOKS + ' books per show, ' + slugs.length + ' asked - narrow with find\n';
+  const books = opts.books || catalog().books;
+  const dir = opts.dir || shelfDir;
   const parts = [];
   const seated = [];
   let bytes = 0;
@@ -386,10 +388,10 @@ function show(slugs, opts) {
       parts.push('not found: ' + s);
       continue;
     }
-    const text = fs.readFileSync(path.join(shelfDir(b.raf), b.file), 'utf8');
+    const text = fs.readFileSync(path.join(dir(b.raf), b.file), 'utf8');
     const piece = opts.lean ? lean(text) : text;
     bytes += Buffer.byteLength(piece);
-    if (bytes > MAX_BYTES) return 'cap: ' + Math.round(MAX_BYTES / 1024) + ' KB per show, ' + b.slug + ' pushes it over - fewer books or --lean\n';
+    if (capped && bytes > MAX_BYTES) return 'cap: ' + Math.round(MAX_BYTES / 1024) + ' KB per show, ' + b.slug + ' pushes it over - fewer books or --lean\n';
     parts.push(piece);
     seated.push(b.slug);
   }
@@ -426,7 +428,7 @@ function record(root, o) {
     '# ' + (o.topic || 'danisma'),
     '',
     '- tarih: ' + new Date().toISOString().slice(0, 10),
-    '- danisilan: kutuphane/' + (o.books || ''),
+    '- danisilan: ' + (o.shelf || 'kutuphane') + '/' + (o.books || ''),
     '- maliyet: ' + (o.cost || '-'),
     '',
     '## Girdi',
@@ -510,4 +512,4 @@ function main(argv) {
 }
 
 if (require.main === module) process.exit(main(process.argv.slice(2)));
-module.exports = { home, shelves, shelfDir, fetch, push, stale, refresh, ageDays, STALE_DAYS, build, catalog, list, find, show, lean, record, addShelf, seatFile, owner, privateRoot, privateDir, privateBooks, expand, PRIVATE, PRIVATE_MAX, MAX_BOOKS, MAX_BYTES };
+module.exports = { git, front, row, home, shelves, shelfDir, fetch, push, stale, refresh, ageDays, STALE_DAYS, build, catalog, list, find, show, lean, record, addShelf, seatFile, owner, privateRoot, privateDir, privateBooks, expand, PRIVATE, PRIVATE_MAX, MAX_BOOKS, MAX_BYTES };

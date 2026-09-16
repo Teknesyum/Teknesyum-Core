@@ -6,16 +6,19 @@ const lib = require('../hooks/lib.js');
 const argv = process.argv.slice(2);
 const CORE = path.resolve(__dirname, '..');
 
-function check(name, fn) {
+function check(name, fn, keys = ['message']) {
+  let r;
   try {
-    const r = fn();
-    if (r === true || r === undefined) return { name, ok: true, message: '' };
-    if (r === false) return { name, ok: false, message: '' };
-    if (typeof r === 'string') return { name, ok: true, message: r };
-    return { name, ok: !!r.ok, message: String(r.message || '') };
+    r = fn();
   } catch (e) {
-    return { name, ok: false, message: String((e && e.message) || e) };
+    r = { ok: false, [keys[0]]: (e && e.message) || e };
   }
+  if (r === true || r === undefined) r = { ok: true };
+  else if (r === false) r = { ok: false };
+  else if (typeof r === 'string') r = { ok: true, [keys[0]]: r };
+  const row = { name, ok: !!r.ok };
+  for (const k of keys) row[k] = String(r[k] || '');
+  return row;
 }
 
 function nodeOk() {

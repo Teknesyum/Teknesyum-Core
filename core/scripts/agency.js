@@ -1,21 +1,13 @@
 const fs = require('fs');
 const path = require('path');
-const { spawnSync } = require('child_process');
-const { configRoot, arg, nextNumber } = require('../hooks/lib.js');
-const { slugOf } = require('./advice.js');
+const { configRoot, arg } = require('../hooks/lib.js');
+const lib = require('./kutuphane.js');
 
 const REPO = 'https://github.com/msitarzewski/agency-agents.git';
 const SKIP = ['.git', 'integrations', 'strategy', 'examples', 'scripts'];
-const DROP = /identity & memory|communication style|learning & memory|success metrics|advanced capabilities/i;
-const RECORDS = 'docs/danisma';
 
 function home() {
-  return process.env.TEKNESYUM_AGENCY || path.join(require('./kutuphane.js').home(), 'agency');
-}
-
-function git(args, cwd) {
-  const r = spawnSync('git', args, { cwd, encoding: 'utf8', windowsHide: true });
-  return { ok: r.status === 0, out: (r.stdout || '') + (r.stderr || '') };
+  return process.env.TEKNESYUM_AGENCY || path.join(lib.home(), 'agency');
 }
 
 function fetch() {
@@ -26,23 +18,12 @@ function fetch() {
     fs.renameSync(old, at);
   }
   if (fs.existsSync(path.join(at, '.git'))) {
-    const r = git(['pull', '-q', '--ff-only'], at);
+    const r = lib.git(['pull', '-q', '--ff-only'], at);
     return r.ok ? 'updated ' + at : 'pull failed: ' + r.out.trim();
   }
   fs.mkdirSync(path.dirname(at), { recursive: true });
-  const r = git(['clone', '-q', '--depth', '1', REPO, at]);
+  const r = lib.git(['clone', '-q', '--depth', '1', REPO, at]);
   return r.ok ? 'fetched ' + at : 'clone failed: ' + r.out.trim();
-}
-
-function front(text) {
-  const m = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text);
-  const meta = {};
-  if (!m) return meta;
-  for (const line of m[1].split(/\r?\n/)) {
-    const k = /^(\w+):\s*(.*)$/.exec(line);
-    if (k) meta[k[1]] = k[2].trim();
-  }
-  return meta;
 }
 
 function agents() {
@@ -57,21 +38,16 @@ function agents() {
   for (const division of divisions) {
     for (const f of fs.readdirSync(path.join(at, division))) {
       if (!f.endsWith('.md')) continue;
-      const file = path.join(at, division, f);
-      const meta = front(fs.readFileSync(file, 'utf8'));
+      const meta = lib.front(fs.readFileSync(path.join(at, division, f), 'utf8'));
       if (!meta.name) continue;
-      out.push({ slug: f.replace(/\.md$/, ''), division, name: meta.name, description: meta.description || '', file });
+      out.push({ slug: f.replace(/\.md$/, ''), raf: 'agency', division, name: meta.name, description: meta.description || '', file: path.join(division, f) });
     }
   }
   return out.sort((a, b) => a.slug.localeCompare(b.slug));
 }
 
-function row(a) {
-  return a.slug + '  ' + a.name + ' - ' + a.description.slice(0, 110);
-}
-
 function list(division) {
-  return agents().filter((a) => !division || a.division === division).map(row);
+  return agents().filter((a) => !division || a.division === division).map(lib.row);
 }
 
 function find(words) {
@@ -87,77 +63,15 @@ function find(words) {
     }
     return { a, score };
   });
-  return scored.filter((x) => x.score > 0).sort((x, y) => y.score - x.score).slice(0, 10).map((x) => row(x.a));
-}
-
-function lean(text) {
-  const body = text.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, '');
-  const out = [];
-  let dropping = false;
-  for (const line of body.split(/\r?\n/)) {
-    const h = /^(#{1,3})\s+(.*)$/.exec(line);
-    if (h) {
-      dropping = h[1].length === 2 && DROP.test(h[2]);
-      if (dropping) continue;
-      out.push(h[1] + ' ' + h[2].replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}️]/gu, '').trim());
-      continue;
-    }
-    if (!dropping) out.push(line);
-  }
-  return out.join('\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
-}
-
-function seatFile() {
-  return path.join(configRoot(), 'teknesyum', 'seat.json');
+  return scored.filter((x) => x.score > 0).sort((x, y) => y.score - x.score).slice(0, 10).map((x) => lib.row(x.a));
 }
 
 function show(slugs, opts) {
-  const all = agents();
-  const parts = [];
-  const seated = [];
-  for (const s of slugs) {
-    const a = all.find((x) => x.slug === s || x.slug.endsWith('-' + s) || x.name.toLowerCase() === s.toLowerCase());
-    if (!a) {
-      parts.push('not found: ' + s);
-      continue;
-    }
-    const text = fs.readFileSync(a.file, 'utf8');
-    parts.push(opts.lean ? lean(text) : text);
-    seated.push(a.slug);
-  }
-  const out = parts.join('\n---\n');
-  if (seated.length) {
-    try {
-      fs.mkdirSync(path.dirname(seatFile()), { recursive: true });
-      fs.writeFileSync(seatFile(), JSON.stringify({ slugs: seated, bytes: Buffer.byteLength(out), at: new Date().toISOString() }));
-    } catch {}
-  }
-  return out;
+  return lib.show(slugs, { lean: opts.lean, books: agents(), dir: home, cap: false });
 }
 
 function record(root, o) {
-  const dir = path.join(root, RECORDS);
-  fs.mkdirSync(dir, { recursive: true });
-  const name = String(nextNumber(dir)).padStart(3, '0') + '-' + slugOf(o.topic) + '.md';
-  const read = (f) => (f ? fs.readFileSync(f, 'utf8').trim() : '');
-  const body = [
-    '# ' + (o.topic || 'danisma'),
-    '',
-    '- tarih: ' + new Date().toISOString().slice(0, 10),
-    '- danisilan: agency/' + (o.agents || ''),
-    '- maliyet: ' + (o.cost || '-'),
-    '',
-    '## Girdi',
-    '',
-    read(o.ask),
-    '',
-    '## Donen',
-    '',
-    read(o.reply),
-    '',
-  ].join('\n');
-  fs.writeFileSync(path.join(dir, name), body);
-  return path.join(RECORDS, name);
+  return lib.record(root, { ...o, shelf: 'agency', books: o.agents });
 }
 
 function main(argv) {
@@ -193,4 +107,4 @@ function main(argv) {
 }
 
 if (require.main === module) process.exit(main(process.argv.slice(2)));
-module.exports = { agents, list, find, show, lean, record, fetch, home, seatFile };
+module.exports = { agents, list, find, show, lean: lib.lean, record, fetch, home, seatFile: lib.seatFile };
