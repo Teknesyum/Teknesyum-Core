@@ -120,7 +120,7 @@ config ile 2026-09-05 ve 2026-09-06'da ölçüldü. Yöntem, tablolar ve ham sat
 | Sökülen 0.15 makinesi olduğu gibi geri takıldı | - | 4-8 kat maliyet, 7-15 ajan çağrısı, aynı kabul |
 | Sökülen her 0.15 parçası tek başına geri takıldı | - | taban aralığının içinde ya da üstünde, kabulün görebildiği hiçbir şey yok |
 
-Tablo Core 0.16.0 üzerinde ölçüldü; kanca yüzeyi v0.16.1'de ve v0.24.0'a kadar yeniden değişti (`count.js`, `handoff.js`, `mod.js`, `scout.js`, `loop.js`), tablo yeniden ölçülmedi.
+Tablo Core 0.16.0 üzerinde ölçüldü; kanca yüzeyi v0.16.1'de ve v0.24.0'a kadar yeniden değişti (`count.js`, `handoff.js`, `mod.js`, `loop.js`), tablo yeniden ölçülmedi. v0.39.0'dan beri Bash, Agent ve Stop olaylarının her biri tek node süreci çalıştırır.
 
 Tek nefeste: hiçbir şeyin olmadığı turda Core'un bedeli sıfır. Görevde Core, düz Claude
 Code ne tutuyorsa onu tutuyor. Satın aldığı tek şey kesilip yeniden alınabilen oturum;
@@ -202,7 +202,7 @@ Konuşmanın tamamı bu. Model planı yazar ya da atla der; kanca bir daha sorma
 
 Statusline aynı durumu okur: dokunulan dosyalar eklenen ve silinen satırlarla, plan var mı,
 oturumun koştuğu testler ve kaçının düştüğü, bağlam yüzdesi, bekleyen devir var mı, açık
-hata günlükleri, varsa kanca hataları. Düz metin; burada renk ya da ölçü uydurulmaz.
+hata günlükleri, varsa kanca hataları. Test bayatlığı state'teki son düzenleme zamanından okunur; git en çok on saniyede bir çalışır. Düz metin; burada renk ya da ölçü uydurulmaz.
 
 Bir kanca iş yapınca kullanıcı sohbette tek satır görür: `Teknesyum Core > Kütüphane Döndü · 3
 Kitap Uydu · En Çok Üçü Okunacak`, cevabın üstünde blok olarak. Kanca satırı diske kuyruğa
@@ -253,9 +253,7 @@ başlayan istem ise özel rafı açar: sahibin kendi kitapları, `~/.claude/tekn
 altında, bütün (8 KB tavan), kullanıcıya `Teknesyum Core > Özel Raf Açıldı` satırıyla; raf yalnız o aynanın
 uzak deposu sahibinse vardır, başka makinede `pp` bunu söyler ve durur. `aa` ile başlayan istem ajansı açar: kelimeler `agency.js find`e gider, en çok üç koltuk ve bir kural
 bağlama girer; model koltuğu lean okur, soruyla birlikte Türkçe bir alt ajana verir, cevabı `docs/danisma/`
-altına kaydeder. Sıradan tur hiçbirinden bir şey almaz. `netleştir` sözcüğü ise
-soruyu keskinleştirme isteğidir: `advice.js ask` soruyu `docs/netlestirme/` altına yazar,
-`hooks/scout.js` kapısı bir kez bırakır, `record` cevabı dosyalar.
+altına kaydeder. Sıradan tur hiçbirinden bir şey almaz.
 
 
 ```mermaid
@@ -275,17 +273,16 @@ flowchart TD
 |---|---|
 | `scripts/map.js .` | Import grafiği: merkezler, döngüler, yetimler. `map.js who <dosya>` kimin import ettiğini söyler. |
 | `scripts/log.js write` | Sabit biçimli hata günlüğü, projenin kendi deposuna. |
-| `scripts/advice.js` | `ask --mod gorus --konu <slug> --girdi <dosya>` fable danışmasını `docs/danisma/` altında numaralar, kapıyı tek çağrı için kurar ve dosyayı gösteren tek satırlık Agent istemi basar; girdi bağlama iki kez girmez. `record --mod gorus --ajan <agentId>` cevabı, modeli, çıktı tokenini ve süreyi ajan kaydından okuyup dosyalar. `ask <soru> [--facts <dosya>]` netleştirmeyi `docs/netlestirme/` altına yazar; `record --reply` dosyalar; `list` kayıtları gösterir. |
-| `scripts/kutuphane.js` | Kütüphane: raflar projenin dışına klonlanır (`fetch`), katalog frontmatter'dan ya da ilk başlık ve paragraftan kurulur, `find <kelimeler>` modelsiz puanlar, `show <slug…> --lean` üç kitap ve 48 KB ile sınırlı, `record` `docs/danisma/` altına yazar, `push private` özel rafı commit'ler ve iter, `stale [gün]` her rafın kaç gün önce çekildiğini listeler, `fetch all --stale 7` yalnız ondan eskileri çeker. Otuz sekiz raf `core/kutuphane.json` ile gelir (1.968 kitap; MIT, Apache-2.0, CC0, CC BY-SA 4.0 ve bir CC BY-NC-SA 4.0; seçim `docs/kutuphane/` altında; 8 Eylül 2026 piyasa taraması, 1000 depo, 963 okundu, 93 Al, `docs/kutuphane/piyasa-2026-09-08.md`), `raf add <slug> <url> --kind agents|skills|prompts|docs` ekler; tür neyin kitap sayılacağını seçer. Hiçbiri kurulmaz, hiçbir raf bağlama girmez. |
-| `scripts/agency.js` | [agency-agents](https://github.com/msitarzewski/agency-agents) deposu artık kütüphanenin `agency` rafı, komutlar aynı: `find ui` seçer, `show <slug> --lean` rolü kişilik ve ölçüt bloklarını atarak alt ajana verir, `record` alışverişi `docs/danisma/` altına yazar. `show` bir koltuk izi bırakır, sonraki `Stop` onu sohbette `Koltuk: <slug> okundu · <n> KB` diye basar; satır bağlama girmez. Hiçbiri ajan olarak kurulmaz; liste bağlama hiç girmez. |
+| `scripts/advice.js` | `ask --mod gorus --konu <slug> --girdi <dosya>` fable danışmasını `docs/danisma/` altında numaralar, kapıyı tek çağrı için kurar ve dosyayı gösteren tek satırlık Agent istemi basar; girdi bağlama iki kez girmez. `record --mod gorus --ajan <agentId>` cevabı, modeli, çıktı tokenini ve süreyi ajan kaydından okuyup dosyalar. `list` kayıtları gösterir. |
+| `scripts/kutuphane.js` | Kütüphane: raflar projenin dışına klonlanır (`fetch`), katalog frontmatter'dan ya da ilk başlık ve paragraftan kurulur, `find <kelimeler>` modelsiz puanlar, `show <slug…> --lean` üç kitap ve 48 KB ile sınırlı, `record` `docs/danisma/` altına yazar, `push private` özel rafı commit'ler ve iter, `stale [gün]` her rafın kaç gün önce çekildiğini listeler, `fetch all --stale 7` yalnız ondan eskileri `fetch --depth 1` ve reset ile günceller, klonlar sığ kalır; `slim` mevcut her klonu bir kez sığlaştırıp çöp toplar. Otuz sekiz raf `core/kutuphane.json` ile gelir (1.968 kitap; MIT, Apache-2.0, CC0, CC BY-SA 4.0 ve bir CC BY-NC-SA 4.0; seçim `docs/kutuphane/` altında; 8 Eylül 2026 piyasa taraması, 1000 depo, 963 okundu, 93 Al, `docs/kutuphane/piyasa-2026-09-08.md`), `raf add <slug> <url> --kind agents|skills|prompts|docs` ekler; tür neyin kitap sayılacağını seçer. Hiçbiri kurulmaz, hiçbir raf bağlama girmez. |
+| `scripts/agency.js` | [agency-agents](https://github.com/msitarzewski/agency-agents) deposu artık kütüphanenin `agency` rafı, komutlar aynı (`find` kendi puanlamasını kullanır, `show` ve `record` kütüphaneninkidir): `find ui` seçer, `show <slug> --lean` rolü kişilik ve ölçüt bloklarını atarak alt ajana verir, `record` alışverişi `docs/danisma/` altına yazar. `show` bir koltuk izi bırakır, sonraki `Stop` onu sohbette `Koltuk: <slug> okundu · <n> KB` diye basar; satır bağlama girmez. Hiçbiri ajan olarak kurulmaz; liste bağlama hiç girmez. |
 | `scripts/manset.js` | Markdown raporu denetler: düzyazıdaki her sayı aynı bölümün tablosunda ya da listesinde bulunmalı. |
 | `scripts/scaffold.js` | Lisans, imza bloğu, dil linki: modelin asla yazmadığı sabit metinler. |
 | `scripts/setup.js` | Makine ayarı: dil, zil, özel depo, projeler klasörü. `--host cursor\|gemini` adaptörü o hosta bağlar, `--remove` çıkarır. |
 | `scripts/doctor.js` | Yedi kontrol: node, git, sürüm, kancalar, statusline, harita, günlükler. |
 | `scripts/scan.js` | Projenin kendisine sekiz salt okunur kontrol: lisans yüzeyleri, beş dosya eşiğine karşı plan, devir boşlukları, sürüme karşı belgeler, test betiği, `trash/` atıfları, `tmp/` dışında kalmış geçici dosyalar, harita. Yazmaz, model çağırmaz, bağlama taşımaz; profil yalnız belge kümesini genişletir. |
-| `scripts/scout.js` | Öncül arama, istenince ve bir kez: `brief <konu>` `docs/oncul/` altına sınırlı bir öncül yazar (5 arama, 3 sayfa, 5 aday, 400 kelime) ve kapıyı kurar; öncül sonnet üstünde tek alt ajana gider; `record` cevabı 8.000 karakterde keserek dosyalar. `hooks/scout.js` kapısı aynı öncüle ikinci çağrıyı, başka modeli ya da uzatılmış istemi reddeder. |
 | `scripts/hatirla.js` | Bellek taraması: `topla [--gun N]` geçmiş her isteği kesmeden kanıtıyla — kapanış cevabı, sonraki isteğe kadarki commit'ler, `trash/jobs-*`, `.claude/jobs.md` ve `docs/plan.md` açık satırları — yaklaşık 40 bin karakterlik `tmp/gecmis-N.md` sayfalarına yeniden eskiye yazar, tekrarlanan istek bir kez. Dönemin bütün commit listesi `tmp/gecmis-commitler.md` dosyasına gider. Yalnız dizin basar; her sayfa sonnet'e yoluyla, 4'erli paralel gruplar ve tek birleştiriciyle gider. Her istek maddelerine bölünür, her madde o isteğin ve sonraki bütün isteklerin kapanışı ve commit'leriyle sınanır. `record --ajan <agentId>` raporu `tmp/hatirlatici.md` olarak dosyalar — istek başına ne dedim, sonra `[x]` yapıldı, `[ ]` yapılmadı, `[!]` kararını bekliyor, `[?]` belirsiz — ve tam bitmemiş olanların hepsini 0 tokenle ekrana basar; ikinci kayıt ekrandaki ilkinin yerine geçer. Geçici dosyalar `tmp/` altında durur, git'e girmez. |
-| `scripts/cop.js` | `<proje>/trash` klasörünü ölçer: `node cop.js .` toplamı ve en büyük on dosyayı basar, 100 MB üstünde `1` ile çıkar. `--sil` klasörü geri dönüşüm kutusuna gönderir. Bu bayrak olmadan hiçbir şey silinmez. |
+| `scripts/cop.js` | `<proje>/trash` klasörünü ölçer: `node cop.js .` toplamı ve en büyük on dosyayı basar, 100 MB üstünde `1` ile çıkar. `--sil` klasörü geri dönüşüm kutusuna gönderir. Bu bayrak olmadan projede hiçbir şey silinmez. Günde bir kez oturum açılışında `~/.claude/teknesyum/` altındaki yedi günden eski state, banner ve advice dosyalarını süpürür (etkin oturumunkini değil); eklenti önbelleğinde kurulu sürüm dahil en yeni iki Teknesyum sürümü dışındakileri `~/.claude/teknesyum/trash/plugin-cache/` altına taşır. |
 | `scripts/release.js` | Sürümü `.changes/` altındaki notlardan artırır, kurulum satırlarını yeniler, etiketler; `publish` GitHub sürümünü `vX.Y.Z` başlığıyla açar, iki kurucuyu `.sha256` dosyalarıyla yükler. |
 
 ---
@@ -446,16 +443,13 @@ Yukarıdaki kanıt kapısı on üç kanca kaydından biri. Dokuz olay, on bir do
 
 | Olay | Kanca | Söyler |
 |---|---|---|
-| `SessionStart` | `count.js` | varsa `Devam: .claude/handoff.md`; varsa `docs/plan.md`nin ilk açık `- [ ]` adımı; `<proje>/trash` 100 MB'ı aştıysa proje başına günde en çok bir kez çöp teklifi — satır tam silme komutunu taşır, kanca hiçbir şeyi kendi silmez; yoksa hiçbir şey. Günde bir kez `kutuphane.js fetch all --stale 7`yi arka planda ayrık başlatır, hiçbir raf bir haftadan eski kalmaz; model hiçbirini görmez |
+| `SessionStart` | `count.js` | varsa `Devam: .claude/handoff.md`; varsa `docs/plan.md`nin ilk açık `- [ ]` adımı; `<proje>/trash` 100 MB'ı aştıysa proje başına günde en çok bir kez çöp teklifi — satır tam silme komutunu taşır, kanca çöpü kendi boşaltmaz; yoksa hiçbir şey. Günde bir kez `kutuphane.js fetch all --stale 7`yi arka planda ayrık başlatır, hiçbir raf bir haftadan eski kalmaz, ve `cop.js`'in eski state dosyası ve eski eklenti sürümü süpürmesini koşar; model hiçbirini görmez |
 | `UserPromptSubmit` | `mod.js` | `??` / `++`de kütüphane bulguları, `pp`de özel kitaplar, `aa`da ajans koltukları, `ff`de fable danışma yordamı, `mc`de bellek tarama yordamı, `hh`de işaretlerin listesi (liste bağlama değil ekran kanalına gider) — işaret cümlenin başında da sonunda da okunur, `mc` başta yalnız tek başına ya da `2 hafta` gibi kapsamla sayılır; `.claude/jobs.md`'nin (iş listesi, `- [ ] iş — gerekçe`) açık satırları bir kez geri gelir, dosya `trash/`'e taşınır; çok maddeli istem bağlama yazmadan durum işareti bırakır; yoksa hiçbir şey |
 | `PostToolUse` | `count.js` | eşikte tek satır, bir kez; yoksa hiçbir şey |
 | `PostToolUseFailure` | `count.js` | hiçbir şey; kalan test komutunu kaydeder |
-| `PreToolUse` | `yasak.js` | tehlikeli komutu tek satır gerekçeyle reddeder. Proje içinde silmek serbest; dışına çıkmak değil — hedefi çalışma klasörünün dışına düşen ya da kökün kendisi olan silme, disk yazma, geçmiş silme, depo/sürüm silme, indir-koş boruları, `chmod 777`, makine çapında durdurma reddedilir; yoksa hiçbir şey |
-| `PreToolUse` | `ust.js` | tur, işi oturumun kendi modelinin üstündeki bir modele verdiğinde tek satır — çağrılan model ve işin ne olduğu. Oturumun kendi modeli dökümün sonundan okunur; aynı ya da alt model, model adı geçmeyen çağrı ve istem anında zaten duyurulmuş danışma susar. Hiçbir şey reddedilmez, modele hiçbir şey gitmez |
-| `PreToolUse` | `loop.js` | bekleme döngüsünün üst sınırı yoksa tek satır; yoksa hiçbir şey |
-| `PreToolUse` | `scout.js` | hiçbir şey; bütçesini aşan öncül ya da `netleştir` çağrısını reddeder |
-| `Stop` | `count.js` | bağlama hiçbir şey; diff'i tazeler, `agency.js show` sonrası koltuğu bir kez sohbet satırı olarak basar |
-| `Stop` | `dur.js` | Dosya düzenleyip hiçbir şey koşmayan oturum bir kez durdurulur; aynı ağaç ikinci kez sorulmaz. Kapatmak: `evidence: false`. İş kapısı aynı bloğu paylaşır: `.claude/jobs.md`'de gerekçesiz açık satır ya da liste yazılmamış çok maddeli istem turu bir kez tutar. Kapatmak: `jobs: false` |
+| `PreToolUse` | `yasak.js` | tehlikeli komutu tek satır gerekçeyle reddeder. Proje içinde silmek serbest; dışına çıkmak değil — hedefi çalışma klasörünün dışına düşen ya da kökün kendisi olan silme, disk yazma, geçmiş silme, depo/sürüm silme, indir-koş boruları, `chmod 777`, makine çapında durdurma reddedilir; ardından aynı süreçte döngü kapısı: bekleme döngüsünün üst sınırı yoksa tek satır; yoksa hiçbir şey |
+| `PreToolUse` | `ust.js` | tur, işi oturumun kendi modelinin üstündeki bir modele verdiğinde tek satır — çağrılan model ve işin ne olduğu. Oturumun kendi modeli dökümün sonundan okunur; aynı ya da alt model, model adı geçmeyen çağrı ve istem anında zaten duyurulmuş danışma susar. Aynı süreçte kurulmamış, harcanmış ya da yol satırından uzun fable danışmasını reddeder; modele hiçbir şey gitmez |
+| `Stop` | `dur.js` | Önce aynı süreçte count'un Stop işi: diff'i tazeler, `agency.js show` sonrası koltuğu bir kez sohbet satırı olarak basar. Sonra dosya düzenleyip hiçbir şey koşmayan oturum bir kez durdurulur; aynı ağaç ikinci kez sorulmaz. Kapatmak: `evidence: false`. İş kapısı aynı bloğu paylaşır: `.claude/jobs.md`'de gerekçesiz açık satır ya da liste yazılmamış çok maddeli istem turu bir kez tutar. Kapatmak: `jobs: false` |
 | `SessionEnd` | `handoff.js` | hiçbir şey; devri yazar |
 | `Notification` | `notify.js` | hiçbir şey; çalar |
 | `MessageDisplay` | `bant.js` | hiçbir şey; kuyruktaki `Teknesyum Core > …` satırlarını yalnız ekrana çizer |
@@ -498,7 +492,6 @@ adapters/
   AGENTS.md            Codex, Cursor ve Gemini için metin olarak kurallar
 docs/
   plan.md              kancanın istediği plan, istediğinde
-  netlestirme/         ?? soruları ve cevapları
   danisma/             danışma kayıtları
 bench/
   rapor.md             yukarıdaki tablonun arkasındaki rapor

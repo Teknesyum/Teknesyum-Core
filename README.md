@@ -120,7 +120,7 @@ effort), clean config, 2026-09-05 and 2026-09-06. Method, tables and raw rows ar
 | The removed 0.15 machinery put back whole | - | 4-8x the cost, 7-15 agent calls, same acceptance |
 | Each removed 0.15 part put back alone | - | inside or above the baseline range, nothing the acceptance could see |
 
-The table was measured on Core 0.16.0; the hook surface changed in v0.16.1 and again through v0.24.0 (`count.js`, `handoff.js`, `mod.js`, `scout.js`, `loop.js`), and the table is not re-measured.
+The table was measured on Core 0.16.0; the hook surface changed in v0.16.1 and again through v0.24.0 (`count.js`, `handoff.js`, `mod.js`, `loop.js`), and the table is not re-measured. Since v0.39.0 the Bash, Agent and Stop events each run one node process.
 
 What that says in one breath: on a turn where nothing happens, Core costs nothing. On a
 task, Core costs what plain Claude Code costs. The one thing it buys is a session that can
@@ -206,7 +206,7 @@ again.
 
 The statusline reads the same state: files touched with added and removed lines, whether a
 plan exists, the tests the session ran and how many failed, the context percentage, whether
-a handoff is waiting, open bug logs, and hook errors if any. Plain text, no colours or
+a handoff is waiting, open bug logs, and hook errors if any. Test staleness is read from the last edit time in state; git runs at most once every ten seconds. Plain text, no colours or
 measures invented here.
 
 When a hook acts, the user sees one chat line such as `Teknesyum Core > Kütüphane Döndü · 3
@@ -262,9 +262,7 @@ English catalog, and matches are whole words. A prompt that starts with `pp` ope
 private shelf instead: the owner's own books under `~/.claude/teknesyum-private/private/`,
 whole (8 KB cap), announced to the user as `Teknesyum Core > Özel Raf Açıldı`; the shelf exists only
 when that mirror's remote is the owner's, so on any other machine `pp` says so and stops.
-A prompt that starts with `aa` opens the agency: `agency.js find` on the words, at most three seats and one rule in the context; the model reads the seat lean, hands it with the question to a subagent in Turkish and records the reply under `docs/danisma/`. An ordinary turn gets nothing from any of them. The word `netleştir` asks instead to sharpen
-the question: `advice.js ask` writes it under `docs/netlestirme/`, the gate in
-`hooks/scout.js` lets it out once, `record` files the answer.
+A prompt that starts with `aa` opens the agency: `agency.js find` on the words, at most three seats and one rule in the context; the model reads the seat lean, hands it with the question to a subagent in Turkish and records the reply under `docs/danisma/`. An ordinary turn gets nothing from any of them.
 
 
 ```mermaid
@@ -284,17 +282,16 @@ flowchart TD
 |---|---|
 | `scripts/map.js .` | Import graph: hubs, cycles, orphans. `map.js who <file>` says what imports it. |
 | `scripts/log.js write` | A bug log with a fixed shape, into the project's own repository. |
-| `scripts/advice.js` | `ask --mod gorus --konu <slug> --girdi <file>` numbers a fable consult under `docs/danisma/`, arms the gate for one call and prints a one-line Agent prompt that points at the file, so the input never enters the context twice; `record --mod gorus --ajan <agentId>` files the reply with its model, output tokens and seconds read from the agent transcript. `ask <question> [--facts <file>]` writes a clarification under `docs/netlestirme/`; `record --reply` files it; `list` shows the records. |
-| `scripts/kutuphane.js` | The library: shelves cloned outside the project (`fetch`), a catalog built from front matter or the first heading and paragraph, `find <words>` scored without a model, `show <slug…> --lean` capped at three books and 48 KB, `record` under `docs/danisma/`, `push private` commits and pushes the private shelf, `stale [days]` lists how long ago each shelf was fetched, `fetch all --stale 7` pulls only the ones older than that. Thirty-eight shelves ship in `core/kutuphane.json` (1,968 books; MIT, Apache-2.0, CC0, CC BY-SA 4.0 and one CC BY-NC-SA 4.0; the picks are in `docs/kutuphane/`; the 2026-09-08 market scan of 1000 repositories, 963 read and 93 marked take, is in `docs/kutuphane/piyasa-2026-09-08.md`), plus `raf add <slug> <url> --kind agents|skills|prompts|docs`; the kind decides what counts as a book. Nothing is installed, so no shelf ever enters the context. |
-| `scripts/agency.js` | A seat from [agency-agents](https://github.com/msitarzewski/agency-agents), on demand: now the `agency` shelf of the library, same commands: `find ui` picks, `show <slug> --lean` hands the role to a subagent without its personality and metrics blocks, `record` files the exchange under `docs/danisma/`. `show` leaves a seat mark that the next `Stop` prints in the chat as `Seat: <slug> read, <n> KB`; the line never enters the context. Nothing is installed as an agent, so the roster never enters the context. |
+| `scripts/advice.js` | `ask --mod gorus --konu <slug> --girdi <file>` numbers a fable consult under `docs/danisma/`, arms the gate for one call and prints a one-line Agent prompt that points at the file, so the input never enters the context twice; `record --mod gorus --ajan <agentId>` files the reply with its model, output tokens and seconds read from the agent transcript. `list` shows the records. |
+| `scripts/kutuphane.js` | The library: shelves cloned outside the project (`fetch`), a catalog built from front matter or the first heading and paragraph, `find <words>` scored without a model, `show <slug…> --lean` capped at three books and 48 KB, `record` under `docs/danisma/`, `push private` commits and pushes the private shelf, `stale [days]` lists how long ago each shelf was fetched, `fetch all --stale 7` updates only the ones older than that with `fetch --depth 1` and a reset, so clones stay shallow, and `slim` shallows and garbage-collects every existing clone once. Thirty-eight shelves ship in `core/kutuphane.json` (1,968 books; MIT, Apache-2.0, CC0, CC BY-SA 4.0 and one CC BY-NC-SA 4.0; the picks are in `docs/kutuphane/`; the 2026-09-08 market scan of 1000 repositories, 963 read and 93 marked take, is in `docs/kutuphane/piyasa-2026-09-08.md`), plus `raf add <slug> <url> --kind agents|skills|prompts|docs`; the kind decides what counts as a book. Nothing is installed, so no shelf ever enters the context. |
+| `scripts/agency.js` | A seat from [agency-agents](https://github.com/msitarzewski/agency-agents), on demand: now the `agency` shelf of the library, same commands (`find` keeps its own scoring, `show` and `record` are the library's): `find ui` picks, `show <slug> --lean` hands the role to a subagent without its personality and metrics blocks, `record` files the exchange under `docs/danisma/`. `show` leaves a seat mark that the next `Stop` prints in the chat as `Seat: <slug> read, <n> KB`; the line never enters the context. Nothing is installed as an agent, so the roster never enters the context. |
 | `scripts/manset.js` | Checks a Markdown report: every number in prose must appear in the same section's table or list. |
 | `scripts/scaffold.js` | License, signature block, language link: fixed texts the model never types. |
 | `scripts/setup.js` | Machine setup: language, chime, private repository, projects folder. `--host cursor\|gemini` wires the adapter into that host, `--remove` takes it out. |
 | `scripts/doctor.js` | Seven checks: node, git, version, hooks, statusline, map, logs. |
 | `scripts/scan.js` | Eight read-only checks on the project itself: license surfaces, plan against the five-file threshold, handoff holes, documents against the version, test script, `trash/` references, stray temporary files against `tmp/`, map. Nothing written, no model, nothing into context; the profile only widens the document set. |
-| `scripts/scout.js` | Prior-art scout, on demand and once: `brief <topic>` writes a bounded brief under `docs/oncul/` (5 searches, 3 pages, 5 candidates, 400 words) and arms the gate; the brief goes to one subagent on sonnet; `record` files the answer, cut at 8,000 characters. The gate in `hooks/scout.js` refuses a second call on the same brief, another model, or a longer prompt. |
 | `scripts/hatirla.js` | Memory check: `topla [--gun N]` writes every past request, whole, with its evidence - the closing reply, the commits made before the next request, the open job lines of `trash/jobs-*`, `.claude/jobs.md` and `docs/plan.md` - into pages of about 40k characters under `tmp/gecmis-N.md`, newest first, a repeated request kept once. The whole commit list of the period goes to `tmp/gecmis-commitler.md`. It prints only an index; every page goes to sonnet by path, in parallel groups of four with one merger. Each request is split into its asks and each ask is checked against the closings and commits of that and every later request. `record --ajan <agentId>` files the report as `tmp/hatirlatici.md` - per request what I said, then `[x]` done, `[ ]` not done, `[!]` awaiting decision, `[?]` unclear - and puts everything not fully done on screen at no token cost; a second record replaces the first on screen. Temporary files live in `tmp/`, which stays out of git. |
-| `scripts/cop.js` | Measures `<project>/trash`: `node cop.js .` prints the total and the ten largest files, exits `1` over 100 MB. `--sil` sends the folder to the recycle bin. Nothing is ever deleted without that flag. |
+| `scripts/cop.js` | Measures `<project>/trash`: `node cop.js .` prints the total and the ten largest files, exits `1` over 100 MB. `--sil` sends the folder to the recycle bin. Nothing in a project is deleted without that flag. Once a day at session start it also sweeps state, banner and advice files older than seven days from `~/.claude/teknesyum/` (never the live session's) and moves all but the newest two Teknesyum plugin versions from the plugin cache to `~/.claude/teknesyum/trash/plugin-cache/`, keeping the installed one. |
 | `scripts/release.js` | Bumps the version from the notes left in `.changes/`, rewrites the install lines, tags; `publish` creates the GitHub release titled `vX.Y.Z` and uploads both installers with their `.sha256` files. |
 
 ---
@@ -454,16 +451,13 @@ The evidence gate above is one of thirteen hook entries. Nine events, eleven fil
 
 | Event | Hook | Says |
 |---|---|---|
-| `SessionStart` | `count.js` | `Resume: .claude/handoff.md` if one exists; the first open `- [ ]` step of `docs/plan.md` if one exists; the trash offer when `<project>/trash` is over 100 MB, at most once a day per project — the line carries the exact emptying command and the hook never deletes anything itself; else nothing. Once a day it also starts `kutuphane.js fetch all --stale 7` detached in the background, so no shelf is older than a week; the model sees none of it |
+| `SessionStart` | `count.js` | `Resume: .claude/handoff.md` if one exists; the first open `- [ ]` step of `docs/plan.md` if one exists; the trash offer when `<project>/trash` is over 100 MB, at most once a day per project — the line carries the exact emptying command and the hook never empties it itself; else nothing. Once a day it also starts `kutuphane.js fetch all --stale 7` detached in the background, so no shelf is older than a week, and runs the `cop.js` sweep of week-old state files and old plugin versions; the model sees none of it |
 | `UserPromptSubmit` | `mod.js` | library hits on `??` / `++`, private books on `pp`, agency seats on `aa`, the consult recipe on `ff`, the memory-check recipe on `mc`, the list of marks on `hh` (that list goes to the display channel, not into the context) — the mark is read at the start or at the end of the prompt, and `mc` at the start counts only alone or before a scope such as `2 hafta`; the open lines of `.claude/jobs.md` (the job list, `- [ ] job — reason`) come back once and the file moves to `trash/`; a prompt with several items leaves a state marker, no context; else nothing |
 | `PostToolUse` | `count.js` | one line at the threshold, once; else nothing |
 | `PostToolUseFailure` | `count.js` | nothing; files a failed test command |
-| `PreToolUse` | `yasak.js` | a denied command with one line on what to do instead. Deleting inside the project is free; leaving it is not — a delete whose target resolves outside the working directory, or is the root itself, is denied, along with disk writes, history rewrites, repo and release deletion, download-and-run pipes, `chmod 777` and machine-wide kills; else nothing |
-| `PreToolUse` | `ust.js` | one line when the turn hands work to a model above the session's own — the called model and what the work is. The session's own model is read from the tail of the transcript; a same or lower model, a model the call does not name, and a consult already announced at the prompt all stay silent. Nothing is denied and nothing reaches the model |
-| `PreToolUse` | `loop.js` | one line when a wait loop has no upper bound; else nothing |
-| `PreToolUse` | `scout.js` | nothing; refuses a scout or `netleştir` call that breaks its budget |
-| `Stop` | `count.js` | nothing in the context; refreshes the diff, and after `agency.js show` prints the seat once as a chat line |
-| `Stop` | `dur.js` | a session that edited files and ran nothing is blocked once; the same tree is never asked twice. Off with `evidence: false`. The job gate shares the block: an open line in `.claude/jobs.md` with no reason, or a list-shaped prompt with no list, holds the turn once. Off with `jobs: false` |
+| `PreToolUse` | `yasak.js` | a denied command with one line on what to do instead. Deleting inside the project is free; leaving it is not — a delete whose target resolves outside the working directory, or is the root itself, is denied, along with disk writes, history rewrites, repo and release deletion, download-and-run pipes, `chmod 777` and machine-wide kills; then, in the same process, the loop gate: one line when a wait loop has no upper bound; else nothing |
+| `PreToolUse` | `ust.js` | one line when the turn hands work to a model above the session's own — the called model and what the work is. The session's own model is read from the tail of the transcript; a same or lower model, a model the call does not name, and a consult already announced at the prompt all stay silent. In the same process it refuses a fable consult that is unarmed, spent, or longer than its path line; nothing reaches the model |
+| `Stop` | `dur.js` | first, in the same process, the count Stop work: refreshes the diff, and after `agency.js show` prints the seat once as a chat line. Then a session that edited files and ran nothing is blocked once; the same tree is never asked twice. Off with `evidence: false`. The job gate shares the block: an open line in `.claude/jobs.md` with no reason, or a list-shaped prompt with no list, holds the turn once. Off with `jobs: false` |
 | `SessionEnd` | `handoff.js` | nothing; writes the handoff |
 | `Notification` | `notify.js` | nothing; rings |
 | `MessageDisplay` | `bant.js` | nothing; draws the queued `Teknesyum Core > …` lines on screen only |
@@ -507,7 +501,6 @@ adapters/
   AGENTS.md            the rules as text, for Codex, Cursor and Gemini
 docs/
   plan.md              the plan the hook asks for, when it asks
-  netlestirme/         ?? questions and their answers
   danisma/             consultation records
 bench/
   rapor.md             the report behind the table above
