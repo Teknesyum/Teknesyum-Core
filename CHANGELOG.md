@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.39.0
+
+- Cleanup from consults 032 and 033: dead code removed, shared hook helpers, the scout gate and the clarification mode retired, Bash, Agent and Stop each run one node process, agency.js wraps the library, the statusline reads test staleness from state, the test suite runs in about 16 s instead of 20 s, week-old state files are swept once a day, the plugin cache keeps two versions, library updates stay shallow and kutuphane.js slim compacts existing clones.
+
 ## v0.38.0
 
 - mc reports per request what was asked and each ask as done, not done, awaiting decision or unclear, and puts the report on screen at no token cost; hh fires at the start of a sentence again
