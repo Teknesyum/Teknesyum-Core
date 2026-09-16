@@ -191,9 +191,23 @@ function testCountTests() {
       input: JSON.stringify({ session_id: 's1', workspace: { current_dir: root }, context_window: { used_percentage: 10 } }),
       env: { ...process.env, CLAUDE_CONFIG_DIR: cfg, NO_COLOR: '1' },
     }).stdout;
-  ok('the statusline shows the last record', /tests unknown/.test(line()), line());
+  const first = line();
+  ok('the statusline shows the last record', /tests unknown/.test(first), first);
+  const cache = path.join(cfg, 'teknesyum', 'tree-s1.json');
+  ok('and keeps the tree it read in a short cache', fs.existsSync(cache), cache);
   fs.writeFileSync(path.join(root, 'src', 'ok.js'), 'module.exports = 3;\n');
-  ok('and calls it stale once the tree moved', /tests stale/.test(line()), line());
+  const cached = line();
+  ok('a change no hook saw waits for the cache', /tests unknown/.test(cached), cached);
+  const old = JSON.parse(fs.readFileSync(cache, 'utf8'));
+  fs.writeFileSync(cache, JSON.stringify({ ...old, at: old.at - 60000 }));
+  const moved = line();
+  ok('and calls it stale once the cache runs out', /tests stale/.test(moved), moved);
+  sh('npm test', { stdout: '12 passing', stderr: '' });
+  ok('a fresh run on the moved tree passes', /tests pass/.test(line()), line());
+  edit(root, cfg, 'src/ok.js', 's1', 'module.exports = 4;\n');
+  fs.writeFileSync(cache, JSON.stringify({ ...JSON.parse(fs.readFileSync(cache, 'utf8')), at: Date.now() + 60000 }));
+  const edited = line();
+  ok('an edit the hook saw makes it stale from state alone', /tests stale/.test(edited), edited);
   sweep(root);
   sweep(cfg);
 }
@@ -310,7 +324,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 19000, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 17000, String(JSON.stringify(table).length));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
   fs.mkdirSync(path.join(h, 'teknesyum'), { recursive: true });
@@ -1279,7 +1293,7 @@ function testConsult() {
   fs.writeFileSync(tr, JSON.stringify({ type: 'assistant', message: { model: 'claude-sonnet-5' } }) + '\n');
   const denied = run(process.execPath, [GATE], { cwd: root, env, input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'Agent', session_id: 'g1', cwd: root, transcript_path: tr, tool_input: { prompt: '[[danisma:077]] oku', model: 'fable', description: 'Danisma' } }) });
   const deniedWhy = (() => { try { return JSON.parse(denied.stdout).hookSpecificOutput.permissionDecision; } catch { return ''; } })();
-  ok('one process both denies an unarmed consult and announces the higher model', deniedWhy === 'deny' && /fable/.test(take(cfg, 'g1')), denied.stdout);
+  ok('one process denies an unarmed consult and does not announce the marked prompt twice', deniedWhy === 'deny' && take(cfg, 'g1') === '', denied.stdout);
   ok('a clarification marker is no longer a gate of its own', gate('[[netlestirme:002]] go', 'opus') === '' && gate('[[oncul:002]] go', 'sonnet') === '');
   const help = run(process.execPath, [ADVICE], { cwd: root, env });
   ok('advice.js help names only the consult flow', !/netlestirme|--facts/.test(help.stdout) && /--mod gorus/.test(help.stdout), help.stdout);
@@ -1397,7 +1411,7 @@ function testUst() {
   call('u4', 'opus', 'fable');
   ok('fable above opus is announced', /fable/.test(take(cfg, 'u4')));
 
-  call('u5', 'sonnet', 'opus', { prompt: 'is [[advice-001]] var' });
+  call('u5', 'sonnet', 'opus', { prompt: 'is [[danisma:001]] var' });
   ok('an already announced consult is not announced twice', take(cfg, 'u5') === '');
 
   call('u6', 'sonnet', undefined);

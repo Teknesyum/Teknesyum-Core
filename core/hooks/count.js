@@ -86,6 +86,7 @@ function onEdit(j, st) {
   const n = rel(st.cwd, p);
   if (/^\.\.\//.test(n) || /^\.claude\//.test(n) || /^[A-Za-z]:/.test(n)) return '';
   st.files[n] = st.files[n] || { adds: 0, dels: 0 };
+  st.editAt = new Date().toISOString();
   refresh(st);
   if (st.warned.plan || planAt(st.cwd)) return '';
   const why = reason(st);

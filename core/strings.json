@@ -1,378 +1,96 @@
 {
-  "ask.lang": {
-    "en": "Language for what you see - messages, setup, statusline? (en/tr)",
-    "tr": "Language for what you see - messages, setup, statusline? (en/tr)"
-  },
-  "ask.notify": {
-    "en": "Play a sound when a turn ends or needs you? (yes/no)",
-    "tr": "Tur bitince ya da seni bekleyince ses çalsın mı? (evet/hayır)"
-  },
-  "ask.privateRepo": {
-    "en": "Private mirror repository for untouchable files, if any (git URL, or blank)",
-    "tr": "Dışarı çıkmayacak dosyalar için özel ayna deposu, varsa (git adresi, yoksa boş bırak)"
-  },
-  "ask.projectsRoot": {
-    "en": "Folder that holds your projects, so a session here can reach a sibling (path, or blank to skip)",
-    "tr": "Projelerinin durduğu klasör; buradaki oturum kardeş projeye uzanabilsin diye (yol, atlamak için boş bırak)"
-  },
-  "setup.done": {
-    "en": "Teknesyum Core is set up.",
-    "tr": "Teknesyum Core kuruldu."
-  },
-  "setup.config": {
-    "en": "config",
-    "tr": "ayar"
-  },
-  "setup.statusline": {
-    "en": "statusline",
-    "tr": "durum satırı"
-  },
-  "setup.sound": {
-    "en": "sound",
-    "tr": "ses"
-  },
-  "setup.private": {
-    "en": "private",
-    "tr": "özel depo"
-  },
-  "setup.on": {
-    "en": "on",
-    "tr": "açık"
-  },
-  "setup.off": {
-    "en": "off",
-    "tr": "kapalı"
-  },
-  "setup.core": {
-    "en": "core repo",
-    "tr": "core deposu"
-  },
-  "setup.none": {
-    "en": "none",
-    "tr": "yok"
-  },
-  "setup.scope": {
-    "en": "reach",
-    "tr": "kapsam"
-  },
-  "setup.scopeOffer": {
-    "en": "Nothing was written. To let a session here reach that folder, run setup again with:",
-    "tr": "Hiçbir şey yazılmadı. Buradaki oturumun o klasöre uzanması için kurulumu şu bayrakla yeniden çalıştır:"
-  },
-  "setup.applies": {
-    "en": "The statusline applies at the next session start.",
-    "tr": "Durum satırı bir sonraki oturum açılışında yürürlüğe girer."
-  },
-  "line.logs": {
-    "en": "logs",
-    "tr": "günlük"
-  },
-  "line.context": {
-    "en": "context",
-    "tr": "bağlam"
-  },
-  "line.files": {
-    "en": "files",
-    "tr": "dosya"
-  },
-  "line.plan": {
-    "en": "plan",
-    "tr": "plan"
-  },
-  "line.noPlan": {
-    "en": "no plan",
-    "tr": "plan yok"
-  },
-  "line.tests": {
-    "en": "tests",
-    "tr": "test"
-  },
-  "line.pass": {
-    "en": "pass",
-    "tr": "geçti"
-  },
-  "line.fail": {
-    "en": "fail",
-    "tr": "kaldı"
-  },
-  "line.unknown": {
-    "en": "unknown",
-    "tr": "bilinmiyor"
-  },
-  "line.stale": {
-    "en": "stale",
-    "tr": "bayat"
-  },
-  "line.handoff": {
-    "en": "handoff",
-    "tr": "devir"
-  },
-  "line.hookErrors": {
-    "en": "hook errors",
-    "tr": "kanca hatası"
-  },
-  "line.procs": {
-    "en": "processes",
-    "tr": "süreç"
-  },
-  "line.min": {
-    "en": "min",
-    "tr": "dk"
-  },
-  "loop.bound": {
-    "en": "This wait loop has no upper bound and would sit forever if what it waits for never comes. Give it one and run it again: wrap it in timeout, or count the iterations. Pick the bound from the job, a ninety-minute job gets ninety minutes.",
-    "tr": "Bu bekleme döngüsünün üst sınırı yok; beklediği şey gelmezse sonsuza kadar asılı kalır. Sınır koyup yeniden koş: timeout ile sar ya da döngüyü say. Sınırı işten seç, doksan dakikalık iş doksan dakika alır."
-  },
-  "cue.files": {
-    "en": "files touched",
-    "tr": "dosyaya dokunuldu"
-  },
-  "cue.lines": {
-    "en": "lines changed",
-    "tr": "satır değişti"
-  },
-  "cue.plan": {
-    "en": "and no plan. Write docs/plan.md or say skip.",
-    "tr": "ve plan yok. docs/plan.md yaz ya da atla de."
-  },
-  "cue.context": {
-    "en": "Context %N%. Fill decisions and next_action in .claude/handoff.md.",
-    "tr": "Bağlam %%N. .claude/handoff.md içinde decisions ve next_action doldur."
-  },
-  "banner.seat": {
-    "en": "Seat Read · %S · %K KB",
-    "tr": "Koltuk Okundu · %S · %K KB"
-  },
-  "banner.start": {
-    "en": "v%V Running",
-    "tr": "v%V Çalışıyor"
-  },
-  "banner.resume": {
-    "en": "Handoff Note Waiting",
-    "tr": "Devir Notu Bekliyor"
-  },
-  "banner.step": {
-    "en": "Plan %I/%N: %T",
-    "tr": "Plan %I/%N: %T"
-  },
-  "banner.library": {
-    "en": "Library Ran · %N Books Matched · Up To Three Get Read",
-    "tr": "Kütüphane Döndü · %N Kitap Uydu · En Çok Üçü Okunacak"
-  },
-  "banner.libraryNone": {
-    "en": "Library Ran · No Book Matched",
-    "tr": "Kütüphane Döndü · Uyan Kitap Yok"
-  },
-  "banner.seats": {
-    "en": "The Agency Has %N Seats For It",
-    "tr": "Ajansta %N Koltuk Var"
-  },
-  "banner.agency": {
-    "en": "Agency · %N Seats Matched · The Reply Lands In docs/danisma/",
-    "tr": "Ajans · %N Koltuk Uydu · Cevap docs/danisma/ Altına Yazılacak"
-  },
-  "banner.agencyNone": {
-    "en": "Agency · No Seat Matched · The Answer Comes Without It",
-    "tr": "Ajans · Uyan Koltuk Yok · Ajanssız Cevap Gelecek"
-  },
-  "banner.shelf": {
-    "en": "Private Shelf Open · %N Books · %K KB",
-    "tr": "Özel Raf Açıldı · %N Kitap · %K KB"
-  },
-  "banner.shelfNone": {
-    "en": "No Private Shelf On This Machine",
-    "tr": "Bu Makinede Özel Raf Yok"
-  },
-  "banner.shelfEmpty": {
-    "en": "Private Shelf Empty · The Model Asks What To Record",
-    "tr": "Özel Raf Boş · Model Ne Kaydedileceğini Soracak"
-  },
-  "banner.fable": {
-    "en": "Consulting Fable · The Question Goes Out, The Reply Gets Filed",
-    "tr": "Fable'a Danışılıyor · Soru Gidiyor, Cevap Kaydedilecek"
-  },
-  "banner.help": {
-    "en": "Mark List On The Way",
-    "tr": "İşaret Listesi Geliyor"
-  },
-  "banner.jobs": {
-    "en": "%N Open Jobs Back · File In trash/",
-    "tr": "%N Açık İş Geri Geldi · Dosya trash/'te"
-  },
-  "banner.jobsOpen": {
-    "en": "Job Gate · %N Open, No Reason",
-    "tr": "İş Kapısı · %N Açık, Gerekçesiz"
-  },
-  "banner.jobsMissing": {
-    "en": "Job Gate · %N Items, No List",
-    "tr": "İş Kapısı · %N Madde, Liste Yok"
-  },
-  "banner.plan": {
-    "en": "Threshold · %W · A Plan Comes Next, Or Say Skip",
-    "tr": "Eşik · %W · Sırada Plan Var Ya Da Atla De"
-  },
-  "banner.context": {
-    "en": "Context %N% · Handoff Note Prepared",
-    "tr": "Bağlam %%N · Devir Notu Hazırlandı"
-  },
-  "banner.evidence": {
-    "en": "Evidence Gate · %N Code Files Changed, Nothing Ran · Proof Comes Next",
-    "tr": "Kanıt Kapısı · %N Kod Dosyası Değişti, Hiçbir Şey Koşmadı · Sırada Kanıt Var"
-  },
-  "banner.deny": {
-    "en": "Denylist Stopped A Command · %R",
-    "tr": "Yasak Liste Bir Komutu Durdurdu · %R"
-  },
-  "banner.loop": {
-    "en": "Endless Wait Stopped · It Reruns With A Bound",
-    "tr": "Sınırsız Bekleme Durduruldu · Sınırla Yeniden Koşacak"
-  },
-  "cue.resume": {
-    "en": "Resume: .claude/handoff.md",
-    "tr": "Devam: .claude/handoff.md"
-  },
-  "handoff.rule": {
-    "en": "Read task, then changed_files. Continue from the first unfinished part; do not redo or re-verify what the diff already shows.",
-    "tr": "Önce task, sonra changed_files oku. İlk bitmemiş parçadan sür; diff'in gösterdiğini yeniden yapma, yeniden doğrulama."
-  },
-  "banner.private": {
-    "en": "Private Shelf Read · %S · %K KB",
-    "tr": "Özel Raf Okundu · %S · %K KB"
-  },
-  "cue.step": {
-    "en": "Plan step %I/%N: %T",
-    "tr": "Plan adım %I/%N: %T"
-  },
-  "mod.library": {
-    "en": "Library first. Matches below (name, then description). Read at most three with %C, name the source on one line, work with that expertise. If none fits, say so and carry on.",
-    "tr": "Önce kütüphane. Aşağıda uyanlar (ad, sonra açıklama). En çok üçünü %C ile oku, kaynağı tek satır söyle, o uzmanlıkla çalış. Uyan yoksa \"kütüphanede yok\" de, normal devam et."
-  },
-  "mod.none": {
-    "en": "Nothing matches in the catalog.",
-    "tr": "Katalogda uyan yok."
-  },
-  "mod.jobs": {
-    "en": "Open jobs from last turn (file now in trash/). Do any whose reason lapsed, name the rest in a line, then the prompt:",
-    "tr": "Önceki turdan açık işler (dosya trash/'te). Gerekçesi düşeni yap, kalanı tek satır söyle, sonra isteğe geç:"
-  },
-  "mod.noneSeat": {
-    "en": "The agency has a seat for this, though. Say so in one line and offer it before you carry on:",
-    "tr": "Ama ajansta koltuk var. Devam etmeden önce tek satır söyle ve öner:"
-  },
-  "mod.notOwner": {
-    "en": "No private shelf on this machine; answer normally.",
-    "tr": "Bu makinede özel raf yok; normal cevap ver."
-  },
-  "mod.empty": {
-    "en": "The private shelf is empty: %D. Ask what to record, write it there as .md, then run the push.",
-    "tr": "Özel raf boş: %D. Ne kaydedileceğini sor, oraya .md yaz, sonra push çalıştır."
-  },
-  "mod.private": {
-    "en": "Private mode. Close the reply with the books you used. The books below are the owner's identity and preferences: apply them, never ask the owner to repeat them. When a preference changes or a new one appears, edit the matching file under %D and run: %C",
-    "tr": "Özel mod. Cevabın son satırı kullandığın kitaplar. Aşağıdaki kitaplar sahibin kimliği ve tercihleri: uygula, sahibine kendini anlattırma. Bir tercih değişir ya da yenisi çıkarsa %D altındaki ilgili dosyayı düzenle ve çalıştır: %C"
-  },
-  "mod.agency": {
-    "en": "Agency. The seats below match (slug, name, description). Pick one to three, read each with %C, hand the body plus the user's question to an Agent in Turkish, and write the reply under docs/danisma/ with %R. Give the path and the cost on one line. Never alter the user's sentence.",
-    "tr": "Ajans. Aşağıdaki koltuklar uyuyor (slug, ad, açıklama). Bir ile üçünü seç, her birini %C ile oku, gövdeyi ve kullanıcının sorusunu Türkçe olarak Agent aracına ver, dönen cevabı %R ile docs/danisma/ altına yaz. Yolu ve maliyeti tek satır söyle. Kullanıcının cümlesini değiştirme."
-  },
-  "mod.agencyNone": {
-    "en": "No seat matches; answer without the agency.",
-    "tr": "Uyan koltuk yok; ajanssız cevap ver."
-  },
-  "mod.big": {
-    "en": "The shelf is over %K KB, so only the list is here; read what you need with show.",
-    "tr": "Raf %K KB üstünde, burada yalnız liste var; gerekeni show ile oku."
-  },
-  "dur.jobs": {
-    "en": "%N open jobs in .claude/jobs.md have no reason. Finish and tick - [x], or add \" — reason\". Asked once:",
-    "tr": ".claude/jobs.md içinde %N açık iş gerekçesiz. Bitirip - [x] yap ya da \" — gerekçe\" ekle. Bir kez soruldu:"
-  },
-  "dur.jobsMissing": {
-    "en": "The prompt had %N items, no .claude/jobs.md. List them (- [ ] job), tick the done, reason the rest.",
-    "tr": "İstemde %N madde vardı, .claude/jobs.md yok. Listele (- [ ] iş), biteni işaretle, kalana gerekçe yaz. Bir kez soruldu."
-  },
-  "dur.evidence": {
-    "en": "You edited files and nothing ran afterwards: no test, no command output. Run what proves it and show the output, or say in one line why you cannot. Asked once; the next stop goes through.",
-    "tr": "Dosya düzenledin ve sonrasında hiçbir şey koşmadı: test de komut çıktısı da yok. Kanıtlayanı koş ve çıktısını göster, ya da neden koşamadığını tek satırla yaz. Bir kez soruldu; sonraki durma geçer."
-  },
-  "yasak.root": {
-    "en": "That path leaves the project or is the project root. Delete inside it.",
-    "tr": "O yol projenin dışına çıkıyor ya da projenin kökü. Proje içinde sil."
-  },
-  "yasak.disk": {
-    "en": "Disk level write. Ask the user to run it.",
-    "tr": "Disk düzeyinde yazma. Kullanıcıdan koşmasını iste."
-  },
-  "yasak.hist": {
-    "en": "This throws away history. Ask the user first.",
-    "tr": "Bu, geçmişi siler. Önce kullanıcıya sor."
-  },
-  "yasak.gone": {
-    "en": "This deletes a repo, release or remote branch. Ask first.",
-    "tr": "Bu bir depoyu, sürümü ya da uzak dalı siler. Önce sor."
-  },
-  "yasak.pipe": {
-    "en": "Download and run in one line. Fetch, read, then run.",
-    "tr": "İndirip aynı satırda koşma. İndir, oku, sonra koş."
-  },
-  "yasak.perm": {
-    "en": "777 opens the file to everyone. Give the needed permission.",
-    "tr": "777 dosyayı herkese açar. Gereken izni ver."
-  },
-  "yasak.kill": {
-    "en": "This stops the machine or every process. Name one process.",
-    "tr": "Bu, makineyi ya da bütün süreçleri durdurur. Tek süreci yaz."
-  },
-  "mod.fable": {
-    "en": "Consult fable before you start. Say so in one line before the first tool call. Write the facts and the question into one file under tmp/, then %C. Give the Agent tool the one line it prints, verbatim, model fable: the agent reads the file itself, never paste the text. Do not read advice.js or older consults. When the agent returns, run %R and print the path and the measure it prints in one line.",
-    "tr": "İşe başlamadan önce fable'a danış. İlk araç çağrısından önce tek satırla söyle. Olguları ve soruyu tmp/ altında tek dosyaya yaz, sonra %C. Bastığı tek satırı Agent aracına olduğu gibi ver, model fable: ajan dosyayı kendisi okur, metni yapıştırma. advice.js'i ve eski danışmaları okuma. Ajan dönünce %R çalıştır, bastığı yolu ve ölçüyü tek satır yaz."
-  },
-  "mod.fableAsk": {
-    "en": "The question: %Q",
-    "tr": "Soru: %Q"
-  },
-  "mod.help": {
-    "en": "Teknesyum marks. Each one stands alone at the **start or the end** of the prompt; a mid-sentence `a ?? b` does not trigger anything.\n\n`??` or `++` — The library. Searches the rest of the sentence across 34 shelves and puts up to eight books, with the command that opens them, into this turn. Before entering a subject: `?? redis distributed lock`.\n\n`pp` — The private shelf. Brings the books under the private repo's `private/` folder; it opens for the owner only. To fold your own notes into the work: `pp`.\n\n`aa` — The agency. Names up to three advisor seats matching the topic and where the answer is filed. When a field's own eye is needed: `security architecture aa`.\n\n`ff` — Consult fable. Puts the recipe into the turn: gather the facts, write the question, hand it to the agent, file the answer. When the decision is expensive: `ff which of the two roads`.\n\n`mc` — Memory check. Splits my past requests into their asks, checks each against closing replies and commits, and puts what I asked and what was not done on screen and in `tmp/hatirlatici.md`. Alone or at the end: `mc`, `mc 2 hafta`, `mc 3 sayfa`.\n\n`hh` — This list.\n\nOn a turn with none of them, the plugin writes not one letter into the context.",
-    "tr": "Teknesyum işaretleri. Her biri cümlenin **başında ya da sonunda**, tek başına durur; ortada geçen `a ?? b` gibi yazımlar tetiklemez.\n\n`??` ya da `++` — Kütüphane. Cümlenin kalan sözcüklerini 34 rafta arar ve en çok sekiz kitabı, açma komutuyla birlikte o tura koyar. Bir konuya girmeden önce elde ne olduğunu görmek için: `?? redis dagitik kilit`.\n\n`pp` — Özel raf. Özel deponun `private/` klasöründeki kitapları getirir; yalnız sahibine açılır. Kendi notlarını işin içine katmak için: `pp`.\n\n`aa` — Ajans. Konuya uyan en fazla üç danışman koltuğunu ve cevabı nereye yazacağını söyler. Bir alanın gözüyle bakılması gerektiğinde: `guvenlik mimarisi aa`.\n\n`ff` — Fable'a danış. Olguları toplama, soruyu yazma, ajana verme ve cevabı kaydetme yordamını o tura koyar. Karar pahalıysa: `ff iki yoldan hangisi`.\n\n`mc` — Bellek taraması. Geçmiş isteklerimi maddelerine böler, her maddeyi kapanış cevabı ve commit'lerle sınar; ne dedim, ne yapılmadı raporunu ekrana ve `tmp/hatirlatici.md` dosyasına yazar. Tek başına ya da sonda: `mc`, `mc 2 hafta`, `mc 3 sayfa`.\n\n`hh` — Bu liste.\n\nHiçbiri yazılmayan turda eklenti bağlama tek harf yazmaz."
-  },
-  "banner.trash": {
-    "en": "Trash %M MB In %N Files · Empty It: %C",
-    "tr": "Çöp %N Dosyada %M MB · Silmek İçin: %C"
-  },
-  "banner.upper": {
-    "en": "Higher Model Called · %M · %D",
-    "tr": "Üst Model Çağrıldı · %M · %D"
-  },
-  "banner.upperWork": {
-    "en": "The Answer Comes Back Into This Turn",
-    "tr": "Cevap Bu Tura Dönecek"
-  },
-  "mod.memory": {
-    "en": "Memory sweep. %C writes every past request with its closing reply and commits to tmp/gecmis-N.md, the whole commit list to tmp/gecmis-commitler.md, and prints only an index. Do not read the pages. Take every page%S. Give sonnet the paths; over 4 pages, groups of 4 in parallel, each writing tmp/mc-grup-K.md, then one merger that reads those files. Task in Turkish: split every request into its separate asks and check each against the closings and commits of that and every later request; a later repeat or `devam` settles it. Per request that is not fully done, newest first: `## date · short name`, `> dedin: \"the user's own words\"`, then one line per ask: `- [x] ask — evidence`, `- [ ] ask — not done: why`, `- [!] ask — awaiting decision`, `- [?] ask — unclear`. No proof of done means [ ], never skip it. Questions and chat are not asks. Fully done requests go at the end under `## Tamamen yapılanlar`, one line each. When the last agent returns run %R; the report appears on screen by itself, do not repeat it.",
-    "tr": "Bellek taraması. %C geçmiş her isteği kapanış cevabı ve commit'leriyle tmp/gecmis-N.md sayfalarına, dönemin bütün commit'lerini tmp/gecmis-commitler.md dosyasına yazar, yalnız dizin basar. Sayfaları okuma. Bütün sayfaları al%S. Yolları sonnet'e ver; 4 sayfadan fazlaysa 4'erli paralel ajanlar, her biri tmp/mc-grup-K.md yazar, sonra o dosyaları okuyan tek birleştirici. Görev Türkçe: her isteği tek tek maddelerine böl, her maddeyi o isteğin ve sonraki bütün isteklerin kapanışı ve commit'leriyle sına; sonraki tekrar ya da `devam` hükmü değiştirir. Tam bitmemiş her istek için, yeniden eskiye: `## tarih · kısa ad`, `> dedin: \"kullanıcının kendi cümlesi\"`, sonra madde başına tek satır: `- [x] madde — kanıt`, `- [ ] madde — yapılmadı: neden`, `- [!] madde — kararını bekliyor`, `- [?] madde — belirsiz`. Yapıldığına kanıt yoksa [ ], asla atlama. Soru ve sohbet madde değildir. Tamamen yapılmış istekler sonda `## Tamamen yapılanlar` altında tek satır. Son ajan dönünce %R; rapor ekrana kendisi basılır, tekrar yazma."
-  },
-  "mod.memoryPages": {
-    "en": " (scope given: only the newest %N pages)",
-    "tr": " (kapsam verildi: yalnız en yeni %N sayfa)"
-  },
-  "mod.memoryDays": {
-    "en": " (scope given: the last %N days)",
-    "tr": " (kapsam verildi: son %N gün)"
-  },
-  "banner.memory": {
-    "en": "Memory Check · Past Requests Are Being Swept",
-    "tr": "Bellek Taraması · Geçmiş İstekler Taranıyor"
-  },
-  "gorus.unknown": {
-    "en": "No consult %ID is armed. Run advice.js ask --mod gorus first and send the prompt it prints.",
-    "tr": "%ID numaralı danışma hazır değil. Önce advice.js ask --mod gorus çalıştır, bastığı istemi ver."
-  },
-  "gorus.spent": {
-    "en": "Consult %ID already went out once. Read its record under docs/danisma/ or write a new one.",
-    "tr": "%ID numaralı danışma bir kez gitti. docs/danisma/ altındaki kaydı oku ya da yenisini yaz."
-  },
-  "gorus.long": {
-    "en": "The prompt carries more than the path. Send the line advice.js printed; the agent reads the file itself.",
-    "tr": "İstem yoldan fazlasını taşıyor. advice.js'in bastığı satırı ver; ajan dosyayı kendisi okur."
-  }
+  "ask.lang": {"en":"Language for what you see - messages, setup, statusline? (en/tr)"},
+  "ask.notify": {"en":"Play a sound when a turn ends or needs you? (yes/no)","tr":"Tur bitince ya da seni bekleyince ses çalsın mı? (evet/hayır)"},
+  "ask.privateRepo": {"en":"Private mirror repository for untouchable files, if any (git URL, or blank)","tr":"Dışarı çıkmayacak dosyalar için özel ayna deposu, varsa (git adresi, yoksa boş bırak)"},
+  "ask.projectsRoot": {"en":"Folder that holds your projects, so a session here can reach a sibling (path, or blank to skip)","tr":"Projelerinin durduğu klasör; buradaki oturum kardeş projeye uzanabilsin diye (yol, atlamak için boş bırak)"},
+  "setup.done": {"en":"Teknesyum Core is set up.","tr":"Teknesyum Core kuruldu."},
+  "setup.config": {"en":"config","tr":"ayar"},
+  "setup.statusline": {"en":"statusline","tr":"durum satırı"},
+  "setup.sound": {"en":"sound","tr":"ses"},
+  "setup.private": {"en":"private","tr":"özel depo"},
+  "setup.on": {"en":"on","tr":"açık"},
+  "setup.off": {"en":"off","tr":"kapalı"},
+  "setup.core": {"en":"core repo","tr":"core deposu"},
+  "setup.none": {"en":"none","tr":"yok"},
+  "setup.scope": {"en":"reach","tr":"kapsam"},
+  "setup.scopeOffer": {"en":"Nothing was written. To let a session here reach that folder, run setup again with:","tr":"Hiçbir şey yazılmadı. Buradaki oturumun o klasöre uzanması için kurulumu şu bayrakla yeniden çalıştır:"},
+  "setup.applies": {"en":"The statusline applies at the next session start.","tr":"Durum satırı bir sonraki oturum açılışında yürürlüğe girer."},
+  "line.logs": {"en":"logs","tr":"günlük"},
+  "line.context": {"en":"context","tr":"bağlam"},
+  "line.files": {"en":"files","tr":"dosya"},
+  "line.plan": {"en":"plan"},
+  "line.noPlan": {"en":"no plan","tr":"plan yok"},
+  "line.tests": {"en":"tests","tr":"test"},
+  "line.pass": {"en":"pass","tr":"geçti"},
+  "line.fail": {"en":"fail","tr":"kaldı"},
+  "line.unknown": {"en":"unknown","tr":"bilinmiyor"},
+  "line.stale": {"en":"stale","tr":"bayat"},
+  "line.handoff": {"en":"handoff","tr":"devir"},
+  "line.hookErrors": {"en":"hook errors","tr":"kanca hatası"},
+  "line.procs": {"en":"processes","tr":"süreç"},
+  "line.min": {"en":"min","tr":"dk"},
+  "loop.bound": {"en":"This wait loop has no upper bound and would sit forever if what it waits for never comes. Give it one and run it again: wrap it in timeout, or count the iterations. Pick the bound from the job, a ninety-minute job gets ninety minutes.","tr":"Bu bekleme döngüsünün üst sınırı yok; beklediği şey gelmezse sonsuza kadar asılı kalır. Sınır koyup yeniden koş: timeout ile sar ya da döngüyü say. Sınırı işten seç, doksan dakikalık iş doksan dakika alır."},
+  "cue.files": {"en":"files touched","tr":"dosyaya dokunuldu"},
+  "cue.lines": {"en":"lines changed","tr":"satır değişti"},
+  "cue.plan": {"en":"and no plan. Write docs/plan.md or say skip.","tr":"ve plan yok. docs/plan.md yaz ya da atla de."},
+  "cue.context": {"en":"Context %N%. Fill decisions and next_action in .claude/handoff.md.","tr":"Bağlam %%N. .claude/handoff.md içinde decisions ve next_action doldur."},
+  "banner.seat": {"en":"Seat Read · %S · %K KB","tr":"Koltuk Okundu · %S · %K KB"},
+  "banner.start": {"en":"v%V Running","tr":"v%V Çalışıyor"},
+  "banner.resume": {"en":"Handoff Note Waiting","tr":"Devir Notu Bekliyor"},
+  "banner.step": {"en":"Plan %I/%N: %T"},
+  "banner.library": {"en":"Library Ran · %N Books Matched · Up To Three Get Read","tr":"Kütüphane Döndü · %N Kitap Uydu · En Çok Üçü Okunacak"},
+  "banner.libraryNone": {"en":"Library Ran · No Book Matched","tr":"Kütüphane Döndü · Uyan Kitap Yok"},
+  "banner.seats": {"en":"The Agency Has %N Seats For It","tr":"Ajansta %N Koltuk Var"},
+  "banner.agency": {"en":"Agency · %N Seats Matched · The Reply Lands In docs/danisma/","tr":"Ajans · %N Koltuk Uydu · Cevap docs/danisma/ Altına Yazılacak"},
+  "banner.agencyNone": {"en":"Agency · No Seat Matched · The Answer Comes Without It","tr":"Ajans · Uyan Koltuk Yok · Ajanssız Cevap Gelecek"},
+  "banner.shelf": {"en":"Private Shelf Open · %N Books · %K KB","tr":"Özel Raf Açıldı · %N Kitap · %K KB"},
+  "banner.shelfNone": {"en":"No Private Shelf On This Machine","tr":"Bu Makinede Özel Raf Yok"},
+  "banner.shelfEmpty": {"en":"Private Shelf Empty · The Model Asks What To Record","tr":"Özel Raf Boş · Model Ne Kaydedileceğini Soracak"},
+  "banner.fable": {"en":"Consulting Fable · The Question Goes Out, The Reply Gets Filed","tr":"Fable'a Danışılıyor · Soru Gidiyor, Cevap Kaydedilecek"},
+  "banner.help": {"en":"Mark List On The Way","tr":"İşaret Listesi Geliyor"},
+  "banner.jobs": {"en":"%N Open Jobs Back · File In trash/","tr":"%N Açık İş Geri Geldi · Dosya trash/'te"},
+  "banner.jobsOpen": {"en":"Job Gate · %N Open, No Reason","tr":"İş Kapısı · %N Açık, Gerekçesiz"},
+  "banner.jobsMissing": {"en":"Job Gate · %N Items, No List","tr":"İş Kapısı · %N Madde, Liste Yok"},
+  "banner.plan": {"en":"Threshold · %W · A Plan Comes Next, Or Say Skip","tr":"Eşik · %W · Sırada Plan Var Ya Da Atla De"},
+  "banner.context": {"en":"Context %N% · Handoff Note Prepared","tr":"Bağlam %%N · Devir Notu Hazırlandı"},
+  "banner.evidence": {"en":"Evidence Gate · %N Code Files Changed, Nothing Ran · Proof Comes Next","tr":"Kanıt Kapısı · %N Kod Dosyası Değişti, Hiçbir Şey Koşmadı · Sırada Kanıt Var"},
+  "banner.deny": {"en":"Denylist Stopped A Command · %R","tr":"Yasak Liste Bir Komutu Durdurdu · %R"},
+  "banner.loop": {"en":"Endless Wait Stopped · It Reruns With A Bound","tr":"Sınırsız Bekleme Durduruldu · Sınırla Yeniden Koşacak"},
+  "cue.resume": {"en":"Resume: .claude/handoff.md","tr":"Devam: .claude/handoff.md"},
+  "handoff.rule": {"en":"Read task, then changed_files. Continue from the first unfinished part; do not redo or re-verify what the diff already shows.","tr":"Önce task, sonra changed_files oku. İlk bitmemiş parçadan sür; diff'in gösterdiğini yeniden yapma, yeniden doğrulama."},
+  "banner.private": {"en":"Private Shelf Read · %S · %K KB","tr":"Özel Raf Okundu · %S · %K KB"},
+  "cue.step": {"en":"Plan step %I/%N: %T","tr":"Plan adım %I/%N: %T"},
+  "mod.library": {"en":"Library first. Matches below (name, then description). Read at most three with %C, name the source on one line, work with that expertise. If none fits, say so and carry on.","tr":"Önce kütüphane. Aşağıda uyanlar (ad, sonra açıklama). En çok üçünü %C ile oku, kaynağı tek satır söyle, o uzmanlıkla çalış. Uyan yoksa \"kütüphanede yok\" de, normal devam et."},
+  "mod.none": {"en":"Nothing matches in the catalog.","tr":"Katalogda uyan yok."},
+  "mod.jobs": {"en":"Open jobs from last turn (file now in trash/). Do any whose reason lapsed, name the rest in a line, then the prompt:","tr":"Önceki turdan açık işler (dosya trash/'te). Gerekçesi düşeni yap, kalanı tek satır söyle, sonra isteğe geç:"},
+  "mod.noneSeat": {"en":"The agency has a seat for this, though. Say so in one line and offer it before you carry on:","tr":"Ama ajansta koltuk var. Devam etmeden önce tek satır söyle ve öner:"},
+  "mod.notOwner": {"en":"No private shelf on this machine; answer normally.","tr":"Bu makinede özel raf yok; normal cevap ver."},
+  "mod.empty": {"en":"The private shelf is empty: %D. Ask what to record, write it there as .md, then run the push.","tr":"Özel raf boş: %D. Ne kaydedileceğini sor, oraya .md yaz, sonra push çalıştır."},
+  "mod.private": {"en":"Private mode. Close the reply with the books you used. The books below are the owner's identity and preferences: apply them, never ask the owner to repeat them. When a preference changes or a new one appears, edit the matching file under %D and run: %C","tr":"Özel mod. Cevabın son satırı kullandığın kitaplar. Aşağıdaki kitaplar sahibin kimliği ve tercihleri: uygula, sahibine kendini anlattırma. Bir tercih değişir ya da yenisi çıkarsa %D altındaki ilgili dosyayı düzenle ve çalıştır: %C"},
+  "mod.agency": {"en":"Agency. The seats below match (slug, name, description). Pick one to three, read each with %C, hand the body plus the user's question to an Agent in Turkish, and write the reply under docs/danisma/ with %R. Give the path and the cost on one line. Never alter the user's sentence.","tr":"Ajans. Aşağıdaki koltuklar uyuyor (slug, ad, açıklama). Bir ile üçünü seç, her birini %C ile oku, gövdeyi ve kullanıcının sorusunu Türkçe olarak Agent aracına ver, dönen cevabı %R ile docs/danisma/ altına yaz. Yolu ve maliyeti tek satır söyle. Kullanıcının cümlesini değiştirme."},
+  "mod.agencyNone": {"en":"No seat matches; answer without the agency.","tr":"Uyan koltuk yok; ajanssız cevap ver."},
+  "mod.big": {"en":"The shelf is over %K KB, so only the list is here; read what you need with show.","tr":"Raf %K KB üstünde, burada yalnız liste var; gerekeni show ile oku."},
+  "dur.jobs": {"en":"%N open jobs in .claude/jobs.md have no reason. Finish and tick - [x], or add \" — reason\". Asked once:","tr":".claude/jobs.md içinde %N açık iş gerekçesiz. Bitirip - [x] yap ya da \" — gerekçe\" ekle. Bir kez soruldu:"},
+  "dur.jobsMissing": {"en":"The prompt had %N items, no .claude/jobs.md. List them (- [ ] job), tick the done, reason the rest.","tr":"İstemde %N madde vardı, .claude/jobs.md yok. Listele (- [ ] iş), biteni işaretle, kalana gerekçe yaz. Bir kez soruldu."},
+  "dur.evidence": {"en":"You edited files and nothing ran afterwards: no test, no command output. Run what proves it and show the output, or say in one line why you cannot. Asked once; the next stop goes through.","tr":"Dosya düzenledin ve sonrasında hiçbir şey koşmadı: test de komut çıktısı da yok. Kanıtlayanı koş ve çıktısını göster, ya da neden koşamadığını tek satırla yaz. Bir kez soruldu; sonraki durma geçer."},
+  "yasak.root": {"en":"That path leaves the project or is the project root. Delete inside it.","tr":"O yol projenin dışına çıkıyor ya da projenin kökü. Proje içinde sil."},
+  "yasak.disk": {"en":"Disk level write. Ask the user to run it.","tr":"Disk düzeyinde yazma. Kullanıcıdan koşmasını iste."},
+  "yasak.hist": {"en":"This throws away history. Ask the user first.","tr":"Bu, geçmişi siler. Önce kullanıcıya sor."},
+  "yasak.gone": {"en":"This deletes a repo, release or remote branch. Ask first.","tr":"Bu bir depoyu, sürümü ya da uzak dalı siler. Önce sor."},
+  "yasak.pipe": {"en":"Download and run in one line. Fetch, read, then run.","tr":"İndirip aynı satırda koşma. İndir, oku, sonra koş."},
+  "yasak.perm": {"en":"777 opens the file to everyone. Give the needed permission.","tr":"777 dosyayı herkese açar. Gereken izni ver."},
+  "yasak.kill": {"en":"This stops the machine or every process. Name one process.","tr":"Bu, makineyi ya da bütün süreçleri durdurur. Tek süreci yaz."},
+  "mod.fable": {"en":"Consult fable before you start. Say so in one line before the first tool call. Write the facts and the question into one file under tmp/, then %C. Give the Agent tool the one line it prints, verbatim, model fable: the agent reads the file itself, never paste the text. Do not read advice.js or older consults. When the agent returns, run %R and print the path and the measure it prints in one line.","tr":"İşe başlamadan önce fable'a danış. İlk araç çağrısından önce tek satırla söyle. Olguları ve soruyu tmp/ altında tek dosyaya yaz, sonra %C. Bastığı tek satırı Agent aracına olduğu gibi ver, model fable: ajan dosyayı kendisi okur, metni yapıştırma. advice.js'i ve eski danışmaları okuma. Ajan dönünce %R çalıştır, bastığı yolu ve ölçüyü tek satır yaz."},
+  "mod.fableAsk": {"en":"The question: %Q","tr":"Soru: %Q"},
+  "mod.help": {"en":"Teknesyum marks. Each one stands alone at the **start or the end** of the prompt; a mid-sentence `a ?? b` does not trigger anything.\n\n`??` or `++` — The library. Searches the rest of the sentence across 34 shelves and puts up to eight books, with the command that opens them, into this turn. Before entering a subject: `?? redis distributed lock`.\n\n`pp` — The private shelf. Brings the books under the private repo's `private/` folder; it opens for the owner only. To fold your own notes into the work: `pp`.\n\n`aa` — The agency. Names up to three advisor seats matching the topic and where the answer is filed. When a field's own eye is needed: `security architecture aa`.\n\n`ff` — Consult fable. Puts the recipe into the turn: gather the facts, write the question, hand it to the agent, file the answer. When the decision is expensive: `ff which of the two roads`.\n\n`mc` — Memory check. Splits my past requests into their asks, checks each against closing replies and commits, and puts what I asked and what was not done on screen and in `tmp/hatirlatici.md`. Alone or at the end: `mc`, `mc 2 hafta`, `mc 3 sayfa`.\n\n`hh` — This list.\n\nOn a turn with none of them, the plugin writes not one letter into the context.","tr":"Teknesyum işaretleri. Her biri cümlenin **başında ya da sonunda**, tek başına durur; ortada geçen `a ?? b` gibi yazımlar tetiklemez.\n\n`??` ya da `++` — Kütüphane. Cümlenin kalan sözcüklerini 34 rafta arar ve en çok sekiz kitabı, açma komutuyla birlikte o tura koyar. Bir konuya girmeden önce elde ne olduğunu görmek için: `?? redis dagitik kilit`.\n\n`pp` — Özel raf. Özel deponun `private/` klasöründeki kitapları getirir; yalnız sahibine açılır. Kendi notlarını işin içine katmak için: `pp`.\n\n`aa` — Ajans. Konuya uyan en fazla üç danışman koltuğunu ve cevabı nereye yazacağını söyler. Bir alanın gözüyle bakılması gerektiğinde: `guvenlik mimarisi aa`.\n\n`ff` — Fable'a danış. Olguları toplama, soruyu yazma, ajana verme ve cevabı kaydetme yordamını o tura koyar. Karar pahalıysa: `ff iki yoldan hangisi`.\n\n`mc` — Bellek taraması. Geçmiş isteklerimi maddelerine böler, her maddeyi kapanış cevabı ve commit'lerle sınar; ne dedim, ne yapılmadı raporunu ekrana ve `tmp/hatirlatici.md` dosyasına yazar. Tek başına ya da sonda: `mc`, `mc 2 hafta`, `mc 3 sayfa`.\n\n`hh` — Bu liste.\n\nHiçbiri yazılmayan turda eklenti bağlama tek harf yazmaz."},
+  "banner.trash": {"en":"Trash %M MB In %N Files · Empty It: %C","tr":"Çöp %N Dosyada %M MB · Silmek İçin: %C"},
+  "banner.upper": {"en":"Higher Model Called · %M · %D","tr":"Üst Model Çağrıldı · %M · %D"},
+  "banner.upperWork": {"en":"The Answer Comes Back Into This Turn","tr":"Cevap Bu Tura Dönecek"},
+  "mod.memory": {"en":"Memory sweep. %C writes every past request with its closing reply and commits to tmp/gecmis-N.md, the whole commit list to tmp/gecmis-commitler.md, and prints only an index. Do not read the pages. Take every page%S. Give sonnet the paths; over 4 pages, groups of 4 in parallel, each writing tmp/mc-grup-K.md, then one merger that reads those files. Task in Turkish: split every request into its separate asks and check each against the closings and commits of that and every later request; a later repeat or `devam` settles it. Per request that is not fully done, newest first: `## date · short name`, `> dedin: \"the user's own words\"`, then one line per ask: `- [x] ask — evidence`, `- [ ] ask — not done: why`, `- [!] ask — awaiting decision`, `- [?] ask — unclear`. No proof of done means [ ], never skip it. Questions and chat are not asks. Fully done requests go at the end under `## Tamamen yapılanlar`, one line each. When the last agent returns run %R; the report appears on screen by itself, do not repeat it.","tr":"Bellek taraması. %C geçmiş her isteği kapanış cevabı ve commit'leriyle tmp/gecmis-N.md sayfalarına, dönemin bütün commit'lerini tmp/gecmis-commitler.md dosyasına yazar, yalnız dizin basar. Sayfaları okuma. Bütün sayfaları al%S. Yolları sonnet'e ver; 4 sayfadan fazlaysa 4'erli paralel ajanlar, her biri tmp/mc-grup-K.md yazar, sonra o dosyaları okuyan tek birleştirici. Görev Türkçe: her isteği tek tek maddelerine böl, her maddeyi o isteğin ve sonraki bütün isteklerin kapanışı ve commit'leriyle sına; sonraki tekrar ya da `devam` hükmü değiştirir. Tam bitmemiş her istek için, yeniden eskiye: `## tarih · kısa ad`, `> dedin: \"kullanıcının kendi cümlesi\"`, sonra madde başına tek satır: `- [x] madde — kanıt`, `- [ ] madde — yapılmadı: neden`, `- [!] madde — kararını bekliyor`, `- [?] madde — belirsiz`. Yapıldığına kanıt yoksa [ ], asla atlama. Soru ve sohbet madde değildir. Tamamen yapılmış istekler sonda `## Tamamen yapılanlar` altında tek satır. Son ajan dönünce %R; rapor ekrana kendisi basılır, tekrar yazma."},
+  "mod.memoryPages": {"en":" (scope given: only the newest %N pages)","tr":" (kapsam verildi: yalnız en yeni %N sayfa)"},
+  "mod.memoryDays": {"en":" (scope given: the last %N days)","tr":" (kapsam verildi: son %N gün)"},
+  "banner.memory": {"en":"Memory Check · Past Requests Are Being Swept","tr":"Bellek Taraması · Geçmiş İstekler Taranıyor"},
+  "gorus.unknown": {"en":"No consult %ID is armed. Run advice.js ask --mod gorus first and send the prompt it prints.","tr":"%ID numaralı danışma hazır değil. Önce advice.js ask --mod gorus çalıştır, bastığı istemi ver."},
+  "gorus.spent": {"en":"Consult %ID already went out once. Read its record under docs/danisma/ or write a new one.","tr":"%ID numaralı danışma bir kez gitti. docs/danisma/ altındaki kaydı oku ya da yenisini yaz."},
+  "gorus.long": {"en":"The prompt carries more than the path. Send the line advice.js printed; the agent reads the file itself.","tr":"İstem yoldan fazlasını taşıyor. advice.js'in bastığı satırı ver; ajan dosyayı kendisi okur."}
 }

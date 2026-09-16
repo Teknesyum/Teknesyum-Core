@@ -5,6 +5,7 @@ const { read, write, stateFile, safe, openLogCount, t } = require('../hooks/lib.
 const C = { dim: '\x1b[2m', off: '\x1b[0m', cyan: '\x1b[36m', green: '\x1b[32m', yellow: '\x1b[33m', red: '\x1b[31m' };
 const CTX_WARN = 60;
 const CTX_LOUD = 85;
+const TREE_TTL = 10 * 1000;
 
 function paint(c, s) {
   return process.env.NO_COLOR ? s : c + s + C.off;
@@ -47,10 +48,20 @@ function workPart(st, cwd) {
 function testPart(st, cwd) {
   const last = ((st && st.tests) || []).slice(-1)[0];
   if (!last) return [];
-  const stale = last.tree && last.tree !== require('../hooks/count.js').tree(cwd);
+  const stale = !!last.tree && (String(st.editAt || '') > String(last.at || '') || last.tree !== tree(st, cwd, last));
   const word = stale ? t('line.stale') : last.ok === true ? t('line.pass') : last.ok === false ? t('line.fail') : t('line.unknown');
   const colour = stale || last.ok === null ? C.dim : last.ok ? C.green : C.red;
   return [t('line.tests') + ' ' + paint(colour, word)];
+}
+
+function tree(st, cwd, last) {
+  const f = stateFile('tree-' + safe(String(st.session || cwd)));
+  const c = read(f);
+  const now = Date.now();
+  if (c && c.cwd === cwd && c.at >= (Date.parse(last.at) || 0) && now - c.at < TREE_TTL) return c.tree;
+  const fresh = require('../hooks/count.js').tree(cwd);
+  write(f, { cwd, tree: fresh, at: now });
+  return fresh;
 }
 
 function hookErrors() {

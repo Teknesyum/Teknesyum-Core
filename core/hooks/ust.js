@@ -4,7 +4,7 @@ const { main, t, say, BANNER } = require('./lib.js');
 const advice = require('../scripts/advice.js');
 
 const RANK = { haiku: 1, sonnet: 2, opus: 3, fable: 4 };
-const MARK = /\[\[[a-z]+-\d{3}\]\]/i;
+const MARK = /\[\[[a-z]+:\d{3}\]\]/i;
 const KESIT = 96 * 1024;
 
 function rank(name) {

@@ -33,7 +33,34 @@ function newest() {
   return null;
 }
 
-const target = newest();
+function stamp() {
+  return bases.map((d) => {
+    try {
+      return fs.statSync(d).mtimeMs;
+    } catch {
+      return 0;
+    }
+  }).join(',');
+}
+
+function cached() {
+  const file = path.join(root, 'teknesyum', 'bridge.json');
+  const now = stamp();
+  try {
+    const c = JSON.parse(fs.readFileSync(file, 'utf8'));
+    if (c.stamp === now && Date.now() - c.at < 60000 && fs.existsSync(c.target)) return c.target;
+  } catch {}
+  const target = newest();
+  if (target) {
+    try {
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      fs.writeFileSync(file, JSON.stringify({ stamp: now, target, at: Date.now() }));
+    } catch {}
+  }
+  return target;
+}
+
+const target = cached();
 if (!target) {
   process.stdout.write('teknesyum-core: plugin not found');
   process.exit(0);
