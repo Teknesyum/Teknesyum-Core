@@ -220,14 +220,15 @@ function say(session, lines) {
   } catch {}
 }
 
-function sayBlock(session, text) {
+function sayBlock(session, text, key) {
   const body = String(text || '').trim();
   if (!body) return;
   try {
     merge(queue(session), (b) => {
-      const now = Array.isArray(b.lines) ? b.lines : [];
+      let now = Array.isArray(b.lines) ? b.lines : [];
+      if (key) now = now.filter((l) => !(l && typeof l === 'object' && l.key === key));
       if (now.some((l) => l && typeof l === 'object' && l.block === body)) return { lines: now };
-      return { lines: now.concat([{ block: body }]).slice(-6) };
+      return { lines: now.concat([key ? { block: body, key } : { block: body }]).slice(-6) };
     });
   } catch {}
 }

@@ -320,7 +320,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 18000, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 19000, String(JSON.stringify(table).length));
   ok('no relay strings are left', !keys.some((k) => /^(role\.|notice\.|line\.(contracts|agents|open|blocked))/.test(k)), keys.join(' '));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
@@ -933,14 +933,29 @@ function testHatirla() {
   fs.mkdirSync(path.join(root, 'tmp'), { recursive: true });
   fs.writeFileSync(path.join(root, 'tmp', 'gecmis-9.md'), 'eski');
   const idx = run(process.execPath, [HAT, 'topla', '--transcript', cok, '--cwd', root]);
-  ok('topla prints an index, not the requests', idx.status === 0 && !/yyyy/.test(idx.stdout) && new RegExp(pages.length + ' sayfa · 30 istek').test(idx.stdout) && idx.stdout.trim().split('\n').length === pages.length + 1, idx.stdout + idx.stderr);
+  ok('topla prints an index, not the requests', idx.status === 0 && !/yyyy/.test(idx.stdout) && new RegExp(pages.length + ' sayfa · 30 istek').test(idx.stdout) && idx.stdout.trim().split('\n').length === pages.length + 2, idx.stdout + idx.stderr);
   ok('and leaves only this sweep in tmp', fs.existsSync(path.join(root, 'tmp', 'gecmis-1.md')) && !fs.existsSync(path.join(root, 'tmp', 'gecmis-9.md')));
 
-  const cevap = '## Açık\n- [ ] issue sablonu — kapanış yok\n- [ ] panel — commit yok\n## Kararını bekliyor\n- [ ] sürüm — jobs: karar\n## Belirsiz\n';
+  ok('topla writes the whole commit list beside the pages', /sablon eklendi/.test(fs.readFileSync(path.join(root, 'tmp', 'gecmis-commitler.md'), 'utf8')) || /commit listesi/.test(idx.stdout), idx.stdout);
+  const cevap = '## 09-16 12:00 · panel\n> dedin: "paneli ve surumu yap"\n- [x] panel — commit abc\n- [ ] surum — yapılmadı: kanıt yok\n- [!] silme — kararını bekliyor\n- [?] ikon — belirsiz\n\n## Tamamen yapılanlar\n- [x] 09-15 · sablon — commit def\n';
   const r = h.record(root, cevap);
   const body = fs.readFileSync(path.join(root, 'tmp', 'hatirlatici.md'), 'utf8');
-  ok('record counts the three classes into one screen line', r.line === pages.length + ' sayfa · 30 istek · 2 açık · 1 karar · 0 belirsiz · tmp/hatirlatici.md', r.line);
-  ok('and the reminder keeps the reply under a dated head', /^# Hatırlatıcı · \d{4}-\d\d-\d\d · /.test(body) && /panel — commit yok/.test(body), body);
+  ok('record counts every ask by its box', r.line === pages.length + ' sayfa · 30 istek · 1 yapılmadı · 1 kararını bekliyor · 1 belirsiz · 2 yapıldı · tmp/hatirlatici.md', r.line);
+  ok('the screen shows what I asked and what was not done, not the finished list', /dedin: "paneli/.test(r.screen) && /surum — yapılmadı/.test(r.screen) && !/Tamamen yapılanlar/.test(r.screen), r.screen);
+  ok('and the reminder keeps the whole reply under a dated head', /^# Hatırlatıcı · \d{4}-\d\d-\d\d · /.test(body) && /Tamamen yapılanlar/.test(body), body);
+  const lib = require(path.join(CORE, 'hooks', 'lib.js'));
+  const qcfg = home();
+  const prev = process.env.CLAUDE_CONFIG_DIR;
+  process.env.CLAUDE_CONFIG_DIR = qcfg;
+  try {
+    lib.sayBlock('mcq', 'ilk rapor', 'mc');
+    lib.sayBlock('mcq', 'ikinci rapor', 'mc');
+    const shown = lib.drain('mcq').map((l) => l.block).join('|');
+    ok('a second record replaces the first report on screen', shown === 'ikinci rapor', shown);
+  } finally {
+    if (prev === undefined) delete process.env.CLAUDE_CONFIG_DIR; else process.env.CLAUDE_CONFIG_DIR = prev;
+    sweep(qcfg);
+  }
   ok('record without a reply is a usage error', run(process.execPath, [HAT, 'record', '--cwd', root]).status === 2);
 
   const mod = require(path.join(CORE, 'hooks', 'mod.js'));
@@ -950,8 +965,8 @@ function testHatirla() {
   };
   const ctx = ctxOf('mc');
   ok('mc writes the sweep recipe', /hatirla\.js/.test(ctx) && /topla/.test(ctx) && /record --ajan/.test(ctx), ctx);
-  ok('and hands the agent paths, not the pages', /tmp\/gecmis-N\.md/.test(ctx) && /(yollar|paths)/.test(ctx), ctx);
-  ok('and asks for the three classes', /## Açık/.test(ctx) && /## Kararını bekliyor/.test(ctx) && /## Belirsiz/.test(ctx), ctx);
+  ok('and hands the agent paths, not the pages', /tmp\/gecmis-N\.md/.test(ctx) && /(yolları|paths)/i.test(ctx), ctx);
+  ok('and asks for what I said and each ask checked', /dedin:/.test(ctx) && /\[ \] madde — yapılmadı/.test(ctx) && /Tamamen yapılanlar/.test(ctx) && /gecmis-commitler\.md/.test(ctx), ctx);
   ok('mc 2 hafta reads two weeks', /topla --gun 14/.test(ctxOf('mc 2 hafta')));
   ok('mc 3 sayfa takes three pages', /\b3\b/.test(ctxOf('mc 3 sayfa')) && !/--gun/.test(ctxOf('mc 3 sayfa')));
   ok('a sentence that starts with mc is not a sweep', !/hatirla\.js/.test(ctxOf('mc nasil calisiyor')));

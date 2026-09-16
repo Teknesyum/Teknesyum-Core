@@ -5,10 +5,10 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const PAGE_CHARS = 40000;
-const CLOSING = 800;
+const CLOSING = 4000;
 const TMP = 'tmp';
 const SKIP = /<(system-reminder|task-notification|ci-monitor-event|command-name|local-command-stdout)\b/;
-const SINIF = ['Açık', 'Kararını bekliyor', 'Belirsiz'];
+const DONE_HEAD = '## Tamamen yapılanlar';
 
 function tmpDir(cwd) {
   return path.join(path.resolve(cwd || process.cwd()), TMP);
@@ -211,16 +211,19 @@ function topla(cwd, transcript, gun) {
   });
   const total = pages.reduce((s, p) => s + p.count, 0);
   write(cwd, 'gecmis-dizin.json', JSON.stringify({ sayfa: pages.length, istek: total }));
+  const oldest = pages.length ? Date.parse(pages[pages.length - 1].from.replace(' ', 'T')) || 0 : Date.now();
+  const log = commits(path.resolve(cwd || process.cwd()), oldest).reverse();
+  const cf = write(cwd, 'gecmis-commitler.md', ['# Dönemin bütün commit\'leri, eskiden yeniye', ''].concat(log.map((c) => '- ' + stamp(c.at) + ' ' + c.hash + ' ' + c.title)).join('\n') + '\n');
+  lines.push('commit listesi · ' + log.length + ' commit · ' + cf);
   return { pages, total, index: (lines.length ? lines.join('\n') : 'kayıt bulunamadı') + '\n' + pages.length + ' sayfa · ' + total + ' istek\n' };
 }
 
 function classes(body) {
-  const out = SINIF.map(() => 0);
-  let at = -1;
-  for (const l of body.split(/\r?\n/)) {
-    const h = /^##\s+(.+?)\s*$/.exec(l);
-    if (h) { at = SINIF.findIndex((s) => s.toLocaleLowerCase('tr') === h[1].toLocaleLowerCase('tr')); continue; }
-    if (at > -1 && /^\s*[-*]\s+\[ \]/.test(l)) out[at]++;
+  const out = { yapildi: 0, acik: 0, karar: 0, belirsiz: 0 };
+  const map = { x: 'yapildi', X: 'yapildi', ' ': 'acik', '!': 'karar', '?': 'belirsiz' };
+  for (const l of String(body).split(/\r?\n/)) {
+    const m = /^\s*[-*]\s+\[([ xX!?])\]/.exec(l);
+    if (m) out[map[m[1]]]++;
   }
   return out;
 }
@@ -231,18 +234,20 @@ function record(cwd, body, sayfa) {
   const pages = Number(sayfa) || dizin.sayfa || 0;
   const istek = dizin.istek || 0;
   const reply = String(body || '').trim();
-  const [acik, karar, belirsiz] = classes(reply);
+  const c = classes(reply);
   const tarih = stamp(Date.now()).slice(0, 10);
   const head = '# Hatırlatıcı · ' + tarih + ' · ' + pages + ' sayfa, ' + istek + ' istek\n\n';
   const file = write(cwd, 'hatirlatici.md', head + reply + '\n');
-  const line = pages + ' sayfa · ' + istek + ' istek · ' + acik + ' açık · ' + karar + ' karar · ' + belirsiz + ' belirsiz · ' + TMP + '/hatirlatici.md';
-  return { file, line, counts: { acik, karar, belirsiz } };
+  const line = pages + ' sayfa · ' + istek + ' istek · ' + c.acik + ' yapılmadı · ' + c.karar + ' kararını bekliyor · ' + c.belirsiz + ' belirsiz · ' + c.yapildi + ' yapıldı · ' + TMP + '/hatirlatici.md';
+  const cut = reply.indexOf(DONE_HEAD);
+  const screen = '**' + line + '**\n\n' + (cut > -1 ? reply.slice(0, cut).trim() : reply);
+  return { file, line, screen, counts: c };
 }
 
-function show(cwd, line) {
+function show(cwd, text) {
   const f = newest(cwd);
   if (!f) return;
-  try { require('../hooks/lib.js').sayBlock(path.basename(f, '.jsonl'), line); } catch {}
+  try { require('../hooks/lib.js').sayBlock(path.basename(f, '.jsonl'), text, 'mc'); } catch {}
 }
 
 function cli(argv) {
@@ -266,7 +271,7 @@ function cli(argv) {
       if (!body) { process.stdout.write('ajan kaydı bulunamadı: ' + ajan + '\n'); return 1; }
     } else { process.stdout.write('kullanim: hatirla.js record --ajan <agentId> | --reply <dosya> [--sayfa N]\n'); return 2; }
     const r = record(cwd, body, flag('--sayfa'));
-    show(cwd, r.line);
+    show(cwd, r.screen);
     process.stdout.write(r.line + '\n');
     return 0;
   }
@@ -276,4 +281,4 @@ function cli(argv) {
 
 if (require.main === module) process.exit(cli(process.argv.slice(2)));
 
-module.exports = { gather, topla, turns, prompts, files, jobs, commits, newest, record, classes, write, tmpDir, cli, TMP, PAGE_CHARS, CLOSING, SINIF };
+module.exports = { gather, topla, turns, prompts, files, jobs, commits, newest, record, classes, write, tmpDir, cli, TMP, PAGE_CHARS, CLOSING, DONE_HEAD };
