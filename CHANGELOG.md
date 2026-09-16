@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.36.1
+
+- mc pages through every transcript newest first and the session model decides how far back to read
+
 ## v0.36.0
 
 - The hh list is drawn on the display channel at no context cost, mc sweeps past requests into a reminder, tmp/ becomes the standard folder for temporary files
