@@ -33,6 +33,59 @@ function gitOk() {
   return String(r.stdout || '').trim();
 }
 
+function read(f) {
+  try {
+    return fs.readFileSync(f, 'utf8');
+  } catch {
+    return null;
+  }
+}
+
+function files(dir, base = dir, out = []) {
+  let list = [];
+  try {
+    list = fs.readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return out;
+  }
+  for (const e of list) {
+    const p = path.join(dir, e.name);
+    if (e.isDirectory()) files(p, base, out);
+    else out.push(path.relative(base, p).split(path.sep).join('/'));
+  }
+  return out;
+}
+
+function installPath() {
+  try {
+    const j = JSON.parse(fs.readFileSync(path.join(lib.configRoot(), 'plugins', 'installed_plugins.json'), 'utf8'));
+    const row = [].concat((j.plugins || {})['teknesyum-core@teknesyum'] || [])[0];
+    return row && row.installPath ? row.installPath : null;
+  } catch {
+    return null;
+  }
+}
+
+function cacheOk() {
+  const repo = lib.coreRepo();
+  if (!repo) return 'no development repo';
+  const live = installPath();
+  if (!live || !fs.existsSync(live)) return 'the plugin is not installed from the marketplace';
+  const src = path.join(repo, 'core');
+  const norm = (s) => (s === null ? null : s.replace(/\r\n/g, '\n'));
+  const diff = ['hooks', 'scripts']
+    .flatMap((d) => files(path.join(src, d)).map((f) => d + '/' + f))
+    .concat('strings.json')
+    .filter((f) => norm(read(path.join(src, f))) !== norm(read(path.join(live, f))));
+  if (!diff.length) return 'the hooks run the repo code';
+  return {
+    ok: false,
+    message:
+      diff.length + ' file(s) in the repo are not live (' + diff.slice(0, 3).join(', ') + (diff.length > 3 ? ', ...' : '') +
+      ') - cut a release and run claude plugin update teknesyum-core@teknesyum',
+  };
+}
+
 function statuslineOk() {
   const p = path.join(lib.configRoot(), 'settings.json');
   let s;
@@ -45,8 +98,12 @@ function statuslineOk() {
     return { ok: false, message: 'the statusline is not wired - run setup.js --apply' };
   const m = /"([^"]+bridge\.js)"/.exec(String(s.statusLine.command));
   if (m && !fs.existsSync(m[1]))
-    return { ok: false, message: 'the statusline points at a file that is gone: ' + m[1] };
+    return { ok: false, message: 'the statusline points at a file that is gone: ' + m[1] + ' - run setup.js --apply' };
   const wired = m ? m[1].split('\\').join('/') : '';
+  if (wired && !/\/plugins\//.test(wired)) {
+    const same = read(wired) === read(path.join(CORE, 'scripts', 'bridge.js'));
+    return same ? 'wired' : { ok: false, message: 'the statusline bridge is older than the plugin - run setup.js --apply' };
+  }
   const ver = /teknesyum-core\/([0-9]+\.[0-9]+\.[0-9]+)\//.exec(wired);
   const now = installedVersion();
   if (ver && now && ver[1] !== now)
@@ -140,6 +197,7 @@ function run(root) {
     check('version', versionOk),
     check('hooks', hooksOk),
     check('statusline', statuslineOk),
+    check('cache', cacheOk),
     check('map', () => mapOk(root)),
     check('logs', logsOk),
   ];

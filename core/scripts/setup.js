@@ -56,6 +56,13 @@ function settingsPath() {
   return path.join(configRoot(), 'settings.json');
 }
 
+function stableBridge() {
+  const to = path.join(configRoot(), 'teknesyum', 'bridge.js');
+  fs.mkdirSync(path.dirname(to), { recursive: true });
+  fs.copyFileSync(path.join(pluginDir(), 'scripts', 'bridge.js'), to);
+  return to.replace(/\\/g, '/');
+}
+
 function pluginDir() {
   return path.resolve(__dirname, '..');
 }
@@ -154,7 +161,7 @@ function wireProjectScope(dir) {
 function inspect() {
   const cfg = read(stateFile('config')) || {};
   const s = read(settingsPath()) || {};
-  const bridge = path.join(pluginDir(), 'scripts', 'bridge.js');
+  const bridge = path.join(configRoot(), 'teknesyum', 'bridge.js');
   const wired =
     s.statusLine && typeof s.statusLine.command === 'string' && s.statusLine.command.includes('bridge.js');
   return {
@@ -197,7 +204,7 @@ function wireStatusline() {
       );
     s = {};
   }
-  const bridge = path.join(pluginDir(), 'scripts', 'bridge.js').replace(/\\/g, '/');
+  const bridge = stableBridge();
   s.statusLine = { type: 'command', command: 'node "' + bridge + '"', padding: 0 };
   fs.mkdirSync(path.dirname(p), { recursive: true });
   fs.writeFileSync(p, JSON.stringify(s, null, 2) + '\n', 'utf8');

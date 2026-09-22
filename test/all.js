@@ -373,6 +373,9 @@ function testLanguage(root) {
   const rows = block.split(String.fromCharCode(10)).filter((l) => l.startsWith('  ') && l.trim());
   ok('every summary label is padded clear of its value', rows.length > 0 && rows.every((l) => /^ {2}\S.*\s{2,}\S/.test(l)), JSON.stringify(rows));
   ok('the summary is translated', /kuruldu/.test(applied), applied);
+  const wiredLine = (JSON.parse(fs.readFileSync(path.join(h, 'settings.json'), 'utf8')).statusLine || {}).command || '';
+  const stable = path.join(h, 'teknesyum', 'bridge.js').split(path.sep).join('/');
+  ok('setup wires the statusline to a bridge that no version prune can move', wiredLine.includes(stable) && fs.existsSync(stable), wiredLine);
 
   const cfgPath = path.join(h, 'teknesyum', 'config.json');
   ok('with no repo in sight the core row stays empty', !(JSON.parse(fs.readFileSync(cfgPath, 'utf8')).coreRepo), applied);
@@ -1276,7 +1279,41 @@ function testDoctor() {
     rows = JSON.parse(r.stdout);
   } catch {}
   const names = rows.map((x) => x.name).join(',');
-  ok('doctor runs the seven checks that are left', names === 'node,git,version,hooks,statusline,map,logs', names + ' ' + r.stderr);
+  ok('doctor runs the eight checks', names === 'node,git,version,hooks,statusline,cache,map,logs', names + ' ' + r.stderr);
+  const live = path.join(cfg, 'plugins', 'cache', 'teknesyum', 'teknesyum-core', '9.9.9');
+  copyTree(CORE, live);
+  fs.writeFileSync(
+    path.join(cfg, 'plugins', 'installed_plugins.json'),
+    JSON.stringify({ plugins: { 'teknesyum-core@teknesyum': [{ installPath: live, version: '9.9.9' }] } })
+  );
+  const cache = () => {
+    const x = run(process.execPath, [path.join(CORE, 'scripts', 'doctor.js'), '--json'], { cwd: root, env: { ...process.env, CLAUDE_CONFIG_DIR: cfg } });
+    try {
+      return JSON.parse(x.stdout).find((y) => y.name === 'cache') || {};
+    } catch {
+      return {};
+    }
+  };
+  let c = cache();
+  ok('doctor passes the cache when it matches the repo', c.ok === true, JSON.stringify(c));
+  fs.appendFileSync(path.join(live, 'hooks', 'mod.js'), '\n');
+  c = cache();
+  ok('doctor names a repo file that is not live', c.ok === false && /1 file\(s\).*hooks\/mod\.js/.test(c.message), JSON.stringify(c));
+  const bridge = path.join(cfg, 'teknesyum', 'bridge.js');
+  fs.mkdirSync(path.dirname(bridge), { recursive: true });
+  fs.copyFileSync(path.join(CORE, 'scripts', 'bridge.js'), bridge);
+  fs.writeFileSync(path.join(cfg, 'settings.json'), JSON.stringify({ statusLine: { type: 'command', command: 'node "' + bridge.split(path.sep).join('/') + '"' } }));
+  const line = () => {
+    const x = run(process.execPath, [path.join(CORE, 'scripts', 'doctor.js'), '--json'], { cwd: root, env: { ...process.env, CLAUDE_CONFIG_DIR: cfg } });
+    try {
+      return JSON.parse(x.stdout).find((y) => y.name === 'statusline') || {};
+    } catch {
+      return {};
+    }
+  };
+  ok('doctor accepts the stable bridge outside the plugin cache', line().ok === true, JSON.stringify(line()));
+  fs.appendFileSync(bridge, '\n');
+  ok('doctor flags a stable bridge older than the plugin', line().ok === false, JSON.stringify(line()));
   sweep(root);
   sweep(cfg);
 }
