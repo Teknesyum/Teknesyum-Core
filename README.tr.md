@@ -344,13 +344,13 @@ her zamanki gibi kendi seçiyor. Çıkan parça, onun yerine seçen makineydi.
 ### Windows - tek satır
 
 ```powershell
-irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.40.0/install.ps1 | iex
+irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.41.0/install.ps1 | iex
 ```
 
 ### macOS / Linux - tek satır
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.40.0/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.41.0/install.sh | bash
 ```
 
 **Sonra Claude Code'u yeniden başlatın.** Kancalar oturum ortasında yüklenir; masaüstü
@@ -385,7 +385,7 @@ Cursor ve Gemini için yalnız Node.js ve Core'un bir kopyası gerekir; Claude C
 Klondan bağlayın, çünkü eklenti önbelleğinin yolu her güncellemede değişir:
 
 ```bash
-git clone --depth 1 --branch v0.40.0 https://github.com/Teknesyum/Teknesyum-Core "$HOME/Teknesyum-Core"
+git clone --depth 1 --branch v0.41.0 https://github.com/Teknesyum/Teknesyum-Core "$HOME/Teknesyum-Core"
 ```
 
 ```bash
