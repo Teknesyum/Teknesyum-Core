@@ -46,6 +46,10 @@ doğrulandı (2026-09-11, `index`, `final`, `delta` alanları geliyor).
 | Üst model (`ust.js`) | `Üst Model Çağrıldı · fable · Zor karar` |
 | Denylist / döngü | `Yasak Liste Bir Komutu Durdurdu · <neden>` / `Sınırsız Bekleme Durduruldu · …` |
 | Koltuk (`show` sonrası ya da Stop) | `Koltuk Okundu · slug · K KB` |
+| Kullanılan kitaplar (`bant.js`, mesaj sonu) | `Kullanılan Kitaplar · teknesyum-ui · tercihler/ui.md` |
+| Beyan denetimi (`dur.js`) | `Kitaplar Uyuşmuyor · Beyan … · Okunan …` |
+| Arayüz kapısı (`dur.js`) | `Arayüz Kapısı · N Arayüz Düzenlemesi, Ekran Görüntüsü Yok` |
+| Core'a rapor (`mod.js`) | `Core'a Rapor · logs/openlogs/ Altına Yazılacak` |
 
 Ölçü 1: sıradan tur 0 bayt; satır yalnız olay olunca kuyruğa girer, bağlama hiç girmez.
 Test takımı hiçbir kancanın `systemMessage` yazmadığını denetler.

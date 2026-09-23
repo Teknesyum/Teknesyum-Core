@@ -5,6 +5,11 @@ const path = require('path');
 const { openLogs, coreRepo, stateFile, fold } = require('../hooks/lib.js');
 
 const PREFIX = 'BUG-';
+const KINDS = {
+  hata: PREFIX,
+  yontem: 'YONTEM-',
+  teklif: 'TEKLIF-',
+};
 
 function slug(s) {
   return fold(String(s))
@@ -36,14 +41,41 @@ function list() {
   say([f.length + ' open bug log(s) — ' + dir, ''].concat(f.map((x) => '  ' + x.slice(0, -3))));
 }
 
+function note(kind, o) {
+  const yontem = kind === 'yontem';
+  return [
+    '# ' + (yontem ? 'Yöntem: ' : 'Teklif: ') + o.title,
+    '',
+    '**State:** open',
+    '**Tür:** ' + (yontem ? 'Yöntem' : 'Teklif'),
+    '**İlk görüldüğü yer:** ' + (o.project || path.basename(process.cwd())) + ', ' + new Date().toISOString().slice(0, 10),
+    '**Amaç:** ' + (o.symptom || '(fill in)'),
+    '',
+    '## ' + (yontem ? 'Karar' : 'Durum'),
+    '',
+    '(fill in)',
+    '',
+    '## ' + (yontem ? 'Neden' : 'Teklif'),
+    '',
+    '(fill in)',
+    '',
+    '## Core İçin Öneri',
+    '',
+    '(What Core should change. Without it the log cannot be closed.)',
+    '',
+  ].join('\n');
+}
+
 function write(o) {
   if (!o.title) die('--title is required');
   const dir = openLogs();
   fs.mkdirSync(dir, { recursive: true });
-  const name = PREFIX + slug(o.title) + '.md';
+  const kind = String(o.kind || 'hata').toLowerCase();
+  if (!KINDS[kind]) die('--kind is one of: ' + Object.keys(KINDS).join(', '));
+  const name = KINDS[kind] + slug(o.title) + '.md';
   const file = path.join(dir, name);
   if (fs.existsSync(file)) die('already exists: ' + name);
-  const body = [
+  const body = kind !== 'hata' ? note(kind, o) : [
     '# Bug: ' + o.title,
     '',
     '**State:** open',
@@ -70,7 +102,7 @@ function write(o) {
       'No core repo found, so this went to the fallback spool.',
       'Set coreRepo in ' + stateFile('config') + ' and move it there.'
     );
-  lines.push('', 'Fill in sections 1 and 2 now.');
+  lines.push('', kind === 'hata' ? 'Fill in sections 1 and 2 now.' : 'Fill in every section now.');
   say(lines);
 }
 
@@ -113,4 +145,4 @@ if (cmd === 'write') write(o);
 else if (cmd === 'list' || !cmd) list();
 else if (cmd === 'close') move(o, false);
 else if (cmd === 'archive') move(o, true);
-else die('usage: log.js [list|write --title T --symptom S|close --id X|archive --id X]');
+else die('usage: log.js [list|write [--kind hata|yontem|teklif] --title T --symptom S|close --id X|archive --id X]');

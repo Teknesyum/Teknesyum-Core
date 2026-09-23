@@ -348,7 +348,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 17500, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 20500, String(JSON.stringify(table).length));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
   fs.mkdirSync(path.join(h, 'teknesyum'), { recursive: true });
@@ -1540,6 +1540,107 @@ function testMachine() {
   sweep(env.CLAUDE_CONFIG_DIR);
 }
 
+function testKitap() {
+  const cfg = home();
+  const root = fixture();
+  const tr = path.join(root, 'kitap.jsonl');
+  const priv = path.join(cfg, 'teknesyum-private', 'private', 'tercihler', 'ui.md');
+  const use = (name, input) => ({ type: 'assistant', message: { content: [{ type: 'tool_use', name, input }] } });
+  const rows = [
+    { type: 'user', uuid: 'u0', message: { content: 'eski istem' } },
+    use('Skill', { skill: 'eski-kitap' }),
+    { type: 'user', uuid: 'u1', message: { content: 'arayuzu yap' } },
+    use('Skill', { skill: 'teknesyum-ui:teknesyum-ui' }),
+    { type: 'user', message: { content: [{ type: 'tool_result', content: 'ok' }] } },
+    use('Read', { file_path: priv }),
+    use('Read', { file_path: path.join(root, 'src', 'ok.js') }),
+    use('Bash', { command: 'node "x/kutuphane.js" show agency/tasarimci --lean' }),
+    { type: 'user', isMeta: true, message: { content: 'Stop hook feedback' } },
+  ];
+  const put = (list) => fs.writeFileSync(tr, list.map((r) => JSON.stringify(r)).join('\n') + '\n');
+  put(rows);
+  const draw = (extra) => {
+    const out = hook(path.join(CORE, 'hooks', 'bant.js'), { hook_event_name: 'MessageDisplay', session_id: 'k1', cwd: root, transcript_path: tr, index: 1, final: true, delta: 'bitti', ...(extra || {}) }, cfg).stdout;
+    return out ? JSON.parse(out).hookSpecificOutput.displayContent : '';
+  };
+  const first = draw();
+  ok('the last message of a turn names the books read in it', /(Books Used|Kullanılan Kitaplar) · teknesyum-ui · tercihler\/ui\.md · agency\/tasarimci/.test(first), first);
+  ok('a plain source file is not a book', !/ok\.js/.test(first), first);
+  ok('a book from an earlier turn is left out', !/eski-kitap/.test(first), first);
+  ok('the line goes under the reply', first.indexOf('bitti') < first.indexOf('teknesyum-ui'), first);
+  ok('the same books are not drawn twice in a turn', !/teknesyum-ui/.test(draw()), draw());
+  ok('a message that is not the last chunk draws nothing', !/teknesyum-ui/.test(draw({ final: false, index: 2 })));
+  put(rows.concat([use('Skill', { skill: 'dataviz' })]));
+  ok('a new book in the same turn draws the line again', /dataviz/.test(draw()));
+  put([{ type: 'user', uuid: 'u2', message: { content: 'selam' } }]);
+  ok('a turn without books draws nothing', draw() === '');
+
+  put(rows);
+  const stop = (said) => {
+    hook(path.join(CORE, 'hooks', 'dur.js'), { hook_event_name: 'Stop', session_id: 'k2', cwd: root, transcript_path: tr, last_assistant_message: said }, cfg);
+    return take(cfg, 'k2');
+  };
+  ok('a declared list that matches stays silent', !/Books Differ|Uyuşmuyor/.test(stop('cevap\nKullanılan kitaplar: teknesyum-ui · tercihler/ui.md · agency/tasarimci')));
+  const diff = stop('cevap\nKullanılan kitaplar: teknesyum-ui');
+  ok('a declared list that misses a read book is flagged', /(Books Differ|Uyuşmuyor).*teknesyum-ui.*tercihler\/ui\.md/.test(diff), diff);
+  ok('no declared line, no check', !/Books Differ|Uyuşmuyor/.test(stop('cevap')));
+  sweep(cfg);
+}
+
+function testUiGate() {
+  const cfg = home();
+  const root = fixture();
+  const tr = path.join(root, 'ui.jsonl');
+  const use = (name, input) => ({ type: 'assistant', message: { content: [{ type: 'tool_use', name, input }] } });
+  const ask = { type: 'user', uuid: 'p1', message: { content: 'kur penceresini duzelt' } };
+  const edit = use('Edit', { file_path: path.join(root, 'src', 'Kur.tsx') });
+  const stop = (list, sid, extra) => {
+    fs.writeFileSync(tr, list.map((r) => JSON.stringify(r)).join('\n') + '\n');
+    const out = hook(path.join(CORE, 'hooks', 'dur.js'), { hook_event_name: 'Stop', session_id: sid, cwd: root, transcript_path: tr, ...(extra || {}) }, cfg).stdout;
+    return out ? JSON.parse(out).reason || '' : '';
+  };
+  const held = stop([ask, edit], 'g1');
+  ok('an interface edit with no screenshot holds the turn', /ekran görüntüsü|screenshot/i.test(held), held);
+  ok('and asks for an outside look and two claims', /alt ajan|subagent/i.test(held) && /kullanılabilir|usable/i.test(held), held);
+  ok('the same turn is held only once', stop([ask, edit], 'g1') === '');
+  ok('a screenshot after the edit lets it go', stop([ask, edit, use('mcp__computer-use__screenshot', {})], 'g2') === '');
+  ok('a screenshot before the last edit does not', /screenshot|görüntü/i.test(stop([ask, use('mcp__computer-use__screenshot', {}), edit], 'g3')));
+  ok('an edit to a plain source file is not an interface edit', stop([ask, use('Edit', { file_path: path.join(root, 'src', 'ok.js') })], 'g4') === '');
+  ok('a browser screenshot counts for a web app', stop([ask, edit, use('mcp__Claude_Browser__computer', { action: 'screenshot' })], 'g5') === '');
+  fs.mkdirSync(path.join(root, 'src-tauri'), { recursive: true });
+  const native = stop([ask, edit, use('mcp__Claude_Browser__computer', { action: 'screenshot' })], 'g6');
+  ok('but not for a desktop app, whose real window must be captured', /tarayıcı provası|browser rehearsal/i.test(native), native);
+  ok('a read of a captured image counts', stop([ask, edit, use('Read', { file_path: path.join(root, 'shot.png') })], 'g7') === '');
+  fs.writeFileSync(path.join(cfg, 'teknesyum', 'config.json'), JSON.stringify({ ui: false }));
+  ok('ui: false turns the gate off', stop([ask, edit], 'g8') === '');
+  sweep(cfg);
+}
+
+function testReport() {
+  const mod = require(path.join(CORE, 'hooks', 'mod.js'));
+  for (const p of ["bunu core'a raporla", 'core a logla şunu', "teknesyum'a bildir", 'report this to core'])
+    ok('"' + p + '" asks for a Core report', mod.REPORT.test(p));
+  for (const p of ['uygulamaya logla', 'hatayı logla', 'core dosyasını düzelt', 'score a raporla'])
+    ok('"' + p + '" does not', !mod.REPORT.test(p));
+  const out = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: "bunu core'a raporla", cwd: os.tmpdir(), session_id: 'tkc-rap-' + process.pid });
+  const ctx = out ? JSON.parse(out).hookSpecificOutput.additionalContext : '';
+  ok('a report prompt gets the log.js recipe', /log\.js" write --kind hata\|yontem\|teklif/.test(ctx), ctx);
+  const plain = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'merhaba', cwd: os.tmpdir() });
+  ok('and an ordinary prompt still costs nothing', plain === '', plain);
+
+  const cfg = home();
+
+  const env = { ...process.env, CLAUDE_CONFIG_DIR: cfg, NO_COLOR: '1' };
+  const w = (args) => run(process.execPath, [path.join(CORE, 'scripts', 'log.js'), 'write', ...args], { cwd: os.tmpdir(), env });
+  const made = w(['--kind', 'yontem', '--title', 'gizli pencere', '--symptom', 'beyaz kare olmasin']);
+  const file = /\s+(\S+YONTEM-gizli-pencere\.md)/.exec(made.stdout);
+  const body = file ? fs.readFileSync(file[1], 'utf8') : '';
+  ok('log.js writes a method note with its own shape', /^# Yöntem: gizli pencere/m.test(body) && /Core İçin Öneri/.test(body) && /beyaz kare/.test(body), made.stdout + made.stderr);
+  ok('an unknown kind is refused', w(['--kind', 'x', '--title', 'y']).status !== 0);
+  if (file) fs.unlinkSync(file[1]);
+  sweep(cfg);
+}
+
 function testUst() {
   const cfg = home();
   const root = fixture();
@@ -1625,6 +1726,9 @@ function main() {
     ['machine sweep', testMachine],
     ['higher model', testUst],
     ['memory check', testHatirla],
+    ['books used', testKitap],
+    ['report to core', testReport],
+    ['ui gate', testUiGate],
   ];
   for (const [name, fn] of suites) {
     try {

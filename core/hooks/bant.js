@@ -1,10 +1,14 @@
 #!/usr/bin/env node
-const { main, drain } = require('./lib.js');
+const { main, drain, say } = require('./lib.js');
+const kitap = require('./kitap.js');
 
 function build(j) {
   if (!j || j.hook_event_name !== 'MessageDisplay') return '';
   const top = j.index === 0;
   if (!top && !j.final) return '';
+  if (j.final) {
+    try { say(j.session_id, kitap.line(j)); } catch {}
+  }
   const lines = drain(j.session_id);
   if (!lines.length) return '';
   const block = lines
