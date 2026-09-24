@@ -137,4 +137,4 @@ Kaynak: [ui-tarama](ajan/ui-tarama/) beş rapor. Kök neden: tarayıcının `con
 - [x] J4 Canlı denetim: web için axe `color-contrast` + `target-size` betiği; Avalonia/WPF için görsel ağaçta yazı–zemin ölçen headless test şablonu.
 - [x] J5 Core `uc` işareti: rafı ve denetim yordamını tetikler, sıradan turda 0 token.
 - [x] J6 İki sürüm, iki README, eklenti güncelle.
-- [ ] J7 Kampanya: VidShrink, Runly, AbxPilot, CodeXray, VideoEdit, Quizloop — her birinde `uc`: rapor, düzeltme, gerçek pencere görüntüsü, commit.
+- [x] J7 Kampanya: VidShrink, Runly, AbxPilot, CodeXray, VideoEdit, Quizloop — her birinde `uc`: rapor, düzeltme, gerçek pencere görüntüsü, commit.
