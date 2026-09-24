@@ -78,7 +78,7 @@ serbest.
 
 ### İki Uçta İşaret
 
-`??` `++` kütüphane, `pp` özel raf, `aa` ajans, `ff` fable danışma, `mc` bellek taraması,
+`??` `++` kütüphane, `pp` özel raf, `aa` ajans, `ff` fable danışma, `mc` bellek taraması, `uc` UI denetimi,
 `hh` yardım. Her biri istemin başında da sonunda da okunur; `hh` hepsini örnekle listeler.
 `hh` listesi ekran kanalına çizilir: bağlama tek harf gitmez, basılıp basılmayacağına
 model karar vermez.
@@ -456,7 +456,7 @@ Yukarıdaki kanıt kapısı on üç kanca kaydından biri. Dokuz olay, on bir do
 | Olay | Kanca | Söyler |
 |---|---|---|
 | `SessionStart` | `count.js` | varsa `Devam: .claude/handoff.md`; varsa `docs/plan.md`nin ilk açık `- [ ]` adımı; `<proje>/trash` 100 MB'ı aştıysa proje başına günde en çok bir kez çöp teklifi — satır tam silme komutunu taşır, kanca çöpü kendi boşaltmaz; her kaynakta, compact dahil, `.claude/acik.md`'nin açık satırları; yoksa hiçbir şey. Günde bir kez `kutuphane.js fetch all --stale 7`yi arka planda ayrık başlatır, hiçbir raf bir haftadan eski kalmaz, ve `cop.js`'in eski state dosyası ve eski eklenti sürümü süpürmesini koşar; model hiçbirini görmez |
-| `UserPromptSubmit` | `mod.js` | `??` / `++`de kütüphane bulguları, `pp`de özel kitaplar, `aa`da ajans koltukları, `ff`de fable danışma yordamı, `mc`de bellek tarama yordamı, `hh`de işaretlerin listesi (liste bağlama değil ekran kanalına gider) — işaret cümlenin başında da sonunda da okunur, `mc` başta yalnız tek başına ya da `2 hafta` gibi kapsamla sayılır; `.claude/jobs.md`'nin (iş listesi, `- [ ] iş — gerekçe`) ve eski `.claude/sonra.md`'nin açık satırları `.claude/acik.md` defterine geçer, dosya `trash/`'e taşınır, defterin `[x]` satırları `trash/`'e budanır, açık satırları bağlama eklenir; Core'a rapor isteyen istem (`core'a raporla`, `teknesyum'a bildir`, `report this to core`) `log.js write` tarifini alır; çok maddeli istem bağlama yazmadan durum işareti bırakır; yoksa hiçbir şey |
+| `UserPromptSubmit` | `mod.js` | `??` / `++`de kütüphane bulguları, `pp`de özel kitaplar, `aa`da ajans koltukları, `ff`de fable danışma yordamı, `mc`de bellek tarama yordamı, `uc`de UI denetim yordamı (raftaki `ui-denetim.md`, teknesyum-ui tarayıcısı ve canlı kontrast parçası), `hh`de işaretlerin listesi (liste bağlama değil ekran kanalına gider) — işaret cümlenin başında da sonunda da okunur, `mc` başta yalnız tek başına ya da `2 hafta` gibi kapsamla sayılır; `.claude/jobs.md`'nin (iş listesi, `- [ ] iş — gerekçe`) ve eski `.claude/sonra.md`'nin açık satırları `.claude/acik.md` defterine geçer, dosya `trash/`'e taşınır, defterin `[x]` satırları `trash/`'e budanır, açık satırları bağlama eklenir; Core'a rapor isteyen istem (`core'a raporla`, `teknesyum'a bildir`, `report this to core`) `log.js write` tarifini alır; çok maddeli istem bağlama yazmadan durum işareti bırakır; yoksa hiçbir şey |
 | `PostToolUse` | `count.js` | eşikte tek satır, bir kez; yoksa hiçbir şey |
 | `PostToolUseFailure` | `count.js` | hiçbir şey; kalan test komutunu kaydeder |
 | `PreToolUse` | `yasak.js` | tehlikeli komutu tek satır gerekçeyle reddeder. Proje içinde silmek serbest; dışına çıkmak değil — hedefi çalışma klasörünün dışına düşen ya da kökün kendisi olan silme, disk yazma, geçmiş silme, depo/sürüm silme, indir-koş boruları, `chmod 777`, makine çapında durdurma reddedilir; ardından aynı süreçte döngü kapısı: bekleme döngüsünün üst sınırı yoksa tek satır; yoksa hiçbir şey |

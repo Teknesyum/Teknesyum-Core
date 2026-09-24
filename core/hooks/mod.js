@@ -4,8 +4,8 @@ const { main, configRoot, stateFile, t, banner, say, sayBlock } = require('./lib
 const lib = require('../scripts/kutuphane.js');
 const ag = require('../scripts/agency.js');
 
-const PREFIX = /^\s*(\?\?|\+\+|pp|aa|ff|hh|mc)(?=\s|$)/i;
-const SUFFIX = /(^|\s)(\?\?|\+\+|pp|aa|ff|hh|mc)\s*$/i;
+const PREFIX = /^\s*(\?\?|\+\+|pp|aa|ff|hh|mc|uc)(?=\s|$)/i;
+const SUFFIX = /(^|\s)(\?\?|\+\+|pp|aa|ff|hh|mc|uc)\s*$/i;
 const WORD_MARK = /^mc$/;
 const SCOPE = /^\s*(\d+\s*(sayfa|g[uü]n|hafta)\s*)?$/i;
 
@@ -120,6 +120,27 @@ function report() {
   return t('mod.report').replace('%C', cmd('write --kind hata|yontem|teklif --title T --symptom S', 'log.js'));
 }
 
+function uiPlugin() {
+  try {
+    const j = JSON.parse(fs.readFileSync(path.join(configRoot(), 'plugins', 'installed_plugins.json'), 'utf8'));
+    const row = [].concat((j.plugins || {})['teknesyum-ui@teknesyum'] || [])[0];
+    return row && row.installPath && fs.existsSync(row.installPath) ? row.installPath : '';
+  } catch {
+    return '';
+  }
+}
+
+function uiCheck(rest) {
+  shown.push(banner('banner.uc'));
+  const root = uiPlugin();
+  if (!root) return t('mod.ucNone');
+  const book = path.join(lib.privateDir(), 'tercihler', 'ui-denetim.md');
+  const js = (s) => 'node "' + path.join(root, 'scripts', s) + '"';
+  const head = t('mod.uc').replace('%B', book).replace('%S', js('scan.js') + ' .').replace('%D', js('denetim.js') + ' --snippet').replace('%T', js('scaffold.js') + ' denetim <Ad>');
+  const q = String(rest || '').trim();
+  return q ? head + '\n' + t('mod.ucScope').replace('%Q', q) : head;
+}
+
 function agency(text) {
   let rows = [];
   try { rows = ag.find(words(text)).slice(0, MAX_SEATS); } catch {}
@@ -206,7 +227,7 @@ function handle(j) {
   let text = '';
   if (m) {
     const { rest, key } = m;
-    text = key === 'hh' ? help(j.session_id) : key === 'mc' ? memory(rest) : key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : library(rest);
+    text = key === 'hh' ? help(j.session_id) : key === 'mc' ? memory(rest) : key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : key === 'uc' ? uiCheck(rest) : library(rest);
   } else if (REPORT.test(prompt)) text = report();
   say(j.session_id, shown);
   const all = [pre, text].filter(Boolean).join('\n\n');

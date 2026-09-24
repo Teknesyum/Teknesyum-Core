@@ -348,7 +348,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 20500, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 21500, String(JSON.stringify(table).length));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
   fs.mkdirSync(path.join(h, 'teknesyum'), { recursive: true });
@@ -947,7 +947,7 @@ function testFable() {
   const drawn = bant.build({ hook_event_name: 'MessageDisplay', session_id: seans, index: 0, delta: 'merhaba' });
   const help = drawn ? JSON.parse(drawn).hookSpecificOutput.displayContent : '';
   ok('hh draws the list on the display channel instead', help.includes('merhaba'), help);
-  for (const k of ['??', '++', 'pp', 'aa', 'ff', 'hh']) ok('hh explains ' + k, help.includes('`' + k + '`'), help);
+  for (const k of ['??', '++', 'pp', 'aa', 'ff', 'uc', 'hh']) ok('hh explains ' + k, help.includes('`' + k + '`'), help);
   ok('hh says where the mark stands', /başında|sonunda|start|end/i.test(help), help);
   ok('hh shows how to use one', /`\?\? redis/.test(help), help);
   ok('hh says an unmarked turn is free', /tek harf|not one letter/i.test(help), help);
@@ -1641,6 +1641,34 @@ function testReport() {
   sweep(cfg);
 }
 
+function testUiCheck() {
+  const mod = require(path.join(CORE, 'hooks', 'mod.js'));
+  ok('uc at the start is a mark', (mod.mark('uc ayarlar') || {}).key === 'uc');
+  ok('uc at the end is a mark', (mod.mark('ayarlar ekranı uc') || {}).key === 'uc');
+  ok('uc mid-sentence is not', mod.mark('bir uc durum var') === null);
+  const cfg = home();
+  const was = process.env.CLAUDE_CONFIG_DIR;
+  process.env.CLAUDE_CONFIG_DIR = cfg;
+  const ask = (p) => {
+    const out = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: p, cwd: os.tmpdir(), session_id: 'tkc-uc-' + process.pid });
+    return out ? JSON.parse(out).hookSpecificOutput.additionalContext : '';
+  };
+  try {
+    ok('without the UI plugin uc says how to install it', /teknesyum-ui@teknesyum/.test(ask('uc')));
+    const ui = path.join(cfg, 'plugins', 'cache', 'teknesyum-ui');
+    fs.mkdirSync(path.join(ui, 'scripts'), { recursive: true });
+    fs.writeFileSync(path.join(cfg, 'plugins', 'installed_plugins.json'), JSON.stringify({ plugins: { 'teknesyum-ui@teknesyum': [{ installPath: ui }] } }));
+    const ctx = ask('uc ayarlar ekranı');
+    ok('uc names the shelf book', /ui-denetim\.md/.test(ctx), ctx);
+    ok('and the scanner and the live contrast snippet', /scan\.js" \.`/.test(ctx) && /denetim\.js" --snippet/.test(ctx), ctx);
+    ok('and carries the scope', /ayarlar ekranı/.test(ctx), ctx);
+  } finally {
+    if (was === undefined) delete process.env.CLAUDE_CONFIG_DIR;
+    else process.env.CLAUDE_CONFIG_DIR = was;
+    sweep(cfg);
+  }
+}
+
 function testUst() {
   const cfg = home();
   const root = fixture();
@@ -1728,6 +1756,7 @@ function main() {
     ['memory check', testHatirla],
     ['books used', testKitap],
     ['report to core', testReport],
+    ['ui check mark', testUiCheck],
     ['ui gate', testUiGate],
   ];
   for (const [name, fn] of suites) {
