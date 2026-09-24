@@ -132,9 +132,9 @@ Sıra: önce riski sıfır olan ölü kod, sonra ortak yardımcılar (sonraki da
 Kaynak: [ui-tarama](ajan/ui-tarama/) beş rapor. Kök neden: tarayıcının `contrast` kuralı yazıyı yalnız siyaha karşı ölçer, paletteki ve kaynak anahtarıyla gelen rengi hiç ölçmez; dolgu–yazı çifti hiç ölçülmez. Runly 0 hata verir ama okunmaz düğme taşır.
 
 - [x] J1 Raf: tarama adayları `ui-duzeni.md`'ye (Okunurluk bölümü, masaüstü, davranış), yeni kitap `ui-denetim.md` (`uc` yordamı, denetim listesi, rapor biçimi).
-- [ ] J2 Token: her dolgu token'ının `on` eşi; üretici saydam dolguyu zemine bindirip her dolgu×yazı çiftini ölçer, eşik altı çiftte tema üretmez.
-- [ ] J3 Tarayıcı: `pair-contrast` — aynı öğedeki dolgu ve yazı rengini (hex, token, fırça anahtarı, Tailwind) çözer, saydamlığı bindirir, ölçer.
-- [ ] J4 Canlı denetim: web için axe `color-contrast` + `target-size` betiği; Avalonia/WPF için görsel ağaçta yazı–zemin ölçen headless test şablonu.
+- [x] J2 Token: her dolgu token'ının `on` eşi; üretici saydam dolguyu zemine bindirip her dolgu×yazı çiftini ölçer, eşik altı çiftte tema üretmez.
+- [x] J3 Tarayıcı: `pair-contrast` — aynı öğedeki dolgu ve yazı rengini (hex, token, fırça anahtarı, Tailwind) çözer, saydamlığı bindirir, ölçer.
+- [x] J4 Canlı denetim: web için axe `color-contrast` + `target-size` betiği; Avalonia/WPF için görsel ağaçta yazı–zemin ölçen headless test şablonu.
 - [x] J5 Core `uc` işareti: rafı ve denetim yordamını tetikler, sıradan turda 0 token.
-- [ ] J6 İki sürüm, iki README, eklenti güncelle.
+- [x] J6 İki sürüm, iki README, eklenti güncelle.
 - [ ] J7 Kampanya: VidShrink, Runly, AbxPilot, CodeXray, VideoEdit, Quizloop — her birinde `uc`: rapor, düzeltme, gerçek pencere görüntüsü, commit.
