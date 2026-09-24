@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.43.0
+
+- Add the uc mark: a UI check that puts the private-shelf audit book, the scanner and live contrast measuring into the turn
+
 ## v0.42.0
 
 - Name the books a turn used under the reply, hold interface work that nobody looked at, route 'core'a raporla' to log.js with hata/yontem/teklif kinds
