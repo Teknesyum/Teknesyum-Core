@@ -584,6 +584,7 @@ function testDur() {
   const r10 = stop();
   ok('an edit after the run closes it again', blocks(r10), r10.stdout);
 
+  edit(root, cfg, 'src/two.js', 's1', 'module.exports = 30;' + String.fromCharCode(10));
   hook(COUNT, { hook_event_name: 'PostToolUseFailure', tool_name: 'Bash', session_id: 's1', cwd: root, tool_input: { command: 'npm test' }, error: '1 failed' }, cfg);
   const r11 = stop();
   ok('a failed run is not evidence', blocks(r11), r11.stdout);
@@ -599,6 +600,83 @@ function testDur() {
 
   const junk = run(process.execPath, [DUR], { cwd: root, input: '{nope', env: { ...process.env, CLAUDE_CONFIG_DIR: cfg } });
   ok('bad input exits quietly', junk.status === 0 && junk.stdout === '');
+  sweep(root);
+  sweep(cfg);
+}
+
+function testEvidenceOnce() {
+  const DUR = path.join(CORE, 'hooks', 'dur.js');
+  const cfg = home();
+  const blocks = (r) => { try { return JSON.parse(r.stdout).decision === 'block'; } catch { return false; } };
+  const nl = String.fromCharCode(10);
+  const start = (root, sid) => hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: sid, cwd: root }, cfg);
+  const stop = (root, sid, extra) => hook(DUR, { hook_event_name: 'Stop', session_id: sid, cwd: root, ...extra }, cfg);
+  const shell = (root, sid, command) => hook(COUNT, { hook_event_name: 'PostToolUse', tool_name: 'Bash', session_id: sid, cwd: root, tool_input: { command }, tool_response: { stdout: 'ok', stderr: '' } }, cfg);
+
+  const once = fixture();
+  start(once, 'e1');
+  edit(once, cfg, 'src/ok.js', 'e1', 'module.exports = 11;' + nl);
+  ok('an unproven edit is asked about', blocks(stop(once, 'e1')));
+  const again = stop(once, 'e1');
+  ok('asked once: the next stop with no new edit goes through', again.stdout === '', again.stdout);
+  const later = stop(once, 'e1');
+  ok('and so does every stop after it while nothing is written', later.stdout === '', later.stdout);
+  edit(once, cfg, 'src/ok.js', 'e1', 'module.exports = 12;' + nl);
+  ok('a new write asks again', blocks(stop(once, 'e1')));
+  sweep(once);
+
+  const TEST = require(COUNT).TEST;
+  for (const cmd of ['npx tsc --noEmit', 'npx vite build', 'cargo check', 'cargo build --release', 'cargo clippy', 'node C:/x/teknesyum-ui/scripts/scan.js .', 'npx eslint src', 'ruff check .', 'dotnet build -c Release'])
+    ok('counts as evidence: ' + cmd, TEST.test(cmd));
+  ok('a plain git status is not evidence', !TEST.test('git status'));
+
+  const typed = fixture();
+  start(typed, 'e2');
+  edit(typed, cfg, 'src/ok.js', 'e2', 'module.exports = 21;' + nl);
+  shell(typed, 'e2', 'npx tsc --noEmit');
+  const t1 = stop(typed, 'e2');
+  ok('a type check after the edit opens the gate on the first stop', t1.stdout === '', t1.stdout);
+  sweep(typed);
+
+  const script = fixture();
+  start(script, 'e3');
+  edit(script, cfg, 'src/ok.js', 'e3', 'module.exports = 31;' + nl);
+  shell(script, 'e3', 'npm test');
+  fs.writeFileSync(path.join(script, 'package.json'), '{"version":"9.9.9"}' + nl);
+  fs.mkdirSync(path.join(script, 'dist'), { recursive: true });
+  fs.writeFileSync(path.join(script, 'dist', 'app.exe'), 'bin');
+  const s1 = stop(script, 'e3');
+  ok('a script that bumps the version and copies a binary does not reopen the gate', s1.stdout === '', s1.stdout);
+  fs.writeFileSync(path.join(script, 'src', 'ok.js'), 'module.exports = 32;' + nl);
+  const s2 = stop(script, 'e3');
+  ok('a turn with no Write or Edit is never asked', s2.stdout === '', s2.stdout);
+  sweep(script);
+  sweep(cfg);
+}
+
+function testReplyLanguage() {
+  const DUR = path.join(CORE, 'hooks', 'dur.js');
+  const cfg = home();
+  const root = fixture();
+  const blocks = (r) => { try { return JSON.parse(r.stdout).decision === 'block'; } catch { return false; } };
+  const stop = (said) => hook(DUR, { hook_event_name: 'Stop', session_id: 'l1', cwd: root, last_assistant_message: said }, cfg);
+  const EN = 'Rebuilt the app and the tests pass now. The release is ready and I have pushed it to the main branch, so the next step is yours: open the installer, check that it starts, and tell me if the window looks right. There is nothing else to do for this job.';
+  const TR = 'Uygulamayı yeniden derledim ve testler geçti. Sürüm hazır, ana dala da gönderdim; sıradaki adım senin: kurucuyu aç, başladığını gör ve pencere doğru görünüyor mu bana söyle. Bu iş için başka yapılacak bir şey yok. The build uses \`npm run build\` and it is fine.';
+  hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 'l1', cwd: root }, cfg);
+  ok('with no reply language set, an English reply is left alone', stop(EN).stdout === '');
+  fs.writeFileSync(path.join(cfg, 'CLAUDE.md'), '**Answer in Turkish.** These instructions are English.' + String.fromCharCode(10));
+  const en = stop(EN);
+  ok('an English reply to a Turkish owner is held once', blocks(en) && /Turkish|Türkçe/.test(en.stdout), en.stdout);
+  ok('and the display queue names it', /Reply Language|Yanıt Dili/.test(take(cfg, 'l1')));
+  ok('the second stop of the same turn goes through', hook(DUR, { hook_event_name: 'Stop', session_id: 'l1', cwd: root, stop_hook_active: true, last_assistant_message: EN }, cfg).stdout === '');
+  ok('a Turkish reply with English code in it passes', stop(TR).stdout === '');
+  ok('a short English line is not judged', stop('Done, pushed.').stdout === '');
+  const c = hook(COUNT, { hook_event_name: 'SessionStart', source: 'compact', session_id: 'l1', cwd: root }, cfg);
+  ok('after a compaction the first context carries the reply language', /Reply language: Turkish|Yanıt dili: Türkçe/.test(c.stdout), c.stdout);
+  const s = hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 'l2', cwd: root }, cfg);
+  ok('a fresh session start does not', !/Reply language|Yanıt dili/.test(s.stdout), s.stdout);
+  fs.writeFileSync(path.join(cfg, 'teknesyum', 'config.json'), JSON.stringify({ langCheck: false }));
+  ok('the check switches off in one setting', stop(EN).stdout === '');
   sweep(root);
   sweep(cfg);
 }
@@ -1584,6 +1662,11 @@ function testKitap() {
   const diff = stop('cevap\nKullanılan kitaplar: teknesyum-ui');
   ok('a declared list that misses a read book is flagged', /(Books Differ|Uyuşmuyor).*teknesyum-ui.*tercihler\/ui\.md/.test(diff), diff);
   ok('no declared line, no check', !/Books Differ|Uyuşmuyor/.test(stop('cevap')));
+  put([{ type: 'user', uuid: 'u3', message: { content: 'selam' } }]);
+  ok('"Kullanılan kitaplar: yok" on a turn with no books is a declaration, not a mismatch', !/Books Differ|Uyuşmuyor/.test(stop('cevap\nKullanılan kitaplar: yok')));
+  put(rows);
+  const none = stop('cevap\nKullanılan kitaplar: yok');
+  ok('but "yok" on a turn that read books is flagged', /(Books Differ|Uyuşmuyor).*(Said|Beyan) - /.test(none), none);
   sweep(cfg);
 }
 
@@ -1736,6 +1819,8 @@ function main() {
     ['chime', testChime],
     ['loop gate', testLoop],
     ['evidence gate', testDur],
+    ['evidence once', testEvidenceOnce],
+    ['reply language', testReplyLanguage],
     ['display notice', testNotice],
     ['denylist', testYasak],
     ['prompt marks', testMark],

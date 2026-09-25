@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
-const { main, read, merge, settings, stateFile, errorLog, t, banner, say } = require('./lib.js');
+const { main, read, merge, settings, stateFile, errorLog, t, banner, say, replyLang } = require('./lib.js');
 const count = require('./count.js');
-const { file, tree } = count;
+const { file, sum } = count;
 
 function off() {
   return settings().evidence === false || process.env.TEKNESYUM_KANIT === '0';
@@ -19,7 +19,36 @@ function code(st) {
 }
 
 function proven(st, now) {
-  return (st.tests || []).some((r) => r.ok !== false && r.tree === now);
+  return (st.tests || []).some((r) => r.ok !== false && r.sum === now);
+}
+
+const TR_CHARS = /[çğışöüÇĞİŞÖÜ]/;
+const TR_WORDS = new Set(['ve', 'bir', 'bu', 'için', 'ile', 'da', 'de', 'değil', 'olarak', 'var', 'yok', 'ama', 'çok', 'daha', 'gibi', 'sonra', 'şimdi', 'ne', 'mi', 'ya', 'her', 'kez', 'yani']);
+const EN_WORDS = new Set(['the', 'and', 'is', 'are', 'was', 'to', 'of', 'for', 'with', 'that', 'this', 'it', 'in', 'on', 'not', 'now', 'be', 'so', 'but', 'you', 'we', 'i', 'have', 'has', 'what', 'which', 'from']);
+
+function english(text) {
+  const prose = String(text || '')
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/`[^`\n]*`/g, ' ')
+    .replace(/https?:\/\/\S+/g, ' ')
+    .replace(/\S*[\/\\]\S*/g, ' ');
+  const words = prose.toLowerCase().match(/[a-zçğıöşü']+/g) || [];
+  if (words.length < 25) return false;
+  let en = 0;
+  let tr = 0;
+  for (const w of words) {
+    if (EN_WORDS.has(w)) en += 1;
+    else if (TR_WORDS.has(w) || TR_CHARS.test(w)) tr += 1;
+  }
+  return en >= 5 && en > tr * 3;
+}
+
+function language(j) {
+  if (settings().langCheck === false || replyLang() !== 'tr') return '';
+  const said = typeof j.last_assistant_message === 'string' ? j.last_assistant_message : require('./defter.js').lastText(j);
+  if (!english(said)) return '';
+  say(j.session_id, banner('banner.lang'));
+  return t('dur.lang');
 }
 
 function jobs(j) {
@@ -50,14 +79,12 @@ function evidence(j) {
   const f = file(j);
   const st = read(f);
   if (!st) return '';
-  const now = tree(st.cwd || j.cwd || process.cwd());
-  if (!now) return '';
-  if (st.stopTree === now) return '';
   if (!code(st).length) return '';
-  if (proven(st, now)) {
-    merge(f, { stopTree: now });
-    return '';
-  }
+  const seq = Number(st.seq) || 0;
+  if (seq === st.stopSeq) return '';
+  const now = sum(st.cwd || j.cwd || process.cwd(), Object.keys(st.files || {}));
+  merge(f, { stopSum: now, stopSeq: seq });
+  if (st.stopSum === now || proven(st, now)) return '';
   say(j.session_id, banner('banner.evidence', { '%N': code(st).length }));
   return t('dur.evidence');
 }
@@ -103,7 +130,7 @@ function ui(j) {
 function decide(j) {
   if (j.hook_event_name !== 'Stop') return null;
   if (j.stop_hook_active) return null;
-  const why = [jobs(j), require('./defter.js').short(j), evidence(j), ui(j)].filter(Boolean);
+  const why = [jobs(j), require('./defter.js').short(j), evidence(j), ui(j), language(j)].filter(Boolean);
   return why.length ? { decision: 'block', reason: why.join('\n\n') } : null;
 }
 
@@ -117,4 +144,4 @@ function stop(j) {
 
 if (require.main === module) main(stop);
 
-module.exports = { ui, shot, stop, decide, proven, off, code, jobs, CODE };
+module.exports = { ui, shot, stop, decide, proven, off, code, jobs, english, language, CODE };

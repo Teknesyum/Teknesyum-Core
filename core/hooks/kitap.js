@@ -4,6 +4,7 @@ const { configRoot, stateFile, read, write, banner, say } = require('./lib.js');
 
 const TAIL = 512 * 1024;
 const SHOW = /kutuphane\.js["']?\s+show\s+([^|;&\r\n]+)/g;
+const NONE = /^(yok|hiçbiri|none|-|—)$/i;
 const DECLARED = /^[^\n]*(?:Kullanılan kitaplar|Books used)\s*:\s*(.+)$/im;
 
 function slash(p) {
@@ -119,7 +120,7 @@ function line(j) {
 function declared(text) {
   const m = DECLARED.exec(String(text || ''));
   if (!m) return null;
-  return m[1].split(/\s*[·,]\s*/).map((s) => s.replace(/[`*]/g, '').trim()).filter(Boolean);
+  return m[1].split(/\s*[·,]\s*/).map((s) => s.replace(/[`*]/g, '').replace(/\.$/, '').trim()).filter((s) => s && !NONE.test(s));
 }
 
 function audit(j) {
@@ -131,7 +132,7 @@ function audit(j) {
   const got = list.map(base);
   const want = said.map(base);
   if (want.every((s) => got.includes(s)) && got.every((s) => want.includes(s))) return '';
-  const msg = banner('banner.booksDiff', { '%D': said.join(' · '), '%R': list.join(' · ') || '-' });
+  const msg = banner('banner.booksDiff', { '%D': said.join(' · ') || '-', '%R': list.join(' · ') || '-' });
   say(j.session_id, msg);
   return msg;
 }

@@ -138,6 +138,16 @@ function t(key) {
   return row[lang()] || row.en || key;
 }
 
+function replyLang() {
+  const set = settings().replyLang;
+  if (set) return String(set).toLowerCase();
+  try {
+    const m = /\b(?:answer|reply|respond)\s+in\s+(turkish|english)\b/i.exec(fs.readFileSync(path.join(configRoot(), 'CLAUDE.md'), 'utf8'));
+    if (m) return m[1].toLowerCase() === 'turkish' ? 'tr' : 'en';
+  } catch {}
+  return lang();
+}
+
 const BANNER = 'Teknesyum Core > ';
 
 function banner(key, vars) {
@@ -307,6 +317,7 @@ module.exports = {
   settings,
   coreRepo,
   lang,
+  replyLang,
   t,
   banner,
   queue,

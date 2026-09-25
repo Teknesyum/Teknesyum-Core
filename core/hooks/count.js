@@ -7,7 +7,7 @@ const FILE_MAX = 5;
 const DIFF_MAX = 150;
 const CTX_MAX = 60;
 const RISK = /(^|\/)(migrations?\/|\.github\/|dockerfile$)|auth|secur|config|\.lock$|-lock\.json$/i;
-const TEST = /\b(npm|pnpm|yarn|bun)\s+(run\s+)?test\b|\bnpx\s+(ava|jest|mocha|vitest)\b|\bpytest\b|\bgo\s+test\b|\bcargo\s+test\b|\bdotnet\s+test\b|\bnode\s+\S*test\S*\.m?js\b/i;
+const TEST = /\b(npm|pnpm|yarn|bun)\s+(run\s+)?test\b|\bnpx\s+(ava|jest|mocha|vitest)\b|\bpytest\b|\bgo\s+test\b|\bcargo\s+test\b|\bdotnet\s+test\b|\bnode\s+\S*test\S*\.m?js\b|\btsc\b|\bvite\s+build\b|\bcargo\s+(check|build|clippy)\b|\bscan\.js\b|\beslint\b|\bruff\b|\bdotnet\s+build\b/i;
 const SEAL = /\bgit\b[^\n]*\bcommit\b/;
 const EDITS = /^(Write|Edit|NotebookEdit)$/;
 const SHELLS = /^(Bash|PowerShell)$/;
@@ -87,6 +87,7 @@ function onEdit(j, st) {
   if (/^\.\.\//.test(n) || /^\.claude\//.test(n) || /^[A-Za-z]:/.test(n)) return '';
   st.files[n] = st.files[n] || { adds: 0, dels: 0 };
   st.editAt = new Date().toISOString();
+  st.seq = (Number(st.seq) || 0) + 1;
   refresh(st);
   if (st.warned.plan || planAt(st.cwd)) return '';
   const why = reason(st);
@@ -102,6 +103,16 @@ function tree(cwd) {
   return require('crypto').createHash('sha1').update(String(head.stdout || '') + String(r.stdout || '')).digest('hex').slice(0, 12);
 }
 
+function sum(cwd, names) {
+  const h = require('crypto').createHash('sha1');
+  for (const n of names.slice().sort()) {
+    h.update(n + '|');
+    try { h.update(fs.readFileSync(path.join(cwd, n))); } catch { h.update('-'); }
+    h.update('|');
+  }
+  return h.digest('hex').slice(0, 12);
+}
+
 function onShell(j, st, failed) {
   const cmd = String((j.tool_input && j.tool_input.command) || '');
   if (!failed && SEAL.test(cmd)) {
@@ -109,14 +120,15 @@ function onShell(j, st, failed) {
     st.tests = [];
     st.diff = 0;
     st.edited = 0;
-    delete st.stopTree;
+    delete st.stopSum;
+    delete st.stopSeq;
     return '';
   }
   if (!TEST.test(cmd)) return '';
   const res = j.tool_response || {};
   const out = typeof res === 'string' ? res : String(res.stdout || '') + String(res.stderr || '');
   const ok = failed ? false : out.trim() ? true : null;
-  st.tests.push({ cmd: cmd.slice(0, 120), ok, at: new Date().toISOString(), tree: tree(st.cwd) });
+  st.tests.push({ cmd: cmd.slice(0, 120), ok, at: new Date().toISOString(), tree: tree(st.cwd), sum: sum(st.cwd, Object.keys(st.files || {})) });
   st.tests = st.tests.slice(-8);
   return '';
 }
@@ -193,6 +205,7 @@ function opening(j, cwd) {
     lines.push(s.text);
     parts.push(s.line);
   }
+  if (j.source === 'compact' && require('./lib.js').replyLang() === 'tr') lines.push(t('cue.lang'));
   let book = { text: '' };
   try { book = require('./defter.js').ledger(cwd); } catch {}
   if (book.text) {
@@ -252,4 +265,4 @@ function handle(j) {
 
 if (require.main === module) main(handle, { log: 'count.js' });
 
-module.exports = { handle, reason, file, tree, step, FILE_MAX, DIFF_MAX, CTX_MAX, RISK, TEST };
+module.exports = { handle, reason, file, tree, sum, step, FILE_MAX, DIFF_MAX, CTX_MAX, RISK, TEST };
