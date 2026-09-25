@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.44.0
+
+- The evidence gate asks once and only after the model writes files, counts type checks, builds and linters as proof, and a Turkish owner's reply language survives a compaction.
+
 ## v0.43.0
 
 - Add the uc mark: a UI check that puts the private-shelf audit book, the scanner and live contrast measuring into the turn
