@@ -1776,6 +1776,9 @@ function testUiCheck() {
     ok('uc names the shelf book', /ui-denetim\.md/.test(ctx), ctx);
     ok('and the scanner and the live contrast snippet', /scan\.js" \.`/.test(ctx) && /denetim\.js" --snippet/.test(ctx), ctx);
     ok('and carries the scope', /ayarlar ekranı/.test(ctx), ctx);
+    fs.writeFileSync(path.join(ui, 'scripts', 'uc.js'), "module.exports = { metin: (o) => 'UI OWNS ' + o.kapsam + ' @ ' + o.cwd };");
+    const own = ask('uc ayarlar ekranı');
+    ok('when the UI plugin ships uc.js, it writes the instruction', /^UI OWNS ayarlar ekranı @ /.test(own), own);
   } finally {
     if (was === undefined) delete process.env.CLAUDE_CONFIG_DIR;
     else process.env.CLAUDE_CONFIG_DIR = was;

@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.47.0
+
+- `uc` hands its instruction to the teknesyum-ui plugin: when that plugin ships `scripts/uc.js`, its text goes into the turn; the old text stays as the fallback
+
 ## v0.46.0
 
 - An owner yes lets the model run a history rewrite or a repo, release or branch delete itself instead of handing over the command

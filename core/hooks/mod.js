@@ -130,10 +130,15 @@ function uiPlugin() {
   }
 }
 
-function uiCheck(rest) {
+function uiCheck(rest, cwd) {
   shown.push(banner('banner.uc'));
   const root = uiPlugin();
   if (!root) return t('mod.ucNone');
+  const own = path.join(root, 'scripts', 'uc.js');
+  if (fs.existsSync(own))
+    try {
+      return require(own).metin({ cwd, kapsam: String(rest || '').trim() });
+    } catch {}
   const book = path.join(lib.privateDir(), 'tercihler', 'ui-denetim.md');
   const js = (s) => 'node "' + path.join(root, 'scripts', s) + '"';
   const head = t('mod.uc').replace('%B', book).replace('%S', js('scan.js') + ' .').replace('%D', js('denetim.js') + ' --snippet').replace('%T', js('scaffold.js') + ' denetim <Ad>');
@@ -227,7 +232,7 @@ function handle(j) {
   let text = '';
   if (m) {
     const { rest, key } = m;
-    text = key === 'hh' ? help(j.session_id) : key === 'mc' ? memory(rest) : key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : key === 'uc' ? uiCheck(rest) : library(rest);
+    text = key === 'hh' ? help(j.session_id) : key === 'mc' ? memory(rest) : key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : key === 'uc' ? uiCheck(rest, j.cwd || process.cwd()) : library(rest);
   } else if (REPORT.test(prompt)) text = report();
   say(j.session_id, shown);
   const all = [pre, text].filter(Boolean).join('\n\n');
