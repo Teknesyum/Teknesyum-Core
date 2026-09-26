@@ -77,6 +77,7 @@
   "dur.jobs": {"en":"%N open jobs in .claude/jobs.md have no reason. Finish and tick - [x], or add \" — reason\". Asked once:","tr":".claude/jobs.md içinde %N açık iş gerekçesiz. Bitirip - [x] yap ya da \" — gerekçe\" ekle. Bir kez soruldu:"},
   "dur.jobsShort": {"en":"The prompt had %N items, .claude/jobs.md has %M. Add the missing.","tr":"İstemde %N madde, .claude/jobs.md'de %M satır. Eksiği ekle."},
   "dur.jobsMissing": {"en":"The prompt had %N items, no .claude/jobs.md. List them (- [ ] job), tick the done, reason the rest.","tr":"İstemde %N madde vardı, .claude/jobs.md yok. Listele (- [ ] iş), biteni işaretle, kalana gerekçe yaz. Bir kez soruldu."},
+  "dur.queued": {"en":"%N message(s) arrived while you worked; each is a job:","tr":"Sen çalışırken %N mesaj geldi; her biri iş:"},
   "dur.evidence": {"en":"You edited files and nothing ran afterwards: no test, no command output. Run what proves it and show the output, or say in one line why you cannot. Asked once; the next stop goes through.","tr":"Dosya düzenledin ve sonrasında hiçbir şey koşmadı: test de komut çıktısı da yok. Kanıtlayanı koş ve çıktısını göster, ya da neden koşamadığını tek satırla yaz. Bir kez soruldu; sonraki durma geçer."},
   "dur.lang": {"en":"Your reply was English; the owner reads Turkish. Rewrite all of it in Turkish.","tr":"Yanıtın İngilizce; sahip Türkçe okur. Tamamını Türkçe yeniden yaz."},
   "banner.lang": {"en":"Reply Language · English Reply · Rewrite Asked","tr":"Yanıt Dili · İngilizce Yanıt · Yeniden Yazım"},

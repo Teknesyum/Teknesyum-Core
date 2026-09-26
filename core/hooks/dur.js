@@ -51,11 +51,58 @@ function language(j) {
   return t('dur.lang');
 }
 
+function said(a) {
+  const p = a.prompt;
+  if (typeof p === 'string') return p;
+  return Array.isArray(p) ? p.filter((x) => x && x.type === 'text').map((x) => x.text).join('\n') : '';
+}
+
+function queued(j) {
+  const kitap = require('./kitap.js');
+  const file = kitap.transcript(j);
+  if (!file) return [];
+  const list = kitap.entries(file);
+  let at = -1;
+  for (let i = list.length - 1; i >= 0; i--) if (kitap.prompt(list[i])) { at = i; break; }
+  const out = [];
+  for (const o of list.slice(at + 1)) {
+    const a = o && o.type === 'attachment' && o.attachment;
+    if (!a || a.type !== 'queued_command' || a.isMeta || o.isSidechain) continue;
+    if (a.commandMode && a.commandMode !== 'prompt') continue;
+    const text = said(a).trim();
+    if (!text || /^<[a-z-]+[\s>]/i.test(text)) continue;
+    out.push(text);
+  }
+  return out;
+}
+
+function late(j, want) {
+  let extra = [];
+  try { extra = queued(j); } catch {}
+  if (!extra.length) return { want, extra };
+  const { items } = require('./mod.js');
+  const base = want && want.n ? want.n : 1;
+  const n = extra.reduce((s, q) => s + Math.max(1, items(q)), base);
+  return { want: { n }, extra };
+}
+
+function quote(extra) {
+  return extra.map((q) => '> ' + q.replace(/\s+/g, ' ').slice(0, 140)).join('\n');
+}
+
 function jobs(j) {
   const mark = stateFile('jobs-' + String(j.session_id || 'none'));
   let want = null;
   try { want = JSON.parse(fs.readFileSync(mark, 'utf8')); fs.unlinkSync(mark); } catch {}
   if (settings().jobs === false) return '';
+  const got = late(j, want);
+  want = got.want;
+  const tail = got.extra.length ? '\n' + t('dur.queued').replace('%N', String(got.extra.length)) + '\n' + quote(got.extra) : '';
+  const r = jobsOf(j, want);
+  return r ? r + tail : '';
+}
+
+function jobsOf(j, want) {
   let body = null;
   try { body = fs.readFileSync(path.join(j.cwd || process.cwd(), '.claude', 'jobs.md'), 'utf8'); } catch {}
   if (body === null) {

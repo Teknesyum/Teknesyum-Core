@@ -137,4 +137,4 @@ function audit(j) {
   return msg;
 }
 
-module.exports = { line, audit, books, turn, declared, used, entries, transcript };
+module.exports = { line, audit, books, turn, declared, used, entries, transcript, prompt };

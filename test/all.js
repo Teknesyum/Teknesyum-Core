@@ -901,6 +901,24 @@ function testJobs() {
     const fewer = said(stop('j4'));
     ok('a list shorter than the prompt is held once', fewer.decision === 'block' && /3/.test(fewer.reason) && /2/.test(fewer.reason), JSON.stringify(fewer));
     fs.unlinkSync(list);
+    const tr = path.join(cwd, 'q.jsonl');
+    const q = (prompt, extra) => JSON.stringify({ type: 'attachment', attachment: { type: 'queued_command', commandMode: 'prompt', prompt, ...extra } });
+    fs.writeFileSync(tr, [
+      JSON.stringify({ type: 'user', uuid: 'u1', message: { content: 'tek iş yap' } }),
+      q('bir de şunu düzelt'),
+      q([{ type: 'text', text: 'x ekle\ny sil' }]),
+      JSON.stringify({ type: 'attachment', attachment: { type: 'queued_command', commandMode: 'task-notification', prompt: '<task-notification>\n- a\n- b</task-notification>' } }),
+    ].join('\n') + '\n');
+    mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'tek iş yap', cwd, session_id: 'jq' });
+    const queuedMiss = said(stop('jq', { transcript_path: tr }));
+    ok('messages sent while working count as jobs', queuedMiss.decision === 'block' && /\b4\b/.test(queuedMiss.reason) && /bir de şunu düzelt/.test(queuedMiss.reason) && !/task-notification/.test(queuedMiss.reason), JSON.stringify(queuedMiss));
+    fs.writeFileSync(list, '- [x] tek iş yap\n- [x] şunu düzelt\n- [x] x ekle\n- [x] y sil');
+    ok('all queued jobs done lets the turn end', stop('jq', { transcript_path: tr }).stdout === '');
+    fs.writeFileSync(list, '- [x] tek iş yap\n- [x] şunu düzelt\n- [ ] x ekle\n- [x] y sil');
+    const queuedOpen = said(stop('jq', { transcript_path: tr }));
+    ok('an open queued job is named with the messages', queuedOpen.decision === 'block' && /x ekle/.test(queuedOpen.reason) && /> bir de şunu düzelt/.test(queuedOpen.reason), JSON.stringify(queuedOpen));
+    fs.unlinkSync(list);
+    ok('a single prompt with no queued message is still free', (mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'tek iş', cwd, session_id: 'jr' }), stop('jr', { transcript_path: path.join(cwd, 'yok.jsonl') }).stdout === ''));
     const book = path.join(cwd, '.claude', 'acik.md');
     fs.writeFileSync(book, '- [ ] bekleyen — 2026-09-16 10:00 — karar\n');
     const brief = said(stop('j5', { last_assistant_message: 'No response requested.' }));
