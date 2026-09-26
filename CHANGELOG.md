@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.46.0
+
+- An owner yes lets the model run a history rewrite or a repo, release or branch delete itself instead of handing over the command
+
 ## v0.45.0
 
 - Messages sent while a turn is running count as jobs: the job gate reads them from the transcript and holds the turn until each one is listed
