@@ -760,6 +760,19 @@ function testYasak() {
   ];
   for (const cmd of passed) ok('lets through ' + cmd, yasak.forbidden(cmd, GARDEN) === null, String(yasak.forbidden(cmd, GARDEN)));
 
+  const onayYaz = (text) => {
+    const f = path.join(os.tmpdir(), 'onay-' + Math.random().toString(36).slice(2) + '.jsonl');
+    fs.writeFileSync(f, JSON.stringify({ type: 'user', uuid: 'p', message: { content: text } }) + '\n');
+    return f;
+  };
+  const onayla = (cmd, text) => yasak.decide({ hook_event_name: 'PreToolUse', tool_name: 'Bash', session_id: 'yo', cwd: GARDEN, transcript_path: onayYaz(text), tool_input: { command: cmd } });
+  ok('an owner yes lets a branch delete through', onayla('git branch -D a b c', 'evet sil') === null);
+  ok('an owner delete request lets a release delete through', onayla('gh release delete v1.0.0 --yes', 'o sürümü silebilirsin') === null);
+  ok('no yes keeps the branch delete held', !!onayla('git branch -D a', 'devam et'));
+  ok('a word that only contains sil is not a yes', !!onayla('git branch -D a', 'basil kontrol et'));
+  ok('a yes never opens disk or root wipes', !!onayla('rm -rf /', 'evet') && !!onayla('mkfs.ext4 /dev/sdb1', 'evet'));
+  ok('the denial tells the model to run it after a yes', /sen koş|run it/.test(JSON.stringify(onayla('git reset --hard HEAD~1', 'bak'))));
+
   const was = process.env.CLAUDE_CONFIG_DIR;
   const dh = home();
   process.env.CLAUDE_CONFIG_DIR = dh;

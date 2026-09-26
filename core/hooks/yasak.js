@@ -57,11 +57,33 @@ function forbidden(cmd, cwd) {
   return null;
 }
 
+const ASKED = new Set(['yasak.hist', 'yasak.gone']);
+const YES = /(^|[^\p{L}])(evet|onay\p{L}*|sil\p{L}*|kaldır\p{L}*|yes|approved?)(?=$|[^\p{L}])/iu;
+
+function lastPrompt(j) {
+  const kitap = require('./kitap.js');
+  const file = kitap.transcript(j);
+  if (!file) return '';
+  const list = kitap.entries(file);
+  for (let i = list.length - 1; i >= 0; i--) {
+    const o = list[i];
+    if (!kitap.prompt(o)) continue;
+    const c = o.message.content;
+    return typeof c === 'string' ? c : c.filter((x) => x && x.type === 'text').map((x) => x.text).join(' ');
+  }
+  return '';
+}
+
+function approved(j) {
+  try { return YES.test(lastPrompt(j)); } catch { return false; }
+}
+
 function forbid(j) {
   if (j.hook_event_name && j.hook_event_name !== 'PreToolUse') return null;
   if (!/^(Bash|PowerShell)$/.test(j.tool_name || '')) return null;
   const key = forbidden((j.tool_input || {}).command, j.cwd);
   if (!key) return null;
+  if (ASKED.has(key) && approved(j)) return null;
   say(j.session_id, banner('banner.deny', { '%R': t(key) }));
   return {
     hookSpecificOutput: {
@@ -78,4 +100,4 @@ function decide(j) {
 
 if (require.main === module) main(decide);
 
-module.exports = { forbidden, decide, outside, targets, RULES, WIPE };
+module.exports = { forbidden, decide, outside, targets, approved, RULES, WIPE, YES };
