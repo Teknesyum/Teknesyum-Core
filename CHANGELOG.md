@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.45.0
+
+- Messages sent while a turn is running count as jobs: the job gate reads them from the transcript and holds the turn until each one is listed
+
 ## v0.44.0
 
 - The evidence gate asks once and only after the model writes files, counts type checks, builds and linters as proof, and a Turkish owner's reply language survives a compaction.
