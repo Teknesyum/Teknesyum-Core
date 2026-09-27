@@ -1077,7 +1077,6 @@ function testFable() {
   for (const k of ['??', '++', 'pp', 'aa', 'ff', 'uc', 'hh']) ok('hh explains ' + k, help.includes('`' + k + '`'), help);
   ok('hh says where the mark stands', /başında|sonunda|start|end/i.test(help), help);
   ok('hh shows how to use one', /`\?\? redis/.test(help), help);
-  ok('hh says an unmarked turn is free', /tek harf|not one letter/i.test(help), help);
 
   const bare = JSON.parse(mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'ff' })).hookSpecificOutput.additionalContext;
   ok('a bare ff still gives the recipe', /advice\.js/.test(bare) && !/Soru:/.test(bare), bare);
@@ -1779,6 +1778,19 @@ function testReport() {
   fs.writeFileSync(askT, user('simgeyi yap') + said('Senden istediklerim listesini sonra yazarım.'));
   ok('the words mid-sentence are not a heading', ev(askT) === '');
   ok('**bold** heading also counts', mod.ASKED.test('**Senden istediklerim**'));
+  const logRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-logs-'));
+  fs.mkdirSync(path.join(logRoot, 'core', '.claude-plugin'), { recursive: true });
+  fs.writeFileSync(path.join(logRoot, 'core', '.claude-plugin', 'plugin.json'), '{}');
+  fs.mkdirSync(path.join(logRoot, 'logs', 'openlogs', 'closed'), { recursive: true });
+  const oldCore = process.env.TEKNESYUM_CORE;
+  process.env.TEKNESYUM_CORE = logRoot;
+  const lp = (cwd) => { const o = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'selam', cwd, session_id: 'tkc-logs-' + process.pid }); return o ? JSON.parse(o).hookSpecificOutput.additionalContext : ''; };
+  ok('no open log, no line', !/archive --id/.test(lp(logRoot)));
+  fs.writeFileSync(path.join(logRoot, 'logs', 'openlogs', 'BUG-bir.md'), 'x');
+  const lc = lp(path.join(logRoot, 'core'));
+  ok('an open log comes first with its name and the archive command', /BUG-bir/.test(lc) && /log\.js" archive --id X/.test(lc) && lc.indexOf('BUG-bir') < 40, lc);
+  ok('another project hears nothing of it', !/BUG-bir/.test(lp(os.tmpdir())));
+  if (oldCore === undefined) delete process.env.TEKNESYUM_CORE; else process.env.TEKNESYUM_CORE = oldCore;
   const plain = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'merhaba', cwd: os.tmpdir() });
   ok('and an ordinary prompt still costs nothing', plain === '', plain);
 

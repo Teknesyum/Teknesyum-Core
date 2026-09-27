@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { main, configRoot, stateFile, t, banner, say, sayBlock } = require('./lib.js');
+const { main, configRoot, stateFile, t, banner, say, sayBlock, coreRepo, uiRepo } = require('./lib.js');
 const lib = require('../scripts/kutuphane.js');
 const ag = require('../scripts/agency.js');
 
@@ -245,6 +245,16 @@ function asked(j) {
   return '';
 }
 
+function openLogs(cwd, pre) {
+  const here = path.resolve(cwd).toLowerCase() + path.sep;
+  const root = [coreRepo(), uiRepo()].find((d) => d && here.startsWith(path.resolve(d).toLowerCase() + path.sep));
+  if (!root) return '';
+  let names = [];
+  try { names = fs.readdirSync(path.join(root, 'logs', 'openlogs')).filter((f) => f.endsWith('.md') && !pre.includes(f)); } catch {}
+  if (!names.length) return '';
+  return t('mod.logs').replace('%N', String(names.length)).replace('%L', names.map((f) => f.replace(/\.md$/, '')).join(', ')).replace('%C', cmd('archive --id X', 'log.js'));
+}
+
 function handle(j) {
   if (j.hook_event_name !== 'UserPromptSubmit') return '';
   const prompt = String(j.prompt || '');
@@ -264,7 +274,7 @@ function handle(j) {
   } else if (UI_REPORT.test(prompt)) text = report(true);
   else if (REPORT.test(prompt)) text = report(false);
   say(j.session_id, shown);
-  const all = [pre, ahead, text].filter(Boolean).join('\n\n');
+  const all = [openLogs(j.cwd || process.cwd(), pre), pre, ahead, text].filter(Boolean).join('\n\n');
   if (!all) return '';
   return JSON.stringify({ hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: all } });
 }
