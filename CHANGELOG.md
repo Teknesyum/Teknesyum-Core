@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.56.0
+
+- Clean trash and tmp by themselves; queue messages sent mid-turn, ss skips the queue
+
 ## v0.55.0
 
 - Measure trash and old tmp across every project and delete them for good on --sil
