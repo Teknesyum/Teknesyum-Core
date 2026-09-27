@@ -1757,6 +1757,13 @@ function testReport() {
   const out = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: "bunu core'a raporla", cwd: os.tmpdir(), session_id: 'tkc-rap-' + process.pid });
   const ctx = out ? JSON.parse(out).hookSpecificOutput.additionalContext : '';
   ok('a report prompt gets the log.js recipe', /log\.js" write --kind hata\|yontem\|teklif/.test(ctx), ctx);
+  for (const p of ["bunu ui'a raporla", 'ui a raporla', "teknesyum-ui'ye bildir", 'report this to ui'])
+    ok('"' + p + '" reports to the ui repo', mod.UI_REPORT.test(p));
+  for (const p of ["core'a raporla", 'uygulamaya logla', 'guide raporla'])
+    ok('"' + p + '" is not a ui report', !mod.UI_REPORT.test(p));
+  const uo = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: "bunu ui'a raporla", cwd: os.tmpdir(), session_id: 'tkc-rap-ui-' + process.pid });
+  const uctx = uo ? JSON.parse(uo).hookSpecificOutput.additionalContext : '';
+  ok('a ui report gets the recipe with --to ui and names teknesyum-ui', /log\.js" write --to ui /.test(uctx) && /teknesyum-ui/.test(uctx) && !/Teknesyum Core/.test(uctx), uctx);
   const plain = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'merhaba', cwd: os.tmpdir() });
   ok('and an ordinary prompt still costs nothing', plain === '', plain);
 

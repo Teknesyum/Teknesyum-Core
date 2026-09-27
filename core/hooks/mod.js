@@ -116,9 +116,12 @@ function fable(text) {
 
 const REPORT = /(?:^|[^\p{L}])(core|teknesyum)(?:['’]?(?:a|e|ya|ye))?\s+(?:\S+\s+){0,2}?(raporla|logla|bildir)|\b(report|log)\s+(?:\S+\s+){0,2}?to\s+(core|teknesyum)\b/iu;
 
-function report() {
+const UI_REPORT = /(?:^|[^\p{L}])(teknesyum-ui|ui)(?:['’]?(?:a|e|ya|ye|ı|i|yı|yi))?\s+(?:\S+\s+){0,2}?(raporla|logla|bildir)|\b(report|log)\s+(?:\S+\s+){0,2}?to\s+(teknesyum-)?ui\b/iu;
+
+function report(ui) {
   shown.push(banner('banner.report'));
-  return t('mod.report').replace('%C', cmd('write --kind hata|yontem|teklif --title T --symptom S', 'log.js'));
+  const text = t('mod.report').replace('%C', cmd('write' + (ui ? ' --to ui' : '') + ' --kind hata|yontem|teklif --title T --symptom S', 'log.js'));
+  return ui ? text.replace(/Teknesyum Core/g, 'teknesyum-ui') : text;
 }
 
 function uiPlugin() {
@@ -236,7 +239,8 @@ function handle(j) {
   if (m) {
     const { rest, key } = m;
     text = key === 'hh' ? help(j.session_id) : key === 'mc' ? memory(rest) : key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : key === 'uc' ? uiCheck(rest, j.cwd || process.cwd()) : library(rest);
-  } else if (REPORT.test(prompt)) text = report();
+  } else if (UI_REPORT.test(prompt)) text = report(true);
+  else if (REPORT.test(prompt)) text = report(false);
   say(j.session_id, shown);
   const all = [pre, ahead, text].filter(Boolean).join('\n\n');
   if (!all) return '';
@@ -245,4 +249,4 @@ function handle(j) {
 
 if (require.main === module) main(handle, { log: 'mod.js' });
 
-module.exports = { REPORT, handle, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };
+module.exports = { REPORT, UI_REPORT, handle, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };
