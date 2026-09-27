@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.50.0
+
+- Put a routed teknesyum-ui log into that repo's ledger and tick it on archive
+
 ## v0.49.0
 
 - Route teknesyum-ui logs to the ui repo's own openlogs folder
