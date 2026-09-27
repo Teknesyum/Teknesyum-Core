@@ -129,7 +129,7 @@ function evidence(j) {
   if (!code(st).length) return '';
   const seq = Number(st.seq) || 0;
   if (seq === st.stopSeq) return '';
-  const now = sum(st.cwd || j.cwd || process.cwd(), Object.keys(st.files || {}));
+  const now = sum(st.cwd || j.cwd || process.cwd(), code(st));
   merge(f, { stopSum: now, stopSeq: seq });
   if (st.stopSum === now || proven(st, now)) return '';
   say(j.session_id, banner('banner.evidence', { '%N': code(st).length }));

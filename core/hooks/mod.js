@@ -68,6 +68,7 @@ function words(text) {
 }
 
 let shown = [];
+let ahead = '';
 
 function seats(text) {
   let rows = [];
@@ -211,9 +212,10 @@ function items(prompt) {
   return 0;
 }
 
-function expect(session, prompt) {
+function expect(session, prompt, cwd) {
   const f = stateFile('jobs-' + String(session || 'none'));
   const n = items(prompt);
+  if (n >= 2 && cwd && !fs.existsSync(path.join(cwd, JOBS))) ahead = t('dur.jobsMissing').replace('%N', String(n));
   try {
     if (!n) { fs.unlinkSync(f); return; }
     fs.mkdirSync(path.dirname(f), { recursive: true });
@@ -226,16 +228,17 @@ function handle(j) {
   const prompt = String(j.prompt || '');
   if (EVENT.test(prompt)) return '';
   shown = [];
+  ahead = '';
   const pre = later(j.cwd || process.cwd());
   const m = mark(prompt);
-  expect(j.session_id, m ? m.rest : prompt);
+  expect(j.session_id, m ? m.rest : prompt, j.cwd || process.cwd());
   let text = '';
   if (m) {
     const { rest, key } = m;
     text = key === 'hh' ? help(j.session_id) : key === 'mc' ? memory(rest) : key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : key === 'uc' ? uiCheck(rest, j.cwd || process.cwd()) : library(rest);
   } else if (REPORT.test(prompt)) text = report();
   say(j.session_id, shown);
-  const all = [pre, text].filter(Boolean).join('\n\n');
+  const all = [pre, ahead, text].filter(Boolean).join('\n\n');
   if (!all) return '';
   return JSON.stringify({ hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: all } });
 }

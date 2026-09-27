@@ -572,6 +572,18 @@ function testDur() {
   ok('a commit seals the work and the gate lets go', hook(DUR, { hook_event_name: 'Stop', session_id: 's8', cwd: sealed }, cfg).stdout === '');
   sweep(sealed);
 
+  const prose = fixture();
+  hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 's7', cwd: prose }, cfg);
+  edit(prose, cfg, 'src/five.js', 's7', 'module.exports = 6;' + String.fromCharCode(10));
+  hook(COUNT, { hook_event_name: 'PostToolUse', tool_name: 'Bash', session_id: 's7', cwd: prose, tool_input: { command: 'npm test' }, tool_response: { stdout: '3 passing', stderr: '' } }, cfg);
+  edit(prose, cfg, 'README.md', 's7', '# readme' + String.fromCharCode(10));
+  edit(prose, cfg, '.claude/acik.md', 's7', '- [ ] is' + String.fromCharCode(10));
+  const after = hook(DUR, { hook_event_name: 'Stop', session_id: 's7', cwd: prose }, cfg);
+  ok('prose written after a proven run does not reopen the gate', after.stdout === '', after.stdout);
+  edit(prose, cfg, 'src/five.js', 's7', 'module.exports = 7;' + String.fromCharCode(10));
+  ok('but a code edit after it still does', blocks(hook(DUR, { hook_event_name: 'Stop', session_id: 's7', cwd: prose }, cfg)));
+  sweep(prose);
+
   ok('a stop that is not a stop event is ignored', hook(DUR, { hook_event_name: 'SubagentStop', session_id: 's1', cwd: root }, cfg).stdout === '');
 
   hook(COUNT, { hook_event_name: 'PostToolUse', tool_name: 'Bash', session_id: 's1', cwd: root, tool_input: { command: 'npm test' }, tool_response: { stdout: '12 passing', stderr: '' } }, cfg);
@@ -854,6 +866,12 @@ function testJobs() {
   const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-jobs-'));
   const list = path.join(cwd, mod.JOBS);
   ok('no file, no bytes', mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'merhaba', cwd }) === '');
+  const warned = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'bunu yap\nsonra şunu yap', cwd });
+  ok('a two-job prompt with no list is told at the prompt, not after the reply', /jobs\.md/.test(warned), warned);
+  ok('a one-line prompt is not told', !/jobs\.md/.test(mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'merhaba', cwd })));
+  fs.rmSync(path.join(cwd, 'trash'), { recursive: true, force: true });
+  fs.rmSync(path.join(cwd, '.claude', 'acik.md'), { force: true });
+  try { fs.unlinkSync(require(path.join(CORE, 'hooks', 'lib.js')).stateFile('jobs-none')); } catch {}
   fs.mkdirSync(path.join(cwd, '.claude'), { recursive: true });
   fs.writeFileSync(list, '   \n');
   ok('an empty file costs nothing', mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'merhaba', cwd }) === '');
