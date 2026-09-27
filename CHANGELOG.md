@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.52.0
+
+- Show the trash offer as a zero-token banner after the reply instead of at session start
+
 ## v0.51.0
 
 - Send a ui'a raporla prompt to the teknesyum-ui repo's logs
