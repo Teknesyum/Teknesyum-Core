@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { main, read, write, stateFile, configRoot, safe, t, banner, say } = require('./lib.js');
+const { main, read, write, stateFile, configRoot, safe, t, banner, say, settings } = require('./lib.js');
 
 const FILE_MAX = 5;
 const DIFF_MAX = 150;
@@ -162,22 +162,24 @@ function trash(cwd) {
   const gun = new Date().toISOString().slice(0, 10);
   const damga = stateFile('cop');
   const gecmis = read(damga) || {};
-  const anahtar = safe(cwd);
-  if (gecmis[anahtar] === gun) return '';
-  const over = cop.asar(cwd);
-  if (!over) return '';
-  gecmis[anahtar] = gun;
+  if (gecmis.gun === gun || Date.now() - (gecmis.at || 0) < 60 * 60 * 1000) return '';
+  gecmis.at = Date.now();
+  let top = '';
+  try { top = settings().projectsRoot || ''; } catch {}
+  const olcum = top && fs.existsSync(top) ? cop.hepsi(top) : cop.proje(cwd);
+  if (olcum.bytes < cop.CEILING) return write(damga, gecmis), '';
+  gecmis.gun = gun;
   write(damga, gecmis);
   const script = path.join(__dirname, '..', 'scripts', 'cop.js');
   const ev = require('os').homedir();
   const kisa = script.toLowerCase().startsWith(ev.toLowerCase()) ? '~' + script.slice(ev.length) : script;
   const vars = {
-    '%M': String(cop.mb(over.bytes)),
-    '%N': String(over.count),
-    '%C': 'node "' + kisa + '" . --sil',
+    '%M': String(cop.mb(olcum.bytes)),
+    '%N': String(olcum.count),
+    '%C': 'node "' + kisa + '" ' + (olcum.list ? '--hepsi' : '.') + ' --sil',
   };
   let line = t('banner.trash');
-  for (const [k, v] of Object.entries(vars)) line = line.split(k).join(v);
+  for (const [key, v] of Object.entries(vars)) line = line.split(key).join(v);
   return line;
 }
 

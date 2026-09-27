@@ -1574,14 +1574,20 @@ function testCop() {
   const root = fixture();
   const cfg = home();
 
-  const bos = hook(COUNT, { hook_event_name: 'Stop', session_id: 'c1', cwd: root }, cfg);
-  ok('no trash folder, no line', !/(Trash|Çöp)/.test(take(cfg, 'c1')), bos.stdout);
+  const h1 = home();
+  const bos = hook(COUNT, { hook_event_name: 'Stop', session_id: 'c1', cwd: root }, h1);
+  ok('no trash folder, no line', !/(Trash|Çöp)/.test(take(h1, 'c1')), bos.stdout);
+  const saat = hook(COUNT, { hook_event_name: 'Stop', session_id: 'c1b', cwd: root }, h1);
+  ok('it measures at most once an hour', JSON.parse(fs.readFileSync(path.join(h1, 'teknesyum', 'cop.json'), 'utf8')).at > 0 && !/(Trash|Çöp)/.test(take(h1, 'c1b')), saat.stdout);
+  sweep(h1);
 
   const trash = path.join(root, 'trash');
   fs.mkdirSync(trash, { recursive: true });
   fs.writeFileSync(path.join(trash, 'kucuk.bin'), Buffer.alloc(1024));
-  const kucuk = hook(COUNT, { hook_event_name: 'Stop', session_id: 'c2', cwd: root }, cfg);
-  ok('a small trash folder says nothing', !/(Trash|Çöp)/.test(take(cfg, 'c2')), kucuk.stdout);
+  const h2 = home();
+  const kucuk = hook(COUNT, { hook_event_name: 'Stop', session_id: 'c2', cwd: root }, h2);
+  ok('a small trash folder says nothing', !/(Trash|Çöp)/.test(take(h2, 'c2')), kucuk.stdout);
+  sweep(h2);
   ok('cop.asar is silent under the ceiling', cop.asar(root) === null);
 
   fs.writeFileSync(path.join(trash, 'buyuk.bin'), Buffer.alloc(cop.CEILING + 1024));
@@ -1594,6 +1600,7 @@ function testCop() {
   const line = take(cfg, 'c3');
   ok('a full trash folder offers the command', /cop\.js/.test(line) && /--sil/.test(line), line || dolu.stdout);
   ok('the line names the size and the count', /100/.test(line) && /2/.test(line), line);
+  ok('without projectsRoot it names this project', /cop\.js" \. --sil/.test(line), line);
 
   hook(COUNT, { hook_event_name: 'Stop', session_id: 'c4', cwd: root }, cfg);
   ok('it offers once a day, not every reply', !/--sil/.test(take(cfg, 'c4')));
@@ -1606,6 +1613,41 @@ function testCop() {
 
   const yok = run(process.execPath, [path.join(CORE, 'scripts', 'cop.js'), fixture()], { env: { ...process.env, NO_COLOR: '1' } });
   ok('cop.js exits 2 without a trash folder', yok.status === 2, yok.stderr);
+
+  const tmp = path.join(root, 'tmp', 'alt');
+  fs.mkdirSync(tmp, { recursive: true });
+  const eski = path.join(tmp, 'eski.log');
+  const taze = path.join(root, 'tmp', 'taze.log');
+  fs.writeFileSync(eski, Buffer.alloc(2048));
+  fs.writeFileSync(taze, Buffer.alloc(2048));
+  const gecen = (Date.now() - 2 * cop.DAY) / 1000;
+  fs.utimesSync(eski, gecen, gecen);
+  const p = cop.proje(root);
+  ok('tmp files older than a day count, fresh ones do not', p.tmp.length === 1 && p.count === 3, JSON.stringify({ tmp: p.tmp.length, c: p.count }));
+
+  const top = fixture();
+  const iki = path.join(top, 'iki');
+  fs.mkdirSync(path.join(iki, 'trash'), { recursive: true });
+  fs.writeFileSync(path.join(iki, 'trash', 'x.bin'), Buffer.alloc(1024));
+  fs.renameSync(root, path.join(top, 'bir'));
+  const h = cop.hepsi(top);
+  ok('--hepsi sums every project, largest first', h.list.length === 2 && path.basename(h.list[0].root) === 'bir' && h.count === 4, JSON.stringify(h.list.map((x) => path.basename(x.root))));
+
+  const sil = run(process.execPath, [path.join(CORE, 'scripts', 'cop.js'), '--hepsi', top, '--sil'], { env: { ...process.env, NO_COLOR: '1' } });
+  const bir = path.join(top, 'bir');
+  ok('--hepsi --sil empties every trash for good', sil.status === 0 && !fs.readdirSync(path.join(bir, 'trash')).length && !fs.readdirSync(path.join(iki, 'trash')).length, sil.stdout + sil.stderr);
+  ok('it deletes old tmp files and their empty folders, keeps fresh ones', !fs.existsSync(path.join(bir, 'tmp', 'alt')) && fs.existsSync(path.join(bir, 'tmp', 'taze.log')));
+
+  const cfg2 = home();
+  const conf = path.join(cfg2, 'teknesyum', 'config.json');
+  fs.mkdirSync(path.dirname(conf), { recursive: true });
+  fs.writeFileSync(conf, JSON.stringify({ projectsRoot: top }));
+  fs.writeFileSync(path.join(iki, 'trash', 'buyuk.bin'), Buffer.alloc(cop.CEILING + 1024));
+  hook(COUNT, { hook_event_name: 'Stop', session_id: 'c6', cwd: bir }, cfg2);
+  const genel = take(cfg2, 'c6');
+  ok('with projectsRoot the offer covers every project', /--hepsi --sil/.test(genel), genel);
+  sweep(top);
+  sweep(cfg2);
 
   sweep(root);
   sweep(cfg);

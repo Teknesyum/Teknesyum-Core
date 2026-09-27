@@ -3,7 +3,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const { spawnSync } = require('child_process');
 
 const CEILING = 100 * 1024 * 1024;
 const SKIP = /^\.git$/i;
@@ -49,6 +48,57 @@ function olc(root) {
   };
 }
 
+const DAY = 24 * 60 * 60 * 1000;
+
+function yas(root, now) {
+  const base = path.join(path.resolve(root || process.cwd()), 'tmp');
+  const limit = (now || Date.now()) - DAY;
+  return walk(base, []).filter((f) => f.at < limit);
+}
+
+function proje(root, now) {
+  const t = olc(root);
+  const eski = yas(root, now);
+  const tmpBytes = eski.reduce((n, f) => n + f.bytes, 0);
+  return { root: path.resolve(root), bytes: t.bytes + tmpBytes, count: t.count + eski.length, trash: t, tmp: eski };
+}
+
+function projeler(top) {
+  const base = path.resolve(top);
+  let names = [];
+  try {
+    names = fs.readdirSync(base, { withFileTypes: true }).filter((e) => e.isDirectory() && !e.name.startsWith('.')).map((e) => e.name);
+  } catch {}
+  return names.map((n) => path.join(base, n));
+}
+
+function hepsi(top, now) {
+  const list = projeler(top).map((p) => proje(p, now)).filter((p) => p.count).sort((a, b) => b.bytes - a.bytes);
+  return { top: path.resolve(top), bytes: list.reduce((n, p) => n + p.bytes, 0), count: list.reduce((n, p) => n + p.count, 0), list };
+}
+
+function bosalt(p) {
+  let gone = 0;
+  if (p.trash.var) {
+    for (const e of fs.readdirSync(p.trash.base)) {
+      try { fs.rmSync(path.join(p.trash.base, e), { recursive: true, force: true }); } catch {}
+    }
+    gone += p.trash.bytes;
+  }
+  for (const f of p.tmp) {
+    try { fs.unlinkSync(f.file); gone += f.bytes; } catch {}
+  }
+  budama(path.join(p.root, 'tmp'), true);
+  return gone;
+}
+
+function budama(d, top) {
+  let entries;
+  try { entries = fs.readdirSync(d, { withFileTypes: true }); } catch { return; }
+  for (const e of entries) if (e.isDirectory()) budama(path.join(d, e.name), false);
+  if (!top) try { if (!fs.readdirSync(d).length) fs.rmdirSync(d); } catch {}
+}
+
 function asar(root, ceiling) {
   const s = olc(root);
   return s.var && s.bytes >= (ceiling || CEILING) ? s : null;
@@ -56,25 +106,6 @@ function asar(root, ceiling) {
 
 function mb(bytes) {
   return Math.round(bytes / 1048576);
-}
-
-function recycle(base) {
-  if (process.platform !== 'win32') {
-    fs.rmSync(base, { recursive: true, force: true });
-    return { ok: true, how: 'removed' };
-  }
-  const cmd =
-    "Add-Type -AssemblyName Microsoft.VisualBasic; " +
-    "[Microsoft.VisualBasic.FileIO.FileSystem]::DeleteDirectory('" +
-    base.replace(/'/g, "''") +
-    "','OnlyErrorDialogs','SendToRecycleBin')";
-  const r = spawnSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', cmd], {
-    encoding: 'utf8',
-    windowsHide: true,
-    timeout: 120000,
-  });
-  if (r.error || r.status !== 0) return { ok: false, how: 'recycle', why: String(r.stderr || (r.error && r.error.message) || '').trim() };
-  return { ok: true, how: 'recycle' };
 }
 
 function report(s) {
@@ -179,11 +210,28 @@ function main(argv) {
   const args = argv.slice(2);
   if (args.includes('--help') || args.includes('-h')) {
     process.stdout.write(
-      'Usage: node cop.js [project] [--sil]\n\nMeasures <project>/trash. --sil sends the whole folder to the recycle bin.\nExit: 0 under the ceiling · 1 over it · 2 no trash folder\n'
+      'Usage: node cop.js [project] [--sil]\n       node cop.js --hepsi [projects root] [--sil]\n\nMeasures <project>/trash and the tmp files older than a day.\n--hepsi does it for every project under the root (default: projectsRoot).\n--sil deletes them for good: the recycle bin frees no space.\nExit: 0 under the ceiling · 1 over it · 2 no trash folder\n'
     );
     return 0;
   }
-  const root = args.find((a) => !a.startsWith('-')) || process.cwd();
+  const free = args.find((a) => !a.startsWith('-'));
+  if (args.includes('--hepsi')) {
+    let top = free;
+    if (!top) try { top = require('../hooks/lib.js').settings().projectsRoot; } catch {}
+    if (!top) {
+      process.stderr.write('no projects root: pass one or set projectsRoot\n');
+      return 2;
+    }
+    const h = hepsi(top);
+    for (const p of h.list) process.stdout.write(String(mb(p.bytes)).padStart(6) + ' MB  ' + String(p.count).padStart(6) + ' file(s)  ' + path.basename(p.root) + '\n');
+    process.stdout.write(String(mb(h.bytes)).padStart(6) + ' MB  total\n');
+    if (!args.includes('--sil')) return h.bytes >= CEILING ? 1 : 0;
+    let gone = 0;
+    for (const p of h.list) gone += bosalt(p);
+    process.stdout.write('deleted: ' + mb(gone) + ' MB\n');
+    return 0;
+  }
+  const root = free || process.cwd();
   const s = olc(root);
   if (!s.var) {
     process.stderr.write('no trash folder at ' + s.base + '\n');
@@ -191,20 +239,13 @@ function main(argv) {
   }
   if (args.includes('--sil')) {
     process.stdout.write(report(s) + '\n');
-    const r = recycle(s.base);
-    if (!r.ok) {
-      process.stderr.write('could not empty: ' + r.why + '\n');
-      return 3;
-    }
-    process.stdout.write(
-      (r.how === 'recycle' ? 'sent to the recycle bin: ' : 'removed: ') + mb(s.bytes) + ' MB, ' + s.count + ' file(s)\n'
-    );
+    process.stdout.write('deleted: ' + mb(bosalt(proje(root))) + ' MB\n');
     return 0;
   }
   process.stdout.write(report(s) + '\n');
   return s.bytes >= CEILING ? 1 : 0;
 }
 
-module.exports = { CEILING, WEEK, dir, olc, asar, mb, report, sweepState, pruneCache, newer };
+module.exports = { CEILING, WEEK, DAY, dir, olc, asar, mb, report, sweepState, pruneCache, newer, proje, hepsi, bosalt };
 
 if (require.main === module) process.exitCode = main(process.argv);
