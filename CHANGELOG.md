@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.49.0
+
+- Route teknesyum-ui logs to the ui repo's own openlogs folder
+
 ## v0.48.0
 
 - Tie the evidence hash to code files only, and ask for the job list at the prompt when it is missing
