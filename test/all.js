@@ -1575,13 +1575,13 @@ function testCop() {
   const root = fixture();
   const cfg = home();
 
-  const bos = hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 'c1', cwd: root }, cfg);
+  const bos = hook(COUNT, { hook_event_name: 'Stop', session_id: 'c1', cwd: root }, cfg);
   ok('no trash folder, no line', !/(Trash|Çöp)/.test(take(cfg, 'c1')), bos.stdout);
 
   const trash = path.join(root, 'trash');
   fs.mkdirSync(trash, { recursive: true });
   fs.writeFileSync(path.join(trash, 'kucuk.bin'), Buffer.alloc(1024));
-  const kucuk = hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 'c2', cwd: root }, cfg);
+  const kucuk = hook(COUNT, { hook_event_name: 'Stop', session_id: 'c2', cwd: root }, cfg);
   ok('a small trash folder says nothing', !/(Trash|Çöp)/.test(take(cfg, 'c2')), kucuk.stdout);
   ok('cop.asar is silent under the ceiling', cop.asar(root) === null);
 
@@ -1589,13 +1589,15 @@ function testCop() {
   const over = cop.asar(root);
   ok('cop.asar reports over the ceiling', over && over.count === 2 && over.bytes > cop.CEILING, JSON.stringify(over && { c: over.count, b: over.bytes }));
 
-  const dolu = hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 'c3', cwd: root }, cfg);
+  hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 'c5', cwd: root }, cfg);
+  ok('the session opening no longer carries it', !/--sil/.test(take(cfg, 'c5')));
+  const dolu = hook(COUNT, { hook_event_name: 'Stop', session_id: 'c3', cwd: root }, cfg);
   const line = take(cfg, 'c3');
   ok('a full trash folder offers the command', /cop\.js/.test(line) && /--sil/.test(line), line || dolu.stdout);
   ok('the line names the size and the count', /100/.test(line) && /2/.test(line), line);
 
-  hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 'c4', cwd: root }, cfg);
-  ok('it offers once a day, not every session', !/--sil/.test(take(cfg, 'c4')));
+  hook(COUNT, { hook_event_name: 'Stop', session_id: 'c4', cwd: root }, cfg);
+  ok('it offers once a day, not every reply', !/--sil/.test(take(cfg, 'c4')));
 
   ok('nothing was deleted', fs.existsSync(path.join(trash, 'buyuk.bin')));
 

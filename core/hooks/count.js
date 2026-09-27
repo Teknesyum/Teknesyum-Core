@@ -212,8 +212,6 @@ function opening(j, cwd) {
     lines.push(book.text);
     parts.push(banner('banner.ledger', { '%N': require('./defter.js').open(cwd).length }));
   }
-  const cop = trash(cwd);
-  if (cop) parts.push(cop);
   if (j.source !== 'compact') say(j.session_id, parts.join(' · '));
   if (!lines.length) return '';
   return JSON.stringify({ hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext: lines.join('\n') } });
@@ -258,6 +256,8 @@ function handle(j) {
   } else if (ev === 'Stop') {
     refresh(st);
     out = onSeat(st);
+    const cop = trash(st.cwd || j.cwd || process.cwd());
+    if (cop) say(j.session_id, cop);
   }
   write(f, st);
   return out;
