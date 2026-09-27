@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.48.0
+
+- Tie the evidence hash to code files only, and ask for the job list at the prompt when it is missing
+
 ## v0.47.0
 
 - `uc` hands its instruction to the teknesyum-ui plugin: when that plugin ships `scripts/uc.js`, its text goes into the turn; the old text stays as the fallback
