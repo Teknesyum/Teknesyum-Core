@@ -1779,14 +1779,18 @@ function testReport() {
   const uiDir = path.join(uiRoot, 'logs', 'openlogs');
   lj(['write', '--kind', 'teklif', '--title', 'teknesyum-ui react sablonu', '--symptom', 's']);
   ok('a log about teknesyum-ui goes to the ui repo', fs.existsSync(path.join(uiDir, 'TEKLIF-teknesyum-ui-react-sablonu.md')));
+  const uiBook = () => { try { return fs.readFileSync(path.join(uiRoot, '.claude', 'acik.md'), 'utf8'); } catch { return ''; } };
+  ok('and the ui ledger is told to read it', /- \[ \] Logu oku: logs\/openlogs\/TEKLIF-teknesyum-ui-react-sablonu\.md/.test(uiBook()), uiBook());
   lj(['write', '--to', 'ui', '--title', 'yon secimi']);
   ok('--to ui sends any log there', fs.existsSync(path.join(uiDir, 'BUG-yon-secimi.md')));
   ok('list shows both repos', /Teknesyum|tkc-uirepo/.test(lj(['list']).stdout) && lj(['list']).stdout.includes(uiDir));
   lj(['archive', '--id', 'yon-secimi']);
   ok('archive finds a log in the ui repo', fs.existsSync(path.join(uiDir, 'closed', 'BUG-yon-secimi.md')));
+  ok('and ticks its ledger line', /- \[x\] Logu oku: logs\/openlogs\/BUG-yon-secimi\.md/.test(uiBook()), uiBook());
   lj(['write', '--to', 'core', '--title', 'tkc route deneme']);
   const moved = lj(['route', '--id', 'tkc-route-deneme', '--to', 'ui']);
   ok('route moves a core log to the ui repo', fs.existsSync(path.join(uiDir, 'BUG-tkc-route-deneme.md')), moved.stdout + moved.stderr);
+  ok('a routed log is put in the ui ledger too', /Logu oku: logs\/openlogs\/BUG-tkc-route-deneme\.md/.test(uiBook()));
   sweep(uiRoot);
   sweep(cfg);
 }

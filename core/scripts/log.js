@@ -12,6 +12,29 @@ function target(o) {
   return UI.test([o.title, o.symptom].join(' ')) ? 'ui' : 'core';
 }
 
+function tell(file) {
+  const ui = uiRepo();
+  if (!ui || path.resolve(path.dirname(file)) !== path.resolve(openLogs('ui'))) return false;
+  const defter = require('../hooks/defter.js');
+  try {
+    return defter.append(ui, [defter.entry('- [ ] Logu oku: logs/openlogs/' + path.basename(file), 'Core yönlendirdi')]) > 0;
+  } catch {
+    return false;
+  }
+}
+
+function untell(file) {
+  const ui = uiRepo();
+  if (!ui) return;
+  const book = path.join(ui, '.claude', 'acik.md');
+  try {
+    const name = path.basename(file);
+    const text = fs.readFileSync(book, 'utf8');
+    const next = text.split(/\r?\n/).map((l) => (l.includes('logs/openlogs/' + name) ? l.replace(/^(\s*[-*]\s+)\[ \]/, '$1[x]') : l)).join('\n');
+    if (next !== text) fs.writeFileSync(book, next, 'utf8');
+  } catch {}
+}
+
 function dirs() {
   const out = [openLogs('core')];
   if (uiRepo()) out.push(openLogs('ui'));
@@ -114,6 +137,7 @@ function write(o) {
     '',
   ].join('\n');
   fs.writeFileSync(file, body, 'utf8');
+  const told = tell(file);
   const lines = ['Wrote ' + name + (to === 'ui' && uiRepo() ? ' (teknesyum-ui)' : ''), '  ' + file];
   if (!coreRepo())
     lines.push(
@@ -121,6 +145,7 @@ function write(o) {
       'No core repo found, so this went to the fallback spool.',
       'Set coreRepo in ' + stateFile('config') + ' and move it there.'
     );
+  if (told) lines.push('Added to the teknesyum-ui ledger (.claude/acik.md).');
   lines.push('', kind === 'hata' ? 'Fill in sections 1 and 2 now.' : 'Fill in every section now.');
   say(lines);
 }
@@ -149,7 +174,9 @@ function route(o) {
   if (path.resolve(dest) === path.resolve(from)) return say(['Already there: ' + dest]);
   fs.mkdirSync(dir, { recursive: true });
   fs.renameSync(from, dest);
-  say(['Moved ' + path.basename(from), '  ' + dest]);
+  const out = ['Moved ' + path.basename(from), '  ' + dest];
+  if (tell(dest)) out.push('Added to the teknesyum-ui ledger (.claude/acik.md).');
+  say(out);
 }
 
 function move(o, archive) {
@@ -165,6 +192,7 @@ function move(o, archive) {
   let b = fs.readFileSync(from, 'utf8').replace(/^\*\*State:\*\*.*$/m, '**State:** closed');
   fs.writeFileSync(to, b, 'utf8');
   fs.unlinkSync(from);
+  untell(from);
   say(['Archived ' + path.basename(from), '  ' + to]);
 }
 
