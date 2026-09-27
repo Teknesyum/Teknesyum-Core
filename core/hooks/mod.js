@@ -226,10 +226,32 @@ function expect(session, prompt, cwd) {
   } catch {}
 }
 
+const ASKED = /^\s*(?:#{1,6}\s*|\*\*)(Senden istediklerim|What I need from you)\b/im;
+
+function asked(j) {
+  const kitap = require('./kitap.js');
+  const file = kitap.transcript(j);
+  if (!file) return '';
+  const list = kitap.entries(file);
+  let at = -1;
+  for (let i = list.length - 1; i >= 0; i--) if (kitap.prompt(list[i])) { at = i; break; }
+  for (const o of list.slice(at + 1)) {
+    if (!o || o.type !== 'assistant' || o.isSidechain || !o.message || !Array.isArray(o.message.content)) continue;
+    for (const c of o.message.content) {
+      const hit = c && c.type === 'text' && ASKED.exec(c.text || '');
+      if (hit) return t('mod.asked').replace('%H', hit[1]);
+    }
+  }
+  return '';
+}
+
 function handle(j) {
   if (j.hook_event_name !== 'UserPromptSubmit') return '';
   const prompt = String(j.prompt || '');
-  if (EVENT.test(prompt)) return '';
+  if (EVENT.test(prompt)) {
+    const a = asked(j);
+    return a ? JSON.stringify({ hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: a } }) : '';
+  }
   shown = [];
   ahead = '';
   const pre = later(j.cwd || process.cwd());
@@ -249,4 +271,4 @@ function handle(j) {
 
 if (require.main === module) main(handle, { log: 'mod.js' });
 
-module.exports = { REPORT, UI_REPORT, handle, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };
+module.exports = { REPORT, UI_REPORT, ASKED, handle, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };

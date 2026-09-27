@@ -1766,6 +1766,19 @@ function testReport() {
   const uo = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: "bunu ui'a raporla", cwd: os.tmpdir(), session_id: 'tkc-rap-ui-' + process.pid });
   const uctx = uo ? JSON.parse(uo).hookSpecificOutput.additionalContext : '';
   ok('a ui report gets the recipe with --to ui and names teknesyum-ui', /log\.js" write --to ui /.test(uctx) && /teknesyum-ui/.test(uctx) && !/Teknesyum Core/.test(uctx), uctx);
+  const askDir = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-ask-'));
+  const askT = path.join(askDir, 't.jsonl');
+  const row = (o) => JSON.stringify(o) + '\n';
+  const said = (text) => row({ type: 'assistant', message: { content: [{ type: 'text', text }] } });
+  const user = (text) => row({ type: 'user', message: { content: text } });
+  const ev = (tp) => { const o = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: '<task-notification>done</task-notification>', cwd: os.tmpdir(), session_id: 'tkc-ask-' + process.pid, transcript_path: tp }); return o ? JSON.parse(o).hookSpecificOutput.additionalContext : ''; };
+  fs.writeFileSync(askT, user('simgeyi yap') + said('Bitti.\n\n## Senden istediklerim\n1. yaz: simge tamam') + user('<task-notification>x</task-notification>') + said('CI yeşil.'));
+  ok('a background event after an open ask says not to repeat it', /Senden istediklerim/.test(ev(askT)), ev(askT));
+  fs.writeFileSync(askT, user('simgeyi yap') + said('Bitti.\n\n## Senden istediklerim\n1. yaz') + user('simge tamam') + said('Tamam.'));
+  ok('an answered ask is not carried into the next event', ev(askT) === '');
+  fs.writeFileSync(askT, user('simgeyi yap') + said('Senden istediklerim listesini sonra yazarım.'));
+  ok('the words mid-sentence are not a heading', ev(askT) === '');
+  ok('**bold** heading also counts', mod.ASKED.test('**Senden istediklerim**'));
   const plain = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'merhaba', cwd: os.tmpdir() });
   ok('and an ordinary prompt still costs nothing', plain === '', plain);
 
