@@ -1770,6 +1770,24 @@ function testReport() {
   ok('log.js writes a method note with its own shape', /^# Yöntem: gizli pencere/m.test(body) && /Core İçin Öneri/.test(body) && /beyaz kare/.test(body), made.stdout + made.stderr);
   ok('an unknown kind is refused', w(['--kind', 'x', '--title', 'y']).status !== 0);
   if (file) fs.unlinkSync(file[1]);
+
+  const uiRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-uirepo-'));
+  fs.mkdirSync(path.join(uiRoot, 'ui', '.claude-plugin'), { recursive: true });
+  fs.writeFileSync(path.join(uiRoot, 'ui', '.claude-plugin', 'plugin.json'), '{}');
+  const uenv = { ...env, TEKNESYUM_UI: uiRoot };
+  const lj = (args) => run(process.execPath, [path.join(CORE, 'scripts', 'log.js'), ...args], { cwd: os.tmpdir(), env: uenv });
+  const uiDir = path.join(uiRoot, 'logs', 'openlogs');
+  lj(['write', '--kind', 'teklif', '--title', 'teknesyum-ui react sablonu', '--symptom', 's']);
+  ok('a log about teknesyum-ui goes to the ui repo', fs.existsSync(path.join(uiDir, 'TEKLIF-teknesyum-ui-react-sablonu.md')));
+  lj(['write', '--to', 'ui', '--title', 'yon secimi']);
+  ok('--to ui sends any log there', fs.existsSync(path.join(uiDir, 'BUG-yon-secimi.md')));
+  ok('list shows both repos', /Teknesyum|tkc-uirepo/.test(lj(['list']).stdout) && lj(['list']).stdout.includes(uiDir));
+  lj(['archive', '--id', 'yon-secimi']);
+  ok('archive finds a log in the ui repo', fs.existsSync(path.join(uiDir, 'closed', 'BUG-yon-secimi.md')));
+  lj(['write', '--to', 'core', '--title', 'tkc route deneme']);
+  const moved = lj(['route', '--id', 'tkc-route-deneme', '--to', 'ui']);
+  ok('route moves a core log to the ui repo', fs.existsSync(path.join(uiDir, 'BUG-tkc-route-deneme.md')), moved.stdout + moved.stderr);
+  sweep(uiRoot);
   sweep(cfg);
 }
 

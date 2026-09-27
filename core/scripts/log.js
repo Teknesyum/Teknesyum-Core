@@ -2,7 +2,21 @@
 
 const fs = require('fs');
 const path = require('path');
-const { openLogs, coreRepo, stateFile, fold } = require('../hooks/lib.js');
+const { openLogs, coreRepo, uiRepo, stateFile, fold } = require('../hooks/lib.js');
+
+const UI = /teknesyum-ui|\bui\s+(eklenti|plugin)|\b(scaffold|scan|uc|artik|raf|esle|setup)\.js\b|\btemplates\/(durum|kur|denetim)\b/i;
+
+function target(o) {
+  const to = String(o.to || '').toLowerCase();
+  if (to === 'ui' || to === 'core') return to;
+  return UI.test([o.title, o.symptom].join(' ')) ? 'ui' : 'core';
+}
+
+function dirs() {
+  const out = [openLogs('core')];
+  if (uiRepo()) out.push(openLogs('ui'));
+  return out;
+}
 
 const PREFIX = 'BUG-';
 const KINDS = {
@@ -32,13 +46,17 @@ function flags(argv) {
 }
 
 function list() {
-  const dir = openLogs();
-  let f = [];
-  try {
-    f = fs.readdirSync(dir).filter((x) => x.endsWith('.md'));
-  } catch {}
-  if (!f.length) return say(['No open bug logs.', '  ' + dir]);
-  say([f.length + ' open bug log(s) — ' + dir, ''].concat(f.map((x) => '  ' + x.slice(0, -3))));
+  const out = [];
+  for (const dir of dirs()) {
+    let f = [];
+    try {
+      f = fs.readdirSync(dir).filter((x) => x.endsWith('.md'));
+    } catch {}
+    if (out.length) out.push('');
+    if (!f.length) out.push('No open bug logs.', '  ' + dir);
+    else out.push(f.length + ' open bug log(s) — ' + dir, '', ...f.map((x) => '  ' + x.slice(0, -3)));
+  }
+  say(out);
 }
 
 function note(kind, o) {
@@ -68,7 +86,8 @@ function note(kind, o) {
 
 function write(o) {
   if (!o.title) die('--title is required');
-  const dir = openLogs();
+  const to = target(o);
+  const dir = openLogs(to);
   fs.mkdirSync(dir, { recursive: true });
   const kind = String(o.kind || 'hata').toLowerCase();
   if (!KINDS[kind]) die('--kind is one of: ' + Object.keys(KINDS).join(', '));
@@ -95,7 +114,7 @@ function write(o) {
     '',
   ].join('\n');
   fs.writeFileSync(file, body, 'utf8');
-  const lines = ['Wrote ' + name, '  ' + file];
+  const lines = ['Wrote ' + name + (to === 'ui' && uiRepo() ? ' (teknesyum-ui)' : ''), '  ' + file];
   if (!coreRepo())
     lines.push(
       '',
@@ -106,18 +125,37 @@ function write(o) {
   say(lines);
 }
 
-function move(o, archive) {
-  if (!o.id) die('--id is required');
-  const dir = openLogs();
-  let from = path.join(dir, o.id.endsWith('.md') ? o.id : PREFIX + slug(o.id) + '.md');
-  if (!fs.existsSync(from)) {
-    const want = slug(String(o.id).replace(/\.md$/i, ''));
+function find(id) {
+  const want = slug(id.replace(/\.md$/i, ''));
+  for (const dir of dirs()) {
+    const exact = path.join(dir, id.endsWith('.md') ? id : PREFIX + slug(id) + '.md');
+    if (fs.existsSync(exact)) return exact;
     const hit = (fs.existsSync(dir) ? fs.readdirSync(dir) : []).find(
       (f) => f.endsWith('.md') && slug(f.slice(0, -3)).endsWith(want)
     );
-    if (!hit) die('not found: ' + path.basename(from));
-    from = path.join(dir, hit);
+    if (hit) return path.join(dir, hit);
   }
+  die('not found: ' + id);
+}
+
+function route(o) {
+  if (!o.id) die('--id is required');
+  const to = String(o.to || '').toLowerCase();
+  if (to !== 'ui' && to !== 'core') die('--to is ui or core');
+  if (to === 'ui' && !uiRepo()) die('no teknesyum-ui repo found; set uiRepo in ' + stateFile('config'));
+  const from = find(String(o.id));
+  const dir = openLogs(to);
+  const dest = path.join(dir, path.basename(from));
+  if (path.resolve(dest) === path.resolve(from)) return say(['Already there: ' + dest]);
+  fs.mkdirSync(dir, { recursive: true });
+  fs.renameSync(from, dest);
+  say(['Moved ' + path.basename(from), '  ' + dest]);
+}
+
+function move(o, archive) {
+  if (!o.id) die('--id is required');
+  const from = find(String(o.id));
+  const dir = path.dirname(from);
   if (!archive) {
     fs.unlinkSync(from);
     return say(['Closed and deleted ' + path.basename(from)]);
@@ -145,4 +183,5 @@ if (cmd === 'write') write(o);
 else if (cmd === 'list' || !cmd) list();
 else if (cmd === 'close') move(o, false);
 else if (cmd === 'archive') move(o, true);
-else die('usage: log.js [list|write [--kind hata|yontem|teklif] --title T --symptom S|close --id X|archive --id X]');
+else if (cmd === 'route') route(o);
+else die('usage: log.js [list|write [--kind hata|yontem|teklif] [--to ui|core] --title T --symptom S|close --id X|archive --id X|route --id X --to ui|core]');

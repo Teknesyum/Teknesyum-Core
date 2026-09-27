@@ -215,7 +215,24 @@ function coreRepo() {
   return null;
 }
 
-function openLogs() {
+function uiRepo() {
+  const core = coreRepo();
+  const seen = [process.env.TEKNESYUM_UI, settings().uiRepo];
+  if (core) {
+    const up = path.dirname(core);
+    try { for (const n of fs.readdirSync(up)) seen.push(path.join(up, n)); } catch {}
+  }
+  for (const c of seen) {
+    try {
+      if (c && fs.existsSync(path.join(c, 'ui', '.claude-plugin', 'plugin.json'))) return c;
+    } catch {}
+  }
+  return null;
+}
+
+function openLogs(to) {
+  const ui = to === 'ui' ? uiRepo() : null;
+  if (ui) return path.join(ui, 'logs', 'openlogs');
   const repo = coreRepo();
   return repo
     ? path.join(repo, 'logs', 'openlogs')
@@ -316,6 +333,7 @@ module.exports = {
   safe,
   settings,
   coreRepo,
+  uiRepo,
   lang,
   replyLang,
   t,
