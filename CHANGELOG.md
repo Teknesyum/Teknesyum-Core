@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.51.0
+
+- Send a ui'a raporla prompt to the teknesyum-ui repo's logs
+
 ## v0.50.0
 
 - Put a routed teknesyum-ui log into that repo's ledger and tick it on archive
