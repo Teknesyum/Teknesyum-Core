@@ -348,7 +348,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 21500, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 22500, String(JSON.stringify(table).length));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
   fs.mkdirSync(path.join(h, 'teknesyum'), { recursive: true });
@@ -1572,47 +1572,13 @@ function testConsult() {
 function testCop() {
   const cop = require(path.join(CORE, 'scripts', 'cop.js'));
   const root = fixture();
-  const cfg = home();
-
-  const h1 = home();
-  const bos = hook(COUNT, { hook_event_name: 'Stop', session_id: 'c1', cwd: root }, h1);
-  ok('no trash folder, no line', !/(Trash|Çöp)/.test(take(h1, 'c1')), bos.stdout);
-  const saat = hook(COUNT, { hook_event_name: 'Stop', session_id: 'c1b', cwd: root }, h1);
-  ok('it measures at most once an hour', JSON.parse(fs.readFileSync(path.join(h1, 'teknesyum', 'cop.json'), 'utf8')).at > 0 && !/(Trash|Çöp)/.test(take(h1, 'c1b')), saat.stdout);
-  sweep(h1);
-
   const trash = path.join(root, 'trash');
   fs.mkdirSync(trash, { recursive: true });
-  fs.writeFileSync(path.join(trash, 'kucuk.bin'), Buffer.alloc(1024));
-  const h2 = home();
-  const kucuk = hook(COUNT, { hook_event_name: 'Stop', session_id: 'c2', cwd: root }, h2);
-  ok('a small trash folder says nothing', !/(Trash|Çöp)/.test(take(h2, 'c2')), kucuk.stdout);
-  sweep(h2);
-  ok('cop.asar is silent under the ceiling', cop.asar(root) === null);
-
   fs.writeFileSync(path.join(trash, 'buyuk.bin'), Buffer.alloc(cop.CEILING + 1024));
+  fs.mkdirSync(path.join(trash, 'klasor'));
+  fs.writeFileSync(path.join(trash, 'klasor', 'a.txt'), 'x');
   const over = cop.asar(root);
   ok('cop.asar reports over the ceiling', over && over.count === 2 && over.bytes > cop.CEILING, JSON.stringify(over && { c: over.count, b: over.bytes }));
-
-  hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 'c5', cwd: root }, cfg);
-  ok('the session opening no longer carries it', !/--sil/.test(take(cfg, 'c5')));
-  const dolu = hook(COUNT, { hook_event_name: 'Stop', session_id: 'c3', cwd: root }, cfg);
-  const line = take(cfg, 'c3');
-  ok('a full trash folder offers the command', /cop\.js/.test(line) && /--sil/.test(line), line || dolu.stdout);
-  ok('the line names the size and the count', /100/.test(line) && /2/.test(line), line);
-  ok('without projectsRoot it names this project', /cop\.js" \. --sil/.test(line), line);
-
-  hook(COUNT, { hook_event_name: 'Stop', session_id: 'c4', cwd: root }, cfg);
-  ok('it offers once a day, not every reply', !/--sil/.test(take(cfg, 'c4')));
-
-  ok('nothing was deleted', fs.existsSync(path.join(trash, 'buyuk.bin')));
-
-  const r = run(process.execPath, [path.join(CORE, 'scripts', 'cop.js'), root], { env: { ...process.env, NO_COLOR: '1' } });
-  ok('cop.js exits 1 over the ceiling', r.status === 1, r.stdout + r.stderr);
-  ok('cop.js lists the largest file first', /buyuk\.bin/.test(String(r.stdout).split(/\r?\n/)[1] || ''), r.stdout);
-
-  const yok = run(process.execPath, [path.join(CORE, 'scripts', 'cop.js'), fixture()], { env: { ...process.env, NO_COLOR: '1' } });
-  ok('cop.js exits 2 without a trash folder', yok.status === 2, yok.stderr);
 
   const tmp = path.join(root, 'tmp', 'alt');
   fs.mkdirSync(tmp, { recursive: true });
@@ -1625,32 +1591,61 @@ function testCop() {
   const p = cop.proje(root);
   ok('tmp files older than a day count, fresh ones do not', p.tmp.length === 1 && p.count === 3, JSON.stringify({ tmp: p.tmp.length, c: p.count }));
 
+  const now = Date.now();
+  const first = cop.oto([root], {}, now);
+  ok('a trash entry seen for the first time stays', fs.existsSync(path.join(trash, 'buyuk.bin')) && first.seen[cop.dir(root)]['buyuk.bin'] === now, JSON.stringify(first.seen));
+  ok('an old tmp file goes at once, with its empty folder, a fresh one stays', !fs.existsSync(path.join(root, 'tmp', 'alt')) && fs.existsSync(taze) && first.count === 1);
+  const later = cop.oto([root], first.seen, now + cop.WEEK - 1000);
+  ok('it stays for a week', fs.existsSync(path.join(trash, 'buyuk.bin')) && later.bytes < cop.CEILING);
+  fs.writeFileSync(path.join(trash, 'yeni.bin'), 'y');
+  const week = cop.oto([root], later.seen, now + cop.WEEK);
+  ok('after a week it is deleted, folders and all', !fs.existsSync(path.join(trash, 'buyuk.bin')) && !fs.existsSync(path.join(trash, 'klasor')) && week.count === 2 && week.bytes > cop.CEILING, JSON.stringify({ c: week.count }));
+  ok('what landed later keeps its own clock', fs.existsSync(path.join(trash, 'yeni.bin')) && week.seen[cop.dir(root)]['yeni.bin'] === now + cop.WEEK);
+
+  const cfg = home();
+  const st = path.join(cfg, 'teknesyum', 'cop.json');
+  fs.mkdirSync(path.dirname(st), { recursive: true });
+  fs.writeFileSync(path.join(trash, 'eski.bin'), Buffer.alloc(4096));
+  fs.writeFileSync(st, JSON.stringify({ at: 0, seen: { [cop.dir(root)]: { 'eski.bin': Date.now() - cop.WEEK - 1000 } } }));
+  hook(COUNT, { hook_event_name: 'Stop', session_id: 'c1', cwd: root }, cfg);
+  const line = take(cfg, 'c1');
+  ok('the Stop hook cleans by itself and says so on screen', !fs.existsSync(path.join(trash, 'eski.bin')) && /(Trash Cleared|Çöp Temizlendi)/.test(line), line);
+  fs.writeFileSync(path.join(root, 'tmp', 'x.log'), 'x');
+  fs.utimesSync(path.join(root, 'tmp', 'x.log'), gecen, gecen);
+  hook(COUNT, { hook_event_name: 'Stop', session_id: 'c2', cwd: root }, cfg);
+  ok('it runs at most once an hour', fs.existsSync(path.join(root, 'tmp', 'x.log')) && !/(Trash|Çöp)/.test(take(cfg, 'c2')));
+  hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 'c5', cwd: root }, cfg);
+  ok('the session opening never carries it', !/(Trash|Çöp)/.test(take(cfg, 'c5')));
+
+  const r = run(process.execPath, [path.join(CORE, 'scripts', 'cop.js'), root], { env: { ...process.env, NO_COLOR: '1' } });
+  ok('cop.js lists the trash', /yeni\.bin/.test(r.stdout), r.stdout + r.stderr);
+  const yok = run(process.execPath, [path.join(CORE, 'scripts', 'cop.js'), fixture()], { env: { ...process.env, NO_COLOR: '1' } });
+  ok('cop.js exits 2 without a trash folder', yok.status === 2, yok.stderr);
+
   const top = fixture();
   const iki = path.join(top, 'iki');
   fs.mkdirSync(path.join(iki, 'trash'), { recursive: true });
   fs.writeFileSync(path.join(iki, 'trash', 'x.bin'), Buffer.alloc(1024));
   fs.renameSync(root, path.join(top, 'bir'));
-  const h = cop.hepsi(top);
-  ok('--hepsi sums every project, largest first', h.list.length === 2 && path.basename(h.list[0].root) === 'bir' && h.count === 4, JSON.stringify(h.list.map((x) => path.basename(x.root))));
-
-  const sil = run(process.execPath, [path.join(CORE, 'scripts', 'cop.js'), '--hepsi', top, '--sil'], { env: { ...process.env, NO_COLOR: '1' } });
   const bir = path.join(top, 'bir');
-  ok('--hepsi --sil empties every trash for good', sil.status === 0 && !fs.readdirSync(path.join(bir, 'trash')).length && !fs.readdirSync(path.join(iki, 'trash')).length, sil.stdout + sil.stderr);
-  ok('it deletes old tmp files and their empty folders, keeps fresh ones', !fs.existsSync(path.join(bir, 'tmp', 'alt')) && fs.existsSync(path.join(bir, 'tmp', 'taze.log')));
+  const h = cop.hepsi(top);
+  ok('--hepsi sums every project, largest first', h.list.length === 2 && h.list[0].bytes >= h.list[1].bytes, JSON.stringify(h.list.map((x) => path.basename(x.root))));
+  const sil = run(process.execPath, [path.join(CORE, 'scripts', 'cop.js'), '--hepsi', top, '--sil'], { env: { ...process.env, NO_COLOR: '1' } });
+  ok('--hepsi --sil empties every trash now', sil.status === 0 && !fs.readdirSync(path.join(bir, 'trash')).length && !fs.readdirSync(path.join(iki, 'trash')).length, sil.stdout + sil.stderr);
 
   const cfg2 = home();
   const conf = path.join(cfg2, 'teknesyum', 'config.json');
   fs.mkdirSync(path.dirname(conf), { recursive: true });
   fs.writeFileSync(conf, JSON.stringify({ projectsRoot: top }));
-  fs.writeFileSync(path.join(iki, 'trash', 'buyuk.bin'), Buffer.alloc(cop.CEILING + 1024));
+  fs.writeFileSync(path.join(iki, 'tmp.log'), 'x');
+  fs.mkdirSync(path.join(iki, 'tmp'), { recursive: true });
+  fs.writeFileSync(path.join(iki, 'tmp', 'eski.log'), 'x');
+  fs.utimesSync(path.join(iki, 'tmp', 'eski.log'), gecen, gecen);
   hook(COUNT, { hook_event_name: 'Stop', session_id: 'c6', cwd: bir }, cfg2);
-  const genel = take(cfg2, 'c6');
-  ok('with projectsRoot the offer covers every project', /--hepsi --sil/.test(genel), genel);
+  ok('with projectsRoot it cleans the other projects too', !fs.existsSync(path.join(iki, 'tmp', 'eski.log')) && /(Trash Cleared|Çöp Temizlendi)/.test(take(cfg2, 'c6')));
   sweep(top);
-  sweep(cfg2);
-
-  sweep(root);
   sweep(cfg);
+  sweep(cfg2);
 }
 
 function testMachine() {
@@ -1820,6 +1815,31 @@ function testReport() {
   fs.writeFileSync(askT, user('simgeyi yap') + said('Senden istediklerim listesini sonra yazarım.'));
   ok('the words mid-sentence are not a heading', ev(askT) === '');
   ok('**bold** heading also counts', mod.ASKED.test('**Senden istediklerim**'));
+  const sq = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-sira-'));
+  const sqT = path.join(sq, 't.jsonl');
+  const at = new Date().toISOString();
+  const work = user('uzun iş') + row({ type: 'assistant', timestamp: at, message: { stop_reason: 'tool_use', content: [{ type: 'tool_use', name: 'Bash', input: {} }] } }) + row({ type: 'user', message: { content: [{ type: 'tool_result', content: 'ok' }] } });
+  const sid = 'tkc-sira-' + process.pid;
+  const sub = (prompt) => { const o = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt, cwd: sq, session_id: sid, transcript_path: sqT }); return o ? JSON.parse(o).hookSpecificOutput.additionalContext : ''; };
+  fs.writeFileSync(sqT, work);
+  ok('a turn in the middle of a tool call is busy', mod.busy({ transcript_path: sqT }));
+  fs.writeFileSync(sqT, work + row({ type: 'assistant', timestamp: at, message: { stop_reason: 'end_turn', content: [{ type: 'text', text: 'bitti' }] } }));
+  ok('a finished turn is not', !mod.busy({ transcript_path: sqT }));
+  fs.writeFileSync(sqT, work + row({ type: 'user', message: { content: [{ type: 'text', text: '[Request interrupted by user]' }] } }));
+  ok('an interrupted turn is not', !mod.busy({ transcript_path: sqT }));
+  fs.writeFileSync(sqT, user('uzun iş') + row({ type: 'assistant', timestamp: new Date(Date.now() - 3600000).toISOString(), message: { stop_reason: 'tool_use', content: [] } }));
+  ok('a tool call left an hour ago is not', !mod.busy({ transcript_path: sqT }));
+  fs.writeFileSync(sqT, work);
+  const qc = sub('bir de başlığı düzelt');
+  const book = fs.readFileSync(path.join(sq, '.claude', 'acik.md'), 'utf8');
+  ok('a message sent while working is queued in the ledger', /^- \[ \] Sıra: bir de başlığı düzelt — /m.test(book) && /acik\.md/.test(qc), book + qc);
+  ok('ss skips the queue and says now', /ss/.test(sub('ss dur, yanlış dosya')) && !/yanlış dosya/.test(fs.readFileSync(path.join(sq, '.claude', 'acik.md'), 'utf8')));
+  const dur = require(path.join(CORE, 'hooks', 'dur.js'));
+  const gate = dur.sira({ session_id: sid, cwd: sq });
+  ok('the turn end names the queued job once', /bir de başlığı düzelt/.test(gate) && dur.sira({ session_id: sid, cwd: sq }) === '', gate);
+  fs.writeFileSync(sqT, work + row({ type: 'assistant', timestamp: at, message: { stop_reason: 'end_turn', content: [{ type: 'text', text: 'bitti' }] } }));
+  sub('yeni iş');
+  ok('an idle prompt is not queued', !/Sıra: yeni iş/.test(fs.readFileSync(path.join(sq, '.claude', 'acik.md'), 'utf8')));
   const logRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-logs-'));
   fs.mkdirSync(path.join(logRoot, 'core', '.claude-plugin'), { recursive: true });
   fs.writeFileSync(path.join(logRoot, 'core', '.claude-plugin', 'plugin.json'), '{}');

@@ -159,28 +159,16 @@ function trash(cwd) {
   } catch {
     return '';
   }
-  const gun = new Date().toISOString().slice(0, 10);
   const damga = stateFile('cop');
-  const gecmis = read(damga) || {};
-  if (gecmis.gun === gun || Date.now() - (gecmis.at || 0) < 60 * 60 * 1000) return '';
-  gecmis.at = Date.now();
+  const st = read(damga) || {};
+  if (Date.now() - (st.at || 0) < 60 * 60 * 1000) return '';
   let top = '';
   try { top = settings().projectsRoot || ''; } catch {}
-  const olcum = top && fs.existsSync(top) ? cop.hepsi(top) : cop.proje(cwd);
-  if (olcum.bytes < cop.CEILING) return write(damga, gecmis), '';
-  gecmis.gun = gun;
-  write(damga, gecmis);
-  const script = path.join(__dirname, '..', 'scripts', 'cop.js');
-  const ev = require('os').homedir();
-  const kisa = script.toLowerCase().startsWith(ev.toLowerCase()) ? '~' + script.slice(ev.length) : script;
-  const vars = {
-    '%M': String(cop.mb(olcum.bytes)),
-    '%N': String(olcum.count),
-    '%C': 'node "' + kisa + '" ' + (olcum.list ? '--hepsi' : '.') + ' --sil',
-  };
-  let line = t('banner.trash');
-  for (const [key, v] of Object.entries(vars)) line = line.split(key).join(v);
-  return line;
+  const roots = top && fs.existsSync(top) ? cop.projeler(top) : [cwd];
+  const done = cop.oto(roots, st.seen || {}, Date.now());
+  write(damga, { at: Date.now(), seen: done.seen });
+  if (!done.count) return '';
+  return banner('banner.trash', { '%M': cop.mb(done.bytes), '%N': done.count });
 }
 
 function tidy(j) {

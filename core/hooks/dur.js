@@ -174,10 +174,22 @@ function ui(j) {
   return t(native ? 'dur.uiNative' : 'dur.ui');
 }
 
+function sira(j) {
+  const f = stateFile('sira-' + String(j.session_id || 'none'));
+  let want = [];
+  try { want = JSON.parse(fs.readFileSync(f, 'utf8')); fs.unlinkSync(f); } catch {}
+  if (!want.length) return '';
+  const defter = require('./defter.js');
+  let body = '';
+  try { body = fs.readFileSync(path.join(j.cwd || process.cwd(), defter.LEDGER), 'utf8'); } catch {}
+  const left = body.split(/\r?\n/).filter((l) => ITEM.test(l) && !DONE.test(l) && want.includes(defter.job(l))).map((l) => l.trim());
+  return left.length ? t('dur.queued').replace('%N', String(left.length)) + '\n' + left.join('\n') : '';
+}
+
 function decide(j) {
   if (j.hook_event_name !== 'Stop') return null;
   if (j.stop_hook_active) return null;
-  const why = [jobs(j), require('./defter.js').short(j), evidence(j), ui(j), language(j)].filter(Boolean);
+  const why = [sira(j), jobs(j), require('./defter.js').short(j), evidence(j), ui(j), language(j)].filter(Boolean);
   return why.length ? { decision: 'block', reason: why.join('\n\n') } : null;
 }
 
@@ -191,4 +203,4 @@ function stop(j) {
 
 if (require.main === module) main(stop);
 
-module.exports = { ui, shot, stop, decide, proven, off, code, jobs, english, language, CODE };
+module.exports = { ui, shot, stop, decide, sira, proven, off, code, jobs, english, language, CODE };

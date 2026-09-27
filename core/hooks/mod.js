@@ -4,8 +4,8 @@ const { main, configRoot, stateFile, t, banner, say, sayBlock, coreRepo, uiRepo 
 const lib = require('../scripts/kutuphane.js');
 const ag = require('../scripts/agency.js');
 
-const PREFIX = /^\s*(\?\?|\+\+|pp|aa|ff|hh|mc|uc)(?=\s|$)/i;
-const SUFFIX = /(^|\s)(\?\?|\+\+|pp|aa|ff|hh|mc|uc)\s*$/i;
+const PREFIX = /^\s*(\?\?|\+\+|pp|aa|ff|hh|mc|uc|ss)(?=\s|$)/i;
+const SUFFIX = /(^|\s)(\?\?|\+\+|pp|aa|ff|hh|mc|uc|ss)\s*$/i;
 const WORD_MARK = /^mc$/;
 const SCOPE = /^\s*(\d+\s*(sayfa|g[uü]n|hafta)\s*)?$/i;
 
@@ -255,6 +255,57 @@ function openLogs(cwd, pre) {
   return t('mod.logs').replace('%N', String(names.length)).replace('%L', names.map((f) => f.replace(/\.md$/, '')).join(', ')).replace('%C', cmd('archive --id X', 'log.js'));
 }
 
+const TAIL = 256 * 1024;
+const STALE = 30 * 60 * 1000;
+
+function tail(file) {
+  let fd;
+  try {
+    fd = fs.openSync(file, 'r');
+    const size = fs.fstatSync(fd).size;
+    const len = Math.min(size, TAIL);
+    const buf = Buffer.alloc(len);
+    fs.readSync(fd, buf, 0, len, size - len);
+    const rows = buf.toString('utf8').split('\n');
+    if (len < size) rows.shift();
+    const out = [];
+    for (const row of rows) try { out.push(JSON.parse(row)); } catch {}
+    return out;
+  } catch {
+    return [];
+  } finally {
+    if (fd !== undefined) try { fs.closeSync(fd); } catch {}
+  }
+}
+
+function busy(j, now) {
+  const file = require('./kitap.js').transcript(j);
+  if (!file) return false;
+  const list = tail(file);
+  for (let i = list.length - 1; i >= 0; i--) {
+    const o = list[i];
+    if (!o || o.isSidechain) continue;
+    if (o.type === 'user' && /\[Request interrupted/.test(JSON.stringify((o.message && o.message.content) || ''))) return false;
+    if (o.type !== 'assistant' || !o.message) continue;
+    const at = Date.parse(o.timestamp || '') || 0;
+    return o.message.stop_reason === 'tool_use' && (now || Date.now()) - at < STALE;
+  }
+  return false;
+}
+
+function enqueue(j, prompt) {
+  const cwd = j.cwd || process.cwd();
+  const what = 'Sıra: ' + prompt.replace(/\s+/g, ' ').replace(/ — /g, ' - ').trim().slice(0, 300);
+  try { defter.append(cwd, [defter.entry(what, 'çalışırken geldi')]); } catch { return ''; }
+  const f = stateFile('sira-' + String(j.session_id || 'none'));
+  let list = [];
+  try { list = JSON.parse(fs.readFileSync(f, 'utf8')); } catch {}
+  list.push(defter.job(what));
+  try { fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, JSON.stringify(list)); } catch {}
+  shown.push(banner('banner.queued', { '%N': list.length }));
+  return t('mod.queued');
+}
+
 function handle(j) {
   if (j.hook_event_name !== 'UserPromptSubmit') return '';
   const prompt = String(j.prompt || '');
@@ -268,10 +319,12 @@ function handle(j) {
   const m = mark(prompt);
   expect(j.session_id, m ? m.rest : prompt, j.cwd || process.cwd());
   let text = '';
-  if (m) {
+  if (m && m.key === 'ss') text = busy(j) ? t('mod.now') : '';
+  else if (m) {
     const { rest, key } = m;
     text = key === 'hh' ? help(j.session_id) : key === 'mc' ? memory(rest) : key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : key === 'uc' ? uiCheck(rest, j.cwd || process.cwd()) : library(rest);
-  } else if (UI_REPORT.test(prompt)) text = report(true);
+  } else if (busy(j)) text = enqueue(j, prompt);
+  else if (UI_REPORT.test(prompt)) text = report(true);
   else if (REPORT.test(prompt)) text = report(false);
   say(j.session_id, shown);
   const all = [openLogs(j.cwd || process.cwd(), pre), pre, ahead, text].filter(Boolean).join('\n\n');
@@ -281,4 +334,4 @@ function handle(j) {
 
 if (require.main === module) main(handle, { log: 'mod.js' });
 
-module.exports = { REPORT, UI_REPORT, ASKED, handle, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };
+module.exports = { REPORT, UI_REPORT, ASKED, handle, busy, tail, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };

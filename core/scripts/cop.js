@@ -99,6 +99,56 @@ function budama(d, top) {
   if (!top) try { if (!fs.readdirSync(d).length) fs.rmdirSync(d); } catch {}
 }
 
+function boyut(p) {
+  try {
+    const s = fs.statSync(p);
+    return s.isDirectory() ? walk(p, []).reduce((n, f) => n + f.bytes, 0) : s.size;
+  } catch {
+    return 0;
+  }
+}
+
+function sayi(p) {
+  try {
+    return fs.statSync(p).isDirectory() ? walk(p, []).length : 1;
+  } catch {
+    return 0;
+  }
+}
+
+function oto(roots, seen, now) {
+  const t = now || Date.now();
+  const out = { bytes: 0, count: 0, seen: {} };
+  for (const root of roots) {
+    const base = dir(root);
+    const old = seen[base] || {};
+    const keep = {};
+    let names = [];
+    try { names = fs.readdirSync(base); } catch {}
+    for (const n of names) {
+      const first = old[n] || t;
+      const full = path.join(base, n);
+      if (t - first >= WEEK) {
+        const b = boyut(full);
+        const k = sayi(full);
+        try {
+          fs.rmSync(full, { recursive: true, force: true });
+          out.bytes += b;
+          out.count += k;
+          continue;
+        } catch {}
+      }
+      keep[n] = first;
+    }
+    if (Object.keys(keep).length) out.seen[base] = keep;
+    for (const f of yas(root, t)) {
+      try { fs.unlinkSync(f.file); out.bytes += f.bytes; out.count += 1; } catch {}
+    }
+    budama(path.join(path.resolve(root), 'tmp'), true);
+  }
+  return out;
+}
+
 function asar(root, ceiling) {
   const s = olc(root);
   return s.var && s.bytes >= (ceiling || CEILING) ? s : null;
@@ -210,7 +260,7 @@ function main(argv) {
   const args = argv.slice(2);
   if (args.includes('--help') || args.includes('-h')) {
     process.stdout.write(
-      'Usage: node cop.js [project] [--sil]\n       node cop.js --hepsi [projects root] [--sil]\n\nMeasures <project>/trash and the tmp files older than a day.\n--hepsi does it for every project under the root (default: projectsRoot).\n--sil deletes them for good: the recycle bin frees no space.\nExit: 0 under the ceiling · 1 over it · 2 no trash folder\n'
+      'Usage: node cop.js [project] [--sil]\n       node cop.js --hepsi [projects root] [--sil]\n\nMeasures <project>/trash and the tmp files older than a day.\n--hepsi does it for every project under the root (default: projectsRoot).\n--sil deletes them for good: the recycle bin frees no space.\nThe Stop hook does this by itself: trash entries a week after they land, tmp files after a day.\nExit: 0 under the ceiling · 1 over it · 2 no trash folder\n'
     );
     return 0;
   }
@@ -246,6 +296,6 @@ function main(argv) {
   return s.bytes >= CEILING ? 1 : 0;
 }
 
-module.exports = { CEILING, WEEK, DAY, dir, olc, asar, mb, report, sweepState, pruneCache, newer, proje, hepsi, bosalt };
+module.exports = { CEILING, WEEK, DAY, oto, projeler, dir, olc, asar, mb, report, sweepState, pruneCache, newer, proje, hepsi, bosalt };
 
 if (require.main === module) process.exitCode = main(process.argv);
