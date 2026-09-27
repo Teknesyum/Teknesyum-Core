@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.53.0
+
+- On a background event after an unanswered ask, tell the model not to repeat Senden istediklerim
+
 ## v0.52.0
 
 - Show the trash offer as a zero-token banner after the reply instead of at session start
