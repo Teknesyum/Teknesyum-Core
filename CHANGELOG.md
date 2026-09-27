@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.54.0
+
+- Name the open logs at the top of every prompt so they are read and archived before the request
+
 ## v0.53.0
 
 - On a background event after an unanswered ask, tell the model not to repeat Senden istediklerim
