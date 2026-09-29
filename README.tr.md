@@ -2,6 +2,8 @@
 
 [<img src="assets/badge-lang.tr.svg" alt="Türkçe seçili, switch to English" width="124" height="44">](README.md)
 
+<img src="assets/icon.svg" alt="Teknesyum Core" width="96" height="96">
+
 # Teknesyum Core
 
 Sayar, Gösterir, Bir Kez Konuşur

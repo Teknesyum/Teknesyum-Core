@@ -2,6 +2,8 @@
 
 [<img src="assets/badge-lang.svg" alt="English selected, switch to Türkçe" width="124" height="44">](README.tr.md)
 
+<img src="assets/icon.svg" alt="Teknesyum Core" width="96" height="96">
+
 # Teknesyum Core
 
 Counts, Shows, And Speaks Once

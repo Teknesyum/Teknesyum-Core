@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Teknesyum Core">
+  <defs>
+    <linearGradient id="e" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#6cb4ff"/>
+      <stop offset="1" stop-color="#d63de6"/>
+    </linearGradient>
+    <radialGradient id="c" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#d63de6"/>
+      <stop offset="1" stop-color="#9b6cf5"/>
+    </radialGradient>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="56" fill="#111827"/>
+  <rect x="9" y="9" width="238" height="238" rx="55" fill="none" stroke="#6cb4ff" stroke-opacity="0.35" stroke-width="2"/>
+  <path d="M192.3 74 A84 84 0 1 0 192.3 182" fill="none" stroke="url(#e)" stroke-width="18" stroke-linecap="round"/>
+  <path d="M160 88 A52 52 0 1 0 160 168" fill="none" stroke="#9b6cf5" stroke-width="8" stroke-linecap="round" stroke-opacity="0.8"/>
+  <circle cx="192.3" cy="74" r="12" fill="#d63de6"/>
+  <circle cx="128" cy="128" r="14" fill="url(#c)"/>
+  <circle cx="174" cy="128" r="7" fill="#6cb4ff"/>
+  <circle cx="198" cy="128" r="7" fill="#9b6cf5"/>
+  <circle cx="222" cy="128" r="7" fill="#d63de6"/>
+</svg>
