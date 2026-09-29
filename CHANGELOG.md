@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.57.0
+
+- Ask for a source when a rule file gains a ban
+
 ## v0.56.0
 
 - Clean trash and tmp by themselves; queue messages sent mid-turn, ss skips the queue
