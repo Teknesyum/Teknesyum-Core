@@ -83,6 +83,7 @@
   "banner.lang": {"en":"Reply Language · English Reply · Rewrite Asked","tr":"Yanıt Dili · İngilizce Yanıt · Yeniden Yazım"},
   "cue.lang": {"en":"Reply language: Turkish.","tr":"Yanıt dili: Türkçe."},
   "yasak.root": {"en":"That path leaves the project or is the project root. Delete inside it.","tr":"O yol projenin dışına çıkıyor ya da projenin kökü. Proje içinde sil."},
+  "yasak.temp": {"en":"Wipes system temp. Ask once; after a yes, run it.","tr":"Sistem geçicisini siler. Bir kez sor; onay gelince sen koş."},
   "yasak.disk": {"en":"Disk level write. Ask the user to run it.","tr":"Disk düzeyinde yazma. Kullanıcıdan koşmasını iste."},
   "yasak.hist": {"en":"Erases history. Ask once; after a yes, run it.","tr":"Geçmişi siler. Bir kez sor; onay gelince sen koş."},
   "yasak.gone": {"en":"Deletes a repo, release or remote branch. Ask once; after a yes, run it.","tr":"Depo, sürüm ya da uzak dal siler. Bir kez sor; onay gelince sen koş."},

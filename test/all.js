@@ -783,6 +783,18 @@ function testYasak() {
   ok('no yes keeps the branch delete held', !!onayla('git branch -D a', 'devam et'));
   ok('a word that only contains sil is not a yes', !!onayla('git branch -D a', 'basil kontrol et'));
   ok('a yes never opens disk or root wipes', !!onayla('rm -rf /', 'evet') && !!onayla('mkfs.ext4 /dev/sdb1', 'evet'));
+  const TMP = fs.realpathSync.native(os.tmpdir());
+  const tmpIn = path.join(TMP, 'yasak-deneme');
+  ok('a wipe inside the system temp asks first', yasak.forbidden('rm -rf ' + tmpIn, GARDEN) === 'yasak.temp' && yasak.forbidden('Remove-Item -Recurse -Force $env:TEMP\\x', GARDEN) === 'yasak.temp' && yasak.forbidden('rm -rf "$TEMP/*"', GARDEN) === 'yasak.temp');
+  ok('an owner yes lets a temp wipe through', onayla('rm -rf ' + tmpIn, 'evet sil') === null && onayla('rm -rf $TMP/eski', 'temp klasörünü silebilirsin') === null);
+  ok('no yes keeps the temp wipe held', !!onayla('rm -rf ' + tmpIn, 'devam et'));
+  ok('the temp root itself stays shut even after a yes', yasak.forbidden('rm -rf ' + TMP, GARDEN) === 'yasak.root' && yasak.forbidden('rm -rf $TEMP', GARDEN) === 'yasak.root' && !!onayla('rm -rf %TEMP%', 'evet'));
+  ok('a temp path that climbs out is not temp', yasak.forbidden('rm -rf $TEMP/../..', GARDEN) === 'yasak.root');
+  ok('a yes never opens another outside path', !!onayla('rm -rf ../komsu', 'evet sil') && !!onayla('rm -rf ' + tmpIn + ' ../komsu', 'evet sil'));
+  if (process.platform === 'win32') {
+    const bashTmp = '/' + tmpIn[0].toLowerCase() + tmpIn.slice(2).replace(/\\/g, '/');
+    ok('a Git Bash temp path is the same temp', yasak.forbidden('rm -rf ' + bashTmp, GARDEN) === 'yasak.temp' && onayla('rm -rf ' + bashTmp, 'evet') === null, bashTmp);
+  }
   ok('the denial tells the model to run it after a yes', /sen koş|run it/.test(JSON.stringify(onayla('git reset --hard HEAD~1', 'bak'))));
 
   const was = process.env.CLAUDE_CONFIG_DIR;

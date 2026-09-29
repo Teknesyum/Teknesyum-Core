@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { main, t, banner, say } = require('./lib.js');
 const loop = require('./loop.js');
@@ -41,23 +43,57 @@ function targets(cmd) {
 
 function outside(target, cwd) {
   const s = String(target);
-  if (/^[~$]/.test(s) || /^\/dev\b/.test(s)) return true;
+  if (/^[~$%]/.test(s) || /^\/dev\b/.test(s)) return true;
   if (/^([A-Za-z]:[\\/]|[\\/])/.test(s)) return true;
   const rel = path.relative(cwd, path.resolve(cwd, s));
   if (rel === '' || rel === '.') return true;
   return rel.startsWith('..');
 }
 
+function temps() {
+  const seen = new Set();
+  for (const p of [os.tmpdir(), process.env.TEMP, process.env.TMP, process.env.TMPDIR]) {
+    if (!p) continue;
+    seen.add(path.resolve(p));
+    try { seen.add(fs.realpathSync.native(p)); } catch {}
+  }
+  return [...seen];
+}
+
+function expand(target) {
+  let s = String(target);
+  const env = s.match(/^(?:\$\{?(?:env:)?(TEMP|TMP|TMPDIR)\}?|%(TEMP|TMP)%)(?=$|[\\/])/i);
+  if (env) s = (process.env[(env[1] || env[2]).toUpperCase()] || os.tmpdir()) + s.slice(env[0].length);
+  else if (/^~(?=$|[\\/])/.test(s)) s = os.homedir() + s.slice(1);
+  if (process.platform === 'win32') s = s.replace(/^\/([a-z])(?=$|\/)/i, '$1:');
+  return /^\$|%/.test(s) ? null : s;
+}
+
+function inTemp(target) {
+  const s = expand(target);
+  if (!s || !path.isAbsolute(s)) return false;
+  const win = process.platform === 'win32';
+  const full = path.resolve(s);
+  const rels = temps().map((t) => (win ? path.relative(t.toLowerCase(), full.toLowerCase()) : path.relative(t, full)));
+  if (rels.includes('')) return false;
+  return rels.some((rel) => !rel.startsWith('..') && !path.isAbsolute(rel));
+}
+
 function forbidden(cmd, cwd) {
   const s = String(cmd || '');
   if (!s.trim()) return null;
   const root = cwd || process.cwd();
-  for (const target of targets(s)) if (outside(target, root)) return 'yasak.root';
+  let temp = false;
+  for (const target of targets(s)) {
+    if (!outside(target, root)) continue;
+    if (!inTemp(target)) return 'yasak.root';
+    temp = true;
+  }
   for (const [key, re] of RULES) if (re.test(s)) return key;
-  return null;
+  return temp ? 'yasak.temp' : null;
 }
 
-const ASKED = new Set(['yasak.hist', 'yasak.gone']);
+const ASKED = new Set(['yasak.hist', 'yasak.gone', 'yasak.temp']);
 const YES = /(^|[^\p{L}])(evet|onay\p{L}*|sil\p{L}*|kaldır\p{L}*|yes|approved?)(?=$|[^\p{L}])/iu;
 
 function lastPrompt(j) {
@@ -100,4 +136,4 @@ function decide(j) {
 
 if (require.main === module) main(decide);
 
-module.exports = { forbidden, decide, outside, targets, approved, RULES, WIPE, YES };
+module.exports = { forbidden, decide, outside, targets, approved, inTemp, RULES, WIPE, YES };
