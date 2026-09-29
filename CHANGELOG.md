@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.58.0
+
+- Let a wipe inside the system temp through after an owner yes; the temp root stays shut
+
 ## v0.57.0
 
 - Ask for a source when a rule file gains a ban
