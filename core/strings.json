@@ -118,5 +118,6 @@
   "mod.logs": {"en":"Open logs here (%N): %L. Before the request read each, fix it, close it with %C (cannot fix one: say why); then the request.","tr":"Burada açık log var (%N): %L. İstekten önce her birini oku, çöz, %C ile kapat (çözemediğinin nedenini yaz); sonra istek."},
   "banner.queued": {"en":"Queued · %N Waiting","tr":"Sıraya Alındı · %N Bekliyor"},
   "mod.queued": {"en":"This came while you worked and is queued in .claude/acik.md: do not switch, finish the current job, then take it and tick its line.","tr":"Bu sen çalışırken geldi, .claude/acik.md defterine sıraya yazıldı: işi bölme, elindekini bitir, sonra bunu al ve satırını [x] yap."},
-  "mod.now": {"en":"Marked ss: the owner wants this now, ahead of the current job.","tr":"ss işaretli: sahip bunu şimdi, elindeki işten önce istiyor."}
+  "mod.now": {"en":"Marked ss: the owner wants this now, ahead of the current job.","tr":"ss işaretli: sahip bunu şimdi, elindeki işten önce istiyor."},
+  "kural.yasak": {"en":"A ban without a source went into a rule file. If it closes work we could do, write the risk and its design answer instead (measure, verify, exclude, let the user run it); a ban stays only with a law, licence or platform source and a date:","tr":"Kural dosyasına kaynaksız yasak yazıldı. Yapabileceğimiz bir işi kapatıyorsa yasağı değil riski ve tasarım karşılığını yaz (ölçüm, doğrulama, dışlama, kullanıcının elinden çalıştırma); yasak ancak yasa, lisans ya da platform kaynağı ve tarihle kalır:"}
 }

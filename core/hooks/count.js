@@ -70,6 +70,25 @@ function reason(st) {
   return '';
 }
 
+const RULE_FILE = /(^|[\\/])(RULES|CLAUDE|AGENTS|SPEC)[^\\/]*\.md$|(^|[\\/])docs[\\/][^\\/]*(karar|decision)[^\\/]*\.md$/i;
+const BAN = /(yasak|\basla\b|forbidden|prohibited|\bnever\b)/i;
+const SOURCE = /https?:\/\/|kaynak|source|lisans|licen[cs]e|\byasa\b|\blaw\b|\d{4}-\d{2}-\d{2}|§/i;
+
+function added(j) {
+  const i = j.tool_input || {};
+  const old = new Set(String(i.old_string || '').split(/\r?\n/));
+  const text = i.content != null ? i.content : i.new_string != null ? i.new_string : (i.edits || []).map((e) => e.new_string || '').join('\n');
+  return String(text || '').split(/\r?\n/).filter((l) => !old.has(l));
+}
+
+function kural(j) {
+  const p = (j.tool_input && (j.tool_input.file_path || j.tool_input.notebook_path)) || '';
+  if (!RULE_FILE.test(p)) return '';
+  const bad = added(j).filter((l) => BAN.test(l) && !SOURCE.test(l)).map((l) => l.trim()).filter(Boolean).slice(0, 3);
+  if (!bad.length) return '';
+  return JSON.stringify({ hookSpecificOutput: { hookEventName: 'PostToolUse', additionalContext: t('kural.yasak') + '\n' + bad.join('\n') } });
+}
+
 function speak(st, text, line) {
   say(st.session, line);
   return JSON.stringify({ hookSpecificOutput: { hookEventName: 'PostToolUse', additionalContext: text } });
@@ -235,7 +254,7 @@ function handle(j) {
   if (j.transcript_path) st.transcript = j.transcript_path;
   let out = '';
   if (ev === 'PostToolUse') {
-    if (EDITS.test(j.tool_name)) out = onEdit(j, st);
+    if (EDITS.test(j.tool_name)) out = onEdit(j, st) || kural(j);
     else if (SHELLS.test(j.tool_name)) {
       out = onShell(j, st);
       onSeat(st);
@@ -255,4 +274,4 @@ function handle(j) {
 
 if (require.main === module) main(handle, { log: 'count.js' });
 
-module.exports = { handle, reason, file, tree, sum, step, FILE_MAX, DIFF_MAX, CTX_MAX, RISK, TEST };
+module.exports = { handle, kural, reason, file, tree, sum, step, FILE_MAX, DIFF_MAX, CTX_MAX, RISK, TEST };

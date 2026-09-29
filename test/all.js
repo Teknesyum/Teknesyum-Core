@@ -348,7 +348,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 22500, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 23000, String(JSON.stringify(table).length));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
   fs.mkdirSync(path.join(h, 'teknesyum'), { recursive: true });
@@ -1569,6 +1569,17 @@ function testConsult() {
   sweep(cfg);
 }
 
+function testKural() {
+  const count = require(path.join(CORE, 'hooks', 'count.js'));
+  const ed = (file_path, new_string, old_string) => count.kural({ tool_name: 'Edit', tool_input: { file_path, new_string, old_string: old_string || '' } });
+  const hit = ed('C:/p/Runly/docs/SPEC.md', "UserChoice hash'ini kırmak yasaktır.");
+  ok('a ban without a source in a rule file gets one line', /kaynaksız|without a source/.test(hit) && /kırmak yasaktır/.test(hit), hit);
+  ok('a ban with a source passes', ed('C:/p/x/AGENTS.md', 'Yasak: lisans GPL-3.0 kaynak https://gnu.org') === '');
+  ok('a ban already there before the edit passes', ed('C:/p/x/CLAUDE.md', 'asla silme\nyeni satır', 'asla silme') === '');
+  ok('an ordinary file is left alone', ed('C:/p/x/src/app.js', 'never do this') === '');
+  ok('a decision paper counts too', /never/.test(ed('C:/p/x/docs/kararlar.md', 'We never touch the registry.')));
+}
+
 function testCop() {
   const cop = require(path.join(CORE, 'scripts', 'cop.js'));
   const root = fixture();
@@ -2005,6 +2016,7 @@ function main() {
     ['doctor', testDoctor],
     ['scan', testScan],
     ['consult gate', testConsult],
+    ['kural', testKural],
     ['trash', testCop],
     ['machine sweep', testMachine],
     ['higher model', testUst],
