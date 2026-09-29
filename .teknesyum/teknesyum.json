@@ -1,0 +1,85 @@
+{
+  "catalog": {
+    "category": "developer",
+    "tags": {
+      "tr": [
+        "claude-code",
+        "eklenti",
+        "token",
+        "ajan"
+      ],
+      "en": [
+        "claude-code",
+        "plugin",
+        "tokens",
+        "agents"
+      ]
+    },
+    "summary": {
+      "tr": "Claude Code için token sayan, çok ajanlı çalışmayı düzenleyen bir eklenti. Oturumdaki harcamayı sayar, durum çubuğunda gösterir ve bir eşiğe gelindiğinde yalnız bir kez uyarır. Tehlikeli komutları durduran yasak listesi, bir istemdeki bütün işlerin aynı turda bitmesini takip eden iş kapısı ve oturum devri gibi kancalar içerir. Aynı kancalar Cursor ve Gemini CLI içinde de çalışır. Claude Code'u uzun ve çok parçalı işlerde kullanan geliştiriciler için.",
+      "en": "A Claude Code plugin that counts tokens and organises multi-agent work. It tracks what a session spends, shows it in the status line and speaks once when a threshold is reached. Hooks add a denylist that stops dangerous commands, a job gate that keeps every task in a prompt within the same turn, and a handoff routine for long sessions. The same hooks also run inside Cursor and Gemini CLI. For developers who use Claude Code on long, many-part jobs."
+    },
+    "points": {
+      "tr": [
+        "Değişen dosya ve satırları sessizce sayar",
+        "Eşikte tek satırla uyarır",
+        "Durum çubuğunda dosya, test ve bağlam yüzdesi",
+        "Sonsuz bekleme döngülerini engeller",
+        "Tehlikeli komutları gerekçeyle reddeder",
+        "Oturum sonunda devir teslim dosyası yazar",
+        "İş listesini izler, açık kalanı deftere taşır",
+        "Kod değişince test ya da derleme kanıtı ister",
+        "Arayüz değişince gerçek pencere incelemesi ister",
+        "Yanıt dilini denetler",
+        "Onay beklerken sesli uyarı",
+        "1.968 kitaplık yerel kütüphanede arama",
+        "Özel raf, ajans rolleri ve danışma kayıtları",
+        "İçe aktarma grafiği: merkez, döngü, yetim dosya",
+        "Hata, yöntem ve teklif günlükleri",
+        "Proje sağlık taraması",
+        "Sürüm yükseltip GitHub yayını açar",
+        "Claude Code, Cursor ve Gemini CLI"
+      ],
+      "en": [
+        "Silently counts changed files and lines",
+        "Speaks one line at a threshold",
+        "Files, tests and context percent in the statusline",
+        "Blocks unbounded wait loops",
+        "Denies destructive commands with a reason",
+        "Writes a handoff file at session end",
+        "Tracks the job list, carries open items to a ledger",
+        "Asks for test or build evidence after code changes",
+        "Asks for a real-window review after UI changes",
+        "Checks the reply language",
+        "Chime while waiting for approval",
+        "Search across a 1,968-book local library",
+        "Private shelf, agency roles and consult records",
+        "Import graph: hubs, cycles, orphan files",
+        "Bug, method and proposal logs",
+        "Project health scan",
+        "Bumps versions and publishes GitHub releases",
+        "Claude Code, Cursor and Gemini CLI"
+      ]
+    },
+    "uses": {
+      "tr": [
+        "Harcamayı say, eşikte uyarı al",
+        "Tehlikeli komutları kendiliğinden durdur",
+        "İstemdeki tüm işlerin bitmesini izle",
+        "Oturum sonunda devir dosyası al",
+        "Yerel kütüphanede kitap ara"
+      ],
+      "en": [
+        "Track spending, get threshold alerts",
+        "Block dangerous commands automatically",
+        "Make sure every job gets done",
+        "Get an end-of-session handoff file",
+        "Search a local book library"
+      ]
+    },
+    "lead": {
+      "tr": "Claude Code Token Sayacı, İş Yöneticisi ve Güvenlik Kancaları",
+      "en": "Claude Code Token Counter, Job Manager and Safety Hooks"
+    }
+  }
+}
