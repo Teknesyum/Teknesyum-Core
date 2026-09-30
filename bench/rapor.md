@@ -369,3 +369,30 @@ hepsini buldu ama test eşleştirmesinde eksik kaldı) ve ikinci tekrarın özet
 
 Yorum: Haiku'ya okuma ve özet verilebilir; çıktının Opus tarafından doğrulanacağı, çok dosyalı
 eşleştirme istemeyen işlerde. Şant (§13–16) kapalı kalır; bu bölüm yalnız kapasiteyi ölçer.
+
+## 18. Araya Soru: Opus Haiku'ya Gönül Rahatlığıyla Verebilir Mi
+
+Kurulum: `bench/araya.js`. Opus ana iş yapar (`test/all.js`'e `testEnglish` yaz, listeye bağla,
+testleri geçir). Çalışırken 20 sn arayla 4 soru akışa (stream-json) düşer; sorular §17'nin
+puanlanan soruları. Kollar: **kendi** (Opus cevaplar), **haiku** (Opus soruyu Haiku okuyucuya
+verir, cevaba bakmaz), **denetim** (Haiku cevaplar, Opus denetler). 2 tekrar, 5 $ tavan.
+Ham: `bench/araya-ham/`, satırlar `bench/araya.jsonl`, duman koşusu `bench/araya-duman.jsonl`.
+
+| Kol | Ana iş | Araya puan (ort.) | Cevap gecikmesi (sn) | $ (Opus + Haiku) |
+|---|---|---|---|---|
+| kendi 1 / 2 | 1 / 1 | 1,00 / 0,99 | 28–329 / 173–233 | 1,05 / 1,03 |
+| haiku 1 / 2 | 1 / 1 | 0,99 / 0,98 | 34–269 / 50–268 | 1,03 / 1,53 |
+| denetim 1 / 2 | 1 / 1 | 0,99 / 1,00 | 35–174 / 46–238 | 2,00 / 1,63 |
+| duman (haiku) | 1 | 0,98 | 40–169 | 1,63 |
+
+Sonuç: Haiku'ya devredilen araya sorular Opus'un kendi cevabı kadar doğru (0,98–0,99'a
+0,99–1,00); ana iş hiçbir kolda bozulmadı, 4 sorunun 4'ü her seferinde devredildi. Kazanç
+paradan değil hızdan: Opus soruları sıraya koyup ana işten sonra cevapladığı için kendi
+kolunda ilk cevap çoğu kez 3–5 dk sürdü; Haiku kolunda kolay sorular 30–70 sn'de geldi.
+Para eşit çıktı (1,03–1,53 $'a 1,03–1,05 $): Opus devir için yine bağlam taşıyor. Denetim
+kolu puanı artırmadı, parayı %60–90 artırdı.
+
+Yorum: Evet, gönül rahatlığıyla verilebilir; ama denetimsiz. Denetim boşa para. Kazanç hız,
+maliyet değil. Not: kendi ve denetim kolunun duvar saati (26 dk) ölçüm hatası; akış sonundaki
+bir `task_summary` satırı boşta algısını kaçırdı, `result.duration_ms` gerçek iş süresini
+~6,5 dk gösteriyor. Betik düzeltildi.
