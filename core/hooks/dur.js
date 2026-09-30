@@ -56,12 +56,21 @@ function sil(j) {
 const OZET = /^\s*#{1,6}\s*(Özet|Summary)\s*$/im;
 const UZUN = 5;
 
+function uyanis(o) {
+  if (!o || o.type !== 'user' || o.isSidechain || !o.message) return false;
+  const c = o.message.content;
+  return typeof c === 'string' ? /^\s*<task-notification/.test(c) : Array.isArray(c) && c.some((x) => x && x.type === 'text' && /^\s*<task-notification/.test(x.text || ''));
+}
+
 function kapanis(j) {
   if (settings().closing === false) return '';
   const kitap = require('./kitap.js');
   const f = kitap.transcript(j);
   if (!f) return '';
-  const n = kitap.turn(kitap.entries(f)).uses.length;
+  const list = kitap.entries(f);
+  let at = -1;
+  for (let i = list.length - 1; i >= 0; i--) if (uyanis(list[i])) { at = i; break; }
+  const n = kitap.turn(list.slice(at)).uses.length;
   if (n < UZUN) return '';
   const said = typeof j.last_assistant_message === 'string' ? j.last_assistant_message : require('./defter.js').lastText(j);
   if (OZET.test(String(said || ''))) return '';

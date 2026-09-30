@@ -1607,6 +1607,8 @@ function testKapanis() {
   yaz(6);
   ok('a long turn without the summary heading is sent back', /Ön Özet|Earlier/.test(k('Bitti.\n\nYok')));
   ok('a long turn with the summary heading passes', k('## Ön Özet\nx\n\n## Özet\nBitti.\n\nYok') === '');
+  fs.appendFileSync(tr, JSON.stringify({ type: 'user', message: { content: '<task-notification>bitti</task-notification>' } }) + '\n' + use(1) + '\n');
+  ok('a background notice after a long turn starts a short one', k('Bitti.') === '');
   yaz(2);
   ok('a short turn passes', k('Bitti.') === '');
   const cizik = bant.serit('Giriş\n\n## Ön Özet\nx\n\n## Özet\ny');
