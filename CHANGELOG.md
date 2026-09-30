@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.61.1
+
+- The closing gate no longer asks for a summary on a short turn woken by a background notice.
+
 ## v0.61.0
 
 - A turn of five or more tool calls closes with a pre-summary, a summary, advice and the owner's asks; the summary headings show as banners.
