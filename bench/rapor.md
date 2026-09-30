@@ -285,3 +285,22 @@ Harcama: 4,53 + 4,38 + 3,89 = 12,80 $.
 - Üç turda da kapı hiç reddetmediği hâlde kollar arası fark %6–%31. n=2'de gürültü bu kadar; kollar arası fark kapıya yazılamaz.
 
 Sonuç: ≥%30 ölçütü karşılanmadı, kapı kurulmaz. Tek bulgu: opus 5 büyük dosyayı yalnız adı istemde geçtiğinde bütün okuyor — kapının asıl hedefi, planın muaf tuttuğu durum.
+
+## 14. Şant, İstisnasız, 4. Tur
+
+Adı istemde geçen dosya da kapıya tabi; görev metinleri 2. turdaki gibi dosya adını anıyor. Ham satırlar `bench/sant-4.jsonl`, kanca günlükleri `bench/sant-kanca/tur4/`. 2. tekrar koşulurken kapanış kapısı (dur.js) eklenmişti; iki kolda da açıktı.
+
+| Görev | Tekrar | Kapısız ana token | Kapılı ana token | Kapının reddi | Sonnet okuyucu | Doğru |
+|---|---|---|---|---|---|---|
+| düzelt | 1 | 322 663 | 265 576 | 1 | çağrılmadı | 2/2 |
+| düzelt | 2 | 372 577 | 535 172 | 1 | çağrılmadı | 2/2 |
+| soru | 1 | 638 055 | 580 108 | 0 | çağrılmadı | 2/2 |
+| soru | 2 | 431 328 | 596 749 | 0 | çağrılmadı | 2/2 |
+
+Harcama 5,08 $; dört turun toplamı 17,88 $.
+
+- Kapı yalnız `cat test/all.js` (2110 satır) okumasını durdurdu. İki seferde de opus Sonnet okuyucuya gitmedi, `grep -n` ile kendisi aradı.
+- Soru görevinde opus 300 satırı aşan dosyayı zaten aralıkla okudu (`sed -n`), kapı çalışmadı.
+- Düzelt görevinde bir tekrarda %18 az, diğerinde %44 fazla; yön tutarsız.
+
+Sonuç: "300 satırı aşan dosyayı Sonnet okusun" düzeni gerçekte hiç kullanılmadı. Opus 5 durdurulunca işi devretmek yerine kendisi daraltıyor; bütün okuma nadir. Kapı kurulmadı, kod `trash/sant/`.
