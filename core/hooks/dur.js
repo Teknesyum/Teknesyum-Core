@@ -53,6 +53,21 @@ function sil(j) {
   return t('dur.sil');
 }
 
+const OZET = /^\s*#{1,6}\s*(Özet|Summary)\s*$/im;
+const UZUN = 5;
+
+function kapanis(j) {
+  if (settings().closing === false) return '';
+  const kitap = require('./kitap.js');
+  const f = kitap.transcript(j);
+  if (!f) return '';
+  const n = kitap.turn(kitap.entries(f)).uses.length;
+  if (n < UZUN) return '';
+  const said = typeof j.last_assistant_message === 'string' ? j.last_assistant_message : require('./defter.js').lastText(j);
+  if (OZET.test(String(said || ''))) return '';
+  return t('dur.kapanis').replace('%N', String(n));
+}
+
 function language(j) {
   if (settings().langCheck === false || replyLang() !== 'tr') return '';
   const said = typeof j.last_assistant_message === 'string' ? j.last_assistant_message : require('./defter.js').lastText(j);
@@ -199,7 +214,7 @@ function sira(j) {
 function decide(j) {
   if (j.hook_event_name !== 'Stop') return null;
   if (j.stop_hook_active) return null;
-  const why = [sira(j), sil(j), jobs(j), require('./defter.js').short(j), evidence(j), ui(j), language(j)].filter(Boolean);
+  const why = [sira(j), sil(j), jobs(j), require('./defter.js').short(j), evidence(j), ui(j), language(j), kapanis(j)].filter(Boolean);
   return why.length ? { decision: 'block', reason: why.join('\n\n') } : null;
 }
 
@@ -213,4 +228,4 @@ function stop(j) {
 
 if (require.main === module) main(stop);
 
-module.exports = { ui, shot, stop, decide, sira, sil, proven, off, code, jobs, english, language, CODE };
+module.exports = { ui, shot, stop, decide, sira, sil, kapanis, proven, off, code, jobs, english, language, CODE };

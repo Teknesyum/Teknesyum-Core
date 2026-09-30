@@ -348,7 +348,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 24500, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 25500, String(JSON.stringify(table).length));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
   fs.mkdirSync(path.join(h, 'teknesyum'), { recursive: true });
@@ -1596,6 +1596,28 @@ function testHaiku() {
   sweep(d);
 }
 
+function testKapanis() {
+  const dur = require(path.join(CORE, 'hooks', 'dur.js'));
+  const bant = require(path.join(CORE, 'hooks', 'bant.js'));
+  const d = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-kapanis-'));
+  const tr = path.join(d, 't.jsonl');
+  const use = (n) => JSON.stringify({ type: 'assistant', message: { content: Array.from({ length: n }, (_, i) => ({ type: 'tool_use', id: 'u' + i, name: 'Bash', input: {} })) } });
+  const yaz = (n) => fs.writeFileSync(tr, JSON.stringify({ type: 'user', message: { content: 'işi yap' } }) + '\n' + use(n) + '\n');
+  const k = (text) => dur.kapanis({ transcript_path: tr, last_assistant_message: text, cwd: d });
+  yaz(6);
+  ok('a long turn without the summary heading is sent back', /Ön Özet|Earlier/.test(k('Bitti.\n\nYok')));
+  ok('a long turn with the summary heading passes', k('## Ön Özet\nx\n\n## Özet\nBitti.\n\nYok') === '');
+  yaz(2);
+  ok('a short turn passes', k('Bitti.') === '');
+  const cizik = bant.serit('Giriş\n\n## Ön Özet\nx\n\n## Özet\ny');
+  ok('the summary headings are drawn as banners', !/^## /m.test(cizik) && (cizik.match(/Teknesyum Core > /g) || []).length === 2, cizik);
+  ok('other headings stay', bant.serit('## Özetler\n## Senden istediklerim') === '## Özetler\n## Senden istediklerim');
+  const orta = bant.build({ hook_event_name: 'MessageDisplay', index: 3, final: false, delta: '## Özet\nx', session_id: 'tkc-kapanis-' + process.pid });
+  ok('a middle chunk with the heading is redrawn', /Teknesyum Core > /.test(orta), orta);
+  ok('a middle chunk without it is left alone', bant.build({ hook_event_name: 'MessageDisplay', index: 3, final: false, delta: 'x', session_id: 'z' }) === '');
+  sweep(d);
+}
+
 function testSil() {
   const dur = require(path.join(CORE, 'hooks', 'dur.js'));
   const k = (text) => dur.sil({ last_assistant_message: text });
@@ -2053,6 +2075,7 @@ function main() {
     ['scan', testScan],
     ['consult gate', testConsult],
     ['haiku', testHaiku],
+    ['kapanis', testKapanis],
     ['sil', testSil],
     ['kural', testKural],
     ['trash', testCop],
