@@ -1,0 +1,6 @@
+{"tool":"Bash","agent_id":null,"agent_type":null,"girdi":{"command":"ls -R test core 2>/dev/null | head -50; echo ---; cat package.json","description":"List test and core files"},"red":false}
+{"tool":"Bash","agent_id":null,"agent_type":null,"girdi":{"command":"ls test; echo ---; grep -rln \"haiku\" test core --include=*.js -i | head -20","description":"Find haiku references"},"red":false}
+{"tool":"Bash","agent_id":null,"agent_type":null,"girdi":{"command":"grep -n -i \"haiku\" test/all.js core/hooks/ust.js","description":"Show haiku lines"},"red":false}
+{"tool":"Bash","agent_id":null,"agent_type":null,"girdi":{"command":"sed -n 1605,1630p test/all.js","description":"Show testHaiku"},"red":false}
+{"tool":"Bash","agent_id":null,"agent_type":null,"girdi":{"command":"cd \"C:/Users/ADMINI~1/AppData/Local/Temp/tkc-sant-bench-IpAsci\" && sed -i \"s|  ok('sonnet passes', call('sonnet') === null);|  ok('sonnet passes', call('sonnet') === null);\\n  ok('opus passes', call('opus') === null);|\" test/all.js && sed -n 1619,1624p test/all.js","description":"Insert opus assertion"},"red":false}
+{"tool":"Bash","agent_id":null,"agent_type":null,"girdi":{"command":"cd \"C:/Users/ADMINI~1/AppData/Local/Temp/tkc-sant-bench-IpAsci\" && npm test 2>&1 | tail -30","timeout":600000,"description":"Run npm test"},"red":false}

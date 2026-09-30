@@ -1,0 +1,4 @@
+{"tool":"Bash","agent_id":null,"agent_type":null,"girdi":{"command":"cat test/all.js && echo \"---PKG---\" && cat package.json","description":"Read test file and package.json"},"red":false}
+{"tool":"Bash","agent_id":null,"agent_type":null,"girdi":{"command":"grep -n \"testHaiku\" -A 60 test/all.js | head -100; echo \"---SCRIPTS---\"; grep -n '\"scripts\"' -A 8 package.json","description":"Find testHaiku function"},"red":false}
+{"tool":"Bash","agent_id":null,"agent_type":null,"girdi":{"command":"grep -n \"haiku\" core/hooks/ust.js | head -40","description":"Inspect ust.js haiku logic"},"red":false}
+{"tool":"Bash","agent_id":null,"agent_type":null,"girdi":{"command":"cd \"C:/Users/ADMINI~1/AppData/Local/Temp/tkc-sant-bench-zYhkbu\" && npm test 2>&1 | tail -30","timeout":300000,"description":"Run npm test"},"red":false}

@@ -263,3 +263,25 @@ yazmadı. Eklentinin "sıradan turda sıfır" iddiası bu koşuda doğrulandı.
 **n=1 — fark gürültünün içinde.** Aynı koşuda çıktı token'ı %13 oynadı; %6'lık toplam
 farkı eklentinin marifeti saymak için en az üç tekrar gerekir. Bu koşunun kesin söylediği
 tek şey şudur: eklenti **maliyeti artırmıyor**. Koşunun kendi bedeli 0,85 $.
+
+## 13. Şant Okuma Kapısı, opus ana model, 2 kol × 2 görev × 2 tekrar, üç tur
+
+Betik `trash/sant/bench-sant.js` (kapı kodu ve yaması `trash/sant/`), ham satırlar `bench/sant-1.jsonl`, `sant-2.jsonl`, `sant-3.jsonl`; kanca günlükleri `bench/sant-kanca/tur1..3/`. Kapısız kolda eşik 1 000 000 (kapı fiilen kapalı), kapılı kolda 300. Ana token = opus girdi + önbellek okuma + önbellek yazma + çıktı.
+
+| Tur | Görev | Kapısız ana token | Kapılı ana token | Kapının reddi | Doğru |
+|---|---|---|---|---|---|
+| 1 | düzelt | 398 411 | 270 701 | 0 | 4/4 |
+| 1 | soru | 610 703 | 533 466 | 0 | 4/4 |
+| 2 | düzelt | 346 098 | 297 322 | 0 | 4/4 |
+| 2 | soru | 606 846 | 416 090 | 0 | 4/4 |
+| 3 | düzelt | 312 940 | 284 157 | 0 | 4/4 |
+| 3 | soru | 493 460 | 456 443 | 0 | 4/4 |
+
+Harcama: 4,53 + 4,38 + 3,89 = 12,80 $.
+
+- Tur 1 geçersiz: model `cat a && cat test/all.js` ve `cat -n` kullandı, regex yalnız tek başına `cat` yakalıyordu. Düzeltildi (zincirin her parçası, `-n`).
+- Tur 2 geçersiz: iki görev de dosya adını istemde anıyordu; adı anılan dosya muaf olduğu için kapı hiç çalışmadı. Model tam da bu durumda dosyayı bütün okudu (`cat test/all.js`, `cat core/hooks/lib.js`).
+- Tur 3: adlar çıkarıldı; opus dosyayı bilmediğinde `grep -n` + `sed -n` aralıklarıyla geziniyor, bütün okuma yapmıyor. Kapı yine 0 red.
+- Üç turda da kapı hiç reddetmediği hâlde kollar arası fark %6–%31. n=2'de gürültü bu kadar; kollar arası fark kapıya yazılamaz.
+
+Sonuç: ≥%30 ölçütü karşılanmadı, kapı kurulmaz. Tek bulgu: opus 5 büyük dosyayı yalnız adı istemde geçtiğinde bütün okuyor — kapının asıl hedefi, planın muaf tuttuğu durum.

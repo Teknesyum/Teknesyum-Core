@@ -1,0 +1,4 @@
+{"tool":"Bash","agent_id":null,"agent_type":null,"girdi":{"command":"ls -R test core 2>/dev/null | head -50; echo \"---\"; cat package.json","description":"List test/core files and package.json"},"red":false}
+{"tool":"Bash","agent_id":null,"agent_type":null,"girdi":{"command":"ls test; echo \"---\"; grep -rn \"haiku\" test core --include=*.js -i | head -40","description":"Find haiku gate references"},"red":false}
+{"tool":"Bash","agent_id":null,"agent_type":null,"girdi":{"command":"sed -n 1605,1630p test/all.js; echo \"=== ust.js ===\"; sed -n 55,85p core/hooks/ust.js","description":"Read test function and gate"},"red":false}
+{"tool":"Bash","agent_id":null,"agent_type":null,"girdi":{"command":"npm test 2>&1 | tail -30","timeout":300000,"description":"Run npm test"},"red":false}
