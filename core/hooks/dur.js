@@ -43,6 +43,16 @@ function english(text) {
   return en >= 5 && en > tr * 3;
 }
 
+const ASK = /^\s*(?:#{1,6}\s*|\*\*)(Senden istediklerim|What I need from you)\b/im;
+const WIPE = /\bRemove-Item\b|\brm\s+-\S*[rf]|\brmdir\b|\brd\s+\/s\b|\bdel\s+\/[sfq]\b/i;
+
+function sil(j) {
+  const said = typeof j.last_assistant_message === 'string' ? j.last_assistant_message : require('./defter.js').lastText(j);
+  const m = ASK.exec(String(said || ''));
+  if (!m || !WIPE.test(said.slice(m.index))) return '';
+  return t('dur.sil');
+}
+
 function language(j) {
   if (settings().langCheck === false || replyLang() !== 'tr') return '';
   const said = typeof j.last_assistant_message === 'string' ? j.last_assistant_message : require('./defter.js').lastText(j);
@@ -189,7 +199,7 @@ function sira(j) {
 function decide(j) {
   if (j.hook_event_name !== 'Stop') return null;
   if (j.stop_hook_active) return null;
-  const why = [sira(j), jobs(j), require('./defter.js').short(j), evidence(j), ui(j), language(j)].filter(Boolean);
+  const why = [sira(j), sil(j), jobs(j), require('./defter.js').short(j), evidence(j), ui(j), language(j)].filter(Boolean);
   return why.length ? { decision: 'block', reason: why.join('\n\n') } : null;
 }
 
@@ -203,4 +213,4 @@ function stop(j) {
 
 if (require.main === module) main(stop);
 
-module.exports = { ui, shot, stop, decide, sira, proven, off, code, jobs, english, language, CODE };
+module.exports = { ui, shot, stop, decide, sira, sil, proven, off, code, jobs, english, language, CODE };

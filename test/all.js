@@ -348,7 +348,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 23000, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 24000, String(JSON.stringify(table).length));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
   fs.mkdirSync(path.join(h, 'teknesyum'), { recursive: true });
@@ -1581,6 +1581,15 @@ function testConsult() {
   sweep(cfg);
 }
 
+function testSil() {
+  const dur = require(path.join(CORE, 'hooks', 'dur.js'));
+  const k = (text) => dur.sil({ last_assistant_message: text });
+  ok('a delete command under Senden istediklerim is sent back', /trash/.test(k('Bitti.\n\n## Senden istediklerim\n\n1. Çalıştır:\n```\nRemove-Item -Recurse -Force "C:\\x"\n```')));
+  ok('rm -rf too', /trash/.test(k('## What I need from you\n1. `rm -rf build`')));
+  ok('a delete command elsewhere in the reply passes', k('Remove-Item ile sildim.\n\n## Senden istediklerim\n\n1. Yeniden başlat.') === '');
+  ok('a reply without the heading passes', k('rm -rf yaptım') === '');
+}
+
 function testKural() {
   const count = require(path.join(CORE, 'hooks', 'count.js'));
   const ed = (file_path, new_string, old_string) => count.kural({ tool_name: 'Edit', tool_input: { file_path, new_string, old_string: old_string || '' } });
@@ -2028,6 +2037,7 @@ function main() {
     ['doctor', testDoctor],
     ['scan', testScan],
     ['consult gate', testConsult],
+    ['sil', testSil],
     ['kural', testKural],
     ['trash', testCop],
     ['machine sweep', testMachine],
