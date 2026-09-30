@@ -304,3 +304,22 @@ Harcama 5,08 $; dört turun toplamı 17,88 $.
 - Düzelt görevinde bir tekrarda %18 az, diğerinde %44 fazla; yön tutarsız.
 
 Sonuç: "300 satırı aşan dosyayı Sonnet okusun" düzeni gerçekte hiç kullanılmadı. Opus 5 durdurulunca işi devretmek yerine kendisi daraltıyor; bütün okuma nadir. Kapı kurulmadı, kod `trash/sant/`.
+
+## 15. Şant, 400 Satır, Tek Yol Sonnet 5.5 Okuyucu, 5. Tur
+
+Kapı mesajı yalnız okuyucuyu gösterdi ("kendin okuma, Agent ile teknesyum-core:okuyucu çağır"); okuyucu `claude-sonnet-5-5`. Soru görevi 2110 satırlık `test/all.js`'in tamamını anlamayı ister. Ham satırlar `bench/sant-5.jsonl`, günlükler `bench/sant-kanca/tur5/`.
+
+| Görev | Tekrar | Kapısız ana token | Kapılı ana token | Red | Sonnet harcaması | Doğru |
+|---|---|---|---|---|---|---|
+| düzelt | 1 | 369 181 | 405 008 | 1 | 0 $ | 0/2 |
+| düzelt | 2 | 369 095 | 311 896 | 1 | 0 $ | 0/2 |
+| soru | 1 | 662 295 | 697 757 | 0 | 0 $ | 2/2 |
+| soru | 2 | 879 032 | 1 034 404 | 0 | 0 $ | 2/2 |
+
+Harcama 5,68 $; beş turun toplamı 23,56 $.
+
+- Opus kapının mesajını gördü (sonraki adımı hep `grep -n`), okuyucuyu bir kez bile çağırmadı; ikinci deneme kaçışını da kullanmadı.
+- Soru görevinde opus dosyayı hiç bütün açmadı; `grep` ve küçük betiklerle tarayıp doğru cevap verdi, kapı çalışmadı.
+- Düzelt görevinin doğruluğu iki kolda da 0: kapı mesajı metin tablosunu büyüttüğü için kopyadaki "the table is small" testi kırmızıydı. Kollar eşit etkilendi; ölçüm sonucu değişmez.
+
+Sonuç: Opus 5 okumayı alt ajana devretmiyor; yönlendirme ne olursa olsun kendisi daraltıyor. Sonnet okuyucu düzeni kullanılmadığı için 500 satır denemesi yapılmadı. Kod `trash/sant/tur5/`.

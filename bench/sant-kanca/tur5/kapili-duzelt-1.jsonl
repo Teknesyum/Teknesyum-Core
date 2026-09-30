@@ -1,0 +1,7 @@
+{"tool":"Bash","agent_id":null,"agent_type":null,"girdi":{"command":"cat -n test/all.js; echo \"---PKG---\"; cat package.json","description":"Read test file and package.json"},"red":true}
+{"tool":"Bash","agent_id":null,"agent_type":null,"girdi":{"command":"grep -n \"testHaiku\" -A 40 test/all.js | head -80; echo \"---PKG---\"; cat package.json","description":"Find testHaiku function"},"red":false}
+{"tool":"Bash","agent_id":null,"agent_type":null,"girdi":{"command":"sed -i \"1593a\\\\  ok('opus passes', call('opus') === null);\" test/all.js && sed -n '1590,1598p' test/all.js","description":"Insert opus assertion after sonnet line"},"red":false}
+{"tool":"Bash","agent_id":null,"agent_type":null,"girdi":{"command":"npm test 2>&1 | tail -20","description":"Run npm test"},"red":false}
+{"tool":"Bash","agent_id":null,"agent_type":null,"girdi":{"command":"grep -rn \"the table is small\" test/ core/ | head","description":"Locate the failing assertion"},"red":false}
+{"tool":"Bash","agent_id":null,"agent_type":null,"girdi":{"command":"sed -n '335,355p' test/all.js","description":"Read context of table test"},"red":false}
+{"tool":"Bash","agent_id":null,"agent_type":null,"girdi":{"command":"node -e \"const t=require('./core/strings.json');console.log(JSON.stringify(t).length)\"; git status --porcelain test/ core/strings.json","description":"Verify strings.json size independent of change"},"red":false}
