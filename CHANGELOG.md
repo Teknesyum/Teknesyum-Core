@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.59.0
+
+- Hold a reply that hands the owner a delete command
+
 ## v0.58.0
 
 - Let a wipe inside the system temp through after an owner yes; the temp root stays shut
