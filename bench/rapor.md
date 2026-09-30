@@ -323,3 +323,27 @@ Harcama 5,68 $; beş turun toplamı 23,56 $.
 - Düzelt görevinin doğruluğu iki kolda da 0: kapı mesajı metin tablosunu büyüttüğü için kopyadaki "the table is small" testi kırmızıydı. Kollar eşit etkilendi; ölçüm sonucu değişmez.
 
 Sonuç: Opus 5 okumayı alt ajana devretmiyor; yönlendirme ne olursa olsun kendisi daraltıyor. Sonnet okuyucu düzeni kullanılmadığı için 500 satır denemesi yapılmadı. Kod `trash/sant/tur5/`.
+
+## 16. Şant, Güçlü Öneri Ve Zorunlu Neden, 6. Tur
+
+Kapı yalnız bench kopyasında kuruldu (`trash/sant/tur6/sant-kapi.js`). 400 satırı aşan bir dosyaya ilk dokunuşta (cat, grep, sed, head, Read) Opus durdu: ya `teknesyum-core:okuyucu` (Sonnet 5.5) çağıracak ya da nedenini `echo "NEDEN: …"` ile loga yazacaktı; ikisi olmadan başka araç çalışmadı. Yalnız kapılı kol, tavan 1,2 $. Ham satırlar `bench/sant-6.jsonl`, günlükler `bench/sant-kanca/tur6/`.
+
+| Görev | Tekrar | Seçim | Doğru | Opus $ | Sonnet $ | Toplam $ | Not |
+|---|---|---|---|---|---|---|---|
+| düzelt | 1 | reddetti, neden yazdı | evet | 0,42 | 0 | 0,42 | 5. tur kapısız 0,41 |
+| düzelt | 2 | reddetti, neden yazdı | evet | 0,40 | 0 | 0,40 | |
+| soru | 1 | okuyucu çağırdı | hayır | 0,17 | 1,22 | 1,38 | tavan aşıldı |
+| soru | 2 | okuyucu çağırdı | hayır | 0,17 | 1,05 | 1,22 | tavan aşıldı |
+| soru (ilk deneme) | 1-2 | okuyucu çağırdı | hayır | — | — | — | ayrıştırma hatası; `tur6/ilk/` |
+
+Düzelt görevinde yazılan nedenler (kelimesi kelimesine `tur6/ilk/neden-duzelt-*.log`):
+
+> NEDEN: Tum dosyanin raporuna ihtiyacim yok; sadece testHaiku fonksiyonunun aralgini gorup tek satir eklemem gerekiyor. Ayrica bu oturumun kurallari, kullanici istemedikce Agent/subagent cagirmami yasakliyor; kullanici okuyucu istemedi. …
+
+> NEDEN: Bana 2106 satirin tamami gerekmiyor; sadece testHaiku govdesindeki birkac satiri gorup tek bir ok(...) satiri eklemem lazim. Ayrica bu oturumun yapilandirmasi kullanici acikca istemedikce subagent (Agent araci) cagirmami yasakliyor, bu yuzden okuyucu'yu cagiramiyorum. …
+
+- "Kullanıcı istemedikçe alt ajan yok" kuralı Core'da ve sahibin ayarlarında yok; bench boş yapılandırmayla koşar. Kaynak Claude Code'un kendi sistem metni.
+- Soru görevinde Opus itirazsız okuyucuyu çağırdı. Sonnet 2106 satırı 700'lük parçalarla okudu; her adımda önceki parçaları yeniden okuduğu için 333 000 ile 467 000 önbellek token'ı harcadı.
+- Yalnız Sonnet'in okuması 1,05 ile 1,22 $ tuttu. Opus'un aynı görevi baştan sona kendisinin yapması 5. turda 0,86 ile 1,08 $ idi.
+
+Sonuç: Opus ayrımı doğru yapıyor; küçük işte okuyucuyu reddediyor, büyük işte kendisi çağırıyor. Ama Sonnet okuyucu, Opus'un kendi daraltarak okumasından pahalı. Şant fikri kapatıldı; 500 satır denemesi gereksiz.
