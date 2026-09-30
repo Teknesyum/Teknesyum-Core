@@ -60,7 +60,15 @@ function line(j) {
   return BANNER + s;
 }
 
+function haiku(j) {
+  if (j.tool_name !== 'Agent' || !/haiku/i.test(String((j.tool_input || {}).model || ''))) return null;
+  if (/haiku/i.test(require('./yasak.js').lastPrompt(j))) return null;
+  return { hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: t('ust.haiku') } };
+}
+
 function gate(j) {
+  const h = haiku(j);
+  if (h) return h;
   const deny = advice.gate(j);
   if (!deny && j.tool_name === 'Agent') {
     const input = j.tool_input || {};
@@ -73,4 +81,4 @@ function gate(j) {
 
 if (require.main === module) main(gate);
 
-module.exports = { gate, line, rank };
+module.exports = { gate, line, rank, haiku };

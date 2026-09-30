@@ -348,7 +348,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 24000, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 24500, String(JSON.stringify(table).length));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
   fs.mkdirSync(path.join(h, 'teknesyum'), { recursive: true });
@@ -1581,6 +1581,21 @@ function testConsult() {
   sweep(cfg);
 }
 
+function testHaiku() {
+  const ust = require(path.join(CORE, 'hooks', 'ust.js'));
+  const d = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-haiku-'));
+  const tr = path.join(d, 't.jsonl');
+  const user = (text) => JSON.stringify({ type: 'user', message: { content: text } }) + '\n';
+  const call = (model) => ust.haiku({ tool_name: 'Agent', tool_input: { model, prompt: 'x' }, transcript_path: tr, cwd: d });
+  fs.writeFileSync(tr, user('dosyaları say'));
+  const no = call('haiku');
+  ok('haiku without the owner is denied', no && no.hookSpecificOutput.permissionDecision === 'deny', JSON.stringify(no));
+  ok('sonnet passes', call('sonnet') === null);
+  fs.writeFileSync(tr, user('tamam haiku kullan'));
+  ok('the owner naming haiku lets it through', call('haiku') === null);
+  sweep(d);
+}
+
 function testSil() {
   const dur = require(path.join(CORE, 'hooks', 'dur.js'));
   const k = (text) => dur.sil({ last_assistant_message: text });
@@ -2037,6 +2052,7 @@ function main() {
     ['doctor', testDoctor],
     ['scan', testScan],
     ['consult gate', testConsult],
+    ['haiku', testHaiku],
     ['sil', testSil],
     ['kural', testKural],
     ['trash', testCop],

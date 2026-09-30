@@ -136,4 +136,4 @@ function decide(j) {
 
 if (require.main === module) main(decide);
 
-module.exports = { forbidden, decide, outside, targets, approved, inTemp, RULES, WIPE, YES };
+module.exports = { lastPrompt, forbidden, decide, outside, targets, approved, inTemp, RULES, WIPE, YES };
