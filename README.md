@@ -10,126 +10,127 @@ Counts, Shows, And Speaks Once
 
 ---
 
-## New In 0.33
+## What It Is
 
-Six things arrived between 0.26 and 0.33. None of them costs a byte on a turn where nothing
-happens, and every one of them is covered by the test suite.
-
-### One Core, Four Hosts
-
-Core was a Claude Code plugin. It still is, and now the same hooks also run inside Cursor's
-own agent and inside Gemini CLI. `core/hooks/host.js` is a thin adapter: it turns the host's
-hook JSON into the Claude shape, calls the same counting, denylist, loop, job and handoff
-code, and turns the answer back. One repository, one version, one test suite.
-
-```mermaid
-flowchart LR
-  CC["Claude Code<br/>hooks.json"] --> H["count · mod · yasak<br/>loop · dur · handoff"]
-  CU["Cursor agent<br/>~/.cursor/hooks.json"] --> A["host.js<br/>adapter"]
-  GE["Gemini CLI<br/>~/.gemini/settings.json"] --> A
-  A --> H
-  CX["Codex CLI"] -.-> R["adapters/AGENTS.md<br/>rules only"]
-```
-
-`setup.js --host cursor` or `--host gemini` wires only its own entries, keeps everything else
-in the file, and `--remove` takes them out again. Codex CLI has no hooks on Windows yet, so it
-gets the rules as text. Gemini was run live on 0.58.0: a hard reset denied, the banner shown,
-the job gate holding the turn once ([log](docs/raporlar/gemini-canli-deneme.md)).
-
-### A Banner That Costs Nothing
-
-When a hook acts, you see one line such as `Teknesyum Core > Denylist Stopped A Command`. In
-Claude Code the hook queues it on disk and `bant.js` draws it above the reply through
-`MessageDisplay`; the stored message and the model's context never see it. In Gemini the same
-line rides `systemMessage`, which Gemini shows you and never sends the model. In Cursor it
-appears when a shell command is denied.
-
-### Every Job, This Turn
-
-A prompt with five jobs used to lose one somewhere around the fortieth tool call. Now the
-model lists them in `.claude/jobs.md` as `- [ ] job`, ticks each one `- [x]`, and may leave
-one open only with a reason: `- [ ] job — waits on your decision`.
-
-On `Stop`, `dur.js` holds the turn once if a line is open with no reason, or if the prompt
-was a list and no list was written, or listed fewer lines than the prompt had items. A message
-you send while the model is working counts too: each one is at least one more job, and the hold
-quotes them back. On the
-next prompt the open lines move into the ledger and the file moves to `trash/`. A background
-task notification is not a prompt and takes nothing away.
-
-### One Ledger For Everything Put Off
-
-Everything put off goes to `.claude/acik.md` as `- [ ] job — time — reason`; there is no
-`sonra.md`. The hooks write it: `mod.js` moves the open lines of `jobs.md` in, `ust.js` opens
-`- [ ] ajan: <description>` for every Agent call, and an old `.claude/sonra.md` is moved in once
-and sent to `trash/`. While a line is open the ledger rides on every prompt and on every
-`SessionStart` (startup, resume, compact), at most 12 lines and 600 characters; `[x]` lines are
-pruned to `trash/acik-<ts>.md`. When the ledger shows, tick `[x]` what you did and give a
-reason for what you did not; a line never leaves without one. A reply of 40 characters or less
-with open lines is held once at `Stop`. An empty ledger costs nothing.
-
-### Evidence Before "Done"
-
-A session that edited code and ran nothing is held once at `Stop`: run it, show the output.
-Tests, `tsc`, `vite build`, `cargo check|build|clippy`, `scan.js`, `eslint`, `ruff` and
-`dotnet build` count as proof. The proof is tied to the code files the model wrote, so a README,
-note or ledger line written after the run, or a release
-script that bumps a version does not reopen the gate. It asks once, and a turn with no
-Write or Edit is never asked; a commit resets the count.
-
-When the owner's `CLAUDE.md` says "Answer in Turkish", a long reply that reads as English is
-held once at `Stop` and asked again in Turkish, and the first context after a compaction
-carries one line with the reply language. Off with `langCheck: false`.
-
-### A Denylist With Reasons
-
-Before every shell call, destructive commands are denied with one line on what to do
-instead: a delete that leaves the working directory, disk writes, force pushes and hard
-resets, repo and release deletion, download-and-run pipes, `chmod 777`, machine-wide kills.
-Deleting inside the project stays free.
-
-### Marks At Either End
-
-`??` `++` library, `pp` private shelf, `aa` agency, `ff` fable consult, `mc` memory check, `uc` UI check,
-`ss` now, `hh` help. Each is read at the start or at the end of the prompt, and `hh` lists them all
-with an example. The `hh` list is drawn on the display channel, so it costs the context
-nothing and no model decides whether to print it.
-
-| Feature | Ordinary turn | When it acts | Off with |
-|---|---|---|---|
-| Banner | 0 tokens | 0 tokens, screen only | - |
-| Job gate | 0 bytes | one block at `Stop` | `jobs: false` |
-| Job hand-back | 0 bytes | the open lines move to the ledger | `jobs: false` |
-| Ledger | 0 bytes when empty | at most 600 characters per prompt while a line is open | `jobs: false` |
-| Evidence gate | 0 bytes | one block at `Stop` | `evidence: false` |
-| Reply language | 0 bytes | one block at `Stop`, one line after a compaction | `langCheck: false` |
-| Denylist | 0 bytes | one reason per denied command | - |
-| Host adapters | 0 bytes | the same as in Claude Code | `setup.js --host <h> --remove` |
-
-The switches live in `~/.claude/teknesyum/config.json`.
+Teknesyum Core is an add-on for Claude Code that keeps long coding sessions on track. It
+watches how much work a session is doing and shows it on the bottom line of your window. It
+speaks up only when something needs you: a big change with no plan, a risky command, a job
+that was dropped, or code that was changed but never run. When a session runs out of room or
+ends, it writes a short note on where the work stands, so the next session carries on after
+one word: "continue". On a turn where nothing goes wrong, it adds nothing to what Claude
+reads, so it costs nothing extra.
 
 ---
 
-## The Scan
+## Doesn't Claude Code Already Do This?
 
-We did not guess what belonged in here. We read the market.
+Partly, yes. Claude Code can already hand work to helper agents, make a plan before it
+edits, work in a separate copy of the repository, show a status line, and run small scripts
+of your own at fixed moments (these scripts are called hooks). Core leaves all of that alone
+and wraps none of it.
 
-| | |
-|---|---|
-| Repositories looked at | 1,000 |
-| Read end to end, by 45 Opus agents | 963 |
-| Taken into the library | 93 |
-| Kept as an idea note, not shipped | 165 |
-| Declined | 705 |
-| Shelves shipping today | 38 |
-| Books in the catalog | 1,968 |
+What Core adds on top:
 
-None of them is installed. The catalog is a file on disk, searched without a model, and no
-shelf ever enters an ordinary turn's context.
+- **A note for the next session.** The work survives a cut session; the new one reads the
+  note instead of starting over.
+- **One reminder at the right moment.** When a job grows large and there is no plan, you
+  hear it once, not on every turn.
+- **Checks before "done".** A reply is held back once if jobs from your message were
+  dropped, or if code was changed and nothing was run.
+- **A library you open on request.** Expert notes from open-source projects, read only when
+  you ask, never loaded otherwise.
+
+---
+
+## What It Does
+
+Every feature, in plain words. The technical detail of each is in
+[How It Works](#how-it-works).
+
+- **Counting and a plan reminder.** It counts the files a session changes. When the job gets
+  big and there is no plan file, Claude is told once to write one or say skip.
+- **Status line.** The bottom line of the window shows files changed, whether a plan exists,
+  whether tests passed, how full the conversation is, and whether a handoff note is waiting.
+- **On-screen notices.** When Core acts, you see one line such as
+  `Teknesyum Core > Denylist Stopped A Command`. The line is drawn for you only; Claude never
+  reads it, so it costs nothing.
+- **Long-running process watch.** Programs a session started that are still running after
+  half an hour are counted on the status line. Nothing is stopped.
+- **Endless-wait guard.** A command that waits in a loop with no time limit is refused, and
+  Claude is told how to add one. Such a loop could otherwise hang forever.
+- **Handoff note.** When the conversation fills up or the session ends, Core writes where the
+  work stands. The next session reads it and continues.
+- **Chime.** A sound when Claude is waiting on you, such as a permission question. Silence
+  for everything else.
+- **Library.** Start or end a message with `??` or `++` and Core searches a catalog of expert
+  notes from open-source projects, then hands Claude the best few. Nothing is installed.
+- **Private shelf.** `pp` opens your own notes instead of the public library, on your own
+  machine only.
+- **Agency.** `aa` picks a specialist role, such as a designer or a reviewer, and hands your
+  question to a helper agent playing it.
+- **Second opinion.** `ff` sends a question to a stronger model once and keeps its answer in
+  a file.
+- **Memory check.** `mc` goes through your past requests and lists what was done, what was
+  not, and what waits on you.
+- **Interface check.** `uc` brings the steps for checking a user interface: contrast,
+  layout, the design rules.
+- **Now and help.** `ss` says you want something now, while Claude is still working. `hh`
+  lists every mark with an example.
+- **Every job, this turn.** A message with several jobs is written down as a checklist. If
+  one is dropped without a reason, the reply is held back once.
+- **Messages sent while Claude works.** A message you send mid-turn is queued, not lost, and
+  asked for once the current job is done.
+- **One list for everything put off.** Whatever was postponed goes to one list with a
+  reason. It is shown again until each line is done or explained.
+- **Proof before "done".** A session that changed code and ran nothing is held once and
+  asked to run it and show the output.
+- **Reply language.** If you asked for replies in Turkish, a long English reply is held once
+  and asked again in Turkish.
+- **Closing summary.** A long turn must end with a short summary, what is new to you, and
+  what Claude needs from you.
+- **No delete commands handed to you.** Claude is not allowed to ask you to run a delete; it
+  moves the files to a `trash/` folder itself.
+- **Screenshot after interface work.** When a screen file was edited, Claude is asked for a
+  screenshot and an outside look before calling it done.
+- **Books used.** Under a reply you see which notes and skills were really read. If Claude
+  names different ones, you are told.
+- **Denylist.** Destructive commands, such as deleting outside the project or force-pushing,
+  are refused with one line on what to do instead.
+- **Model guard.** The cheapest model is not used for helper agents unless you asked for it,
+  and you are told when work goes to a model above the session's own.
+- **Rules need a reason.** When a new ban is written into a rules file without a source,
+  Claude is asked for the risk and a design answer instead.
+- **Bug reports.** Say "report this to core" and Claude files a bug log in Core's own
+  repository. Open logs are named at the start of the next request there.
+- **Cleanup.** Old files in `trash/` and `tmp/` folders are deleted after a set time, and old
+  Core versions are cleared from the plugin cache.
+- **Fresh library.** Once a day the library is updated in the background.
+- **Tools you run by hand.** A map of which file imports which, a number checker for
+  reports, a license and signature writer, a setup script, a health check, a project scan
+  and a release script.
+- **Other tools than Claude Code.** The same checks run in Cursor's own agent and in Gemini
+  CLI. Codex CLI gets the rules as text.
+- **Design and review notes.** The library carries shelves for designing an interface and for
+  reviewing one.
+
+---
+
+## What It Does Not Do
+
+- It does not replace Claude Code's own helpers, plan mode or worktrees; the model still
+  picks those itself.
+- It does not install the library, the agency roles or any skill; they are files read on
+  request.
+- It does not stop long-running programs; it only shows them.
+- It does not make a task cheaper. On a task it costs what plain Claude Code costs.
+- The status line does not show inside the Claude Code extension of Cursor or VS Code.
 
 ---
 
 ## The Numbers First
+
+We ran the same tasks with plain Claude Code and with Core, and compared what they cost and
+whether the work got finished.
 
 Every claim below was measured against plain Claude Code on the same seat (sonnet, low
 effort), clean config, 2026-09-05 and 2026-09-06. Method, tables and raw rows are in
@@ -158,207 +159,6 @@ contracts, roles and tiers. Put back whole, it passed the same tasks at four to 
 the price. Put back one piece at a time, with the decision rule written before the runs,
 no piece moved the acceptance column and none came back. Section 8 of the report has the
 rows; the variants live under `bench/varyant/` and rerun with one command.
-
----
-
-## Why Big Tools Were Not Bundled
-
-Every one of these was read. None was rejected for being bad; each was rejected for what it
-costs on a turn where nothing happens.
-
-| Tool | Why it is not in here |
-|---|---|
-| [Obsidian](https://obsidian.md) | A whole note vault beside the repo. What we needed from it was one handoff file, and that is `handoff.js`. |
-| [graphify](https://github.com/hongkongkiwi/graphify) | Excellent on a large codebase, and we still recommend it. It indexes; we did not want an index in every session, so `map.js` runs only when called. |
-| [Context7](https://context7.com) | Live documentation on demand. It is a per-turn context cost by design; our rule is that an ordinary turn costs nothing extra. |
-| [superpowers](https://github.com/obra/superpowers) | The broadest skill framework there is. Its own lab shelf is in our library; the framework itself keeps a schema in context every session, which is the one thing we do not do. |
-
-The line between class Z and class C is the whole plugin: Z writes nothing ever, A writes
-only when you call it, B keeps a schema per session, C pays on every turn. Core ships Z and
-A. Nothing above them.
-
-```mermaid
-flowchart LR
-  Z["Class Z<br/>writes nothing"] --> A["Class A<br/>only when called"]
-  A --> B["Class B<br/>schema per session"]
-  B --> C["Class C<br/>pays every turn"]
-  Z:::in
-  A:::in
-  B:::out
-  C:::out
-  classDef in fill:#1b5e20,stroke:#2e7d32,color:#fff
-  classDef out fill:#4e342e,stroke:#6d4c41,color:#fff
-```
-
-Green is what Core ships. Brown is what it refused.
-
----
-
-## What It Is
-
-Teknesyum Core is a plugin for Claude Code that adds nothing to an ordinary turn. It counts
-the files a session touches, shows the count on the statusline, and speaks into the
-conversation exactly once, when the work has grown past a threshold and there is no plan on
-disk. When the session ends, or when the context window fills up, it writes a handoff file
-the next session resumes from with one word: "continue".
-
-Everything Claude Code already does natively - subagents, worktrees, plan mode, hooks, the
-statusline - is left alone. Nothing is wrapped, gated or rewritten.
-
-The same hooks run in Cursor's own agent and in Gemini CLI through a thin adapter, and Codex
-CLI gets the rules as text. See [Other Hosts](#cursor-gemini-codex-and-other-hosts).
-
----
-
-## What It Does
-
-### Count
-
-After every `Write`, `Edit` and `NotebookEdit` the hook records the touched file and asks git
-how many lines changed. Below the threshold it writes nothing: zero bytes into the context.
-
-The threshold is five files, or a hundred and fifty changed lines in tracked files, or a
-single file whose path looks risky: `migrations/`, `auth`, `secur`, `config`, a lock file,
-`.github/`, a `Dockerfile`. Lines in brand-new files are shown but do not count toward the
-line threshold; a task that writes three fresh files is not a task that needs a plan. When
-the threshold is crossed and there is no `docs/plan.md`, one line arrives, once per session:
-
-> 5 files touched and no plan. Write docs/plan.md or say skip.
-
-That is the whole conversation. The model writes the plan or says skip; the hook never asks
-again.
-
-### Show
-
-The statusline reads the same state: files touched with added and removed lines, whether a
-plan exists, the tests the session ran and how many failed, the context percentage, whether
-a handoff is waiting, open bug logs, and hook errors if any. Test staleness is read from the last edit time in state; git runs at most once every ten seconds. Plain text, no colours or
-measures invented here.
-
-When a hook acts, the user sees one chat line such as `Teknesyum Core > Kütüphane Döndü · 3
-Kitap Uydu · En Çok Üçü Okunacak`, drawn as a block above the reply. The hook queues the
-line on disk and `bant.js` draws it through `MessageDisplay`, which changes only what is
-shown: the stored message and the model's context stay untouched, so the line costs no
-tokens. Session start, marks, the threshold, the evidence gate, the denylist, a seat read and
-the job list each have one.
-
-It also counts processes the session spawned through a shell that have been running for
-more than thirty minutes: `⏳ 2 processes 40 min`. The count is refreshed by a detached
-process at most once a minute, so the statusline never waits on it, and the chime rings
-once when the first stale process appears. Nothing is stopped; a ninety-minute job is
-allowed to take ninety minutes, the line only says it is still there.
-
-### Bound
-
-Before every `Bash` and `PowerShell` call the hook looks for a wait loop with no upper
-bound: `until` or `while` around a `sleep`, with no `timeout`, no counter, no deadline.
-Such a loop sits forever when what it waits for never comes. The call is denied with one
-line that says how to bound it; the model picks the bound from the job and runs again.
-Everything else passes without a byte.
-
-### Handoff
-
-When the context passes sixty percent, or when the session ends, `.claude/handoff.md` is
-written by the machine. It opens with one rule line - read the task, then the changed files,
-continue from the first unfinished part, do not redo what the diff already shows - and then
-carries `task`, the session's first prompt read from the transcript; `changed_files` from
-`git diff --stat`; `tests_run` from the commands the hook saw, their exit code and the tree
-hash of that moment; `steer`, the last three prompts after the first; and `plan` if there is
-one. Two sections are left for the model, `decisions` and `next_action`,
-and one line asks for them at the threshold:
-
-> Context 64%. Fill decisions and next_action in .claude/handoff.md.
-
-A regenerated handoff keeps what the model wrote. The next session start says one line,
-`Resume: .claude/handoff.md`, and nothing else. When the work is finished, the file goes to
-`trash/`.
-
-### Chime
-
-A sound when Claude is waiting on you - a permission prompt, a question, a dialog - and
-silence for everything that does not need you. Off with one setting.
-
-### Consult
-
-A prompt that starts with `??` or `++` opens the library first. The `hooks/mod.js` hook
-runs `kutuphane.js find` on the words, with no model call, and puts up to eight hits and a
-three-line rule into that turn's context; the model reads at most three books lean, names the
-source on one line and works with that expertise. Turkish words are folded and mapped to the
-English catalog, and matches are whole words. A prompt that starts with `pp` opens the
-private shelf instead: the owner's own books under `~/.claude/teknesyum-private/private/`,
-whole (8 KB cap), announced to the user as `Teknesyum Core > Özel Raf Açıldı`; the shelf exists only
-when that mirror's remote is the owner's, so on any other machine `pp` says so and stops.
-A prompt that starts with `aa` opens the agency: `agency.js find` on the words, at most three seats and one rule in the context; the model reads the seat lean, hands it with the question to a subagent in Turkish and records the reply under `docs/danisma/`. An ordinary turn gets nothing from any of them.
-
-
-```mermaid
-flowchart TD
-  P["Your prompt"] --> M{"Mark at either end?"}
-  M -->|"none"| N["Ordinary turn<br/>nothing is written"]
-  M -->|"?? ++"| L["Library<br/>1,968 books, no model call"]
-  M -->|"pp"| S["Private shelf<br/>owner's machine only"]
-  M -->|"aa"| G["Agency<br/>a seat, handed to a subagent"]
-  M -->|"ff"| F["Fable<br/>one consult, filed on disk"]
-  M -->|"hh"| H["Lists every mark"]
-```
-
-### Tools that only run when called
-
-| Script | What it does |
-|---|---|
-| `scripts/map.js .` | Import graph: hubs, cycles, orphans. `map.js who <file>` says what imports it. |
-| `scripts/log.js write` | A log with a fixed shape into Core's `logs/openlogs/`: `--kind hata` (a bug, the default), `yontem` (a method worth keeping) or `teklif` (a proposal). A log whose title or symptom names teknesyum-ui or one of its scripts, or one written with `--to ui`, goes to the teknesyum-ui repo's own `logs/openlogs/` instead (found beside Core, or by `uiRepo` in the config); `list` shows both folders, `archive` finds a log in either, `route --id X --to ui` moves one across. A log that lands in teknesyum-ui also leaves a `- [ ] Logu oku: logs/openlogs/<file>` line in that repo's ledger `.claude/acik.md`, so the UI session sees it on its next prompt; `archive` ticks the line. A prompt such as `core'a raporla` or `report this to core` brings the recipe into that turn only. |
-| `scripts/advice.js` | `ask --mod gorus --konu <slug> --girdi <file>` numbers a fable consult under `docs/danisma/`, arms the gate for one call and prints a one-line Agent prompt that points at the file, so the input never enters the context twice; `record --mod gorus --ajan <agentId>` files the reply with its model, output tokens and seconds read from the agent transcript. `list` shows the records. |
-| `scripts/kutuphane.js` | The library: shelves cloned outside the project (`fetch`), a catalog built from front matter or the first heading and paragraph, `find <words>` scored without a model, `show <slug…> --lean` capped at three books and 48 KB, `record` under `docs/danisma/`, `push private` commits and pushes the private shelf, `stale [days]` lists how long ago each shelf was fetched, `fetch all --stale 7` updates only the ones older than that with `fetch --depth 1` and a reset, so clones stay shallow, and `slim` shallows and garbage-collects every existing clone once. Thirty-eight shelves ship in `core/kutuphane.json` (1,968 books; MIT, Apache-2.0, CC0, CC BY-SA 4.0 and one CC BY-NC-SA 4.0; the picks are in `docs/kutuphane/`; the 2026-09-08 market scan of 1000 repositories, 963 read and 93 marked take, is in `docs/kutuphane/piyasa-2026-09-08.md`), plus `raf add <slug> <url> --kind agents|skills|prompts|docs`; the kind decides what counts as a book. Nothing is installed, so no shelf ever enters the context. |
-| `scripts/agency.js` | A seat from [agency-agents](https://github.com/msitarzewski/agency-agents), on demand: now the `agency` shelf of the library, same commands (`find` keeps its own scoring, `show` and `record` are the library's): `find ui` picks, `show <slug> --lean` hands the role to a subagent without its personality and metrics blocks, `record` files the exchange under `docs/danisma/`. `show` leaves a seat mark that the next `Stop` prints in the chat as `Seat: <slug> read, <n> KB`; the line never enters the context. Nothing is installed as an agent, so the roster never enters the context. |
-| `scripts/manset.js` | Checks a Markdown report: every number in prose must appear in the same section's table or list. |
-| `scripts/scaffold.js` | License, signature block, language link: fixed texts the model never types. |
-| `scripts/setup.js` | Machine setup: language, chime, private repository, projects folder. The statusline runs a copy of `bridge.js` in `~/.claude/teknesyum/`, so pruning old plugin versions never breaks it. `--host cursor\|gemini` wires the adapter into that host, `--remove` takes it out. |
-| `scripts/doctor.js` | Eight checks: node, git, version, hooks, statusline, cache, map, logs. `cache` compares the repo's hooks, scripts and strings with the installed plugin and names every file that is not live yet. |
-| `scripts/scan.js` | Eight read-only checks on the project itself: license surfaces, plan against the five-file threshold, handoff holes, documents against the version, test script, `trash/` references, stray temporary files against `tmp/`, map. Nothing written, no model, nothing into context; the profile only widens the document set. |
-| `scripts/hatirla.js` | Memory check: `topla [--gun N]` writes every past request, whole, with its evidence - the closing reply, the commits made before the next request, the open job lines of `trash/jobs-*`, `.claude/jobs.md` and `docs/plan.md` - into pages of about 40k characters under `tmp/gecmis-N.md`, newest first, a repeated request kept once. The whole commit list of the period goes to `tmp/gecmis-commitler.md`. It prints only an index; every page goes to sonnet by path, in parallel groups of four with one merger. Each request is split into its asks and each ask is checked against the closings and commits of that and every later request. `record --ajan <agentId>` files the report as `tmp/hatirlatici.md` - per request what I said, then `[x]` done, `[ ]` not done, `[!]` awaiting decision, `[?]` unclear - and puts everything not fully done on screen at no token cost; a second record replaces the first on screen. Temporary files live in `tmp/`, which stays out of git. |
-| `scripts/cop.js` | Measures `<project>/trash` and the `tmp/` files older than a day: `node cop.js .` prints the total and the ten largest files, exits `1` over 100 MB; `--hepsi [root]` does it for every project under `projectsRoot`, largest first. At `Stop`, at most once an hour, `count.js` cleans every project under `projectsRoot` (this one alone without it) by itself: a `trash/` entry is deleted a week after it was first seen there, a `tmp/` file once it is a day old, and the banner under the finished reply names what went, at zero tokens. `--sil` empties the trash and the old tmp files now, for good, because the recycle bin frees no space; fresh tmp files stay. Once a day at session start it also sweeps state, banner and advice files older than seven days from `~/.claude/teknesyum/` (never the live session's) and moves all but the newest two Teknesyum plugin versions from the plugin cache to `~/.claude/teknesyum/trash/plugin-cache/`, keeping the installed one. |
-| `scripts/release.js` | Bumps the version from the notes left in `.changes/`, rewrites the install lines, tags; `publish` creates the GitHub release titled `vX.Y.Z` and uploads both installers with their `.sha256` files. |
-
----
-
-## Design And UI Review
-
-Design work and design review are two different jobs, so the library carries both. Five
-shelves were added for them after a second sweep of the market.
-
-| Shelf | What it is for |
-|---|---|
-| `ui-ux-pro-max` | Designing: 67 styles, 96 palettes, 57 font pairings, across 13 stacks. |
-| `anthropic-skills` | Designing: `frontend-design`, `brand-guidelines`, `canvas-design`, from Anthropic's own repository. |
-| `addyosmani-skills` | Both: `frontend-ui-engineering` builds accessible, responsive UI; the accessibility checklist reviews it. |
-| `react-best-practices` | Reviewing: `web-design-guidelines` reads finished UI code against the Web Interface Guidelines. |
-| `pair-design` | Designing: a framework for working through a design with the user rather than at them. |
-
-Alongside what was already there — `refactoring-ui`, `web-design`, `ecc/skills/design-system`,
-`ecc/skills/accessibility`, the `design` seats of the agency. Nothing is installed; `?? ui`
-or `?? arayüzü denetle` finds them, and an ordinary turn sees none of it.
-
-```mermaid
-flowchart LR
-  D["?? tasarım"] --> DS["ui-ux-pro-max<br/>frontend-design<br/>design-system"]
-  R["?? arayüzü denetle"] --> RS["web-design-guidelines<br/>accessibility<br/>ui-finish-gate-reviewer"]
-```
-
----
-
-## What Went Out
-
-Version 0.16 is a subtraction release. These left the plugin; the `v0.15.0`
-tag holds every one of them, and `bench/varyant/` names the source of each part it measures:
-
-- the contract machine: `contract.js`, `risk.js`, `verify-runner.js`, the relay `handoff.js`;
-- nine hooks: autoclose, closure, cue, embed, guard, notice, schema, seal, watch;
-- six role texts, the `worker` agent, the relay skill, `tiers.json`.
-
-What replaced them is two hooks, `count.js` and `handoff.js`, and the five-line rule below.
-Agents, worktrees and plan mode are still there; they are Claude Code's own, and the model
-picks them the way it always did. The removed part was the machine that chose for it.
 
 ---
 
@@ -426,40 +226,15 @@ A ready-made prompt for a Cursor user's agent is in
 
 ---
 
-## The Rule For CLAUDE.md
+## How It Works
 
-The plugin does not tell the model how to work. This is the five-line rule it suggests you
-put in your own `CLAUDE.md`; the count hook is its only enforcement, and the rule itself is
-the ~200 tokens per turn in the table above.
+From here on the language is technical: hook events, context bytes, file paths and
+switches.
 
-```
-- One file and a job you know: do it.
-- Five or more files: docs/plan.md first.
-- A library you do not know: read before writing.
-- When done, run it and show the output.
-- Small job: none of the above.
-```
+### Hooks
 
-The longer form, with the job list and the handoff, is in [adapters/AGENTS.md](adapters/AGENTS.md).
-
----
-
-## What It Looks Like In Use
-
-```
-Teknesyum ▸ my-app · context 41% · 3 files +82-14 · no plan · tests pass
-Teknesyum ▸ my-app · context 67% · 6 files +240-31 · plan · tests stale · handoff
-```
-
-The first line is a session below every threshold: nothing has been said to the model. The
-second is a session that wrote its plan, ran its tests, edited since (so the last record is
-stale), and has a handoff waiting for the `decisions` and `next_action` lines. The test word
-is the last record only: pass or fail from the exit code, unknown when the run printed
-nothing, stale when HEAD or the working tree moved after it.
-
----
-
-## Hooks
+The evidence gate below is one of thirteen hook entries. Nine events, eleven files, all under
+`core/hooks/`:
 
 ```mermaid
 flowchart LR
@@ -471,9 +246,6 @@ flowchart LR
   A --> K{"git commit?"}
   K -->|"yes"| R["Seals the work,<br/>counter reset"]
 ```
-
-The evidence gate above is one of thirteen hook entries. Nine events, eleven files, all under
-`core/hooks/`:
 
 | Event | Hook | Says |
 |---|---|---|
@@ -513,10 +285,320 @@ sequenceDiagram
   H-->>H: writes the handoff
 ```
 
+### Count
+
+After every `Write`, `Edit` and `NotebookEdit` the hook records the touched file and asks git
+how many lines changed. Below the threshold it writes nothing: zero bytes into the context.
+
+The threshold is five files, or a hundred and fifty changed lines in tracked files, or a
+single file whose path looks risky: `migrations/`, `auth`, `secur`, `config`, a lock file,
+`.github/`, a `Dockerfile`. Lines in brand-new files are shown but do not count toward the
+line threshold; a task that writes three fresh files is not a task that needs a plan. When
+the threshold is crossed and there is no `docs/plan.md`, one line arrives, once per session:
+
+> 5 files touched and no plan. Write docs/plan.md or say skip.
+
+That is the whole conversation. The model writes the plan or says skip; the hook never asks
+again.
+
+### Show
+
+The statusline reads the same state: files touched with added and removed lines, whether a
+plan exists, the tests the session ran and how many failed, the context percentage, whether
+a handoff is waiting, open bug logs, and hook errors if any. Test staleness is read from the last edit time in state; git runs at most once every ten seconds. Plain text, no colours or
+measures invented here.
+
+It also counts processes the session spawned through a shell that have been running for
+more than thirty minutes: `⏳ 2 processes 40 min`. The count is refreshed by a detached
+process at most once a minute, so the statusline never waits on it, and the chime rings
+once when the first stale process appears. Nothing is stopped; a ninety-minute job is
+allowed to take ninety minutes, the line only says it is still there.
+
+### Banner
+
+When a hook acts, the user sees one chat line such as `Teknesyum Core > Kütüphane Döndü · 3
+Kitap Uydu · En Çok Üçü Okunacak`, drawn as a block above the reply. The hook queues the
+line on disk and `bant.js` draws it through `MessageDisplay`, which changes only what is
+shown: the stored message and the model's context stay untouched, so the line costs no
+tokens. Session start, marks, the threshold, the evidence gate, the denylist, a seat read and
+the job list each have one.
+
+In Gemini the same line rides `systemMessage`, which Gemini shows you and never sends the
+model. In Cursor it appears when a shell command is denied.
+
+### Bound
+
+Before every `Bash` and `PowerShell` call the hook looks for a wait loop with no upper
+bound: `until` or `while` around a `sleep`, with no `timeout`, no counter, no deadline.
+Such a loop sits forever when what it waits for never comes. The call is denied with one
+line that says how to bound it; the model picks the bound from the job and runs again.
+Everything else passes without a byte.
+
+### Denylist
+
+Before every shell call, destructive commands are denied with one line on what to do
+instead: a delete that leaves the working directory, disk writes, force pushes and hard
+resets, repo and release deletion, download-and-run pipes, `chmod 777`, machine-wide kills.
+Deleting inside the project stays free. The exact rules are in the `yasak.js` row above.
+
+### Handoff
+
+When the context passes sixty percent, or when the session ends, `.claude/handoff.md` is
+written by the machine. It opens with one rule line - read the task, then the changed files,
+continue from the first unfinished part, do not redo what the diff already shows - and then
+carries `task`, the session's first prompt read from the transcript; `changed_files` from
+`git diff --stat`; `tests_run` from the commands the hook saw, their exit code and the tree
+hash of that moment; `steer`, the last three prompts after the first; and `plan` if there is
+one. Two sections are left for the model, `decisions` and `next_action`,
+and one line asks for them at the threshold:
+
+> Context 64%. Fill decisions and next_action in .claude/handoff.md.
+
+A regenerated handoff keeps what the model wrote. The next session start says one line,
+`Resume: .claude/handoff.md`, and nothing else. When the work is finished, the file goes to
+`trash/`.
+
+### Chime
+
+A sound when Claude is waiting on you - a permission prompt, a question, a dialog - and
+silence for everything that does not need you. Off with one setting.
+
+### Every Job, This Turn
+
+The model lists the jobs of a prompt in `.claude/jobs.md` as `- [ ] job`, ticks each one
+`- [x]`, and may leave one open only with a reason: `- [ ] job — waits on your decision`.
+
+On `Stop`, `dur.js` holds the turn once if a line is open with no reason, or if the prompt
+was a list and no list was written, or listed fewer lines than the prompt had items. A message
+you send while the model is working counts too: each one is at least one more job, and the hold
+quotes them back. On the next prompt the open lines move into the ledger and the file moves to
+`trash/`. A background task notification is not a prompt and takes nothing away.
+
+### One Ledger For Everything Put Off
+
+Everything put off goes to `.claude/acik.md` as `- [ ] job — time — reason`; there is no
+`sonra.md`. The hooks write it: `mod.js` moves the open lines of `jobs.md` in, `ust.js` opens
+`- [ ] ajan: <description>` for every Agent call, and an old `.claude/sonra.md` is moved in once
+and sent to `trash/`. While a line is open the ledger rides on every prompt and on every
+`SessionStart` (startup, resume, compact), at most 12 lines and 600 characters; `[x]` lines are
+pruned to `trash/acik-<ts>.md`. When the ledger shows, tick `[x]` what you did and give a
+reason for what you did not; a line never leaves without one. A reply of 40 characters or less
+with open lines is held once at `Stop`. An empty ledger costs nothing.
+
+### Evidence Before "Done"
+
+A session that edited code and ran nothing is held once at `Stop`: run it, show the output.
+Tests, `tsc`, `vite build`, `cargo check|build|clippy`, `scan.js`, `eslint`, `ruff` and
+`dotnet build` count as proof. The proof is tied to the code files the model wrote, so a README,
+note or ledger line written after the run, or a release
+script that bumps a version does not reopen the gate. It asks once, and a turn with no
+Write or Edit is never asked; a commit resets the count.
+
+When the owner's `CLAUDE.md` says "Answer in Turkish", a long reply that reads as English is
+held once at `Stop` and asked again in Turkish, and the first context after a compaction
+carries one line with the reply language. Off with `langCheck: false`.
+
+### Marks
+
+`??` `++` library, `pp` private shelf, `aa` agency, `ff` fable consult, `mc` memory check, `uc` UI check,
+`ss` now, `hh` help. Each is read at the start or at the end of the prompt, and `hh` lists them all
+with an example. The `hh` list is drawn on the display channel, so it costs the context
+nothing and no model decides whether to print it.
+
+A prompt marked `??` or `++` opens the library first. The `hooks/mod.js` hook
+runs `kutuphane.js find` on the words, with no model call, and puts up to eight hits and a
+three-line rule into that turn's context; the model reads at most three books lean, names the
+source on one line and works with that expertise. Turkish words are folded and mapped to the
+English catalog, and matches are whole words. A prompt marked `pp` opens the
+private shelf instead: the owner's own books under `~/.claude/teknesyum-private/private/`,
+whole (8 KB cap), announced to the user as `Teknesyum Core > Özel Raf Açıldı`; the shelf exists only
+when that mirror's remote is the owner's, so on any other machine `pp` says so and stops.
+A prompt marked `aa` opens the agency: `agency.js find` on the words, at most three seats and one rule in the context; the model reads the seat lean, hands it with the question to a subagent in Turkish and records the reply under `docs/danisma/`. An ordinary turn gets nothing from any of them.
+
+```mermaid
+flowchart TD
+  P["Your prompt"] --> M{"Mark at either end?"}
+  M -->|"none"| N["Ordinary turn<br/>nothing is written"]
+  M -->|"?? ++"| L["Library<br/>1,968 books, no model call"]
+  M -->|"pp"| S["Private shelf<br/>owner's machine only"]
+  M -->|"aa"| G["Agency<br/>a seat, handed to a subagent"]
+  M -->|"ff"| F["Fable<br/>one consult, filed on disk"]
+  M -->|"hh"| H["Lists every mark"]
+```
+
+### One Core, Four Hosts
+
+The same hooks run inside Claude Code, Cursor's own agent and Gemini CLI.
+`core/hooks/host.js` is a thin adapter: it turns the host's hook JSON into the Claude shape,
+calls the same counting, denylist, loop, job and handoff code, and turns the answer back.
+One repository, one version, one test suite.
+
+```mermaid
+flowchart LR
+  CC["Claude Code<br/>hooks.json"] --> H["count · mod · yasak<br/>loop · dur · handoff"]
+  CU["Cursor agent<br/>~/.cursor/hooks.json"] --> A["host.js<br/>adapter"]
+  GE["Gemini CLI<br/>~/.gemini/settings.json"] --> A
+  A --> H
+  CX["Codex CLI"] -.-> R["adapters/AGENTS.md<br/>rules only"]
+```
+
+`setup.js --host cursor` or `--host gemini` wires only its own entries, keeps everything else
+in the file, and `--remove` takes them out again. Codex CLI has no hooks on Windows yet, so it
+gets the rules as text. Gemini was run live on 0.58.0: a hard reset denied, the banner shown,
+the job gate holding the turn once ([log](docs/raporlar/gemini-canli-deneme.md)).
+
+### Tools That Only Run When Called
+
+| Script | What it does |
+|---|---|
+| `scripts/map.js .` | Import graph: hubs, cycles, orphans. `map.js who <file>` says what imports it. |
+| `scripts/log.js write` | A log with a fixed shape into Core's `logs/openlogs/`: `--kind hata` (a bug, the default), `yontem` (a method worth keeping) or `teklif` (a proposal). A log whose title or symptom names teknesyum-ui or one of its scripts, or one written with `--to ui`, goes to the teknesyum-ui repo's own `logs/openlogs/` instead (found beside Core, or by `uiRepo` in the config); `list` shows both folders, `archive` finds a log in either, `route --id X --to ui` moves one across. A log that lands in teknesyum-ui also leaves a `- [ ] Logu oku: logs/openlogs/<file>` line in that repo's ledger `.claude/acik.md`, so the UI session sees it on its next prompt; `archive` ticks the line. A prompt such as `core'a raporla` or `report this to core` brings the recipe into that turn only. |
+| `scripts/advice.js` | `ask --mod gorus --konu <slug> --girdi <file>` numbers a fable consult under `docs/danisma/`, arms the gate for one call and prints a one-line Agent prompt that points at the file, so the input never enters the context twice; `record --mod gorus --ajan <agentId>` files the reply with its model, output tokens and seconds read from the agent transcript. `list` shows the records. |
+| `scripts/kutuphane.js` | The library: shelves cloned outside the project (`fetch`), a catalog built from front matter or the first heading and paragraph, `find <words>` scored without a model, `show <slug…> --lean` capped at three books and 48 KB, `record` under `docs/danisma/`, `push private` commits and pushes the private shelf, `stale [days]` lists how long ago each shelf was fetched, `fetch all --stale 7` updates only the ones older than that with `fetch --depth 1` and a reset, so clones stay shallow, and `slim` shallows and garbage-collects every existing clone once. Thirty-eight shelves ship in `core/kutuphane.json` (1,968 books; MIT, Apache-2.0, CC0, CC BY-SA 4.0 and one CC BY-NC-SA 4.0; the picks are in `docs/kutuphane/`; the 2026-09-08 market scan of 1000 repositories, 963 read and 93 marked take, is in `docs/kutuphane/piyasa-2026-09-08.md`), plus `raf add <slug> <url> --kind agents|skills|prompts|docs`; the kind decides what counts as a book. Nothing is installed, so no shelf ever enters the context. |
+| `scripts/agency.js` | A seat from [agency-agents](https://github.com/msitarzewski/agency-agents), on demand: now the `agency` shelf of the library, same commands (`find` keeps its own scoring, `show` and `record` are the library's): `find ui` picks, `show <slug> --lean` hands the role to a subagent without its personality and metrics blocks, `record` files the exchange under `docs/danisma/`. `show` leaves a seat mark that the next `Stop` prints in the chat as `Seat: <slug> read, <n> KB`; the line never enters the context. Nothing is installed as an agent, so the roster never enters the context. |
+| `scripts/manset.js` | Checks a Markdown report: every number in prose must appear in the same section's table or list. |
+| `scripts/scaffold.js` | License, signature block, language link: fixed texts the model never types. |
+| `scripts/setup.js` | Machine setup: language, chime, private repository, projects folder. The statusline runs a copy of `bridge.js` in `~/.claude/teknesyum/`, so pruning old plugin versions never breaks it. `--host cursor\|gemini` wires the adapter into that host, `--remove` takes it out. |
+| `scripts/doctor.js` | Eight checks: node, git, version, hooks, statusline, cache, map, logs. `cache` compares the repo's hooks, scripts and strings with the installed plugin and names every file that is not live yet. |
+| `scripts/scan.js` | Eight read-only checks on the project itself: license surfaces, plan against the five-file threshold, handoff holes, documents against the version, test script, `trash/` references, stray temporary files against `tmp/`, map. Nothing written, no model, nothing into context; the profile only widens the document set. |
+| `scripts/hatirla.js` | Memory check: `topla [--gun N]` writes every past request, whole, with its evidence - the closing reply, the commits made before the next request, the open job lines of `trash/jobs-*`, `.claude/jobs.md` and `docs/plan.md` - into pages of about 40k characters under `tmp/gecmis-N.md`, newest first, a repeated request kept once. The whole commit list of the period goes to `tmp/gecmis-commitler.md`. It prints only an index; every page goes to sonnet by path, in parallel groups of four with one merger. Each request is split into its asks and each ask is checked against the closings and commits of that and every later request. `record --ajan <agentId>` files the report as `tmp/hatirlatici.md` - per request what I said, then `[x]` done, `[ ]` not done, `[!]` awaiting decision, `[?]` unclear - and puts everything not fully done on screen at no token cost; a second record replaces the first on screen. Temporary files live in `tmp/`, which stays out of git. |
+| `scripts/cop.js` | Measures `<project>/trash` and the `tmp/` files older than a day: `node cop.js .` prints the total and the ten largest files, exits `1` over 100 MB; `--hepsi [root]` does it for every project under `projectsRoot`, largest first. At `Stop`, at most once an hour, `count.js` cleans every project under `projectsRoot` (this one alone without it) by itself: a `trash/` entry is deleted a week after it was first seen there, a `tmp/` file once it is a day old, and the banner under the finished reply names what went, at zero tokens. `--sil` empties the trash and the old tmp files now, for good, because the recycle bin frees no space; fresh tmp files stay. Once a day at session start it also sweeps state, banner and advice files older than seven days from `~/.claude/teknesyum/` (never the live session's) and moves all but the newest two Teknesyum plugin versions from the plugin cache to `~/.claude/teknesyum/trash/plugin-cache/`, keeping the installed one. |
+| `scripts/release.js` | Bumps the version from the notes left in `.changes/`, rewrites the install lines, tags; `publish` creates the GitHub release titled `vX.Y.Z` and uploads both installers with their `.sha256` files. |
+
+### Settings
+
+| Feature | Ordinary turn | When it acts | Off with |
+|---|---|---|---|
+| Banner | 0 tokens | 0 tokens, screen only | - |
+| Job gate | 0 bytes | one block at `Stop` | `jobs: false` |
+| Job hand-back | 0 bytes | the open lines move to the ledger | `jobs: false` |
+| Ledger | 0 bytes when empty | at most 600 characters per prompt while a line is open | `jobs: false` |
+| Evidence gate | 0 bytes | one block at `Stop` | `evidence: false` |
+| Reply language | 0 bytes | one block at `Stop`, one line after a compaction | `langCheck: false` |
+| Denylist | 0 bytes | one reason per denied command | - |
+| Host adapters | 0 bytes | the same as in Claude Code | `setup.js --host <h> --remove` |
+
+The switches live in `~/.claude/teknesyum/config.json`. The closing gate is off with
+`"closing": false` and the interface gate with `ui: false`.
+
+### The Rule For CLAUDE.md
+
+The plugin does not tell the model how to work. This is the five-line rule it suggests you
+put in your own `CLAUDE.md`; the count hook is its only enforcement, and the rule itself is
+the ~200 tokens per turn in the table above.
+
+```
+- One file and a job you know: do it.
+- Five or more files: docs/plan.md first.
+- A library you do not know: read before writing.
+- When done, run it and show the output.
+- Small job: none of the above.
+```
+
+The longer form, with the job list and the handoff, is in [adapters/AGENTS.md](adapters/AGENTS.md).
+
+### What It Looks Like In Use
+
+```
+Teknesyum ▸ my-app · context 41% · 3 files +82-14 · no plan · tests pass
+Teknesyum ▸ my-app · context 67% · 6 files +240-31 · plan · tests stale · handoff
+```
+
+The first line is a session below every threshold: nothing has been said to the model. The
+second is a session that wrote its plan, ran its tests, edited since (so the last record is
+stale), and has a handoff waiting for the `decisions` and `next_action` lines. The test word
+is the last record only: pass or fail from the exit code, unknown when the run printed
+nothing, stale when HEAD or the working tree moved after it.
+
+### The Scan
+
+We did not guess what belonged in here. We read the market.
+
+| | |
+|---|---|
+| Repositories looked at | 1,000 |
+| Read end to end, by 45 Opus agents | 963 |
+| Taken into the library | 93 |
+| Kept as an idea note, not shipped | 165 |
+| Declined | 705 |
+| Shelves shipping today | 38 |
+| Books in the catalog | 1,968 |
+
+None of them is installed. The catalog is a file on disk, searched without a model, and no
+shelf ever enters an ordinary turn's context.
+
+### Why Big Tools Were Not Bundled
+
+Every one of these was read. None was rejected for being bad; each was rejected for what it
+costs on a turn where nothing happens.
+
+| Tool | Why it is not in here |
+|---|---|
+| [Obsidian](https://obsidian.md) | A whole note vault beside the repo. What we needed from it was one handoff file, and that is `handoff.js`. |
+| [graphify](https://github.com/hongkongkiwi/graphify) | Excellent on a large codebase, and we still recommend it. It indexes; we did not want an index in every session, so `map.js` runs only when called. |
+| [Context7](https://context7.com) | Live documentation on demand. It is a per-turn context cost by design; our rule is that an ordinary turn costs nothing extra. |
+| [superpowers](https://github.com/obra/superpowers) | The broadest skill framework there is. Its own lab shelf is in our library; the framework itself keeps a schema in context every session, which is the one thing we do not do. |
+
+The line between class Z and class C is the whole plugin: Z writes nothing ever, A writes
+only when you call it, B keeps a schema per session, C pays on every turn. Core ships Z and
+A. Nothing above them.
+
+```mermaid
+flowchart LR
+  Z["Class Z<br/>writes nothing"] --> A["Class A<br/>only when called"]
+  A --> B["Class B<br/>schema per session"]
+  B --> C["Class C<br/>pays every turn"]
+  Z:::in
+  A:::in
+  B:::out
+  C:::out
+  classDef in fill:#1b5e20,stroke:#2e7d32,color:#fff
+  classDef out fill:#4e342e,stroke:#6d4c41,color:#fff
+```
+
+Green is what Core ships. Brown is what it refused.
+
+### Design And UI Review
+
+Design work and design review are two different jobs, so the library carries both. Five
+shelves were added for them after a second sweep of the market.
+
+| Shelf | What it is for |
+|---|---|
+| `ui-ux-pro-max` | Designing: 67 styles, 96 palettes, 57 font pairings, across 13 stacks. |
+| `anthropic-skills` | Designing: `frontend-design`, `brand-guidelines`, `canvas-design`, from Anthropic's own repository. |
+| `addyosmani-skills` | Both: `frontend-ui-engineering` builds accessible, responsive UI; the accessibility checklist reviews it. |
+| `react-best-practices` | Reviewing: `web-design-guidelines` reads finished UI code against the Web Interface Guidelines. |
+| `pair-design` | Designing: a framework for working through a design with the user rather than at them. |
+
+Alongside what was already there — `refactoring-ui`, `web-design`, `ecc/skills/design-system`,
+`ecc/skills/accessibility`, the `design` seats of the agency. Nothing is installed; `?? ui`
+or `?? arayüzü denetle` finds them, and an ordinary turn sees none of it.
+
+```mermaid
+flowchart LR
+  D["?? tasarım"] --> DS["ui-ux-pro-max<br/>frontend-design<br/>design-system"]
+  R["?? arayüzü denetle"] --> RS["web-design-guidelines<br/>accessibility<br/>ui-finish-gate-reviewer"]
+```
+
+### What Went Out
+
+Version 0.16 is a subtraction release. These left the plugin; the `v0.15.0`
+tag holds every one of them, and `bench/varyant/` names the source of each part it measures:
+
+- the contract machine: `contract.js`, `risk.js`, `verify-runner.js`, the relay `handoff.js`;
+- nine hooks: autoclose, closure, cue, embed, guard, notice, schema, seal, watch;
+- six role texts, the `worker` agent, the relay skill, `tiers.json`.
+
+What replaced them is two hooks, `count.js` and `handoff.js`, and the five-line rule above.
+Agents, worktrees and plan mode are still there; they are Claude Code's own, and the model
+picks them the way it always did. The removed part was the machine that chose for it.
 
 ---
 
-## Layout
+## For Developers
+
+### Layout
 
 ```
 .claude/
@@ -538,9 +620,7 @@ bench/
   hook-errors.log      what a hook could not do
 ```
 
----
-
-## Tests
+### Tests
 
 ```bash
 npm test
@@ -558,9 +638,7 @@ job gate and its hand-back. The host adapters get their own suite, Cursor and Ge
 in and host answers out, and the setup wiring is checked to be idempotent and to leave
 foreign hooks alone.
 
----
-
-## Design Notes
+### Design Notes
 
 - [docs/COST-MODEL.md](docs/COST-MODEL.md) - where tokens go, and the rule that follows
 - [docs/DECISIONS.md](docs/DECISIONS.md) - the decisions that shaped this, and why

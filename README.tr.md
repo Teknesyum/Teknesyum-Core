@@ -10,124 +10,129 @@ Sayar, Gösterir, Bir Kez Konuşur
 
 ---
 
-## 0.33'te Yeni
+## Nedir
 
-0.26 ile 0.33 arasında altı şey geldi. Hiçbir şeyin olmadığı turda hiçbiri tek bayt
-tutmuyor, her biri test takımında.
-
-### Tek Çekirdek, Dört Host
-
-Core bir Claude Code eklentisiydi. Hâlâ öyle; artık aynı kancalar Cursor'un kendi ajanında
-ve Gemini CLI içinde de koşuyor. `core/hooks/host.js` ince bir adaptör: hostun kanca
-JSON'unu Claude şemasına çevirir, aynı sayım, yasak liste, döngü, iş ve devir kodunu çağırır,
-cevabı geri çevirir. Tek depo, tek sürüm, tek test takımı.
-
-```mermaid
-flowchart LR
-  CC["Claude Code<br/>hooks.json"] --> H["count · mod · yasak<br/>loop · dur · handoff"]
-  CU["Cursor ajanı<br/>~/.cursor/hooks.json"] --> A["host.js<br/>adaptör"]
-  GE["Gemini CLI<br/>~/.gemini/settings.json"] --> A
-  A --> H
-  CX["Codex CLI"] -.-> R["adapters/AGENTS.md<br/>yalnız kural"]
-```
-
-`setup.js --host cursor` ya da `--host gemini` yalnız kendi girdilerini bağlar, dosyadaki
-başka her şeyi korur; `--remove` onları geri çıkarır. Codex CLI'nin Windows'ta henüz kancası
-yok, kuralları metin olarak alıyor. Gemini 0.58.0 üstünde canlı koşuldu: hard reset reddedildi,
-banner göründü, iş kapısı turu bir kez tuttu ([kayıt](docs/raporlar/gemini-canli-deneme.md)).
-
-### Bedava Banner
-
-Bir kanca iş yapınca tek satır görürsünüz: `Teknesyum Core > Yasak Liste Bir Komutu Durdurdu`.
-Claude Code'da kanca satırı diske kuyruğa yazar, `bant.js` onu `MessageDisplay` ile cevabın
-üstüne çizer; saklanan mesaj ve modelin bağlamı onu hiç görmez. Gemini'de aynı satır
-`systemMessage` ile gelir; Gemini onu size gösterir, modele göndermez. Cursor'da reddedilen
-kabuk komutunda görünür.
-
-### Her İş, Bu Turda
-
-Beş işli bir istem eskiden kırkıncı araç çağrısı civarında birini kaybederdi. Artık model
-işleri `.claude/jobs.md` içine `- [ ] iş` diye yazar, her birini `- [x]` diye işaretler; bir
-işi yalnız gerekçeyle açık bırakabilir: `- [ ] iş — senin kararını bekliyor`.
-
-`Stop`'ta `dur.js` gerekçesiz açık satır varsa ya da istem bir listeydi ve liste yazılmadıysa
-ya da istemdeki maddeden az satır yazıldıysa turu bir kez tutar. Model çalışırken attığın mesaj
-da sayılır: her biri en az bir iş daha demektir, tutma mesajı onları geri okur. Sonraki istemde açık satırlar
-deftere geçer, dosya `trash/`'e gider. Arka plan görev bildirimi istem değildir, hiçbir şey
-götürmez.
-
-### Ertelenen Her Şey İçin Tek Defter
-
-Ertelenen her şey `.claude/acik.md`'ye `- [ ] iş — zaman — gerekçe` olarak gider; `sonra.md`
-kalkar. Defteri kancalar yazar: `mod.js` `jobs.md`'nin açık satırlarını taşır, `ust.js` her
-Agent çağrısına `- [ ] ajan: <açıklama>` açar, eski `.claude/sonra.md` bir kez taşınıp
-`trash/`'e gider. Açık satır oldukça defter her istemde ve her `SessionStart`'ta (startup,
-resume, compact) en çok 12 satır ve 600 karakterle gelir; `[x]` satırlar
-`trash/acik-<zaman>.md`'ye budanır. Defter göründüğünde yaptığını `[x]` işaretle, yapmadığına
-gerekçe yaz; gerekçesiz satır silinmez. Açık satır varken 40 karakteri geçmeyen yanıt `Stop`'ta
-bir kez tutulur. Boş defterin maliyeti sıfır.
-
-### "Bitti"den Önce Kanıt
-
-Kod düzenleyip hiçbir şey koşmayan oturum `Stop`'ta bir kez tutulur: koş, çıktıyı göster.
-Testler, `tsc`, `vite build`, `cargo check|build|clippy`, `scan.js`, `eslint`, `ruff` ve
-`dotnet build` kanıt sayılır. Kanıt modelin yazdığı kod dosyalarına bağlıdır; koşudan sonra
-yazılan README, not ya da defter satırı ve sürüm artıran bir
-yayın betiği kapıyı yeniden açmaz. Bir kez sorar, Write ya da Edit olmayan tur hiç sorulmaz;
-commit sayacı sıfırlar.
-
-Sahibin `CLAUDE.md`'si "Answer in Turkish" diyorsa İngilizce okunan uzun yanıt `Stop`'ta bir
-kez tutulur ve Türkçe yeniden istenir; sıkıştırmadan sonraki ilk bağlam yanıt dilini tek
-satırla taşır. Kapatmak: `langCheck: false`.
-
-### Gerekçeli Yasak Liste
-
-Her kabuk çağrısından önce yıkıcı komut, yerine ne yapılacağını söyleyen tek satırla
-reddedilir: çalışma klasörünün dışına çıkan silme, disk yazma, force push ve hard reset, depo
-ve sürüm silme, indir-koş boruları, `chmod 777`, makine çapında durdurma. Proje içinde silmek
-serbest.
-
-### İki Uçta İşaret
-
-`??` `++` kütüphane, `pp` özel raf, `aa` ajans, `ff` fable danışma, `mc` bellek taraması, `uc` UI denetimi,
-`ss` şimdi, `hh` yardım. Her biri istemin başında da sonunda da okunur; `hh` hepsini örnekle listeler.
-`hh` listesi ekran kanalına çizilir: bağlama tek harf gitmez, basılıp basılmayacağına
-model karar vermez.
-
-| Özellik | Sıradan tur | İş yapınca | Kapatmak |
-|---|---|---|---|
-| Banner | 0 token | 0 token, yalnız ekran | - |
-| İş kapısı | 0 bayt | `Stop`'ta bir blok | `jobs: false` |
-| İş geri verme | 0 bayt | açık satırlar, sonraki istemde | `jobs: false` |
-| Kanıt kapısı | 0 bayt | `Stop`'ta bir blok | `evidence: false` |
-| Yanıt dili | 0 bayt | `Stop`'ta bir blok, sıkıştırmadan sonra bir satır | `langCheck: false` |
-| Yasak liste | 0 bayt | reddedilen komut başına bir gerekçe | - |
-| Host adaptörleri | 0 bayt | Claude Code'dakiyle aynı | `setup.js --host <h> --remove` |
-
-Anahtarlar `~/.claude/teknesyum/config.json` içinde.
+Teknesyum Core, uzun kodlama oturumlarını yolda tutan bir Claude Code eklentisidir. Bir
+oturumun ne kadar iş yaptığını izler ve bunu pencerenin en alt satırında gösterir. Yalnız
+sizi ilgilendiren bir şey olunca konuşur: plansız büyük bir değişiklik, tehlikeli bir
+komut, unutulan bir iş ya da değişip hiç çalıştırılmamış kod. Oturumun yeri dolduğunda ya da
+oturum bittiğinde işin nerede kaldığını kısa bir nota yazar; sonraki oturum tek kelimeyle
+kaldığı yerden sürer: "devam". Hiçbir şeyin ters gitmediği turda Claude'un okuduğuna hiçbir
+şey eklemez, yani ek bir maliyeti yoktur.
 
 ---
 
-## Tarama
+## Claude Code Bunu Zaten Yapmıyor Mu?
 
-Buraya neyin gireceğini tahmin etmedik. Piyasayı okuduk.
+Kısmen evet. Claude Code işi yardımcı ajanlara verebilir, düzenlemeden önce plan
+çıkarabilir, deponun ayrı bir kopyasında çalışabilir, bir durum satırı gösterebilir ve
+belirli anlarda sizin küçük betiklerinizi çalıştırabilir (bu betiklere kanca denir). Core
+bunların hiçbirine dokunmaz, hiçbirini sarmalamaz.
 
-| | |
-|---|---|
-| Bakılan depo | 1.000 |
-| 45 Opus ajanıyla baştan sona okunan | 963 |
-| Kütüphaneye alınan | 93 |
-| Fikir notu olarak tutulan, konmayan | 165 |
-| Reddedilen | 705 |
-| Bugün gelen raf | 38 |
-| Kataloğdaki kitap | 1.968 |
+Core'un üstüne ekledikleri:
 
-Hiçbiri kurulu değil. Katalog diskte bir dosya, modelsiz aranıyor; sıradan bir turun
-bağlamına hiçbir raf girmiyor.
+- **Sonraki oturum için not.** Kesilen oturumda iş kaybolmaz; yeni oturum baştan başlamak
+  yerine notu okur.
+- **Doğru anda tek hatırlatma.** İş büyüyüp plan yoksa bunu bir kez duyarsınız, her turda
+  değil.
+- **"Bitti"den önce denetim.** Mesajınızdaki işlerden biri atlandıysa ya da kod değişip hiç
+  çalıştırılmadıysa yanıt bir kez geri tutulur.
+- **İstendiğinde açılan kütüphane.** Açık kaynak projelerden uzman notları; yalnız siz
+  isteyince okunur, yoksa hiç yüklenmez.
+
+---
+
+## Neler Yapar
+
+Her özellik, sade dille. Her birinin teknik ayrıntısı
+[Nasıl Çalışır](#nasıl-çalışır) bölümünde.
+
+- **Sayım ve plan hatırlatması.** Oturumun değiştirdiği dosyaları sayar. İş büyüyüp plan
+  dosyası yoksa Claude'a bir kez plan yazmasını ya da atla demesini söyler.
+- **Durum satırı.** Pencerenin alt satırı değişen dosyaları, plan olup olmadığını, testlerin
+  geçip geçmediğini, konuşmanın ne kadar dolduğunu ve bekleyen bir devir notu olup olmadığını
+  gösterir.
+- **Ekran bildirimleri.** Core bir iş yaptığında
+  `Teknesyum Core > Yasak Liste Bir Komutu Durdurdu` gibi tek bir satır görürsünüz. Satır
+  yalnız size çizilir; Claude onu hiç okumaz, bu yüzden maliyeti yoktur.
+- **Uzun süren süreç takibi.** Oturumun başlattığı ve yarım saat sonra hâlâ çalışan
+  programlar durum satırında sayılır. Hiçbiri durdurulmaz.
+- **Sonsuz bekleme koruması.** Süre sınırı olmadan döngüde bekleyen bir komut reddedilir,
+  Claude'a nasıl sınır koyacağı söylenir. Yoksa böyle bir döngü sonsuza kadar asılı kalabilir.
+- **Devir notu.** Konuşma dolduğunda ya da oturum bittiğinde Core işin nerede kaldığını
+  yazar. Sonraki oturum onu okur ve sürdürür.
+- **Zil.** Claude sizi beklerken, örneğin bir izin sorusunda, bir ses. Geri kalan her şeyde
+  sessizlik.
+- **Kütüphane.** Mesajı `??` ya da `++` ile başlatın ya da bitirin; Core açık kaynak
+  projelerden uzman notları kataloğunda arar ve en iyi birkaçını Claude'a verir. Hiçbir şey
+  kurulmaz.
+- **Özel raf.** `pp` herkese açık kütüphane yerine kendi notlarınızı açar, yalnız kendi
+  makinenizde.
+- **Ajans.** `aa` tasarımcı ya da denetçi gibi bir uzman rolü seçer ve sorunuzu o rolü
+  üstlenen bir yardımcı ajana verir.
+- **İkinci görüş.** `ff` bir soruyu bir kez daha güçlü bir modele sorar ve cevabını dosyada
+  saklar.
+- **Bellek taraması.** `mc` geçmiş isteklerinizi gözden geçirir; neyin yapıldığını, neyin
+  yapılmadığını ve neyin sizi beklediğini listeler.
+- **Arayüz denetimi.** `uc` bir kullanıcı arayüzünü denetleme adımlarını getirir: kontrast,
+  yerleşim, tasarım kuralları.
+- **Şimdi ve yardım.** `ss` Claude hâlâ çalışırken bir şeyi hemen istediğinizi söyler. `hh`
+  bütün işaretleri örnekle listeler.
+- **Her iş, bu turda.** Birkaç işli bir mesaj kontrol listesine yazılır. Biri gerekçesiz
+  atlanırsa yanıt bir kez geri tutulur.
+- **Claude çalışırken gönderilen mesajlar.** Tur sürerken gönderdiğiniz mesaj kaybolmaz,
+  sıraya alınır; elindeki iş bitince sorulur.
+- **Ertelenen her şey için tek liste.** Ertelenen her şey gerekçesiyle tek bir listeye
+  gider. Her satır yapılana ya da açıklanana kadar yeniden gösterilir.
+- **"Bitti"den önce kanıt.** Kod değiştirip hiçbir şey çalıştırmayan oturum bir kez tutulur;
+  çalıştırıp çıktıyı göstermesi istenir.
+- **Yanıt dili.** Türkçe yanıt istediyseniz uzun bir İngilizce yanıt bir kez tutulur ve
+  Türkçe yeniden istenir.
+- **Kapanış özeti.** Uzun bir tur kısa bir özet, sizin için yeni olanlar ve Claude'un sizden
+  istedikleriyle bitmek zorundadır.
+- **Size silme komutu verilmez.** Claude sizden bir silme komutu çalıştırmanızı isteyemez;
+  dosyaları kendisi bir `trash/` klasörüne taşır.
+- **Arayüz işinden sonra ekran görüntüsü.** Bir ekran dosyası düzenlendiyse Claude'dan
+  bitti demeden önce bir ekran görüntüsü ve dışarıdan bir bakış istenir.
+- **Kullanılan kitaplar.** Yanıtın altında gerçekten okunan notları ve skill'leri görürsünüz.
+  Claude başkalarını sayarsa size söylenir.
+- **Yasak liste.** Proje dışında silmek ya da zorla göndermek (force push) gibi yıkıcı
+  komutlar, yerine ne yapılacağını söyleyen tek satırla reddedilir.
+- **Model koruması.** Siz istemedikçe yardımcı ajanlarda en ucuz model kullanılmaz; iş
+  oturumun kendi modelinden üstün bir modele gidince size söylenir.
+- **Kurallar gerekçe ister.** Bir kural dosyasına kaynaksız yeni bir yasak yazılınca
+  Claude'dan onun yerine riski ve tasarım karşılığını yazması istenir.
+- **Hata raporları.** "core'a raporla" deyin, Claude Core'un kendi deposuna bir hata kaydı
+  açar. Açık kayıtlar orada bir sonraki isteğin başında adıyla anılır.
+- **Temizlik.** `trash/` ve `tmp/` klasörlerindeki eski dosyalar belli bir süre sonra
+  silinir; eski Core sürümleri eklenti önbelleğinden temizlenir.
+- **Taze kütüphane.** Kütüphane günde bir kez arka planda güncellenir.
+- **Elle çalıştırılan araçlar.** Hangi dosyanın hangisini import ettiğini gösteren harita,
+  raporlar için sayı denetçisi, lisans ve imza yazıcı, kurulum betiği, sağlık kontrolü,
+  proje taraması ve sürüm betiği.
+- **Claude Code dışındaki araçlar.** Aynı denetimler Cursor'un kendi ajanında ve Gemini
+  CLI'de çalışır. Codex CLI kuralları metin olarak alır.
+- **Tasarım ve denetim notları.** Kütüphanede arayüz tasarlamak ve arayüz denetlemek için
+  raflar var.
+
+---
+
+## Yapmadıkları
+
+- Claude Code'un kendi yardımcılarının, plan modunun ya da worktree'lerinin yerine geçmez;
+  onları model yine kendisi seçer.
+- Kütüphaneyi, ajans rollerini ya da herhangi bir skill'i kurmaz; hepsi istenince okunan
+  dosyalardır.
+- Uzun süren programları durdurmaz; yalnız gösterir.
+- Bir görevi ucuzlatmaz. Görevde düz Claude Code ne tutuyorsa onu tutar.
+- Durum satırı Cursor ya da VS Code içindeki Claude Code eklentisinde görünmez.
 
 ---
 
 ## Önce Sayılar
+
+Aynı görevleri düz Claude Code ile ve Core ile koştuk; neye mal olduklarını ve işin bitip
+bitmediğini karşılaştırdık.
 
 Aşağıdaki her iddia düz Claude Code'a karşı aynı koltukta (sonnet, düşük efor), temiz
 config ile 2026-09-05 ve 2026-09-06'da ölçüldü. Yöntem, tablolar ve ham satırlar
@@ -155,199 +160,6 @@ katmanların arkasına alıyordu. Olduğu gibi geri takılınca aynı görevleri
 fiyata geçti. Karar kuralı koşudan önce yazılıp parça parça geri takılınca hiçbir parça
 kabul sütununu oynatmadı, hiçbiri geri girmedi. Satırlar raporun 8. bölümünde; varyantlar
 `bench/varyant/` altında, tek komutla yeniden koşar.
-
----
-
-## Büyük Araçlar Neden Konmadı
-
-Hepsi okundu. Hiçbiri kötü olduğu için elenmedi; her biri, hiçbir şeyin olmadığı bir turda
-ne tuttuğu için elendi.
-
-| Araç | Neden burada değil |
-|---|---|
-| [Obsidian](https://obsidian.md) | Deponun yanına koca bir not kasası. Ondan ihtiyacımız olan tek şey bir devir dosyasıydı; o da `handoff.js`. |
-| [graphify](https://github.com/hongkongkiwi/graphify) | Büyük kod tabanında çok iyi, hâlâ öneriyoruz. O indeksler; biz her oturumda indeks istemedik, `map.js` yalnız çağrılınca koşuyor. |
-| [Context7](https://context7.com) | İstendiğinde canlı belge. Tasarımı gereği tur başına bağlam maliyeti; bizim kuralımız sıradan turun bedava olması. |
-| [superpowers](https://github.com/obra/superpowers) | En geniş skill çatısı. Kendi lab rafı bizim kütüphanemizde; çatının kendisi her oturumda bağlamda şema tutuyor, yapmadığımız tek şey o. |
-
-Z ile C arasındaki çizgi eklentinin tamamı: Z hiç yazmaz, A yalnız çağrılınca yazar, B
-oturum başına şema tutar, C her turda öder. Core Z ve A gönderiyor. Üstünde hiçbir şey yok.
-
-```mermaid
-flowchart LR
-  Z["Sınıf Z<br/>hiç yazmaz"] --> A["Sınıf A<br/>yalnız çağrılınca"]
-  A --> B["Sınıf B<br/>oturum başına şema"]
-  B --> C["Sınıf C<br/>her turda öder"]
-  Z:::ic
-  A:::ic
-  B:::dis
-  C:::dis
-  classDef ic fill:#1b5e20,stroke:#2e7d32,color:#fff
-  classDef dis fill:#4e342e,stroke:#6d4c41,color:#fff
-```
-
-Yeşil Core'un gönderdiği. Kahverengi reddettiği.
-
----
-
-## Nedir
-
-Teknesyum Core, sıradan tura hiçbir şey eklemeyen bir Claude Code eklentisidir. Oturumun
-dokunduğu dosyaları sayar, sayıyı statusline'da gösterir ve sohbete tam bir kez konuşur:
-iş eşiği aştığında ve diskte plan yoksa. Oturum bittiğinde ya da bağlam penceresi
-dolduğunda bir devir dosyası yazar; bir sonraki oturum iki kelimeyle sürer: "devam et".
-
-Claude Code'un native yaptığı her şey - alt ajanlar, worktree'ler, plan modu, kancalar,
-statusline - olduğu gibi bırakılır. Hiçbir şey sarılmaz, kapıya alınmaz, yeniden yazılmaz.
-
-Aynı kancalar ince bir adaptörle Cursor'un kendi ajanında ve Gemini CLI'de koşar; Codex CLI
-kuralları metin olarak alır. Bkz. [Diğer Hostlar](#cursor-gemini-codex-ve-diğer-hostlar).
-
----
-
-## Ne Yapar
-
-### Sayar
-
-Her `Write`, `Edit` ve `NotebookEdit` sonrası kanca dokunulan dosyayı kaydeder ve git'e
-kaç satır değiştiğini sorar. Eşiğin altında hiçbir şey yazmaz: bağlama sıfır bayt.
-
-Eşik beş dosya, ya da izlenen dosyalarda yüz elli değişen satır, ya da yolu riskli görünen
-tek bir dosya: `migrations/`, `auth`, `secur`, `config`, bir lock dosyası, `.github/`,
-bir `Dockerfile`. Yeni dosyaların satırları gösterilir ama satır eşiğine girmez; üç yeni
-dosya yazan iş plan isteyen iş değildir. Eşik aşıldığında ve `docs/plan.md` yoksa oturumda
-bir kez tek satır gelir:
-
-> 5 dosyaya dokunuldu ve plan yok. docs/plan.md yaz ya da atla de.
-
-Konuşmanın tamamı bu. Model planı yazar ya da atla der; kanca bir daha sormaz.
-
-### Gösterir
-
-Statusline aynı durumu okur: dokunulan dosyalar eklenen ve silinen satırlarla, plan var mı,
-oturumun koştuğu testler ve kaçının düştüğü, bağlam yüzdesi, bekleyen devir var mı, açık
-hata günlükleri, varsa kanca hataları. Test bayatlığı state'teki son düzenleme zamanından okunur; git en çok on saniyede bir çalışır. Düz metin; burada renk ya da ölçü uydurulmaz.
-
-Bir kanca iş yapınca kullanıcı sohbette tek satır görür: `Teknesyum Core > Kütüphane Döndü · 3
-Kitap Uydu · En Çok Üçü Okunacak`, cevabın üstünde blok olarak. Kanca satırı diske kuyruğa
-yazar, `bant.js` onu `MessageDisplay` ile çizer; bu olay yalnız ekranı değiştirir, saklanan
-mesaj ve modelin bağlamı aynı kalır, satır token tutmaz. Oturum açılışı, işaretler, eşik,
-kanıt kapısı, yasak liste, koltuk okuma ve iş listesi birer satır basar.
-
-Oturumun kabuk üzerinden başlattığı ve otuz dakikadan uzun süredir çalışan süreçleri de
-sayar: `⏳ 2 süreç 40 dk`. Sayımı ayrık bir süreç en çok dakikada bir tazeler, statusline
-onu hiç beklemez; ilk takılı süreç göründüğünde zil bir kez çalar. Hiçbir şey durdurulmaz;
-doksan dakikalık iş doksan dakika alabilir, satır yalnız hâlâ orada olduğunu söyler.
-
-### Sınırlar
-
-Her `Bash` ve `PowerShell` çağrısından önce kanca üst sınırı olmayan bekleme döngüsü arar:
-`sleep` çevresinde `until` ya da `while`, `timeout` yok, sayaç yok, son tarih yok. Böyle bir
-döngü beklediği şey gelmezse sonsuza kadar asılı kalır. Çağrı, nasıl sınırlanacağını söyleyen
-tek satırla reddedilir; sınırı model işten seçer ve yeniden koşar. Gerisi tek bayt yazılmadan
-geçer.
-
-### Devreder
-
-Bağlam yüzde altmışı geçince ya da oturum bitince `.claude/handoff.md` makine tarafından
-yazılır. Tek satır kuralla açılır - önce task'ı, sonra değişen dosyaları oku, ilk bitmemiş
-parçadan sür, diff'in gösterdiğini yeniden yapma - ve sonra şunları taşır: `task`, oturumun
-ilk istemi, transkriptten; `changed_files`, `git diff --stat`'tan; `tests_run`, kancanın
-gördüğü komutlar, çıkış kodları ve o anın ağaç karması; `steer`, ilkinden sonraki son üç
-istem; varsa `plan`. İki bölüm modele bırakılır, `decisions`
-ve `next_action`; eşikte tek satır onları ister:
-
-> Bağlam %64. .claude/handoff.md içinde decisions ve next_action doldur.
-
-Yeniden üretilen devir modelin yazdığını korur. Sonraki oturum başında tek satır söylenir,
-`Devam: .claude/handoff.md`, başka hiçbir şey. İş bitince dosya `trash/`e gider.
-
-### Çalar
-
-Claude sizi beklerken bir ses - izin sorusu, soru, diyalog - ve sizi gerektirmeyen her şey
-için sessizlik. Tek ayarla kapanır.
-
-### Danışır
-
-`??` ya da `++` ile başlayan istem önce kütüphaneyi açar. `hooks/mod.js` kancası kelimeleri
-`kutuphane.js find`e verir, model çağrısı yok; en çok sekiz bulgu ve üç satır kural o turun
-bağlamına girer; model en çok üç kitabı lean okur, kaynağı tek satırda söyler ve o uzmanlıkla
-çalışır. Türkçe kelimeler İngilizce kataloğa çevrilir, eşleşme tam kelimedir. `pp` ile
-başlayan istem ise özel rafı açar: sahibin kendi kitapları, `~/.claude/teknesyum-private/private/`
-altında, bütün (8 KB tavan), kullanıcıya `Teknesyum Core > Özel Raf Açıldı` satırıyla; raf yalnız o aynanın
-uzak deposu sahibinse vardır, başka makinede `pp` bunu söyler ve durur. `aa` ile başlayan istem ajansı açar: kelimeler `agency.js find`e gider, en çok üç koltuk ve bir kural
-bağlama girer; model koltuğu lean okur, soruyla birlikte Türkçe bir alt ajana verir, cevabı `docs/danisma/`
-altına kaydeder. Sıradan tur hiçbirinden bir şey almaz.
-
-
-```mermaid
-flowchart TD
-  P["Promptun"] --> M{"İki uçtan birinde işaret var mı?"}
-  M -->|"yok"| N["Sıradan tur<br/>hiçbir şey yazılmaz"]
-  M -->|"?? ++"| L["Kütüphane<br/>1.968 kitap, model çağrısı yok"]
-  M -->|"pp"| S["Özel raf<br/>yalnız sahibinin makinesinde"]
-  M -->|"aa"| G["Ajans<br/>bir koltuk, alt ajana verilir"]
-  M -->|"ff"| F["Fable<br/>tek danışma, diske yazılır"]
-  M -->|"hh"| H["Bütün işaretleri sayar"]
-```
-
-### Yalnız çağrılınca çalışan araçlar
-
-| Betik | Ne yapar |
-|---|---|
-| `scripts/map.js .` | Import grafiği: merkezler, döngüler, yetimler. `map.js who <dosya>` kimin import ettiğini söyler. |
-| `scripts/log.js write` | Core'un `logs/openlogs/` klasörüne sabit biçimli kayıt: `--kind hata` (varsayılan), `yontem` (saklanacak yöntem) ya da `teklif` (öneri). Başlığı ya da belirtisi teknesyum-ui'yi ya da betiklerinden birini anan, ya da `--to ui` ile yazılan kayıt teknesyum-ui deposunun kendi `logs/openlogs/` klasörüne gider (Core'un yanında bulunur ya da ayardaki `uiRepo` ile); `list` iki klasörü de gösterir, `archive` kaydı ikisinde de bulur, `route --id X --to ui` birini taşır. teknesyum-ui'ye düşen kayıt o deponun `.claude/acik.md` defterine `- [ ] Logu oku: logs/openlogs/<dosya>` satırı da bırakır; UI oturumu onu bir sonraki istemde görür, `archive` satırı işaretler. `core'a raporla` ya da `report this to core` gibi bir istem tarifi yalnız o tura getirir. |
-| `scripts/advice.js` | `ask --mod gorus --konu <slug> --girdi <dosya>` fable danışmasını `docs/danisma/` altında numaralar, kapıyı tek çağrı için kurar ve dosyayı gösteren tek satırlık Agent istemi basar; girdi bağlama iki kez girmez. `record --mod gorus --ajan <agentId>` cevabı, modeli, çıktı tokenini ve süreyi ajan kaydından okuyup dosyalar. `list` kayıtları gösterir. |
-| `scripts/kutuphane.js` | Kütüphane: raflar projenin dışına klonlanır (`fetch`), katalog frontmatter'dan ya da ilk başlık ve paragraftan kurulur, `find <kelimeler>` modelsiz puanlar, `show <slug…> --lean` üç kitap ve 48 KB ile sınırlı, `record` `docs/danisma/` altına yazar, `push private` özel rafı commit'ler ve iter, `stale [gün]` her rafın kaç gün önce çekildiğini listeler, `fetch all --stale 7` yalnız ondan eskileri `fetch --depth 1` ve reset ile günceller, klonlar sığ kalır; `slim` mevcut her klonu bir kez sığlaştırıp çöp toplar. Otuz sekiz raf `core/kutuphane.json` ile gelir (1.968 kitap; MIT, Apache-2.0, CC0, CC BY-SA 4.0 ve bir CC BY-NC-SA 4.0; seçim `docs/kutuphane/` altında; 8 Eylül 2026 piyasa taraması, 1000 depo, 963 okundu, 93 Al, `docs/kutuphane/piyasa-2026-09-08.md`), `raf add <slug> <url> --kind agents|skills|prompts|docs` ekler; tür neyin kitap sayılacağını seçer. Hiçbiri kurulmaz, hiçbir raf bağlama girmez. |
-| `scripts/agency.js` | [agency-agents](https://github.com/msitarzewski/agency-agents) deposu artık kütüphanenin `agency` rafı, komutlar aynı (`find` kendi puanlamasını kullanır, `show` ve `record` kütüphaneninkidir): `find ui` seçer, `show <slug> --lean` rolü kişilik ve ölçüt bloklarını atarak alt ajana verir, `record` alışverişi `docs/danisma/` altına yazar. `show` bir koltuk izi bırakır, sonraki `Stop` onu sohbette `Koltuk: <slug> okundu · <n> KB` diye basar; satır bağlama girmez. Hiçbiri ajan olarak kurulmaz; liste bağlama hiç girmez. |
-| `scripts/manset.js` | Markdown raporu denetler: düzyazıdaki her sayı aynı bölümün tablosunda ya da listesinde bulunmalı. |
-| `scripts/scaffold.js` | Lisans, imza bloğu, dil linki: modelin asla yazmadığı sabit metinler. |
-| `scripts/setup.js` | Makine ayarı: dil, zil, özel depo, projeler klasörü. Statusline `~/.claude/teknesyum/` altındaki `bridge.js` kopyasını koşar; eski eklenti sürümlerinin budanması onu kırmaz. `--host cursor\|gemini` adaptörü o hosta bağlar, `--remove` çıkarır. |
-| `scripts/doctor.js` | Sekiz kontrol: node, git, sürüm, kancalar, statusline, önbellek, harita, günlükler. `cache` deponun kancalarını, betiklerini ve metinlerini kurulu eklentiyle karşılaştırır, henüz canlı olmayan her dosyayı adıyla basar. |
-| `scripts/scan.js` | Projenin kendisine sekiz salt okunur kontrol: lisans yüzeyleri, beş dosya eşiğine karşı plan, devir boşlukları, sürüme karşı belgeler, test betiği, `trash/` atıfları, `tmp/` dışında kalmış geçici dosyalar, harita. Yazmaz, model çağırmaz, bağlama taşımaz; profil yalnız belge kümesini genişletir. |
-| `scripts/hatirla.js` | Bellek taraması: `topla [--gun N]` geçmiş her isteği kesmeden kanıtıyla — kapanış cevabı, sonraki isteğe kadarki commit'ler, `trash/jobs-*`, `.claude/jobs.md` ve `docs/plan.md` açık satırları — yaklaşık 40 bin karakterlik `tmp/gecmis-N.md` sayfalarına yeniden eskiye yazar, tekrarlanan istek bir kez. Dönemin bütün commit listesi `tmp/gecmis-commitler.md` dosyasına gider. Yalnız dizin basar; her sayfa sonnet'e yoluyla, 4'erli paralel gruplar ve tek birleştiriciyle gider. Her istek maddelerine bölünür, her madde o isteğin ve sonraki bütün isteklerin kapanışı ve commit'leriyle sınanır. `record --ajan <agentId>` raporu `tmp/hatirlatici.md` olarak dosyalar — istek başına ne dedim, sonra `[x]` yapıldı, `[ ]` yapılmadı, `[!]` kararını bekliyor, `[?]` belirsiz — ve tam bitmemiş olanların hepsini 0 tokenle ekrana basar; ikinci kayıt ekrandaki ilkinin yerine geçer. Geçici dosyalar `tmp/` altında durur, git'e girmez. |
-| `scripts/cop.js` | `<proje>/trash` klasörünü ve bir günden eski `tmp/` dosyalarını ölçer: `node cop.js .` toplamı ve en büyük on dosyayı basar, 100 MB üstünde `1` ile çıkar; `--hepsi [kök]` bunu `projectsRoot` altındaki her proje için, büyükten küçüğe yapar. `count.js` `Stop` anında, saatte en çok bir kez, `projectsRoot` altındaki bütün projeleri (ayar yoksa yalnız bu projeyi) kendi temizler: `trash/` içindeki bir girdi orada ilk görüldüğünden bir hafta sonra, `tmp/` dosyası bir günlük olunca silinir; biten yanıtın altındaki banner gideni sıfır tokenle söyler. `--sil` çöpü ve eski tmp dosyalarını hemen, kalıcı siler, çünkü geri dönüşüm kutusu yer açmaz; taze tmp dosyaları kalır. Günde bir kez oturum açılışında `~/.claude/teknesyum/` altındaki yedi günden eski state, banner ve advice dosyalarını süpürür (etkin oturumunkini değil); eklenti önbelleğinde kurulu sürüm dahil en yeni iki Teknesyum sürümü dışındakileri `~/.claude/teknesyum/trash/plugin-cache/` altına taşır. |
-| `scripts/release.js` | Sürümü `.changes/` altındaki notlardan artırır, kurulum satırlarını yeniler, etiketler; `publish` GitHub sürümünü `vX.Y.Z` başlığıyla açar, iki kurucuyu `.sha256` dosyalarıyla yükler. |
-
----
-
-## Tasarım Ve Arayüz Denetimi
-
-Tasarlamak ile tasarımı denetlemek ayrı iki iş, kütüphane ikisini de taşıyor. Piyasanın
-ikinci taramasından sonra bunun için beş raf eklendi.
-
-| Raf | Ne işe yarar |
-|---|---|
-| `ui-ux-pro-max` | Tasarlarken: 67 stil, 96 palet, 57 font eşleşmesi, 13 yığın. |
-| `anthropic-skills` | Tasarlarken: `frontend-design`, `brand-guidelines`, `canvas-design`; Anthropic'in kendi deposu. |
-| `addyosmani-skills` | İkisinde de: `frontend-ui-engineering` erişilebilir ve duyarlı arayüz kurar, erişilebilirlik listesi onu denetler. |
-| `react-best-practices` | Denetlerken: `web-design-guidelines` bitmiş arayüz kodunu Web Interface Guidelines'a göre okur. |
-| `pair-design` | Tasarlarken: kullanıcıya değil kullanıcıyla tasarım yürütme çerçevesi. |
-
-Zaten duranların yanına — `refactoring-ui`, `web-design`, `ecc/skills/design-system`,
-`ecc/skills/accessibility`, ajansın `design` koltukları. Hiçbiri kurulu değil; `?? tasarım`
-ya da `?? arayüzü denetle` bulur, sıradan tur hiçbirini görmez.
-
-```mermaid
-flowchart LR
-  D["?? tasarım"] --> DS["ui-ux-pro-max<br/>frontend-design<br/>design-system"]
-  R["?? arayüzü denetle"] --> RS["web-design-guidelines<br/>accessibility<br/>ui-finish-gate-reviewer"]
-```
-
----
-
-## Ne Çıktı
-
-0.16 bir çıkarma sürümü. Şunlar eklentiden çıktı; hepsi `v0.15.0` etiketinde duruyor,
-`bench/varyant/` ölçtüğü her parçanın kaynağını oradan adlandırıyor:
-
-- sözleşme makinesi: `contract.js`, `risk.js`, `verify-runner.js`, relay'in `handoff.js`'i;
-- dokuz kanca: autoclose, closure, cue, embed, guard, notice, schema, seal, watch;
-- altı rol metni, `worker` ajanı, relay skill'i, `tiers.json`.
-
-Yerine iki kanca geldi, `count.js` ve `handoff.js`, bir de aşağıdaki beş satırlık kural.
-Ajanlar, worktree'ler ve plan modu yerinde; onlar Claude Code'un kendisinin ve model onları
-her zamanki gibi kendi seçiyor. Çıkan parça, onun yerine seçen makineydi.
 
 ---
 
@@ -415,40 +227,15 @@ Cursor kullanıcısının ajanına verilecek hazır istem
 
 ---
 
-## CLAUDE.md Kuralı
+## Nasıl Çalışır
 
-Eklenti modele nasıl çalışacağını söylemez. Kendi `CLAUDE.md`'nize koymanızı önerdiği beş
-satırlık kural bu; sayım kancası tek yaptırımı, kuralın kendisi de yukarıdaki tablodaki tur
-başına ~200 token.
+Buradan sonra dil teknik: kanca olayları, bağlama giden baytlar, dosya yolları ve
+anahtarlar.
 
-```
-- Tek dosya ve bildiğin iş: yap.
-- Beş ve üstü dosya: önce docs/plan.md.
-- Bilmediğin kütüphane: yazmadan önce oku.
-- Bitince çalıştır, çıktıyı göster.
-- Küçük iş: bunların hiçbiri.
-```
+### Kancalar
 
-İş listesi ve devirle uzun biçimi [adapters/AGENTS.md](adapters/AGENTS.md) içinde.
-
----
-
-## Kullanımda Nasıl Görünür
-
-```
-Teknesyum ▸ my-app · bağlam %41 · 3 dosya +82-14 · plan yok · test geçti
-Teknesyum ▸ my-app · bağlam %67 · 6 dosya +240-31 · plan · test bayat · devir
-```
-
-İlk satır her eşiğin altındaki bir oturum: modele hiçbir şey söylenmemiş. İkincisi planını
-yazmış, testlerini koşmuş, sonra dosya değiştirmiş (son kayıt bayat) ve `decisions` ile
-`next_action` satırlarını bekleyen bir devri olan oturum. Test sözcüğü yalnız son kayıttır:
-çıkış kodundan geçti ya da kaldı, koşu hiçbir şey basmadıysa bilinmiyor, HEAD ya da çalışma
-ağacı sonradan değiştiyse bayat.
-
----
-
-## Kancalar
+Aşağıdaki kanıt kapısı on üç kanca kaydından biri. Dokuz olay, on bir dosya, hepsi
+`core/hooks/` altında:
 
 ```mermaid
 flowchart LR
@@ -461,10 +248,6 @@ flowchart LR
   K -->|"evet"| R["İşi mühürler,<br/>sayaç sıfırlanır"]
 ```
 
-
-Yukarıdaki kanıt kapısı on üç kanca kaydından biri. Dokuz olay, on bir dosya, hepsi
-`core/hooks/` altında:
-
 | Olay | Kanca | Söyler |
 |---|---|---|
 | `SessionStart` | `count.js` | varsa `Devam: .claude/handoff.md`; varsa `docs/plan.md`nin ilk açık `- [ ]` adımı; her kaynakta, compact dahil, `.claude/acik.md`'nin açık satırları; sıkıştırmadan sonra, sahibin `CLAUDE.md`'si Türkçe istiyorsa `Yanıt dili: Türkçe.`; yoksa hiçbir şey. Günde bir kez `kutuphane.js fetch all --stale 7`yi arka planda ayrık başlatır, hiçbir raf bir haftadan eski kalmaz, ve `cop.js`'in eski state dosyası ve eski eklenti sürümü süpürmesini koşar; model hiçbirini görmez |
@@ -472,7 +255,7 @@ Yukarıdaki kanıt kapısı on üç kanca kaydından biri. Dokuz olay, on bir do
 | `PostToolUse` | `count.js` | eşikte tek satır, bir kez; `RULES*`, `CLAUDE*`, `AGENTS*`, `SPEC*` ya da `docs/*karar*` / `*decision*` kâğıdına yapılan düzenleme kaynaksız (URL, lisans, yasa, tarih) bir yasak (`yasak`, `asla`, `never`, `forbidden`) eklerse, satırları anarak yasağın yerine riski ve tasarım karşılığını isteyen tek satır; yoksa hiçbir şey |
 | `PostToolUseFailure` | `count.js` | hiçbir şey; kalan test komutunu kaydeder |
 | `PreToolUse` | `yasak.js` | tehlikeli komutu tek satır gerekçeyle reddeder. Proje içinde silmek serbest; dışına çıkmak değil — hedefi çalışma klasörünün dışına düşen ya da kökün kendisi olan silme, disk yazma, geçmiş silme, depo/sürüm silme, indir-koş boruları, `chmod 777`, makine çapında durdurma reddedilir. Geçmiş silme ya da depo, sürüm, uzak dal silme, sahibin son mesajı onay veriyorsa (`evet`, `onay…`, `sil…`, `kaldır…`, `yes`) geçer; model komutu sahibe vermez, kendisi koşar. Disk yazma, kök silme ve durdurma hiç geçmez; ardından aynı süreçte döngü kapısı: bekleme döngüsünün üst sınırı yoksa tek satır; yoksa hiçbir şey |
-| `PreToolUse` | `ust.js` | sahibin son mesajında haiku geçmiyorsa haiku alt ajanını reddeder, sonnet'i gösterir; tur, işi oturumun kendi modelinin üstündeki bir modele verdiğinde tek satır — çağrılan model ve işin ne olduğu. Oturumun kendi modeli dökümün sonundan okunur; aynı ya da alt model, model adı geçmeyen çağrı ve istem anında zaten duyurulmuş danışma susar. Aynı süreçte kurulmamış, harcanmış ya da yol satırından uzun fable danışmasını reddeder; modele hiçbir şey gitmez |
+| `PreToolUse` | `ust.js` | sahibin son mesajında haiku geçmiyorsa haiku alt ajanını reddeder, sonnet'i gösterir; tur, işi oturumun kendi modelinin üstündeki bir modele verdiğinde tek satır — çağrılan model ve işin ne olduğu. Oturumun kendi modeli dökümün sonundan okunur; aynı ya da alt model, model adı geçmeyen çağrı ve istem anında zaten duyurulmuş danışma susar. Aynı süreçte kurulmamış, harcanmış ya da yol satırından uzun fable danışmasını reddeder; geçen her Agent çağrısı `.claude/acik.md` içinde `- [ ] ajan: <açıklama>` satırı açar; modele hiçbir şey gitmez |
 | `Stop` | `dur.js` | Kapanış kapısı: beş ve üstü araç çağrılı turda yanıtta `## Özet` başlığı yoksa bir kez tutulur, `## Ön Özet` (yalnız ara mesajlardaki önemli olan), `## Özet`, tavsiyeli `### Önbilgilendirme`, `## Senden istediklerim` düzeninde yeniden yazılır; `"closing": false` kapatır. Silme kapısı: `Senden istediklerim` bölümü sahibe silme komutu (`Remove-Item`, `rm -r`, `rmdir`, `del /s`) veren yanıt bir kez tutulur; model hedefi kendisi bir `trash/`'e taşır ya da kalıcı gitmesi şartsa sormadan kendisi koşar. Arayüz kapısı: bu tur bir `.tsx` `.jsx` `.vue` `.svelte` `.css` `.scss` `.less` `.html` `.axaml` ya da `.xaml` dosyasını düzenlediyse ve son düzenlemeden sonra ekran görüntüsü alınmadıysa tur bir kez durdurulur; en küçük boyutta görüntü, işi yapmamış bir alt ajanın bakışı ve "çalışıyor" ile "kullanılabilir" iki ayrı iddia istenir; masaüstü projede (`src-tauri/`, Electron, XAML) tarayıcı görüntüsü sayılmaz. Kapatmak: `ui: false`. Ayrıca aynı süreçte, cevap `Kullanılan kitaplar:` / `Books used:` satırıyla bitiyorsa onu gerçekten okunan kitaplarla karşılaştırır, fark varsa `Kitaplar Uyuşmuyor · Beyan … · Okunan …` satırını kuyruğa koyar; count'un Stop işi: diff'i tazeler, `agency.js show` sonrası koltuğu bir kez sohbet satırı olarak basar. Sonra dosya düzenleyip hiçbir şey koşmayan oturum bir kez durdurulur; kanıt modelin yazdığı kod dosyalarının özetine bağlıdır (düzyazı ve defter sayılmaz), Write ya da Edit olmayan tur hiç sorulmaz, blok tekrarlanmaz. Kapatmak: `evidence: false`. Sahibin yanıt dili Türkçeyken İngilizce okunan 25 sözcük ve üstü yanıt bir kez tutulur. Kapatmak: `langCheck: false`. `Kullanılan kitaplar: yok` kitapsız beyan sayılır. İş kapısı aynı bloğu paylaşır: `.claude/jobs.md`'de gerekçesiz açık satır, liste yazılmamış ya da eksik yazılmış çok maddeli istem (tur sürerken kuyruğa giren her mesaj en az bir iş ekler), ya da `.claude/acik.md`'de açık satır varken 40 karakteri geçmeyen yanıt turu bir kez tutar. Kapatmak: `jobs: false` |
 | `SessionEnd` | `handoff.js` | hiçbir şey; devri yazar |
 | `Notification` | `notify.js` | hiçbir şey; çalar |
@@ -502,10 +285,313 @@ sequenceDiagram
   H-->>H: devir dosyasını yazar
 ```
 
+### Sayım
+
+Her `Write`, `Edit` ve `NotebookEdit` sonrası kanca dokunulan dosyayı kaydeder ve git'e
+kaç satır değiştiğini sorar. Eşiğin altında hiçbir şey yazmaz: bağlama sıfır bayt.
+
+Eşik beş dosya, ya da izlenen dosyalarda yüz elli değişen satır, ya da yolu riskli görünen
+tek bir dosya: `migrations/`, `auth`, `secur`, `config`, bir lock dosyası, `.github/`,
+bir `Dockerfile`. Yeni dosyaların satırları gösterilir ama satır eşiğine girmez; üç yeni
+dosya yazan iş plan isteyen iş değildir. Eşik aşıldığında ve `docs/plan.md` yoksa oturumda
+bir kez tek satır gelir:
+
+> 5 dosyaya dokunuldu ve plan yok. docs/plan.md yaz ya da atla de.
+
+Konuşmanın tamamı bu. Model planı yazar ya da atla der; kanca bir daha sormaz.
+
+### Gösterim
+
+Statusline aynı durumu okur: dokunulan dosyalar eklenen ve silinen satırlarla, plan var mı,
+oturumun koştuğu testler ve kaçının düştüğü, bağlam yüzdesi, bekleyen devir var mı, açık
+hata günlükleri, varsa kanca hataları. Test bayatlığı state'teki son düzenleme zamanından okunur; git en çok on saniyede bir çalışır. Düz metin; burada renk ya da ölçü uydurulmaz.
+
+Oturumun kabuk üzerinden başlattığı ve otuz dakikadan uzun süredir çalışan süreçleri de
+sayar: `⏳ 2 süreç 40 dk`. Sayımı ayrık bir süreç en çok dakikada bir tazeler, statusline
+onu hiç beklemez; ilk takılı süreç göründüğünde zil bir kez çalar. Hiçbir şey durdurulmaz;
+doksan dakikalık iş doksan dakika alabilir, satır yalnız hâlâ orada olduğunu söyler.
+
+### Banner
+
+Bir kanca iş yapınca kullanıcı sohbette tek satır görür: `Teknesyum Core > Kütüphane Döndü · 3
+Kitap Uydu · En Çok Üçü Okunacak`, cevabın üstünde blok olarak. Kanca satırı diske kuyruğa
+yazar, `bant.js` onu `MessageDisplay` ile çizer; bu olay yalnız ekranı değiştirir, saklanan
+mesaj ve modelin bağlamı aynı kalır, satır token tutmaz. Oturum açılışı, işaretler, eşik,
+kanıt kapısı, yasak liste, koltuk okuma ve iş listesi birer satır basar.
+
+Gemini'de aynı satır `systemMessage` ile gelir; Gemini onu size gösterir, modele göndermez.
+Cursor'da reddedilen kabuk komutunda görünür.
+
+### Sınır
+
+Her `Bash` ve `PowerShell` çağrısından önce kanca üst sınırı olmayan bekleme döngüsü arar:
+`sleep` çevresinde `until` ya da `while`, `timeout` yok, sayaç yok, son tarih yok. Böyle bir
+döngü beklediği şey gelmezse sonsuza kadar asılı kalır. Çağrı, nasıl sınırlanacağını söyleyen
+tek satırla reddedilir; sınırı model işten seçer ve yeniden koşar. Gerisi tek bayt yazılmadan
+geçer.
+
+### Yasak Liste
+
+Her kabuk çağrısından önce yıkıcı komut, yerine ne yapılacağını söyleyen tek satırla
+reddedilir: çalışma klasörünün dışına çıkan silme, disk yazma, force push ve hard reset, depo
+ve sürüm silme, indir-koş boruları, `chmod 777`, makine çapında durdurma. Proje içinde silmek
+serbest. Kuralların tamamı yukarıdaki `yasak.js` satırında.
+
+### Devir
+
+Bağlam yüzde altmışı geçince ya da oturum bitince `.claude/handoff.md` makine tarafından
+yazılır. Tek satır kuralla açılır - önce task'ı, sonra değişen dosyaları oku, ilk bitmemiş
+parçadan sür, diff'in gösterdiğini yeniden yapma - ve sonra şunları taşır: `task`, oturumun
+ilk istemi, transkriptten; `changed_files`, `git diff --stat`'tan; `tests_run`, kancanın
+gördüğü komutlar, çıkış kodları ve o anın ağaç karması; `steer`, ilkinden sonraki son üç
+istem; varsa `plan`. İki bölüm modele bırakılır, `decisions`
+ve `next_action`; eşikte tek satır onları ister:
+
+> Bağlam %64. .claude/handoff.md içinde decisions ve next_action doldur.
+
+Yeniden üretilen devir modelin yazdığını korur. Sonraki oturum başında tek satır söylenir,
+`Devam: .claude/handoff.md`, başka hiçbir şey. İş bitince dosya `trash/`e gider.
+
+### Zil
+
+Claude sizi beklerken bir ses - izin sorusu, soru, diyalog - ve sizi gerektirmeyen her şey
+için sessizlik. Tek ayarla kapanır.
+
+### Her İş, Bu Turda
+
+Model bir istemin işlerini `.claude/jobs.md` içine `- [ ] iş` diye yazar, her birini `- [x]`
+diye işaretler; bir işi yalnız gerekçeyle açık bırakabilir: `- [ ] iş — senin kararını bekliyor`.
+
+`Stop`'ta `dur.js` gerekçesiz açık satır varsa ya da istem bir listeydi ve liste yazılmadıysa
+ya da istemdeki maddeden az satır yazıldıysa turu bir kez tutar. Model çalışırken attığın mesaj
+da sayılır: her biri en az bir iş daha demektir, tutma mesajı onları geri okur. Sonraki istemde
+açık satırlar deftere geçer, dosya `trash/`'e gider. Arka plan görev bildirimi istem değildir,
+hiçbir şey götürmez.
+
+### Ertelenen Her Şey İçin Tek Defter
+
+Ertelenen her şey `.claude/acik.md`'ye `- [ ] iş — zaman — gerekçe` olarak gider; `sonra.md`
+kalkar. Defteri kancalar yazar: `mod.js` `jobs.md`'nin açık satırlarını taşır, `ust.js` her
+Agent çağrısına `- [ ] ajan: <açıklama>` açar, eski `.claude/sonra.md` bir kez taşınıp
+`trash/`'e gider. Açık satır oldukça defter her istemde ve her `SessionStart`'ta (startup,
+resume, compact) en çok 12 satır ve 600 karakterle gelir; `[x]` satırlar
+`trash/acik-<zaman>.md`'ye budanır. Defter göründüğünde yaptığını `[x]` işaretle, yapmadığına
+gerekçe yaz; gerekçesiz satır silinmez. Açık satır varken 40 karakteri geçmeyen yanıt `Stop`'ta
+bir kez tutulur. Boş defterin maliyeti sıfır.
+
+### "Bitti"den Önce Kanıt
+
+Kod düzenleyip hiçbir şey koşmayan oturum `Stop`'ta bir kez tutulur: koş, çıktıyı göster.
+Testler, `tsc`, `vite build`, `cargo check|build|clippy`, `scan.js`, `eslint`, `ruff` ve
+`dotnet build` kanıt sayılır. Kanıt modelin yazdığı kod dosyalarına bağlıdır; koşudan sonra
+yazılan README, not ya da defter satırı ve sürüm artıran bir
+yayın betiği kapıyı yeniden açmaz. Bir kez sorar, Write ya da Edit olmayan tur hiç sorulmaz;
+commit sayacı sıfırlar.
+
+Sahibin `CLAUDE.md`'si "Answer in Turkish" diyorsa İngilizce okunan uzun yanıt `Stop`'ta bir
+kez tutulur ve Türkçe yeniden istenir; sıkıştırmadan sonraki ilk bağlam yanıt dilini tek
+satırla taşır. Kapatmak: `langCheck: false`.
+
+### İşaretler
+
+`??` `++` kütüphane, `pp` özel raf, `aa` ajans, `ff` fable danışma, `mc` bellek taraması, `uc` UI denetimi,
+`ss` şimdi, `hh` yardım. Her biri istemin başında da sonunda da okunur; `hh` hepsini örnekle listeler.
+`hh` listesi ekran kanalına çizilir: bağlama tek harf gitmez, basılıp basılmayacağına
+model karar vermez.
+
+`??` ya da `++` işaretli istem önce kütüphaneyi açar. `hooks/mod.js` kancası kelimeleri
+`kutuphane.js find`e verir, model çağrısı yok; en çok sekiz bulgu ve üç satır kural o turun
+bağlamına girer; model en çok üç kitabı lean okur, kaynağı tek satırda söyler ve o uzmanlıkla
+çalışır. Türkçe kelimeler İngilizce kataloğa çevrilir, eşleşme tam kelimedir. `pp` işaretli
+istem ise özel rafı açar: sahibin kendi kitapları, `~/.claude/teknesyum-private/private/`
+altında, bütün (8 KB tavan), kullanıcıya `Teknesyum Core > Özel Raf Açıldı` satırıyla; raf yalnız o aynanın
+uzak deposu sahibinse vardır, başka makinede `pp` bunu söyler ve durur. `aa` işaretli istem ajansı açar: kelimeler `agency.js find`e gider, en çok üç koltuk ve bir kural
+bağlama girer; model koltuğu lean okur, soruyla birlikte Türkçe bir alt ajana verir, cevabı `docs/danisma/`
+altına kaydeder. Sıradan tur hiçbirinden bir şey almaz.
+
+```mermaid
+flowchart TD
+  P["Promptun"] --> M{"İki uçtan birinde işaret var mı?"}
+  M -->|"yok"| N["Sıradan tur<br/>hiçbir şey yazılmaz"]
+  M -->|"?? ++"| L["Kütüphane<br/>1.968 kitap, model çağrısı yok"]
+  M -->|"pp"| S["Özel raf<br/>yalnız sahibinin makinesinde"]
+  M -->|"aa"| G["Ajans<br/>bir koltuk, alt ajana verilir"]
+  M -->|"ff"| F["Fable<br/>tek danışma, diske yazılır"]
+  M -->|"hh"| H["Bütün işaretleri sayar"]
+```
+
+### Tek Çekirdek, Dört Host
+
+Aynı kancalar Claude Code'da, Cursor'un kendi ajanında ve Gemini CLI içinde koşar.
+`core/hooks/host.js` ince bir adaptör: hostun kanca JSON'unu Claude şemasına çevirir, aynı
+sayım, yasak liste, döngü, iş ve devir kodunu çağırır, cevabı geri çevirir. Tek depo, tek
+sürüm, tek test takımı.
+
+```mermaid
+flowchart LR
+  CC["Claude Code<br/>hooks.json"] --> H["count · mod · yasak<br/>loop · dur · handoff"]
+  CU["Cursor ajanı<br/>~/.cursor/hooks.json"] --> A["host.js<br/>adaptör"]
+  GE["Gemini CLI<br/>~/.gemini/settings.json"] --> A
+  A --> H
+  CX["Codex CLI"] -.-> R["adapters/AGENTS.md<br/>yalnız kural"]
+```
+
+`setup.js --host cursor` ya da `--host gemini` yalnız kendi girdilerini bağlar, dosyadaki
+başka her şeyi korur; `--remove` onları geri çıkarır. Codex CLI'nin Windows'ta henüz kancası
+yok, kuralları metin olarak alıyor. Gemini 0.58.0 üstünde canlı koşuldu: hard reset reddedildi,
+banner göründü, iş kapısı turu bir kez tuttu ([kayıt](docs/raporlar/gemini-canli-deneme.md)).
+
+### Yalnız Çağrılınca Çalışan Araçlar
+
+| Betik | Ne yapar |
+|---|---|
+| `scripts/map.js .` | Import grafiği: merkezler, döngüler, yetimler. `map.js who <dosya>` kimin import ettiğini söyler. |
+| `scripts/log.js write` | Core'un `logs/openlogs/` klasörüne sabit biçimli kayıt: `--kind hata` (varsayılan), `yontem` (saklanacak yöntem) ya da `teklif` (öneri). Başlığı ya da belirtisi teknesyum-ui'yi ya da betiklerinden birini anan, ya da `--to ui` ile yazılan kayıt teknesyum-ui deposunun kendi `logs/openlogs/` klasörüne gider (Core'un yanında bulunur ya da ayardaki `uiRepo` ile); `list` iki klasörü de gösterir, `archive` kaydı ikisinde de bulur, `route --id X --to ui` birini taşır. teknesyum-ui'ye düşen kayıt o deponun `.claude/acik.md` defterine `- [ ] Logu oku: logs/openlogs/<dosya>` satırı da bırakır; UI oturumu onu bir sonraki istemde görür, `archive` satırı işaretler. `core'a raporla` ya da `report this to core` gibi bir istem tarifi yalnız o tura getirir. |
+| `scripts/advice.js` | `ask --mod gorus --konu <slug> --girdi <dosya>` fable danışmasını `docs/danisma/` altında numaralar, kapıyı tek çağrı için kurar ve dosyayı gösteren tek satırlık Agent istemi basar; girdi bağlama iki kez girmez. `record --mod gorus --ajan <agentId>` cevabı, modeli, çıktı tokenini ve süreyi ajan kaydından okuyup dosyalar. `list` kayıtları gösterir. |
+| `scripts/kutuphane.js` | Kütüphane: raflar projenin dışına klonlanır (`fetch`), katalog frontmatter'dan ya da ilk başlık ve paragraftan kurulur, `find <kelimeler>` modelsiz puanlar, `show <slug…> --lean` üç kitap ve 48 KB ile sınırlı, `record` `docs/danisma/` altına yazar, `push private` özel rafı commit'ler ve iter, `stale [gün]` her rafın kaç gün önce çekildiğini listeler, `fetch all --stale 7` yalnız ondan eskileri `fetch --depth 1` ve reset ile günceller, klonlar sığ kalır; `slim` mevcut her klonu bir kez sığlaştırıp çöp toplar. Otuz sekiz raf `core/kutuphane.json` ile gelir (1.968 kitap; MIT, Apache-2.0, CC0, CC BY-SA 4.0 ve bir CC BY-NC-SA 4.0; seçim `docs/kutuphane/` altında; 8 Eylül 2026 piyasa taraması, 1000 depo, 963 okundu, 93 Al, `docs/kutuphane/piyasa-2026-09-08.md`), `raf add <slug> <url> --kind agents|skills|prompts|docs` ekler; tür neyin kitap sayılacağını seçer. Hiçbiri kurulmaz, hiçbir raf bağlama girmez. |
+| `scripts/agency.js` | [agency-agents](https://github.com/msitarzewski/agency-agents) deposu artık kütüphanenin `agency` rafı, komutlar aynı (`find` kendi puanlamasını kullanır, `show` ve `record` kütüphaneninkidir): `find ui` seçer, `show <slug> --lean` rolü kişilik ve ölçüt bloklarını atarak alt ajana verir, `record` alışverişi `docs/danisma/` altına yazar. `show` bir koltuk izi bırakır, sonraki `Stop` onu sohbette `Koltuk: <slug> okundu · <n> KB` diye basar; satır bağlama girmez. Hiçbiri ajan olarak kurulmaz; liste bağlama hiç girmez. |
+| `scripts/manset.js` | Markdown raporu denetler: düzyazıdaki her sayı aynı bölümün tablosunda ya da listesinde bulunmalı. |
+| `scripts/scaffold.js` | Lisans, imza bloğu, dil linki: modelin asla yazmadığı sabit metinler. |
+| `scripts/setup.js` | Makine ayarı: dil, zil, özel depo, projeler klasörü. Statusline `~/.claude/teknesyum/` altındaki `bridge.js` kopyasını koşar; eski eklenti sürümlerinin budanması onu kırmaz. `--host cursor\|gemini` adaptörü o hosta bağlar, `--remove` çıkarır. |
+| `scripts/doctor.js` | Sekiz kontrol: node, git, sürüm, kancalar, statusline, önbellek, harita, günlükler. `cache` deponun kancalarını, betiklerini ve metinlerini kurulu eklentiyle karşılaştırır, henüz canlı olmayan her dosyayı adıyla basar. |
+| `scripts/scan.js` | Projenin kendisine sekiz salt okunur kontrol: lisans yüzeyleri, beş dosya eşiğine karşı plan, devir boşlukları, sürüme karşı belgeler, test betiği, `trash/` atıfları, `tmp/` dışında kalmış geçici dosyalar, harita. Yazmaz, model çağırmaz, bağlama taşımaz; profil yalnız belge kümesini genişletir. |
+| `scripts/hatirla.js` | Bellek taraması: `topla [--gun N]` geçmiş her isteği kesmeden kanıtıyla — kapanış cevabı, sonraki isteğe kadarki commit'ler, `trash/jobs-*`, `.claude/jobs.md` ve `docs/plan.md` açık satırları — yaklaşık 40 bin karakterlik `tmp/gecmis-N.md` sayfalarına yeniden eskiye yazar, tekrarlanan istek bir kez. Dönemin bütün commit listesi `tmp/gecmis-commitler.md` dosyasına gider. Yalnız dizin basar; her sayfa sonnet'e yoluyla, 4'erli paralel gruplar ve tek birleştiriciyle gider. Her istek maddelerine bölünür, her madde o isteğin ve sonraki bütün isteklerin kapanışı ve commit'leriyle sınanır. `record --ajan <agentId>` raporu `tmp/hatirlatici.md` olarak dosyalar — istek başına ne dedim, sonra `[x]` yapıldı, `[ ]` yapılmadı, `[!]` kararını bekliyor, `[?]` belirsiz — ve tam bitmemiş olanların hepsini 0 tokenle ekrana basar; ikinci kayıt ekrandaki ilkinin yerine geçer. Geçici dosyalar `tmp/` altında durur, git'e girmez. |
+| `scripts/cop.js` | `<proje>/trash` klasörünü ve bir günden eski `tmp/` dosyalarını ölçer: `node cop.js .` toplamı ve en büyük on dosyayı basar, 100 MB üstünde `1` ile çıkar; `--hepsi [kök]` bunu `projectsRoot` altındaki her proje için, büyükten küçüğe yapar. `count.js` `Stop` anında, saatte en çok bir kez, `projectsRoot` altındaki bütün projeleri (ayar yoksa yalnız bu projeyi) kendi temizler: `trash/` içindeki bir girdi orada ilk görüldüğünden bir hafta sonra, `tmp/` dosyası bir günlük olunca silinir; biten yanıtın altındaki banner gideni sıfır tokenle söyler. `--sil` çöpü ve eski tmp dosyalarını hemen, kalıcı siler, çünkü geri dönüşüm kutusu yer açmaz; taze tmp dosyaları kalır. Günde bir kez oturum açılışında `~/.claude/teknesyum/` altındaki yedi günden eski state, banner ve advice dosyalarını süpürür (etkin oturumunkini değil); eklenti önbelleğinde kurulu sürüm dahil en yeni iki Teknesyum sürümü dışındakileri `~/.claude/teknesyum/trash/plugin-cache/` altına taşır. |
+| `scripts/release.js` | Sürümü `.changes/` altındaki notlardan artırır, kurulum satırlarını yeniler, etiketler; `publish` GitHub sürümünü `vX.Y.Z` başlığıyla açar, iki kurucuyu `.sha256` dosyalarıyla yükler. |
+
+### Ayarlar
+
+| Özellik | Sıradan tur | İş yapınca | Kapatmak |
+|---|---|---|---|
+| Banner | 0 token | 0 token, yalnız ekran | - |
+| İş kapısı | 0 bayt | `Stop`'ta bir blok | `jobs: false` |
+| İş geri verme | 0 bayt | açık satırlar deftere geçer | `jobs: false` |
+| Defter | boşken 0 bayt | satır açıkken istem başına en çok 600 karakter | `jobs: false` |
+| Kanıt kapısı | 0 bayt | `Stop`'ta bir blok | `evidence: false` |
+| Yanıt dili | 0 bayt | `Stop`'ta bir blok, sıkıştırmadan sonra bir satır | `langCheck: false` |
+| Yasak liste | 0 bayt | reddedilen komut başına bir gerekçe | - |
+| Host adaptörleri | 0 bayt | Claude Code'dakiyle aynı | `setup.js --host <h> --remove` |
+
+Anahtarlar `~/.claude/teknesyum/config.json` içinde. Kapanış kapısı `"closing": false`,
+arayüz kapısı `ui: false` ile kapanır.
+
+### CLAUDE.md Kuralı
+
+Eklenti modele nasıl çalışacağını söylemez. Kendi `CLAUDE.md`'nize koymanızı önerdiği beş
+satırlık kural bu; sayım kancası tek yaptırımı, kuralın kendisi de yukarıdaki tablodaki tur
+başına ~200 token.
+
+```
+- Tek dosya ve bildiğin iş: yap.
+- Beş ve üstü dosya: önce docs/plan.md.
+- Bilmediğin kütüphane: yazmadan önce oku.
+- Bitince çalıştır, çıktıyı göster.
+- Küçük iş: bunların hiçbiri.
+```
+
+İş listesi ve devirle uzun biçimi [adapters/AGENTS.md](adapters/AGENTS.md) içinde.
+
+### Kullanımda Nasıl Görünür
+
+```
+Teknesyum ▸ my-app · bağlam %41 · 3 dosya +82-14 · plan yok · test geçti
+Teknesyum ▸ my-app · bağlam %67 · 6 dosya +240-31 · plan · test bayat · devir
+```
+
+İlk satır her eşiğin altındaki bir oturum: modele hiçbir şey söylenmemiş. İkincisi planını
+yazmış, testlerini koşmuş, sonra dosya değiştirmiş (son kayıt bayat) ve `decisions` ile
+`next_action` satırlarını bekleyen bir devri olan oturum. Test sözcüğü yalnız son kayıttır:
+çıkış kodundan geçti ya da kaldı, koşu hiçbir şey basmadıysa bilinmiyor, HEAD ya da çalışma
+ağacı sonradan değiştiyse bayat.
+
+### Tarama
+
+Buraya neyin gireceğini tahmin etmedik. Piyasayı okuduk.
+
+| | |
+|---|---|
+| Bakılan depo | 1.000 |
+| 45 Opus ajanıyla baştan sona okunan | 963 |
+| Kütüphaneye alınan | 93 |
+| Fikir notu olarak tutulan, konmayan | 165 |
+| Reddedilen | 705 |
+| Bugün gelen raf | 38 |
+| Kataloğdaki kitap | 1.968 |
+
+Hiçbiri kurulu değil. Katalog diskte bir dosya, modelsiz aranıyor; sıradan bir turun
+bağlamına hiçbir raf girmiyor.
+
+### Büyük Araçlar Neden Konmadı
+
+Hepsi okundu. Hiçbiri kötü olduğu için elenmedi; her biri, hiçbir şeyin olmadığı bir turda
+ne tuttuğu için elendi.
+
+| Araç | Neden burada değil |
+|---|---|
+| [Obsidian](https://obsidian.md) | Deponun yanına koca bir not kasası. Ondan ihtiyacımız olan tek şey bir devir dosyasıydı; o da `handoff.js`. |
+| [graphify](https://github.com/hongkongkiwi/graphify) | Büyük kod tabanında çok iyi, hâlâ öneriyoruz. O indeksler; biz her oturumda indeks istemedik, `map.js` yalnız çağrılınca koşuyor. |
+| [Context7](https://context7.com) | İstendiğinde canlı belge. Tasarımı gereği tur başına bağlam maliyeti; bizim kuralımız sıradan turun bedava olması. |
+| [superpowers](https://github.com/obra/superpowers) | En geniş skill çatısı. Kendi lab rafı bizim kütüphanemizde; çatının kendisi her oturumda bağlamda şema tutuyor, yapmadığımız tek şey o. |
+
+Z ile C arasındaki çizgi eklentinin tamamı: Z hiç yazmaz, A yalnız çağrılınca yazar, B
+oturum başına şema tutar, C her turda öder. Core Z ve A gönderiyor. Üstünde hiçbir şey yok.
+
+```mermaid
+flowchart LR
+  Z["Sınıf Z<br/>hiç yazmaz"] --> A["Sınıf A<br/>yalnız çağrılınca"]
+  A --> B["Sınıf B<br/>oturum başına şema"]
+  B --> C["Sınıf C<br/>her turda öder"]
+  Z:::ic
+  A:::ic
+  B:::dis
+  C:::dis
+  classDef ic fill:#1b5e20,stroke:#2e7d32,color:#fff
+  classDef dis fill:#4e342e,stroke:#6d4c41,color:#fff
+```
+
+Yeşil Core'un gönderdiği. Kahverengi reddettiği.
+
+### Tasarım Ve Arayüz Denetimi
+
+Tasarlamak ile tasarımı denetlemek ayrı iki iş, kütüphane ikisini de taşıyor. Piyasanın
+ikinci taramasından sonra bunun için beş raf eklendi.
+
+| Raf | Ne işe yarar |
+|---|---|
+| `ui-ux-pro-max` | Tasarlarken: 67 stil, 96 palet, 57 font eşleşmesi, 13 yığın. |
+| `anthropic-skills` | Tasarlarken: `frontend-design`, `brand-guidelines`, `canvas-design`; Anthropic'in kendi deposu. |
+| `addyosmani-skills` | İkisinde de: `frontend-ui-engineering` erişilebilir ve duyarlı arayüz kurar, erişilebilirlik listesi onu denetler. |
+| `react-best-practices` | Denetlerken: `web-design-guidelines` bitmiş arayüz kodunu Web Interface Guidelines'a göre okur. |
+| `pair-design` | Tasarlarken: kullanıcıya değil kullanıcıyla tasarım yürütme çerçevesi. |
+
+Zaten duranların yanına — `refactoring-ui`, `web-design`, `ecc/skills/design-system`,
+`ecc/skills/accessibility`, ajansın `design` koltukları. Hiçbiri kurulu değil; `?? tasarım`
+ya da `?? arayüzü denetle` bulur, sıradan tur hiçbirini görmez.
+
+```mermaid
+flowchart LR
+  D["?? tasarım"] --> DS["ui-ux-pro-max<br/>frontend-design<br/>design-system"]
+  R["?? arayüzü denetle"] --> RS["web-design-guidelines<br/>accessibility<br/>ui-finish-gate-reviewer"]
+```
+
+### Ne Çıktı
+
+0.16 bir çıkarma sürümü. Şunlar eklentiden çıktı; hepsi `v0.15.0` etiketinde duruyor,
+`bench/varyant/` ölçtüğü her parçanın kaynağını oradan adlandırıyor:
+
+- sözleşme makinesi: `contract.js`, `risk.js`, `verify-runner.js`, relay'in `handoff.js`'i;
+- dokuz kanca: autoclose, closure, cue, embed, guard, notice, schema, seal, watch;
+- altı rol metni, `worker` ajanı, relay skill'i, `tiers.json`.
+
+Yerine iki kanca geldi, `count.js` ve `handoff.js`, bir de yukarıdaki beş satırlık kural.
+Ajanlar, worktree'ler ve plan modu yerinde; onlar Claude Code'un kendisinin ve model onları
+her zamanki gibi kendi seçiyor. Çıkan parça, onun yerine seçen makineydi.
 
 ---
 
-## Düzen
+## Geliştiriciler İçin
+
+### Düzen
 
 ```
 .claude/
@@ -527,9 +613,7 @@ bench/
   hook-errors.log      bir kancanın yapamadığı
 ```
 
----
-
-## Testler
+### Testler
 
 ```bash
 npm test
@@ -546,9 +630,7 @@ vermesi. Host adaptörlerinin kendi takımı var: Cursor ve Gemini olayları gir
 çıkar; setup bağlamasının iki kez koşunca aynı kaldığı ve yabancı kancalara dokunmadığı
 denetlenir.
 
----
-
-## Tasarım Notları
+### Tasarım Notları
 
 - [docs/COST-MODEL.md](docs/COST-MODEL.md) - token nereye gidiyor ve ondan çıkan kural
 - [docs/DECISIONS.md](docs/DECISIONS.md) - bunu biçimlendiren kararlar ve nedenleri
