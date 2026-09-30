@@ -347,3 +347,25 @@ Düzelt görevinde yazılan nedenler (kelimesi kelimesine `tur6/ilk/neden-duzelt
 - Yalnız Sonnet'in okuması 1,05 ile 1,22 $ tuttu. Opus'un aynı görevi baştan sona kendisinin yapması 5. turda 0,86 ile 1,08 $ idi.
 
 Sonuç: Opus ayrımı doğru yapıyor; küçük işte okuyucuyu reddediyor, büyük işte kendisi çağırıyor. Ama Sonnet okuyucu, Opus'un kendi daraltarak okumasından pahalı. Şant fikri kapatıldı; 500 satır denemesi gereksiz.
+
+## 17. Okuma Ve Özet, Haiku 4.5 / Sonnet 5.5 / Opus 5.5
+
+Kurulum: `bench/okuma.js`, eklentisiz temiz `claude -p`, 4 soru × 3 model × 2 tekrar = 24 koşu,
+koşu başına 1,5 $ tavan. Cevap `cevap.json`'a yazılır, betik kaynaktan doğruyu çıkarıp 0–1
+puanlar. Ham çıktı `bench/okuma-ham/`, satırlar `bench/okuma.jsonl`.
+
+| Soru | Haiku puan | Haiku $ | Sonnet puan | Sonnet $ | Opus puan | Opus $ |
+|---|---|---|---|---|---|---|
+| kolay (satır + ok( sayısı) | 1 / 1 | 0,18 | 1 / 0,5 | 0,34 | 1 / 1 | 0,64 |
+| orta (dur.js geçen fonksiyonlar) | 1 / 1 | 0,24 | 1 / 1 | 0,31 | 1 / 1 | 0,51 |
+| zor (13 kanca × olay + test) | 0,81 / 0,88 | 0,21 | 0,96 / 0,96 | 0,63 | 0,96 / 0,96 | 0,72 |
+| özet (dur.js kontrol sırası) | 1 / 0,67 | 0,10 | 1 / 1 | 0,17 | 1 / 1 | 0,32 |
+| **Ortalama / toplam** | **0,92** | **1,46** | **0,93** | **2,91** | **0,99** | **4,36** |
+
+Sonuç: Haiku, Sonnet kadar doğru okuyor, maliyetin yarısıyla; Opus'a göre üçte biri. Tek
+seferlik bulma ve sıralama işlerinde hatasız. Zayıf yeri geniş çapraz tablo (zor: 13 dosyanın
+hepsini buldu ama test eşleştirmesinde eksik kaldı) ve ikinci tekrarın özetinde erken çıkışı
+`stop_hook_active` yerine `hook_event_name` yazması; sıra yine doğru. Hata veya tavan aşımı yok.
+
+Yorum: Haiku'ya okuma ve özet verilebilir; çıktının Opus tarafından doğrulanacağı, çok dosyalı
+eşleştirme istemeyen işlerde. Şant (§13–16) kapalı kalır; bu bölüm yalnız kapasiteyi ölçer.
