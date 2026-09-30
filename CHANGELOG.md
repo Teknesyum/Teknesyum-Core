@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.60.0
+
+- A haiku subagent is denied unless the owner's last message names haiku.
+
 ## v0.59.0
 
 - Hold a reply that hands the owner a delete command
