@@ -1904,6 +1904,12 @@ function testReport() {
   const qc = sub('bir de başlığı düzelt');
   const book = fs.readFileSync(path.join(sq, '.claude', 'acik.md'), 'utf8');
   ok('a message sent while working is queued in the ledger', /^- \[ \] Sıra: bir de başlığı düzelt — /m.test(book) && /acik\.md/.test(qc), book + qc);
+  const dv = sub('testKapanis kaçıncı satırda?');
+  const dvBook = fs.readFileSync(path.join(sq, '.claude', 'acik.md'), 'utf8');
+  ok('a code question while working goes to the reader', /^- \[ \] Devredildi: testKapanis kaçıncı satırda\? — .* — okuyucuya verildi$/m.test(dvBook) && /teknesyum-core:okuyucu/.test(dv) && /denetlenmedi/.test(dv), dvBook + dv);
+  ok('a question about the work in hand stays queued', /^- \[ \] Sıra: bunu neden böyle yaptın\? — /m.test((sub('bunu neden böyle yaptın?'), fs.readFileSync(path.join(sq, '.claude', 'acik.md'), 'utf8'))));
+  ok('a job is not a question', !mod.soru('bir de başlığı düzelt') && mod.soru('dur.js hangi olaylara bağlı') && mod.soru('test geçiyor mu') && !mod.soru('az önceki hata nerede?') && !mod.soru('a\n- b?'));
+  ok('the reader agent runs on haiku and only reads', /^model: haiku$/m.test(fs.readFileSync(path.join(CORE, 'agents', 'okuyucu.md'), 'utf8')) && !/Write|Edit|Bash/.test(/^tools:.*$/m.exec(fs.readFileSync(path.join(CORE, 'agents', 'okuyucu.md'), 'utf8'))[0]));
   ok('ss skips the queue and says now', /ss/.test(sub('ss dur, yanlış dosya')) && !/yanlış dosya/.test(fs.readFileSync(path.join(sq, '.claude', 'acik.md'), 'utf8')));
   const dur = require(path.join(CORE, 'hooks', 'dur.js'));
   const gate = dur.sira({ session_id: sid, cwd: sq });

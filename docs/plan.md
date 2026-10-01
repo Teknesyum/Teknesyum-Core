@@ -138,3 +138,16 @@ Kaynak: [ui-tarama](ajan/ui-tarama/) beş rapor. Kök neden: tarayıcının `con
 - [x] J5 Core `uc` işareti: rafı ve denetim yordamını tetikler, sıradan turda 0 token.
 - [x] J6 İki sürüm, iki README, eklenti güncelle.
 - [x] J7 Kampanya: VidShrink, Runly, AbxPilot, CodeXray, VideoEdit, Quizloop — her birinde `uc`: rapor, düzeltme, gerçek pencere görüntüsü, commit.
+
+## K. Araya Soru Haiku Okuyucuya (danışma 035, 2026-10-02, sahip "kur" dedi)
+
+Sıradan turda 0 token; yalnız Claude çalışırken gelen istemde devreye girer.
+
+- [x] `core/agents/okuyucu.md`: model haiku, araç Read/Grep/Glob; "bulamadıysan uydurma",
+  "gönderme çözülemiyorsa söyle", kısa cevap, dosyayı bir kez oku.
+- [x] `mod.js` `soru()`: soru işareti / soru eki / soru kelimesi → soru; "bu, şu, az önce,
+  demin, neden, niye, yaptın" gibi konuşma göndermesi → Opus'ta kalır (bugünkü sıra).
+- [x] Soru: defterde `Devredildi:` satırı (sira durumuna girmez, Stop kapısı sormaz),
+  banner "Okuyucuya Verildi", metin `mod.devir`: arka planda okuyucuya ver, cevabı
+  "okuyucu (Haiku), denetlenmedi" etiketiyle aynen aktar, satırı [x] yap; aynı anda tek okuyucu.
+- [x] Ayar `araya: false` kapatır. Testler, iki README, sürüm (minor).

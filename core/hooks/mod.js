@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { main, configRoot, stateFile, t, banner, say, sayBlock, coreRepo, uiRepo } = require('./lib.js');
+const { main, configRoot, settings, stateFile, t, banner, say, sayBlock, coreRepo, uiRepo } = require('./lib.js');
 const lib = require('../scripts/kutuphane.js');
 const ag = require('../scripts/agency.js');
 
@@ -293,7 +293,28 @@ function busy(j, now) {
   return false;
 }
 
+const SORU = /\?|(^|\s)(m[ıiuü]|m[ıiuü]s[ıiuü]n|m[ıiuü]d[ıiuü]r)(\s|$)|^(ne|nedir|nerede|nereden|nasıl|hangi|kaç|kim|what|where|which|how|who)\b|\b(nedir|nerede|hangi|kaçıncı|kaç tane|var mı)\b/i;
+const BAGLAM = /(^|\s)(bu|bunu|bunun|şu|şunu|az önce|az önceki|önceki|demin|demindeki|biraz önce|neden|niye|niçin|yaptın|yaptığın|dedin|dediğin|why|you just|this|that)(\s|$|[,.?])/i;
+
+function soru(prompt) {
+  const p = String(prompt || '').trim();
+  if (!p || p.length > 400 || /\n\s*[-*\d]/.test(p)) return false;
+  return SORU.test(p) && !BAGLAM.test(p);
+}
+
+function devret(j, prompt) {
+  const cwd = j.cwd || process.cwd();
+  const what = 'Devredildi: ' + prompt.replace(/\s+/g, ' ').replace(/ — /g, ' - ').trim().slice(0, 300);
+  try { defter.append(cwd, [defter.entry(what, 'okuyucuya verildi')]); } catch { return ''; }
+  shown.push(banner('banner.devir'));
+  return t('mod.devir');
+}
+
 function enqueue(j, prompt) {
+  if (settings().araya !== false && soru(prompt)) {
+    const r = devret(j, prompt);
+    if (r) return r;
+  }
   const cwd = j.cwd || process.cwd();
   const what = 'Sıra: ' + prompt.replace(/\s+/g, ' ').replace(/ — /g, ' - ').trim().slice(0, 300);
   try { defter.append(cwd, [defter.entry(what, 'çalışırken geldi')]); } catch { return ''; }
@@ -334,4 +355,4 @@ function handle(j) {
 
 if (require.main === module) main(handle, { log: 'mod.js' });
 
-module.exports = { REPORT, UI_REPORT, ASKED, handle, busy, tail, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };
+module.exports = { REPORT, UI_REPORT, ASKED, handle, busy, soru, tail, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };
