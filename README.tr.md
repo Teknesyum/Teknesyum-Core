@@ -171,13 +171,13 @@ kabul sütununu oynatmadı, hiçbiri geri girmedi. Satırlar raporun 8. bölüm�
 ### Windows - tek satır
 
 ```powershell
-irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.61.1/install.ps1 | iex
+irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.62.0/install.ps1 | iex
 ```
 
 ### macOS / Linux - tek satır
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.61.1/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.62.0/install.sh | bash
 ```
 
 **Sonra Claude Code'u yeniden başlatın.** Kancalar oturum ortasında yüklenir; masaüstü
@@ -212,7 +212,7 @@ Cursor ve Gemini için yalnız Node.js ve Core'un bir kopyası gerekir; Claude C
 Klondan bağlayın, çünkü eklenti önbelleğinin yolu her güncellemede değişir:
 
 ```bash
-git clone --depth 1 --branch v0.61.1 https://github.com/Teknesyum/Teknesyum-Core "$HOME/Teknesyum-Core"
+git clone --depth 1 --branch v0.62.0 https://github.com/Teknesyum/Teknesyum-Core "$HOME/Teknesyum-Core"
 ```
 
 ```bash
