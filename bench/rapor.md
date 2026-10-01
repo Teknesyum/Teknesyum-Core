@@ -396,3 +396,29 @@ Yorum: Evet, gönül rahatlığıyla verilebilir; ama denetimsiz. Denetim boşa 
 maliyet değil. Not: kendi ve denetim kolunun duvar saati (26 dk) ölçüm hatası; akış sonundaki
 bir `task_summary` satırı boşta algısını kaçırdı, `result.duration_ms` gerçek iş süresini
 ~6,5 dk gösteriyor. Betik düzeltildi.
+
+## 19. Rutin 350+ Satır Okumada Haiku Okuyucu (Danışma 036)
+
+Kurulum: `bench/okuyucu.js`. İki soru görevi: büyük (`test/all.js`, 2100+ satır, §17 orta
+sorusu) ve orta (`core/scripts/kutuphane.js`, 537 satır, diske yazan fonksiyonlar, F1).
+Kollar: **opus** (tek başına), **sınırlı** (Opus'a "350+ satırı okuyucuya ver" notu; Haiku
+okuyucu tek Read, yalnız Grep, en çok 3 araç), **sınırsız** (aynı not, okuyucuya sınır yok).
+Tavan 1,2 $. Ham: `bench/okuyucu-ham/`, satırlar `bench/okuyucu.jsonl` ve `bench/okuyucu-esli.jsonl`.
+
+İlk 12 koşu sırayla paketlendi (4'erli) ve önbellek ısısı kollara karıştı: soğuk paketler
+~1,0 $, son paket ~0,4 $. Bu yüzden opus ve sınırlı kol aynı pakette yeniden koşuldu (eşli):
+
+| Görev | Opus $ | Sınırlı $ (Opus + Haiku) | Fark | Süre (sn) Opus / Sınırlı | Puan |
+|---|---|---|---|---|---|
+| orta (537 satır) | 0,44 | 0,39 (0,36 + 0,03) | −%12 | 27 / 54 | 1 / 1 |
+| büyük (2100+ satır) | 0,51 | 0,48 (0,38 + 0,10) | −%6 | 54 / 159 | 1 / 1 |
+
+İlk 12 koşuda da bütün puanlar 1; Haiku'nun payı 0,03–0,17 $. Sınırsız okuyucu büyük
+dosyada 10 araç çağrısı yaptı (sınırlı 3–7), yine de yeniden-okuma kaçağı §16'daki gibi
+patlamadı. Opus kendi başına okurken dosyayı hiç Read etmedi: `grep`/`node` ile 3–7 Bash
+çağrısında daralttı.
+
+Sonuç: Haiku doğru okuyor ve kaçak yok, ama tasarruf %6–12 ve iş 2–3 kat yavaş. Opus'un
+kendi dar okuması zaten ucuz; maliyetin çoğu Opus'un sabit bağlamı, okumanın kendisi değil.
+Rutin okuma kapısı kurulmaz; şant bu ölçüyle kapanır. Haiku'nun yeri hız kazandırdığı
+araya soru (§18, v0.62.0).
