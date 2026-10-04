@@ -450,3 +450,25 @@ de içerir, kollar yalnız birbirine göre okunur.
 Sonuç: fikir çalışıyor, laf arasında geçen ağır karar üç modelde de yakalanıyor. Haiku
 kontrolde iki kez boş yere konuştu ("çıktı gösterilmedi", "git deposu değil"); gözcü için
 olmaz, çünkü boş uyarı özelliği öldürür. Sonnet ve Opus hiç boşa konuşmadı.
+
+### 20.1 Bedava Kol: Kapanıştaki Önbilgilendirme
+
+Soru: gözcünün yakaladığını ana ajan kapanışta zaten kendi söylüyor mu? Aynı altı dökümde
+Opus'a "ajan sensin, tur bitti, kapanışı yaz" dendi; kural RULES.md'deki gibi: yeni bir şey
+yoksa `Önbilgilendirme` başlığı hiç yazılmaz. 3 tekrar, 18 koşu, 1,69 $.
+
+| Kol | Yakalama | Doğru susma | Gerçek ek maliyet |
+|---|---|---|---|
+| Kapanış (Opus, Önbilgilendirme) | 12 / 12 | 4 / 6 | yok, kapanış zaten yazılıyor |
+| Gözcü Sonnet | 8 / 8 | 4 / 4 | uzun tur başına bir çağrı |
+| Gözcü Opus | 8 / 8 | 4 / 4 | uzun tur başına bir çağrı |
+
+Kapanış dört ağır kararın hepsini her seferinde kendi söyledi, çoğunda "bunu sen istemedin,
+ben karar verdim" diye. Kontroldeki iki fazla söz hafifti (aramanın yalnız `core/` altında
+yapıldığı, yedeklerin saklama süresi); yanlış değil, gereksiz.
+
+Sınır: dökümü yazan ajan ile kapanışı yazan model aynı oturum değil, yani bu kol da bir tür
+dışarıdan okuma. Gerçek körlük (ajanın kararı hiç fark etmemesi) bu bench'te ölçülmedi.
+
+Sonuç: gözcü, kapanışın bedavaya yaptığı işin üstüne ölçülebilir bir şey koymuyor.
+Kurulmaz. Tek farkı işin ortasında konuşabilmesi; onu da eklenti yalnız ekranda yapıyor.

@@ -17,6 +17,10 @@ ya da
 bilgi: <en fazla 25 kelimelik tek cümle>
 acikla: <en fazla 80 kelime, sade Türkçe>`;
 
+const KAPANIS = `Aşağıdaki dökümde ajan sensin; tur şimdi bitti. Kullanıcıya kapanışı yaz, başka hiçbir şey yazma.
+## Özet — ne yapıldı, ne çıktı; adım listesi yok, en fazla 60 kelime.
+### Önbilgilendirme — kullanıcı için yeni olan ve tavsiyen; yoksa bu başlığı hiç yazma.`;
+
 const SENARYOLAR = {
   kurucu: {
     anahtar: /100 ?MB|tam kurucu|her (güncelleme|sürüm)|fark paket|diferansiyel|blockmap/i,
@@ -93,20 +97,22 @@ function kos(kol, senaryo, tekrar) {
     const s = SENARYOLAR[senaryo];
     const env = { ...process.env, CLAUDE_CONFIG_DIR: config() };
     delete env.CLAUDECODE;
-    const args = ['-p', '--model', kol, '--system-prompt', 'Yalnız istenen biçimde cevap ver. Araç kullanma.', '--output-format', 'json', '--max-budget-usd', '0.5'];
+    const kapanis = kol === 'kapanis';
+    const args = ['-p', '--model', kapanis ? 'opus' : kol, '--system-prompt', 'Yalnız istenen biçimde cevap ver. Araç kullanma.', '--output-format', 'json', '--max-budget-usd', '0.5'];
     const bas = Date.now();
     const p = spawn('claude', args, { cwd: fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-bilmelisin-')), env, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
     let out = '';
     p.stdout.on('data', (b) => (out += b));
     p.stderr.on('data', (b) => (out += b));
-    p.stdin.end(GOZCU + '\n\n<dokum>\n' + s.dokum + '\n</dokum>');
+    p.stdin.end((kapanis ? KAPANIS : GOZCU) + '\n\n<dokum>\n' + s.dokum + '\n</dokum>');
     p.on('close', () => {
       fs.writeFileSync(path.join(HAM, `${kol}-${senaryo}-${tekrar}.txt`), out);
       let son = {};
       try { son = JSON.parse(out); } catch {}
       const cevap = String(son.result || '').trim();
-      const sustu = /^bilgi:\s*yok\b/i.test(cevap);
-      const puan = s.anahtar ? (!sustu && s.anahtar.test(cevap) ? 1 : 0) : (sustu ? 1 : 0);
+      const on = cevap.split(/^#+\s*Önbilgilendirme.*$/im)[1];
+      const sustu = kapanis ? on === undefined : /^bilgi:\s*yok\b/i.test(cevap);
+      const puan = s.anahtar ? (!sustu && s.anahtar.test(kapanis ? on : cevap) ? 1 : 0) : (sustu ? 1 : 0);
       const satir = { kol, senaryo, tekrar, ms: Date.now() - bas, puan, sustu, usd: son.total_cost_usd || 0, cevap };
       fs.appendFileSync(CIKTI, JSON.stringify(satir) + '\n');
       console.log(JSON.stringify({ kol, senaryo, tekrar, puan, sustu, usd: Math.round(satir.usd * 10000) / 10000, ms: satir.ms }));
