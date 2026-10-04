@@ -435,7 +435,7 @@ hiç tetiklenmez, bu yüzden eklentinin kendisi bench'e girmedi.
 kısa döküm. Dördünde ajan sonucu ağır bir şeyi laf arasında söyler ve kullanıcı üstünden
 geçer (tam kurucuya dönüş, kırmızı testle sürüm, paket adı değişimi, bütçe tavanının
 kalkması). İkisi kontroldür: rutin iş ve kullanıcının zaten konuşup anladığı bir silme.
-Kol başına 2 tekrar, 36 koşu, toplam 1,82 $. Ham: `bench/bilmelisin.jsonl`.
+Kol başına 2 tekrar, 36 koşu, toplam 3,65 $. Ham: `bench/bilmelisin.jsonl`.
 
 | Gözcü | Yakalama (8) | Doğru susma (4) | Koşu başına $ | Süre sn |
 |---|---|---|---|---|
