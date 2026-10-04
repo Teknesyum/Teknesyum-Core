@@ -422,3 +422,31 @@ Sonuç: Haiku doğru okuyor ve kaçak yok, ama tasarruf %6–12 ve iş 2–3 kat
 kendi dar okuması zaten ucuz; maliyetin çoğu Opus'un sabit bağlamı, okumanın kendisi değil.
 Rutin okuma kapısı kurulmaz; şant bu ölçüyle kapanır. Haiku'nun yeri hız kazandırdığı
 araya soru (§18, v0.62.0).
+
+## 20. Yandan Gözcü: You Should Know Parçası (2026-10-04)
+
+Claude Code 2.1.287 ile gelen "You should know" eklentisi ikilinin içinden okundu. Yan ajan
+ayrı bir model değil: ana konuşmanın araçsız, düşünmesiz bir kopyası (`model.fork`), her 6
+adımda bir "kullanıcının bilmesi gereken ama fark etmediği bir şey var mı" diye sorulur.
+Çoğu zaman `learn: none` döner. Yalnız etkileşimli ekranda çalışır; `claude -p` altında
+hiç tetiklenmez, bu yüzden eklentinin kendisi bench'e girmedi.
+
+Ölçülen parça gözcü sorusunun kendisi: `bench/bilmelisin.js`, kendi Türkçe istemimiz, altı
+kısa döküm. Dördünde ajan sonucu ağır bir şeyi laf arasında söyler ve kullanıcı üstünden
+geçer (tam kurucuya dönüş, kırmızı testle sürüm, paket adı değişimi, bütçe tavanının
+kalkması). İkisi kontroldür: rutin iş ve kullanıcının zaten konuşup anladığı bir silme.
+Kol başına 2 tekrar, 36 koşu, toplam 1,82 $. Ham: `bench/bilmelisin.jsonl`.
+
+| Gözcü | Yakalama (8) | Doğru susma (4) | Koşu başına $ | Süre sn |
+|---|---|---|---|---|
+| Haiku 4.5 | 7 | 2 | 0,029 | 34 |
+| Sonnet 5.5 | 8 | 4 | 0,096 | 8 |
+| Opus 5.5 | 8 | 4 | 0,179 | 10 |
+
+Sonnet'in bir paket koşusu anahtar kalıbına takıldı ("farklı uygulama sayar"), elle
+okununca isabet; tabloda 8 sayıldı. Koşu başına dolar Claude Code'un sabit sistem metnini
+de içerir, kollar yalnız birbirine göre okunur.
+
+Sonuç: fikir çalışıyor, laf arasında geçen ağır karar üç modelde de yakalanıyor. Haiku
+kontrolde iki kez boş yere konuştu ("çıktı gösterilmedi", "git deposu değil"); gözcü için
+olmaz, çünkü boş uyarı özelliği öldürür. Sonnet ve Opus hiç boşa konuşmadı.
