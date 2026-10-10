@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.63.1
+
+- The shelf link is always the last line and never doubled; a prompt that names a shelved heading gets a one-line reminder to delete it
+
 ## v0.63.0
 
 - A shelf for jobs put off on purpose: docs/later.md, its link under every reply and a statusline count, both drawn on the display side
