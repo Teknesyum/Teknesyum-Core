@@ -151,3 +151,17 @@ Sıradan turda 0 token; yalnız Claude çalışırken gelen istemde devreye gire
   banner "Okuyucuya Verildi", metin `mod.devir`: arka planda okuyucuya ver, cevabı
   "okuyucu (Haiku), denetlenmedi" etiketiyle aynen aktar, satırı [x] yap; aynı anda tek okuyucu.
 - [x] Ayar `araya: false` kapatır. Testler, iki README, sürüm (minor).
+
+## L. Oturum Başına İş Listesi (log BUG Quizloop 2026-10-05)
+
+Aynı klasörde birden çok oturum tek `.claude/jobs.md` paylaşınca Stop kapısı ötekinin
+satırlarını sayıyor, her istemdeki taşıma ötekinin listesini çöpe atıyor. Sıradan turda 0 token.
+
+- [x] `defter.js` `jobsFile(cwd, oturum)`: klasörün ilk oturumu `jobs.md`'nin sahibi olur
+  (durum dosyası, 6 saat taze); sonraki oturum `.claude/jobs-<oturum8>.md` kullanır.
+- [x] Taşıma yalnız oturumun kendi dosyasını deftere geçirir; 6 saatten eski oturum
+  dosyaları süpürülür.
+- [x] `dur.js` ve `mod.js` aynı yolu okur, uyarı metni dosyanın adını söyler.
+- [x] Testler, iki README, yordam, sürüm (patch).
+- [ ] `acik.md` paylaşımı — denenmedi, defter proje çapında ortak tasarlandı
+- [ ] Süren işle ilgili kısa sorunun iş sayılması — bağlam sorusu bilerek sırada kalıyor (035)

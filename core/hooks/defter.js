@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { settings, t } = require('./lib.js');
+const { settings, t, stateFile, slot, safe } = require('./lib.js');
 
 const LEDGER = path.join('.claude', 'acik.md');
 const JOBS = path.join('.claude', 'jobs.md');
@@ -13,6 +13,7 @@ const MAX_LINES = 12;
 const MAX_CHARS = 600;
 const LINE_CHARS = 140;
 const SHORT = 40;
+const FRESH = 6 * 60 * 60 * 1000;
 
 function off() {
   return settings().jobs === false;
@@ -77,8 +78,42 @@ function openOf(text) {
   return lines(text).filter((l) => ITEM.test(l) && !DONE.test(l));
 }
 
-function absorbJobs(cwd) {
-  const file = path.join(cwd, JOBS);
+function jobsFile(cwd, session, claim) {
+  const me = String(session || 'none');
+  const mark = stateFile(slot('jobs-owner', cwd));
+  let o = null;
+  try { o = JSON.parse(fs.readFileSync(mark, 'utf8')); } catch {}
+  const live = o && o.sid && Date.now() - Date.parse(o.at) < FRESH;
+  if (live && o.sid !== me) return path.join('.claude', 'jobs-' + safe(me).slice(0, 8) + '.md');
+  if (claim && me !== 'none') {
+    try {
+      fs.mkdirSync(path.dirname(mark), { recursive: true });
+      fs.writeFileSync(mark, JSON.stringify({ sid: me, at: new Date().toISOString() }));
+    } catch {}
+  }
+  return JOBS;
+}
+
+function release(cwd, session) {
+  const mark = stateFile(slot('jobs-owner', cwd));
+  try { if (JSON.parse(fs.readFileSync(mark, 'utf8')).sid === String(session || 'none')) fs.unlinkSync(mark); } catch {}
+}
+
+function stale(cwd, mine) {
+  const dir = path.join(cwd, '.claude');
+  let names = [];
+  try { names = fs.readdirSync(dir).filter((n) => /^jobs-.+\.md$/.test(n)); } catch {}
+  return names.map((n) => path.join(dir, n)).filter((f) => {
+    try { return f !== mine && Date.now() - fs.statSync(f).mtimeMs > FRESH; } catch { return false; }
+  });
+}
+
+function absorbJobs(cwd, session) {
+  const own = path.join(cwd, jobsFile(cwd, session, true));
+  return [own, ...stale(cwd, own)].reduce((n, f) => n + absorbFile(cwd, f), 0);
+}
+
+function absorbFile(cwd, file) {
   const text = body(file);
   if (text === null) return 0;
   let n = 0;
@@ -136,9 +171,9 @@ function render(rows) {
   return head + '\n' + out.join('\n');
 }
 
-function ledger(cwd) {
+function ledger(cwd, session) {
   if (off()) return { text: '', moved: 0 };
-  const moved = absorbJobs(cwd) + absorbLater(cwd);
+  const moved = absorbJobs(cwd, session) + absorbLater(cwd);
   return { text: render(prune(cwd)), moved };
 }
 
@@ -183,4 +218,4 @@ function short(j) {
   return t('defter.short').replace('%N', String(left.length)) + '\n' + left.slice(0, MAX_LINES).join('\n');
 }
 
-module.exports = { ledger, agent, short, open, prune, append, entry, job, render, lastText, LEDGER, JOBS, LATER, SHORT };
+module.exports = { jobsFile, release, ledger, agent, short, open, prune, append, entry, job, render, lastText, LEDGER, JOBS, LATER, SHORT };

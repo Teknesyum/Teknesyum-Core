@@ -216,7 +216,7 @@ function opening(j, cwd) {
   }
   if (j.source === 'compact' && require('./lib.js').replyLang() === 'tr') lines.push(t('cue.lang'));
   let book = { text: '' };
-  try { book = require('./defter.js').ledger(cwd); } catch {}
+  try { book = require('./defter.js').ledger(cwd, j.session_id); } catch {}
   if (book.text) {
     lines.push(book.text);
     parts.push(banner('banner.ledger', { '%N': require('./defter.js').open(cwd).length }));

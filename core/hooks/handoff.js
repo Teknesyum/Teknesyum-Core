@@ -96,6 +96,7 @@ function generate(cwd, st) {
 function handle(j) {
   if (j.hook_event_name !== 'SessionEnd') return false;
   const cwd = j.cwd || process.cwd();
+  try { require('./defter.js').release(cwd, j.session_id); } catch {}
   const st = read(stateFile('state-' + safe(String(j.session_id || 'none')))) || {};
   if (j.transcript_path) st.transcript = j.transcript_path;
   return generate(cwd, st);

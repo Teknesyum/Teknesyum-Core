@@ -923,23 +923,24 @@ function testJobs() {
   const env = process.env.CLAUDE_CONFIG_DIR;
   process.env.CLAUDE_CONFIG_DIR = cfg;
   const stop = (sid, extra) => hook(DUR, { hook_event_name: 'Stop', session_id: sid, cwd, ...extra }, cfg);
+  const ask = (o) => { const l = require(path.join(CORE, 'hooks', 'lib.js')); try { fs.unlinkSync(l.stateFile(l.slot('jobs-owner', cwd))); } catch {} return mod.handle(o); };
   const said = (r) => { try { return JSON.parse(r.stdout); } catch { return {}; } };
   try {
-    mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'tek iş', cwd, session_id: 'j1' });
+    ask({ hook_event_name: 'UserPromptSubmit', prompt: 'tek iş', cwd, session_id: 'j1' });
     ok('a one-job turn is never held', stop('j1').stdout === '');
-    mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'a yap\nb yap\nc yap', cwd, session_id: 'j2' });
+    ask({ hook_event_name: 'UserPromptSubmit', prompt: 'a yap\nb yap\nc yap', cwd, session_id: 'j2' });
     const miss = said(stop('j2'));
     ok('a list prompt with no list written is held once', miss.decision === 'block' && /3/.test(miss.reason) && /jobs\.md/.test(miss.reason), JSON.stringify(miss));
     ok('and the queue gets the gate line', /^Teknesyum Core > (Job Gate|İş Kapısı)/m.test(take(cfg, 'j2')));
     ok('the second stop goes through', stop('j2').stdout === '');
-    mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'a yap\nb yap', cwd, session_id: 'j3' });
+    ask({ hook_event_name: 'UserPromptSubmit', prompt: 'a yap\nb yap', cwd, session_id: 'j3' });
     fs.writeFileSync(list, '- [x] a yap\n- [ ] b yap\n- [ ] c yap — sahip kararı');
     const held = said(stop('j3'));
     ok('an open job with no reason is held and named', held.decision === 'block' && /b yap/.test(held.reason) && !/c yap/.test(held.reason), JSON.stringify(held));
     ok('the next stop of the same turn goes through', stop('j3', { stop_hook_active: true }).stdout === '');
     fs.writeFileSync(list, '- [x] a yap\n- [ ] b yap — depo dışında takılı');
     ok('every job done or reasoned lets the turn end', stop('j3').stdout === '');
-    mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'a yap\nb yap\nc yap', cwd, session_id: 'j4' });
+    ask({ hook_event_name: 'UserPromptSubmit', prompt: 'a yap\nb yap\nc yap', cwd, session_id: 'j4' });
     fs.writeFileSync(list, '- [x] a yap\n- [x] b yap');
     const fewer = said(stop('j4'));
     ok('a list shorter than the prompt is held once', fewer.decision === 'block' && /3/.test(fewer.reason) && /2/.test(fewer.reason), JSON.stringify(fewer));
@@ -952,7 +953,7 @@ function testJobs() {
       q([{ type: 'text', text: 'x ekle\ny sil' }]),
       JSON.stringify({ type: 'attachment', attachment: { type: 'queued_command', commandMode: 'task-notification', prompt: '<task-notification>\n- a\n- b</task-notification>' } }),
     ].join('\n') + '\n');
-    mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'tek iş yap', cwd, session_id: 'jq' });
+    ask({ hook_event_name: 'UserPromptSubmit', prompt: 'tek iş yap', cwd, session_id: 'jq' });
     const queuedMiss = said(stop('jq', { transcript_path: tr }));
     ok('messages sent while working count as jobs', queuedMiss.decision === 'block' && /\b4\b/.test(queuedMiss.reason) && /bir de şunu düzelt/.test(queuedMiss.reason) && !/task-notification/.test(queuedMiss.reason), JSON.stringify(queuedMiss));
     fs.writeFileSync(list, '- [x] tek iş yap\n- [x] şunu düzelt\n- [x] x ekle\n- [x] y sil');
@@ -961,13 +962,28 @@ function testJobs() {
     const queuedOpen = said(stop('jq', { transcript_path: tr }));
     ok('an open queued job is named with the messages', queuedOpen.decision === 'block' && /x ekle/.test(queuedOpen.reason) && /> bir de şunu düzelt/.test(queuedOpen.reason), JSON.stringify(queuedOpen));
     fs.unlinkSync(list);
-    ok('a single prompt with no queued message is still free', (mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'tek iş', cwd, session_id: 'jr' }), stop('jr', { transcript_path: path.join(cwd, 'yok.jsonl') }).stdout === ''));
+    ok('a single prompt with no queued message is still free', (ask({ hook_event_name: 'UserPromptSubmit', prompt: 'tek iş', cwd, session_id: 'jr' }), stop('jr', { transcript_path: path.join(cwd, 'yok.jsonl') }).stdout === ''));
     const book = path.join(cwd, '.claude', 'acik.md');
     fs.writeFileSync(book, '- [ ] bekleyen — 2026-09-16 10:00 — karar\n');
     const brief = said(stop('j5', { last_assistant_message: 'No response requested.' }));
     ok('a short reply with an open ledger is held once', brief.decision === 'block' && /bekleyen/.test(brief.reason), JSON.stringify(brief));
     ok('and goes through when the hook is already active', stop('j5', { last_assistant_message: 'Tamam.', stop_hook_active: true }).stdout === '');
     ok('a full reply is never held by the ledger', stop('j5', { last_assistant_message: 'x'.repeat(200) }).stdout === '');
+    const defter = require(path.join(CORE, 'hooks', 'defter.js'));
+    const two = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-iki-'));
+    fs.mkdirSync(path.join(two, '.claude'), { recursive: true });
+    const stop2 = (sid) => said(hook(DUR, { hook_event_name: 'Stop', session_id: sid, cwd: two }, cfg));
+    mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'a yap\nb yap', cwd: two, session_id: 'aaaaaaaa1' });
+    fs.writeFileSync(path.join(two, '.claude', 'jobs.md'), '- [x] a yap\n- [ ] b yap');
+    const told = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: 'c yap\nd yap', cwd: two, session_id: 'bbbbbbbb2' });
+    ok('a second session in the same folder is given its own list', /jobs-bbbbbbbb\.md/.test(told), told);
+    ok('and its prompt leaves the first session list in place', fs.existsSync(path.join(two, '.claude', 'jobs.md')));
+    fs.writeFileSync(path.join(two, '.claude', 'jobs-bbbbbbbb.md'), '- [x] c yap\n- [x] d yap');
+    ok('the second session is not held for the open job of the first', !stop2('bbbbbbbb2').decision);
+    const own = stop2('aaaaaaaa1');
+    ok('the first session is held only for its own', own.decision === 'block' && /b yap/.test(own.reason) && !/c yap/.test(own.reason), JSON.stringify(own));
+    defter.release(two, 'aaaaaaaa1');
+    ok('a closed session frees the shared list', defter.jobsFile(two, 'bbbbbbbb2', false) === defter.JOBS);
     hook(path.join(CORE, 'hooks', 'ust.js'), { hook_event_name: 'PreToolUse', tool_name: 'Agent', session_id: 'j6', cwd, tool_input: { description: 'Ölçüm koşusu', prompt: 'koş' } }, cfg);
     ok('an agent call opens a ledger line', /^- \[ \] ajan: Ölçüm koşusu — /m.test(fs.readFileSync(book, 'utf8')), fs.readFileSync(book, 'utf8'));
     const count = require(path.join(CORE, 'hooks', 'count.js'));

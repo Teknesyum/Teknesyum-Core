@@ -138,21 +138,24 @@ function jobs(j) {
 
 function jobsOf(j, want) {
   let body = null;
-  try { body = fs.readFileSync(path.join(j.cwd || process.cwd(), '.claude', 'jobs.md'), 'utf8'); } catch {}
+  const cwd = j.cwd || process.cwd();
+  const rel = require('./defter.js').jobsFile(cwd, j.session_id, false);
+  const named = (s) => s.replace('.claude/jobs.md', rel.split(path.sep).join('/'));
+  try { body = fs.readFileSync(path.join(cwd, rel), 'utf8'); } catch {}
   if (body === null) {
     if (!want || !want.n) return '';
     say(j.session_id, banner('banner.jobsMissing', { '%N': want.n }));
-    return t('dur.jobsMissing').replace('%N', String(want.n));
+    return named(t('dur.jobsMissing')).replace('%N', String(want.n));
   }
   const rows = body.split(/\r?\n/).filter((l) => ITEM.test(l));
   if (want && want.n > rows.length) {
     say(j.session_id, banner('banner.jobsShort', { '%N': want.n, '%M': rows.length }));
-    return t('dur.jobsShort').replace('%N', String(want.n)).replace('%M', String(rows.length));
+    return named(t('dur.jobsShort')).replace('%N', String(want.n)).replace('%M', String(rows.length));
   }
   const left = rows.filter((l) => !DONE.test(l) && !REASON.test(l)).map((l) => l.trim());
   if (!left.length) return '';
   say(j.session_id, banner('banner.jobsOpen', { '%N': left.length }));
-  return t('dur.jobs').replace('%N', String(left.length)) + '\n' + left.join('\n');
+  return named(t('dur.jobs')).replace('%N', String(left.length)) + '\n' + left.join('\n');
 }
 
 function evidence(j) {

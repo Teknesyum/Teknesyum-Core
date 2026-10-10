@@ -372,6 +372,10 @@ silence for everything that does not need you. Off with one setting.
 The model lists the jobs of a prompt in `.claude/jobs.md` as `- [ ] job`, ticks each one
 `- [x]`, and may leave one open only with a reason: `- [ ] job — waits on your decision`.
 
+Two sessions in one folder do not share that file. The first one to take a prompt owns
+`jobs.md` until it closes or six hours pass; any other session is told to write
+`.claude/jobs-<session>.md` and is checked only against its own list.
+
 On `Stop`, `dur.js` holds the turn once if a line is open with no reason, or if the prompt
 was a list and no list was written, or listed fewer lines than the prompt had items. A message
 you send while the model is working counts too: each one is at least one more job, and the hold

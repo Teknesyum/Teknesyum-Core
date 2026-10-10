@@ -365,6 +365,10 @@ için sessizlik. Tek ayarla kapanır.
 Model bir istemin işlerini `.claude/jobs.md` içine `- [ ] iş` diye yazar, her birini `- [x]`
 diye işaretler; bir işi yalnız gerekçeyle açık bırakabilir: `- [ ] iş — senin kararını bekliyor`.
 
+Aynı klasördeki iki oturum bu dosyayı paylaşmaz. İlk istem alan oturum, kapanana ya da altı
+saat geçene kadar `jobs.md`'nin sahibidir; öteki oturuma `.claude/jobs-<oturum>.md` yazması
+söylenir ve yalnız kendi listesinden sorulur.
+
 `Stop`'ta `dur.js` gerekçesiz açık satır varsa ya da istem bir listeydi ve liste yazılmadıysa
 ya da istemdeki maddeden az satır yazıldıysa turu bir kez tutar. Model çalışırken attığın mesaj
 da sayılır: her biri en az bir iş daha demektir, tutma mesajı onları geri okur. Sonraki istemde

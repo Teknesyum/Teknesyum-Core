@@ -196,8 +196,8 @@ function open(body) {
   return String(body || '').split(/\r?\n/).filter((l) => ITEM.test(l) && !DONE.test(l)).map((l) => l.trim());
 }
 
-function later(cwd) {
-  const { text, moved } = defter.ledger(cwd);
+function later(cwd, session) {
+  const { text, moved } = defter.ledger(cwd, session);
   if (moved) shown.push(banner('banner.jobs', { '%N': moved }));
   return text;
 }
@@ -218,7 +218,8 @@ function items(prompt) {
 function expect(session, prompt, cwd) {
   const f = stateFile('jobs-' + String(session || 'none'));
   const n = items(prompt);
-  if (n >= 2 && cwd && !fs.existsSync(path.join(cwd, JOBS))) ahead = t('dur.jobsMissing').replace('%N', String(n));
+  const rel = cwd ? defter.jobsFile(cwd, session, false) : JOBS;
+  if (n >= 2 && cwd && !fs.existsSync(path.join(cwd, rel))) ahead = t('dur.jobsMissing').replace('%N', String(n)).replace('.claude/jobs.md', rel.split(path.sep).join('/'));
   try {
     if (!n) { fs.unlinkSync(f); return; }
     fs.mkdirSync(path.dirname(f), { recursive: true });
@@ -336,7 +337,7 @@ function handle(j) {
   }
   shown = [];
   ahead = '';
-  const pre = later(j.cwd || process.cwd());
+  const pre = later(j.cwd || process.cwd(), j.session_id);
   const m = mark(prompt);
   expect(j.session_id, m ? m.rest : prompt, j.cwd || process.cwd());
   let text = '';
