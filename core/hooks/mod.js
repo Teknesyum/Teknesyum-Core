@@ -122,6 +122,8 @@ const BASE_REPORT = /(?:^|[^\p{L}])(teknesyum-base|base)(?:['’]?(?:a|e|ya|ye))
 
 const QUOTED = /(raporla|logla|bildir)['’"”]?\s+(de(diğim|diğin|rsem|yince|mek|dim|r)|diye|sözü|komutu)/iu;
 
+const BASE_READY = /(?:^|[^\p{L}])base(?:['’]?(?:a|e|ya|ye|de|den))?\s+(?:\S+\s+){0,2}?(kurulabilir|eklenebilir|yüklenebilir)|\binstallable\s+(?:\S+\s+){0,2}?(in|from|by|on)\s+(teknesyum[- ])?base\b/iu;
+
 function wanted(prompt) {
   if (QUOTED.test(prompt)) return '';
   return UI_REPORT.test(prompt) ? 'ui' : BASE_REPORT.test(prompt) ? 'base' : REPORT.test(prompt) ? 'core' : '';
@@ -373,6 +375,7 @@ function handle(j) {
     text = key === 'hh' ? help(j.session_id) : key === 'mc' ? memory(rest) : key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : key === 'uc' ? uiCheck(rest, j.cwd || process.cwd()) : library(rest);
   } else if (busy(j)) text = enqueue(j, prompt);
   else if (wanted(prompt)) text = report(wanted(prompt));
+  else if (BASE_READY.test(prompt)) text = t('mod.base').replace('%C', cmd('init', 'base.js'));
   say(j.session_id, shown);
   const all = [openLogs(j.cwd || process.cwd(), pre), pre, ahead, text, shelve(prompt, j.cwd || process.cwd())].filter(Boolean).join('\n\n');
   if (!all) return '';
@@ -381,4 +384,4 @@ function handle(j) {
 
 if (require.main === module) main(handle, { log: 'mod.js' });
 
-module.exports = { REPORT, UI_REPORT, BASE_REPORT, wanted, SHELVE, ASKED, handle, busy, soru, tail, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };
+module.exports = { REPORT, UI_REPORT, BASE_REPORT, BASE_READY, wanted, SHELVE, ASKED, handle, busy, soru, tail, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };

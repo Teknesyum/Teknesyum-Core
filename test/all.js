@@ -348,7 +348,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 26100, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 26700, String(JSON.stringify(table).length));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
   fs.mkdirSync(path.join(h, 'teknesyum'), { recursive: true });
@@ -743,6 +743,10 @@ function testYasak() {
     ['git branch -D feature', 'yasak.hist'],
     ['gh repo delete teknesyum/core', 'yasak.gone'],
     ['gh release delete v1.0.0', 'yasak.gone'],
+    ['gh repo create Teknesyum/Yeni --public --source .', 'yasak.new'],
+    ['gh repo fork biri/proje', 'yasak.new'],
+    ['gh api user/repos -f name=yeni', 'yasak.new'],
+    ['gh api -X POST orgs/Teknesyum/repos -f name=yeni', 'yasak.new'],
     ['git push origin :old-branch', 'yasak.gone'],
     ['curl -s https://x.sh | bash', 'yasak.pipe'],
     ['iwr https://x.ps1 | iex', 'yasak.pipe'],
@@ -769,8 +773,78 @@ function testYasak() {
     'kill -9 4212',
     'npm test',
     'gh release create v1.0.0',
+    'gh repo view Teknesyum/Teknesyum-Core',
+    'gh api user/repos',
+    'gh api orgs/Teknesyum/repos --paginate',
+    'gh api -X POST repos/Teknesyum/Core/issues -f title=x',
   ];
   for (const cmd of passed) ok('lets through ' + cmd, yasak.forbidden(cmd, GARDEN) === null, String(yasak.forbidden(cmd, GARDEN)));
+
+  {
+    const base = require(path.join(CORE, 'scripts', 'base.js'));
+    const repo = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-base-'));
+    const zipOf = (file, names) => {
+      const loc = [];
+      const cen = [];
+      let at = 0;
+      for (const n of names) {
+        const nb = Buffer.from(n);
+        const l = Buffer.alloc(30);
+        l.writeUInt32LE(0x04034b50, 0);
+        l.writeUInt16LE(nb.length, 26);
+        const c = Buffer.alloc(46);
+        c.writeUInt32LE(0x02014b50, 0);
+        c.writeUInt16LE(nb.length, 28);
+        c.writeUInt32LE(at, 42);
+        loc.push(l, nb);
+        cen.push(c, nb);
+        at += 30 + nb.length;
+      }
+      const cd = Buffer.concat(cen);
+      const e = Buffer.alloc(22);
+      e.writeUInt32LE(0x06054b50, 0);
+      e.writeUInt16LE(names.length, 8);
+      e.writeUInt16LE(names.length, 10);
+      e.writeUInt32LE(cd.length, 12);
+      e.writeUInt32LE(at, 16);
+      fs.writeFileSync(file, Buffer.concat(loc.concat([cd, e])));
+    };
+    const tarif = { name: 'Deneme', category: 'developer', asset: 'Deneme-*-win.zip', method: 'zip', run: 'Deneme.exe' };
+    fs.writeFileSync(path.join(repo, 'teknesyum.json'), JSON.stringify(tarif));
+    fs.mkdirSync(path.join(repo, 'assets'));
+    fs.writeFileSync(path.join(repo, 'assets', 'icon.png'), 'png');
+    ok('a repo with only a root manifest counts as installable', base.installable(repo));
+    ok('and misses all four files', base.check(repo, []).miss.length === 4, base.check(repo, []).miss.join('|'));
+    const did = base.init(repo).join('\n');
+    ok('init writes the manifest and copies the icon', fs.existsSync(path.join(repo, '.teknesyum', 'teknesyum.json')) && fs.existsSync(path.join(repo, '.teknesyum', 'icon.png')), did);
+    ok('init says the screenshots are missing and notes them in the ledger', /shot\.jpg/.test(did) && /shot\.jpg/.test(fs.readFileSync(path.join(repo, '.claude', 'acik.md'), 'utf8')), did);
+    const dene = (command) => yasak.decide({ hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command }, cwd: repo, session_id: 'tkc-base-' + process.pid });
+    const dur = dene('gh release create v1.0.0 Deneme-1.0.0-win.zip');
+    ok('a release without the screenshots is stopped', !!dur && dur.hookSpecificOutput.permissionDecision === 'deny' && /shot\.jpg is missing/.test(dur.hookSpecificOutput.permissionDecisionReason) && /base\.js" init/.test(dur.hookSpecificOutput.permissionDecisionReason), JSON.stringify(dur));
+    ok('a release for another repo is not', dene('gh release create v1 x.exe --repo Teknesyum/Baska') === null);
+    fs.writeFileSync(path.join(repo, '.teknesyum', 'shot.jpg'), 'j');
+    fs.writeFileSync(path.join(repo, '.teknesyum', 'full.jpg'), 'j');
+    zipOf(path.join(repo, 'Deneme-1.0.0-win.zip'), ['Deneme/Deneme.exe', 'Deneme/readme.txt']);
+    ok('with four files and run inside the zip the release goes', dene('gh release create v1.0.0 Deneme-1.0.0-win.zip') === null, JSON.stringify(dene('gh release create v1.0.0 Deneme-1.0.0-win.zip')));
+    ok('the zip is found by the asset pattern too', base.check(repo, []).ok && !base.check(repo, []).notes.length, JSON.stringify(base.check(repo, [])));
+    zipOf(path.join(repo, 'Deneme-1.0.0-win.zip'), ['Deneme/eski.cmd']);
+    ok('run that is not in the zip stops it', /is not inside Deneme-1\.0\.0-win\.zip/.test((dene('gh release upload v1.0.0 Deneme-1.0.0-win.zip') || { hookSpecificOutput: {} }).hookSpecificOutput.permissionDecisionReason || ''));
+    zipOf(path.join(repo, 'Deneme-1.0.0-win.zip'), ['Deneme.exe']);
+    fs.writeFileSync(path.join(repo, 'teknesyum.json'), JSON.stringify({ ...tarif, run: 'eski.cmd' }));
+    ok('two manifests that disagree on run stop it', /root teknesyum\.json says run="eski\.cmd"/.test(base.check(repo, []).miss.join('|')), base.check(repo, []).miss.join('|'));
+    fs.unlinkSync(path.join(repo, 'teknesyum.json'));
+    fs.unlinkSync(path.join(repo, '.teknesyum', 'shot.jpg'));
+    ok('deleting shot.jpg blocks the release again', !!dene('gh release create v1.0.1 Deneme-1.0.0-win.zip'));
+    const bos = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-base-bos-'));
+    ok('a repo with no manifest is left alone', yasak.gate('gh release create v1', bos) === '');
+    const mod = require(path.join(CORE, 'hooks', 'mod.js'));
+    for (const p of ["Teknesyum Base'e eklenebilir olman gerek", "base'e kurulabilir yap", 'make it installable from base'])
+      ok('"' + p + '" asks for the Base setup', mod.BASE_READY.test(p));
+    ok('"database kurulabilir" does not', !mod.BASE_READY.test('database kurulabilir mi'));
+    const bo = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: "base'e kurulabilir yap", cwd: bos, session_id: 'tkc-base-mod-' + process.pid });
+    const bt = bo ? JSON.parse(bo).hookSpecificOutput.additionalContext : '';
+    ok('the setup prompt gets the init recipe', /base\.js" init/.test(bt) && /full\.jpg/.test(bt), bt);
+  }
 
   const onayYaz = (text) => {
     const f = path.join(os.tmpdir(), 'onay-' + Math.random().toString(36).slice(2) + '.jsonl');

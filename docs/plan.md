@@ -177,6 +177,18 @@ UI deposuna 2026-09-27'de üç GitHub issue açılmış (#1–#3); yönerge "iss
 - [x] Testler, iki README, yordam, sürüm (minor).
 - [ ] Base'in AGENTS.md'sine log notu — Base'te başka oturum çalışıyor, ağacı kirli; o oturuma bırakıldı
 
+## O. Base Kurulum Şartları: Tek Komut Ve Sürüm Kapısı (log BUG RepoWarden 2026-10-10)
+
+RepoWarden "Base'e kurulabilir" yapılırken yalnız kökteki `teknesyum.json` yazıldı; Base `.teknesyum/`
+klasörünü okur (tarif, `icon.png`, `shot.jpg`, `full.jpg`). Resim çıkmadı, `run` iki kopyada ayrıştı.
+Kapı var olan `yasak.js` içinde koşar, yönerge yalnız söz geçince gider: sıradan turda 0 token.
+
+- [x] `core/scripts/base.js`: `init` klasörü kurar (tarif, simge kopyası, eksik görüntü deftere), `check` dört dosyaya, iki tarifin uyumuna ve `run`'ın zip içinde olmasına bakar.
+- [x] `yasak.js`: kurulabilir depoda `gh release create|upload` önce `check` koşar, tutmazsa durur.
+- [x] `mod.js`: "Base'e kurulabilir/eklenebilir yap" sözü `init` yönergesini getirir.
+- [x] Testler, iki README, yordam, sürüm (minor).
+- [x] Sahip (2026-10-10): yeni depo açmak onaya bağlı — `yasak.new`, `gh repo create|fork` ve depo açan `gh api` çağrısı bir kez sorulur.
+
 ## M. Raf: Bilerek Ertelenen İşler (log TEKLIF Quizloop 2026-10-08)
 
 Sahip "rafta dursun" dediği işin unutulmamasını, bağlantısının her yanıtın sonunda durmasını

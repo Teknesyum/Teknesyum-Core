@@ -21,6 +21,8 @@ const RULES = [
   ['yasak.hist', /\bgit\s+branch\b[^\n]*\s-D\b/],
   ['yasak.gone', /\bgh\s+(repo|release)\s+delete\b/],
   ['yasak.gone', /\bgit\s+push\b[^\n]*\s:\S/],
+  ['yasak.new', /\bgh\s+repo\s+(create|fork)\b/],
+  ['yasak.new', /\bgh\s+api\b(?=[^\n]*(\bPOST\b|\s-[fF]\s))[^\n]*(\buser|\borgs\/[^\s\/]+)\/repos\b(?!\/)/],
   ['yasak.pipe', /\b(curl|wget|iwr|Invoke-WebRequest)\b[^\n]*\|[^\n]*\b(sh|bash|zsh|python|node|iex|Invoke-Expression)\b/i],
   ['yasak.perm', /\bchmod\s+(-R\s+)?777\b/],
   ['yasak.kill', /\b(kill(all)?\s+-9\s+-1|:\(\)\s*\{.*\|.*&.*\}\s*;?\s*:)/],
@@ -93,7 +95,27 @@ function forbidden(cmd, cwd) {
   return temp ? 'yasak.temp' : null;
 }
 
-const ASKED = new Set(['yasak.hist', 'yasak.gone', 'yasak.temp']);
+const RELEASE = /\bgh\s+release\s+(create|upload)\b/;
+
+function gate(cmd, cwd) {
+  const s = String(cmd || '');
+  if (!RELEASE.test(s)) return '';
+  try {
+    const base = require('../scripts/base.js');
+    const root = base.top(cwd || process.cwd());
+    if (!base.installable(root)) return '';
+    const other = /(?:--repo|-R)[=\s]+["']?[^\s"'\/]+\/([^\s"']+)/.exec(s);
+    if (other && other[1].toLowerCase() !== path.basename(root).toLowerCase()) return '';
+    const zips = s.split(/\s+/).map((w) => w.replace(/^["']|["']$/g, '').split('#')[0]).filter((w) => /\.zip$/i.test(w)).map((w) => path.resolve(cwd || root, w));
+    const r = base.check(root, zips);
+    if (r.ok) return '';
+    return t('yasak.base').replace('%R', r.miss.join('; ')).replace('%C', 'node "' + path.join(__dirname, '..', 'scripts', 'base.js') + '" init');
+  } catch {
+    return '';
+  }
+}
+
+const ASKED = new Set(['yasak.hist', 'yasak.gone', 'yasak.temp', 'yasak.new']);
 const YES = /(^|[^\p{L}])(evet|onay\p{L}*|sil\p{L}*|kaldır\p{L}*|yes|approved?)(?=$|[^\p{L}])/iu;
 
 function lastPrompt(j) {
@@ -118,7 +140,12 @@ function forbid(j) {
   if (j.hook_event_name && j.hook_event_name !== 'PreToolUse') return null;
   if (!/^(Bash|PowerShell)$/.test(j.tool_name || '')) return null;
   const key = forbidden((j.tool_input || {}).command, j.cwd);
-  if (!key) return null;
+  if (!key) {
+    const why = gate((j.tool_input || {}).command, j.cwd);
+    if (!why) return null;
+    say(j.session_id, banner('banner.deny', { '%R': why.split(':')[0] }));
+    return { hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: why } };
+  }
   if (ASKED.has(key) && approved(j)) return null;
   say(j.session_id, banner('banner.deny', { '%R': t(key) }));
   return {
@@ -136,4 +163,4 @@ function decide(j) {
 
 if (require.main === module) main(decide);
 
-module.exports = { lastPrompt, forbidden, decide, outside, targets, approved, inTemp, RULES, WIPE, YES };
+module.exports = { gate, lastPrompt, forbidden, decide, outside, targets, approved, inTemp, RULES, WIPE, YES };
