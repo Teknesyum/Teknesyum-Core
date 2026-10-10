@@ -100,7 +100,7 @@ function kos(kol, senaryo, tekrar) {
     const kapanis = kol === 'kapanis';
     const args = ['-p', '--model', kapanis ? 'opus' : kol, '--system-prompt', 'Yalnız istenen biçimde cevap ver. Araç kullanma.', '--output-format', 'json', '--max-budget-usd', '0.5'];
     const bas = Date.now();
-    const p = spawn('claude', args, { cwd: fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-bilmelisin-')), env, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
+    const p = spawn(process.env.BENCH_CLAUDE || 'claude', args, { cwd: fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-bilmelisin-')), env, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
     let out = '';
     p.stdout.on('data', (b) => (out += b));
     p.stderr.on('data', (b) => (out += b));

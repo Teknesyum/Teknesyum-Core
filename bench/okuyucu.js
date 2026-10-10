@@ -7,7 +7,7 @@ const { SORULAR, f1 } = require('./okuma.js');
 const KOK = path.resolve(__dirname, '..');
 const TAVAN = process.env.OKUYUCU_TAVAN || '1.2';
 const CIKTI = path.join(__dirname, process.env.OKUYUCU_CIKTI || 'okuyucu.jsonl');
-const HAM = path.join(__dirname, 'okuyucu-ham');
+const HAM = path.join(__dirname, process.env.OKUYUCU_HAM || 'okuyucu-ham');
 const KOLLAR = process.env.OKUYUCU_KOL ? JSON.parse(process.env.OKUYUCU_KOL) : { opus: 2, sinirli: 3, sinirsiz: 1 };
 
 function govdeler(d, dosya) {
@@ -33,7 +33,7 @@ const SINIRSIZ = 'Sana verilen soruyu depoyu okuyarak cevapla. Eksiksiz ve doğr
 const NOT = 'Soru, özet veya bulma türü bir işte 350 satırdan uzun bir dosyayı okuman gerekiyorsa o okumayı kendin yapma: okuyucu ajanına (Agent aracı, subagent_type: okuyucu) ver, dönen cevapla işi bitir.';
 
 function ajan(prompt) {
-  return JSON.stringify({ okuyucu: { description: 'Uzun dosyaları okuyup soruyu cevaplar.', prompt, model: 'haiku', tools: ['Read', 'Grep', 'Glob'] } });
+  return JSON.stringify({ okuyucu: { description: 'Uzun dosyaları okuyup soruyu cevaplar.', prompt, model: process.env.OKUYUCU_MODEL || 'haiku', tools: ['Read', 'Grep', 'Glob'] } });
 }
 
 function kopya() {
@@ -56,7 +56,7 @@ function kos(kol, gorev, tekrar) {
     const args = ['-p', GOREVLER[gorev].prompt, '--model', 'opus', '--permission-mode', 'bypassPermissions', '--output-format', 'stream-json', '--verbose', '--max-budget-usd', TAVAN];
     if (kol !== 'opus') args.push('--agents', ajan(kol === 'sinirli' ? SINIRLI : SINIRSIZ), '--append-system-prompt', NOT);
     const bas = Date.now();
-    const p = spawn('claude', args, { cwd: d, env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+    const p = spawn(process.env.BENCH_CLAUDE || 'claude', args, { cwd: d, env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
     let out = '';
     p.stdout.on('data', (b) => (out += b));
     p.stderr.on('data', (b) => (out += b));

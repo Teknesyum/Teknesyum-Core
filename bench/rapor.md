@@ -472,3 +472,38 @@ dışarıdan okuma. Gerçek körlük (ajanın kararı hiç fark etmemesi) bu ben
 
 Sonuç: gözcü, kapanışın bedavaya yaptığı işin üstüne ölçülebilir bir şey koymuyor.
 Kurulmaz. Tek farkı işin ortasında konuşabilmesi; onu da eklenti yalnız ekranda yapıyor.
+
+## 21. Haiku 5.5 İle Yeniden Ölçüm (2026-10-10)
+
+Kurulu Claude Code 2.1.289 `claude-haiku-5-5` kimliğini tanımıyor (`unrecognized_model`);
+koşular 2.1.296 ikilisiyle yapıldı (`BENCH_CLAUDE` ortam değişkeni, kuruluma dokunulmadı).
+Toplam 30 koşu, 3,11 $.
+
+**Gözcü (§20 senaryoları, kol başına 3 tekrar).** Satırlar `bench/bilmelisin.jsonl`.
+
+| Kol | Yakalama | Doğru susma | Koşu başına | Süre |
+|---|---|---|---|---|
+| Haiku 4.5 (§20) | 7/8 | 2/4 | 0,029 $ | 34 sn |
+| Haiku 5.5 | 12/12 | 5/6 | 0,004 $ | 12 sn |
+| Sonnet (§20) | 8/8 | 4/4 | 0,096 $ | 8 sn |
+
+`paket` 2. koşu anahtar sözcüğe uymadı ama içeriği doğru (eski sürümün üstüne kurulamaz,
+veriler taşınmaz), elle sayıldı; o cevap `bilgi:` satırını da atlamış, yani biçim bir kez
+bozuldu. Tek yanlış alarm `rutin` 2. koşu: commit'in hangi depoya gittiğini sordu.
+
+**Okuyucu (§19 görevleri, eşli üç paket).** Okuyucu `claude-haiku-5-5`. Satırlar
+`bench/okuyucu-h55.jsonl`, ham `bench/okuyucu-h55-ham/`.
+
+| Görev | Opus $ (3 koşu) | Sınırlı $ (3 koşu) | Süre Opus / Sınırlı | Puan |
+|---|---|---|---|---|
+| orta (537 satır) | 0,39 / 0,17 / 0,17 | 0,39 / 0,18 / 0,18 | 13 / 18 sn | 1 / 1 |
+| büyük (2100+ satır) | 0,39 / 0,17 / 0,17 | 0,42 / 0,19 / 0,23 | 14 / 28 sn | 1 / 1 |
+
+Altı sınırlı koşunun yalnız birinde Opus okuyucuyu çağırdı. O koşuda Haiku'nun payı
+0,003 $ (§19'da 0,03–0,17 $), ama koşu Opus'un tek başına halinden pahalı (0,42'ye 0,39) ve
+yavaş (40'a 15 sn) çıktı. Öteki beşinde Opus iki `Grep` ile kendi bitirdi.
+
+Sonuç: Haiku 5.5 gözcüde Sonnet'e yaklaşıyor ve 24 kat ucuz; yine de kapanış notu aynı işi
+ek çağrısız yapıyor (§20.1), gözcü kurulmaz. Okuma devrinde Haiku artık bedavaya yakın ama
+harcama Opus'un sabit bağlamında ve devretme turunda; rutin okuma kapısı yine kurulmaz.
+Haiku 5.5'in yeri, Opus'un zaten beklediği işler: araya soru okuyucusu (§18).
