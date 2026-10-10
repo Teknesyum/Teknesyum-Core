@@ -138,9 +138,10 @@ function shelf(cwd) {
   for (const f of SHELF) {
     const text = body(path.join(cwd, f));
     if (text === null) continue;
-    return { n: settings().shelf === false ? 0 : lines(text).filter((l) => HEAD.test(l)).length, rel: f.split(path.sep).join('/') };
+    const heads = settings().shelf === false ? [] : lines(text).filter((l) => HEAD.test(l)).map((l) => l.replace(/^#+\s*(\d+[.)]\s*)?/, '').trim());
+    return { n: heads.length, heads, rel: f.split(path.sep).join('/') };
   }
-  return { n: 0, rel: SHELF[0].split(path.sep).join('/') };
+  return { n: 0, heads: [], rel: SHELF[0].split(path.sep).join('/') };
 }
 
 function prune(cwd) {

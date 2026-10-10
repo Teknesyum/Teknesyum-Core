@@ -379,7 +379,9 @@ Bilerek ertelediğin iş rafa gider. "Rafta dursun" ya da "rafa kaldır" de; mod
 `docs/later.md` dosyasına `## N. Ad` başlığıyla, tarih, senin sözün ve varılan planla yazar ve
 dokunmaz. Rafta başlık oldukça her yanıtın son mesajı `later.md` bağlantısı ve sayıyla biter,
 durum satırı `raf N` gösterir. İkisi de ekran tarafında çizilir, model fazladan bir şey okumaz.
-İş başlayınca başlığı silinir. Ayarlarda `"shelf": false` bunu kapatır.
+İş başlayınca başlığı silinir; istem raftaki bir başlığı anıyorsa model bunun için tek satır
+hatırlatma alır. Bağlantı her zaman son satırdır, tek mesajlık yanıtta da; model kendisi
+bastıysa ikincisi eklenmez. Ayarlarda `"shelf": false` bunu kapatır.
 
 ### Ertelenen Her Şey İçin Tek Defter
 

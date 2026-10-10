@@ -229,8 +229,19 @@ function expect(session, prompt, cwd) {
 
 const SHELVE = /(?:^|[^\p{L}])(rafta\s+(dursun|kalsın|beklesin)|rafa\s+kaldır)|\b(shelve\s+(it|this|that)|keep\s+(it|this|that)\s+on\s+the\s+shelf)\b/iu;
 
+function stems(s) {
+  return (String(s || '').toLocaleLowerCase('tr').match(/[\p{L}\d]{4,}/gu) || []).map((w) => w.slice(0, 5));
+}
+
 function shelve(prompt, cwd) {
-  return SHELVE.test(prompt) ? t('mod.shelf').replace('%F', defter.shelf(cwd).rel) : '';
+  const raf = defter.shelf(cwd);
+  if (SHELVE.test(prompt)) return t('mod.shelf').replace('%F', raf.rel);
+  const said = new Set(stems(prompt));
+  const hit = raf.heads.find((h) => {
+    const w = [...new Set(stems(h))];
+    return w.length && w.filter((x) => said.has(x)).length >= Math.min(2, w.length);
+  });
+  return hit ? t('mod.shelfHit').replace('%F', raf.rel).replace('%H', hit) : '';
 }
 
 const ASKED = /^\s*(?:#{1,6}\s*|\*\*)(Senden istediklerim|What I need from you)\b/im;

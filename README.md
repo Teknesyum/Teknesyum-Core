@@ -387,7 +387,9 @@ the model writes it to `docs/later.md` as a `## N. Name` heading, with the date,
 the plan so far, and leaves it alone. While the shelf holds a heading, the last message of every
 reply ends with a `later.md` link and the count, and the statusline shows `shelf N`. Both are
 drawn on the display side, so the model reads nothing extra. The heading is deleted when the job
-starts. `"shelf": false` in the settings turns it off.
+starts; a prompt that names a shelved heading gets a one-line reminder to do that. The link is
+always the last line, also in a one-message reply, and is not added when the model printed one
+itself. `"shelf": false` in the settings turns it off.
 
 ### One Ledger For Everything Put Off
 

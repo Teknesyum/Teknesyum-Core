@@ -176,5 +176,8 @@ istedi. Bağlantı banttan basılır (ekran kanalı), modele gitmez: sıradan tu
 - [x] `statusline.js`: `raf N`.
 - [x] `mod.js`: "rafta dursun / kalsın / beklesin", "rafa kaldır" sözünde tek seferlik yönerge.
 - [x] Testler, iki README, yordam, sürüm (minor). Dize tablosu tavanı 25500 → 26100.
+- [x] 0.63.1 (log TEKLIF Quizloop 2026-10-10): tek mesajlık yanıtta bağlantı başa düşüyordu, artık her
+  zaman sonda; model bastıysa ikincisi eklenmez; istem raf başlığına değince tek satır hatırlatma.
+- [ ] Stop'ta "konunun dosyaları değişti, başlık duruyor" uyarısı — başlıktan dosyaya güvenilir eşleme yok
 - [ ] `rr` işareti — teklifte isteğe bağlıydı, söz tetiği yetiyor; sahip isterse eklenir
 - [ ] "rafa koy" tetiği — özel rafla ("rafa yaz") karışıyor, bilerek alınmadı

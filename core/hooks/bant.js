@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const { main, drain, say, sayBlock, banner } = require('./lib.js');
+const { main, drain, say, banner } = require('./lib.js');
 const kitap = require('./kitap.js');
 
 const BASLIK = [
@@ -19,20 +19,22 @@ function build(j) {
   const raw = String(j.delta || '');
   const cizik = serit(raw);
   if (!top && !j.final) return cizik === raw ? '' : JSON.stringify({ hookSpecificOutput: { hookEventName: 'MessageDisplay', displayContent: cizik } });
+  let raf = '';
   if (j.final) {
     try { say(j.session_id, kitap.line(j)); } catch {}
     try {
-      const raf = require('./defter.js').shelf(j.cwd || process.cwd());
-      if (raf.n) sayBlock(j.session_id, '[later.md](' + raf.rel + ') · ' + raf.n, 'raf');
+      const r = require('./defter.js').shelf(j.cwd || process.cwd());
+      if (r.n && !/later\.md\)/.test(raw)) raf = '[later.md](' + r.rel + ') · ' + r.n;
     } catch {}
   }
   const lines = drain(j.session_id);
-  if (!lines.length) return cizik === raw ? '' : JSON.stringify({ hookSpecificOutput: { hookEventName: 'MessageDisplay', displayContent: cizik } });
+  if (!lines.length && !raf) return cizik === raw ? '' : JSON.stringify({ hookSpecificOutput: { hookEventName: 'MessageDisplay', displayContent: cizik } });
   const block = lines
     .map((l) => (l && typeof l === 'object' && l.block ? String(l.block) : '`' + String(l).replace(/`/g, "'") + '`'))
     .join('\n\n');
   const delta = cizik;
-  const body = !delta.trim() ? block : top ? block + '\n\n' + delta : delta.replace(/\s+$/, '') + '\n\n' + block;
+  const ust = !lines.length ? delta : !delta.trim() ? block : top ? block + '\n\n' + delta : delta.replace(/\s+$/, '') + '\n\n' + block;
+  const body = raf ? ust.replace(/\s+$/, '') + '\n\n' + raf : ust;
   return JSON.stringify({ hookSpecificOutput: { hookEventName: 'MessageDisplay', displayContent: body } });
 }
 
