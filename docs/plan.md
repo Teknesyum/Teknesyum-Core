@@ -189,6 +189,16 @@ Kapı var olan `yasak.js` içinde koşar, yönerge yalnız söz geçince gider: 
 - [x] Testler, iki README, yordam, sürüm (minor).
 - [x] Sahip (2026-10-10): yeni depo açmak onaya bağlı — `yasak.new`, `gh repo create|fork` ve depo açan `gh api` çağrısı bir kez sorulur.
 
+## P. Bize Ulaşın Tek Yerde: Teknesyum-Private Issue'ları (log TEKLIF RepoWarden 2026-10-10)
+
+Sahibin kararı: bütün projelerin "Bize ulaşın" bildirimi `Teknesyum/Teknesyum-Private` issue'larına düşer; yeni depo yok, aktarıcı yok, anahtar programa gömülür. Tam metin: `logs/openlogs/closed/TEKLIF-butun-projelerin-bize-ulasin-bildirimleri-teknesyum-private-issue-lari.md`.
+
+- [ ] Anahtar — sahipte: ince ayarlı, tek depo, yalnız Issues okuma-yazma; özel rafa konur
+- [ ] Görüntü kararı — sahipte: görüntüsüz, gövdeye gömülü küçük görüntü, ya da ayrı yer
+- [ ] Ortak parça ve sözleşme (başlık `<Proje>: <not>`, etiket `bildirim`, `app:<proje>`) — iki karar bekliyor
+- [ ] Tarayıcı kapısı: herkese açık `issues/new` bağlantısı bulgu — parça çıkınca
+- [ ] Quizloop 0028 ve 0031 geçersiz, `tools/bildirim` kalkar — parça çıkınca
+
 ## M. Raf: Bilerek Ertelenen İşler (log TEKLIF Quizloop 2026-10-08)
 
 Sahip "rafta dursun" dediği işin unutulmamasını, bağlantısının her yanıtın sonunda durmasını
