@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.62.1
+
+- Two sessions in one folder no longer share .claude/jobs.md: the second writes .claude/jobs-<session>.md and each is checked only against its own list
+
 ## v0.62.0
 
 - A code question sent while Claude works now goes to a read-only Haiku reader in the background; its answer comes back marked as unchecked, and Claude keeps working. Off with araya: false.
