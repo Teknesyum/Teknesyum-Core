@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.65.0
+
+- base.js init/check sets up and checks the .teknesyum folder Base installs from; gh release create/upload is stopped in an installable repo until the check passes. Opening a new repository (gh repo create/fork) is asked first.
+
 ## v0.64.0
 
 - "base'e raporla" writes a log into Teknesyum-Base; every report recipe now says it is a local file, not a GitHub issue; a sentence that only quotes the phrase is no longer taken as a report
