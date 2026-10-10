@@ -168,6 +168,15 @@ kabul sütununu oynatmadı, hiçbiri geri girmedi. Satırlar raporun 8. bölüm�
 
 ## Kurulum
 
+**Windows'ta önerilen: Teknesyum Base.**
+
+1. [`Teknesyum-Base.exe`](https://github.com/Teknesyum/Teknesyum-Base/releases/latest/download/Teknesyum-Base.exe) dosyasını ([`.sha256`](https://github.com/Teknesyum/Teknesyum-Base/releases/latest/download/Teknesyum-Base.exe.sha256)) indirip çalıştırın. Yönetici hakkı gerekmez.
+2. Listeden **Teknesyum Core** uygulamasını bulup kurun. Base sonradan güncellemeyi ve kaldırmayı da yapar.
+
+Base henüz imzalı değil; Windows SmartScreen ilk açılışta uyarabilir: *Ek bilgi*'yi, sonra *Yine de çalıştır*'ı seçin. Ayrıntı: [Teknesyum Base](https://github.com/Teknesyum/Teknesyum-Base).
+
+**Diğer platformlar ya da elle:**
+
 ### Windows - tek satır
 
 ```powershell
