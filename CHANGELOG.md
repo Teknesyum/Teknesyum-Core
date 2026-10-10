@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.64.0
+
+- "base'e raporla" writes a log into Teknesyum-Base; every report recipe now says it is a local file, not a GitHub issue; a sentence that only quotes the phrase is no longer taken as a report
+
 ## v0.63.1
 
 - The shelf link is always the last line and never doubled; a prompt that names a shelved heading gets a one-line reminder to delete it
