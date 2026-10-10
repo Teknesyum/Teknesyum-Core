@@ -227,6 +227,12 @@ function expect(session, prompt, cwd) {
   } catch {}
 }
 
+const SHELVE = /(?:^|[^\p{L}])(rafta\s+(dursun|kalsın|beklesin)|rafa\s+kaldır)|\b(shelve\s+(it|this|that)|keep\s+(it|this|that)\s+on\s+the\s+shelf)\b/iu;
+
+function shelve(prompt, cwd) {
+  return SHELVE.test(prompt) ? t('mod.shelf').replace('%F', defter.shelf(cwd).rel) : '';
+}
+
 const ASKED = /^\s*(?:#{1,6}\s*|\*\*)(Senden istediklerim|What I need from you)\b/im;
 
 function asked(j) {
@@ -349,11 +355,11 @@ function handle(j) {
   else if (UI_REPORT.test(prompt)) text = report(true);
   else if (REPORT.test(prompt)) text = report(false);
   say(j.session_id, shown);
-  const all = [openLogs(j.cwd || process.cwd(), pre), pre, ahead, text].filter(Boolean).join('\n\n');
+  const all = [openLogs(j.cwd || process.cwd(), pre), pre, ahead, text, shelve(prompt, j.cwd || process.cwd())].filter(Boolean).join('\n\n');
   if (!all) return '';
   return JSON.stringify({ hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: all } });
 }
 
 if (require.main === module) main(handle, { log: 'mod.js' });
 
-module.exports = { REPORT, UI_REPORT, ASKED, handle, busy, soru, tail, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };
+module.exports = { REPORT, UI_REPORT, SHELVE, ASKED, handle, busy, soru, tail, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };

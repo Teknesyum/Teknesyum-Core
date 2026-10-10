@@ -348,7 +348,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 25500, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 26100, String(JSON.stringify(table).length));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
   fs.mkdirSync(path.join(h, 'teknesyum'), { recursive: true });
@@ -984,6 +984,27 @@ function testJobs() {
     ok('the first session is held only for its own', own.decision === 'block' && /b yap/.test(own.reason) && !/c yap/.test(own.reason), JSON.stringify(own));
     defter.release(two, 'aaaaaaaa1');
     ok('a closed session frees the shared list', defter.jobsFile(two, 'bbbbbbbb2', false) === defter.JOBS);
+    const raf = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-raf-'));
+    ok('an empty folder has no shelf', defter.shelf(raf).n === 0);
+    fs.mkdirSync(path.join(raf, 'docs'), { recursive: true });
+    fs.writeFileSync(path.join(raf, 'docs', 'later.md'), '# Raf\n\n## 1. Kanal\nplan\n\n## 2. Rozet\nplan\n');
+    const onShelf = defter.shelf(raf);
+    ok('the shelf counts its headings', onShelf.n === 2 && onShelf.rel === 'docs/later.md', JSON.stringify(onShelf));
+    const bantRaf = require(path.join(CORE, 'hooks', 'bant.js'));
+    const son = bantRaf.build({ hook_event_name: 'MessageDisplay', session_id: 'tkc-raf-' + process.pid, cwd: raf, index: 2, final: true, delta: 'bitti' });
+    const sonMetin = son ? JSON.parse(son).hookSpecificOutput.displayContent : '';
+    ok('the last message ends with the shelf link', /bitti[\s\S]*\[later\.md\]\(docs\/later\.md\) · 2\s*$/.test(sonMetin), sonMetin);
+    const orta = bantRaf.build({ hook_event_name: 'MessageDisplay', session_id: 'tkc-raf-' + process.pid, cwd: raf, index: 1, final: false, delta: 'ara' });
+    ok('a middle message does not carry it', orta === '', orta);
+    const rafSatir = require(path.join(CORE, 'scripts', 'statusline.js')).summary(raf);
+    ok('the statusline counts the shelf', /(shelf|raf) 2/.test(rafSatir), rafSatir);
+    const koy = ask({ hook_event_name: 'UserPromptSubmit', prompt: 'kanal aboneliği rafta dursun', cwd: raf, session_id: 'raf1' });
+    ok('shelving words name the shelf file', /docs\/later\.md/.test(koy), koy);
+    const duz = ask({ hook_event_name: 'UserPromptSubmit', prompt: 'kanal aboneliğini yap', cwd: raf, session_id: 'raf2' });
+    ok('an ordinary prompt gets no shelf hint', !/later\.md/.test(duz), duz);
+    fs.writeFileSync(path.join(raf, 'docs', 'later.md'), '# Raf\n');
+    const bos = bantRaf.build({ hook_event_name: 'MessageDisplay', session_id: 'tkc-raf-' + process.pid, cwd: raf, index: 2, final: true, delta: 'bitti' });
+    ok('an empty shelf prints nothing', !/later\.md/.test(bos), bos);
     hook(path.join(CORE, 'hooks', 'ust.js'), { hook_event_name: 'PreToolUse', tool_name: 'Agent', session_id: 'j6', cwd, tool_input: { description: 'Ölçüm koşusu', prompt: 'koş' } }, cfg);
     ok('an agent call opens a ledger line', /^- \[ \] ajan: Ölçüm koşusu — /m.test(fs.readFileSync(book, 'utf8')), fs.readFileSync(book, 'utf8'));
     const count = require(path.join(CORE, 'hooks', 'count.js'));

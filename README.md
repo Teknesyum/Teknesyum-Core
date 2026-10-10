@@ -382,6 +382,13 @@ you send while the model is working counts too: each one is at least one more jo
 quotes them back. On the next prompt the open lines move into the ledger and the file moves to
 `trash/`. A background task notification is not a prompt and takes nothing away.
 
+A job you put off on purpose goes on the shelf instead. Say "rafta dursun" or "shelve it" and
+the model writes it to `docs/later.md` as a `## N. Name` heading, with the date, your words and
+the plan so far, and leaves it alone. While the shelf holds a heading, the last message of every
+reply ends with a `later.md` link and the count, and the statusline shows `shelf N`. Both are
+drawn on the display side, so the model reads nothing extra. The heading is deleted when the job
+starts. `"shelf": false` in the settings turns it off.
+
 ### One Ledger For Everything Put Off
 
 Everything put off goes to `.claude/acik.md` as `- [ ] job — time — reason`; there is no

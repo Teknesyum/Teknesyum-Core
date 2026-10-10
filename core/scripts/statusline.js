@@ -81,6 +81,8 @@ function build(input) {
   parts.push(...workPart(st, cwd));
   parts.push(...testPart(st, cwd));
   if (fs.existsSync(path.join(cwd, '.claude', 'handoff.md'))) parts.push(paint(C.yellow, t('line.handoff')));
+  const raf = shelf(cwd);
+  if (raf) parts.push(paint(C.yellow, t('line.shelf') + ' ' + raf));
   const logs = openLogCount();
   if (logs) parts.push(paint(C.yellow, logs + ' ' + t('line.logs')));
   const errs = hookErrors();
@@ -88,6 +90,14 @@ function build(input) {
   const procs = stuck(cwd);
   if (procs) parts.push(paint(C.yellow, '⏳ ' + procs.count + ' ' + t('line.procs') + ' ' + procs.oldest + ' ' + t('line.min')));
   return parts.join(' ' + paint(C.dim, '·') + ' ');
+}
+
+function shelf(cwd) {
+  try {
+    return require('../hooks/defter.js').shelf(cwd).n;
+  } catch {
+    return 0;
+  }
 }
 
 function stuck(cwd) {

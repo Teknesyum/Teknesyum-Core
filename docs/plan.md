@@ -165,3 +165,16 @@ satırlarını sayıyor, her istemdeki taşıma ötekinin listesini çöpe atıy
 - [x] Testler, iki README, yordam, sürüm (patch).
 - [ ] `acik.md` paylaşımı — denenmedi, defter proje çapında ortak tasarlandı
 - [ ] Süren işle ilgili kısa sorunun iş sayılması — bağlam sorusu bilerek sırada kalıyor (035)
+
+## M. Raf: Bilerek Ertelenen İşler (log TEKLIF Quizloop 2026-10-08)
+
+Sahip "rafta dursun" dediği işin unutulmamasını, bağlantısının her yanıtın sonunda durmasını
+istedi. Bağlantı banttan basılır (ekran kanalı), modele gitmez: sıradan turda 0 token.
+
+- [x] `defter.js` `shelf(cwd)`: `docs/later.md` (yoksa `.claude/later.md`) içindeki `## ` başlıklarını sayar.
+- [x] `bant.js`: son mesajın sonuna `[later.md](docs/later.md) · N`.
+- [x] `statusline.js`: `raf N`.
+- [x] `mod.js`: "rafta dursun / kalsın / beklesin", "rafa kaldır" sözünde tek seferlik yönerge.
+- [x] Testler, iki README, yordam, sürüm (minor). Dize tablosu tavanı 25500 → 26100.
+- [ ] `rr` işareti — teklifte isteğe bağlıydı, söz tetiği yetiyor; sahip isterse eklenir
+- [ ] "rafa koy" tetiği — özel rafla ("rafa yaz") karışıyor, bilerek alınmadı

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const { main, drain, say, banner } = require('./lib.js');
+const { main, drain, say, sayBlock, banner } = require('./lib.js');
 const kitap = require('./kitap.js');
 
 const BASLIK = [
@@ -21,6 +21,10 @@ function build(j) {
   if (!top && !j.final) return cizik === raw ? '' : JSON.stringify({ hookSpecificOutput: { hookEventName: 'MessageDisplay', displayContent: cizik } });
   if (j.final) {
     try { say(j.session_id, kitap.line(j)); } catch {}
+    try {
+      const raf = require('./defter.js').shelf(j.cwd || process.cwd());
+      if (raf.n) sayBlock(j.session_id, '[later.md](' + raf.rel + ') · ' + raf.n, 'raf');
+    } catch {}
   }
   const lines = drain(j.session_id);
   if (!lines.length) return cizik === raw ? '' : JSON.stringify({ hookSpecificOutput: { hookEventName: 'MessageDisplay', displayContent: cizik } });

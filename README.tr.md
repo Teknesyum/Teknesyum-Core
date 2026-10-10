@@ -375,6 +375,12 @@ da sayılır: her biri en az bir iş daha demektir, tutma mesajı onları geri o
 açık satırlar deftere geçer, dosya `trash/`'e gider. Arka plan görev bildirimi istem değildir,
 hiçbir şey götürmez.
 
+Bilerek ertelediğin iş rafa gider. "Rafta dursun" ya da "rafa kaldır" de; model işi
+`docs/later.md` dosyasına `## N. Ad` başlığıyla, tarih, senin sözün ve varılan planla yazar ve
+dokunmaz. Rafta başlık oldukça her yanıtın son mesajı `later.md` bağlantısı ve sayıyla biter,
+durum satırı `raf N` gösterir. İkisi de ekran tarafında çizilir, model fazladan bir şey okumaz.
+İş başlayınca başlığı silinir. Ayarlarda `"shelf": false` bunu kapatır.
+
 ### Ertelenen Her Şey İçin Tek Defter
 
 Ertelenen her şey `.claude/acik.md`'ye `- [ ] iş — zaman — gerekçe` olarak gider; `sonra.md`

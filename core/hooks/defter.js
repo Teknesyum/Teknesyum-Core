@@ -5,6 +5,8 @@ const { settings, t, stateFile, slot, safe } = require('./lib.js');
 const LEDGER = path.join('.claude', 'acik.md');
 const JOBS = path.join('.claude', 'jobs.md');
 const LATER = path.join('.claude', 'sonra.md');
+const SHELF = [path.join('docs', 'later.md'), path.join('.claude', 'later.md')];
+const HEAD = /^##\s+\S/;
 const ITEM = /^\s*[-*]\s+\S/;
 const DONE = /^\s*[-*]\s+\[[xX]\]/;
 const OPEN_BOX = /^\s*[-*]\s+\[ \]\s*/;
@@ -132,6 +134,15 @@ function absorbLater(cwd) {
   return n;
 }
 
+function shelf(cwd) {
+  for (const f of SHELF) {
+    const text = body(path.join(cwd, f));
+    if (text === null) continue;
+    return { n: settings().shelf === false ? 0 : lines(text).filter((l) => HEAD.test(l)).length, rel: f.split(path.sep).join('/') };
+  }
+  return { n: 0, rel: SHELF[0].split(path.sep).join('/') };
+}
+
 function prune(cwd) {
   const file = path.join(cwd, LEDGER);
   const text = body(file);
@@ -218,4 +229,4 @@ function short(j) {
   return t('defter.short').replace('%N', String(left.length)) + '\n' + left.slice(0, MAX_LINES).join('\n');
 }
 
-module.exports = { jobsFile, release, ledger, agent, short, open, prune, append, entry, job, render, lastText, LEDGER, JOBS, LATER, SHORT };
+module.exports = { jobsFile, release, shelf, ledger, agent, short, open, prune, append, entry, job, render, lastText, LEDGER, JOBS, LATER, SHORT };
