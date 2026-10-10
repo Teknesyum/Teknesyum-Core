@@ -166,6 +166,17 @@ satırlarını sayıyor, her istemdeki taşıma ötekinin listesini çöpe atıy
 - [ ] `acik.md` paylaşımı — denenmedi, defter proje çapında ortak tasarlandı
 - [ ] Süren işle ilgili kısa sorunun iş sayılması — bağlam sorusu bilerek sırada kalıyor (035)
 
+## N. "X'e Raporla" Üç Hedef, Hep Yerel Dosya (sahip, 2026-10-10)
+
+UI deposuna 2026-09-27'de üç GitHub issue açılmış (#1–#3); yönerge "issue açma" demiyordu,
+"base'e raporla" hiç tanınmıyordu. Yönerge yalnız söz geçince gider, sıradan turda 0 token.
+
+- [x] `mod.js`: `base` hedefi; sözü yalnız anan tümce ("... dediğimde", "... diye") rapor sayılmaz.
+- [x] `log.js` ve `lib.js`: `--to base`, `baseRepo()` (Core'un yanındaki Teknesyum-Base ya da ayar).
+- [x] Yönerge metni: "yerel dosyadır, GitHub issue açma".
+- [x] Testler, iki README, yordam, sürüm (minor).
+- [ ] Base'in AGENTS.md'sine log notu — Base'te başka oturum çalışıyor, ağacı kirli; o oturuma bırakıldı
+
 ## M. Raf: Bilerek Ertelenen İşler (log TEKLIF Quizloop 2026-10-08)
 
 Sahip "rafta dursun" dediği işin unutulmamasını, bağlantısının her yanıtın sonunda durmasını

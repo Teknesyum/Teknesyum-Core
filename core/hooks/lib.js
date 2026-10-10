@@ -230,8 +230,20 @@ function uiRepo() {
   return null;
 }
 
+function baseRepo() {
+  const core = coreRepo();
+  const seen = [process.env.TEKNESYUM_BASE, settings().baseRepo];
+  if (core) seen.push(path.join(path.dirname(core), 'Teknesyum-Base'));
+  for (const c of seen) {
+    try {
+      if (c && fs.existsSync(path.join(c, 'src-tauri'))) return c;
+    } catch {}
+  }
+  return null;
+}
+
 function openLogs(to) {
-  const ui = to === 'ui' ? uiRepo() : null;
+  const ui = to === 'ui' ? uiRepo() : to === 'base' ? baseRepo() : null;
   if (ui) return path.join(ui, 'logs', 'openlogs');
   const repo = coreRepo();
   return repo
@@ -334,6 +346,7 @@ module.exports = {
   settings,
   coreRepo,
   uiRepo,
+  baseRepo,
   lang,
   replyLang,
   t,

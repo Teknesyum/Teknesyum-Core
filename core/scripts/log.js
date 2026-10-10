@@ -2,19 +2,27 @@
 
 const fs = require('fs');
 const path = require('path');
-const { openLogs, coreRepo, uiRepo, stateFile, fold } = require('../hooks/lib.js');
+const { openLogs, coreRepo, uiRepo, baseRepo, stateFile, fold } = require('../hooks/lib.js');
+
+const REPO = { ui: uiRepo, base: baseRepo };
+const NAME = { ui: 'teknesyum-ui', base: 'teknesyum-base' };
+
+function side(file) {
+  return Object.keys(REPO).find((k) => REPO[k]() && path.resolve(path.dirname(file)) === path.resolve(openLogs(k)));
+}
 
 const UI = /teknesyum-ui|\bui\s+(eklenti|plugin)|\b(scaffold|scan|uc|artik|raf|esle|setup)\.js\b|\btemplates\/(durum|kur|denetim)\b/i;
 
 function target(o) {
   const to = String(o.to || '').toLowerCase();
-  if (to === 'ui' || to === 'core') return to;
+  if (to === 'ui' || to === 'core' || to === 'base') return to;
   return UI.test([o.title, o.symptom].join(' ')) ? 'ui' : 'core';
 }
 
 function tell(file) {
-  const ui = uiRepo();
-  if (!ui || path.resolve(path.dirname(file)) !== path.resolve(openLogs('ui'))) return false;
+  const k = side(file);
+  if (!k) return false;
+  const ui = REPO[k]();
   const defter = require('../hooks/defter.js');
   try {
     return defter.append(ui, [defter.entry('- [ ] Logu oku: logs/openlogs/' + path.basename(file), 'Core yönlendirdi')]) > 0;
@@ -24,7 +32,8 @@ function tell(file) {
 }
 
 function untell(file) {
-  const ui = uiRepo();
+  const k = side(file);
+  const ui = k ? REPO[k]() : uiRepo();
   if (!ui) return;
   const book = path.join(ui, '.claude', 'acik.md');
   try {
@@ -38,6 +47,7 @@ function untell(file) {
 function dirs() {
   const out = [openLogs('core')];
   if (uiRepo()) out.push(openLogs('ui'));
+  if (baseRepo()) out.push(openLogs('base'));
   return out;
 }
 
@@ -138,14 +148,14 @@ function write(o) {
   ].join('\n');
   fs.writeFileSync(file, body, 'utf8');
   const told = tell(file);
-  const lines = ['Wrote ' + name + (to === 'ui' && uiRepo() ? ' (teknesyum-ui)' : ''), '  ' + file];
+  const lines = ['Wrote ' + name + (REPO[to] && REPO[to]() ? ' (' + NAME[to] + ')' : ''), '  ' + file];
   if (!coreRepo())
     lines.push(
       '',
       'No core repo found, so this went to the fallback spool.',
       'Set coreRepo in ' + stateFile('config') + ' and move it there.'
     );
-  if (told) lines.push('Added to the teknesyum-ui ledger (.claude/acik.md).');
+  if (told) lines.push('Added to the ' + NAME[to] + ' ledger (.claude/acik.md).');
   lines.push('', kind === 'hata' ? 'Fill in sections 1 and 2 now.' : 'Fill in every section now.');
   say(lines);
 }
@@ -166,8 +176,8 @@ function find(id) {
 function route(o) {
   if (!o.id) die('--id is required');
   const to = String(o.to || '').toLowerCase();
-  if (to !== 'ui' && to !== 'core') die('--to is ui or core');
-  if (to === 'ui' && !uiRepo()) die('no teknesyum-ui repo found; set uiRepo in ' + stateFile('config'));
+  if (to !== 'ui' && to !== 'core' && to !== 'base') die('--to is ui, base or core');
+  if (REPO[to] && !REPO[to]()) die('no ' + NAME[to] + ' repo found; set ' + to + 'Repo in ' + stateFile('config'));
   const from = find(String(o.id));
   const dir = openLogs(to);
   const dest = path.join(dir, path.basename(from));
@@ -175,7 +185,7 @@ function route(o) {
   fs.mkdirSync(dir, { recursive: true });
   fs.renameSync(from, dest);
   const out = ['Moved ' + path.basename(from), '  ' + dest];
-  if (tell(dest)) out.push('Added to the teknesyum-ui ledger (.claude/acik.md).');
+  if (tell(dest)) out.push('Added to the ' + (NAME[to] || 'core') + ' ledger (.claude/acik.md).');
   say(out);
 }
 
@@ -212,4 +222,4 @@ else if (cmd === 'list' || !cmd) list();
 else if (cmd === 'close') move(o, false);
 else if (cmd === 'archive') move(o, true);
 else if (cmd === 'route') route(o);
-else die('usage: log.js [list|write [--kind hata|yontem|teklif] [--to ui|core] --title T --symptom S|close --id X|archive --id X|route --id X --to ui|core]');
+else die('usage: log.js [list|write [--kind hata|yontem|teklif] [--to ui|base|core] --title T --symptom S|close --id X|archive --id X|route --id X --to ui|base|core]');

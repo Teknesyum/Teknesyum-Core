@@ -1921,6 +1921,13 @@ function testReport() {
   const uo = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: "bunu ui'a raporla", cwd: os.tmpdir(), session_id: 'tkc-rap-ui-' + process.pid });
   const uctx = uo ? JSON.parse(uo).hookSpecificOutput.additionalContext : '';
   ok('a ui report gets the recipe with --to ui and names teknesyum-ui', /log\.js" write --to ui /.test(uctx) && /teknesyum-ui/.test(uctx) && !/Teknesyum Core/.test(uctx), uctx);
+  for (const p of ["bunu base'e raporla", 'base e raporla', "teknesyum-base'e bildir", 'report this to base'])
+    ok('"' + p + '" reports to the base repo', mod.wanted(p) === 'base', mod.wanted(p));
+  for (const p of ['database e raporla', 'core a raporla ui a raporla base e raporla dediğimde tam anlaşılmıyor', "'ui a raporla' diye yazınca ne oluyor"])
+    ok('"' + p.slice(0, 30) + '" is talk about the phrase, not a report', mod.wanted(p) !== 'base' && (p.startsWith('database') || mod.wanted(p) === ''), mod.wanted(p));
+  const bo = mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: "bunu base'e raporla", cwd: os.tmpdir(), session_id: 'tkc-rap-base-' + process.pid });
+  const bctx = bo ? JSON.parse(bo).hookSpecificOutput.additionalContext : '';
+  ok('a base report gets --to base, names teknesyum-base and forbids an issue', /log\.js" write --to base /.test(bctx) && /teknesyum-base/.test(bctx) && /GitHub issue/.test(bctx), bctx);
   const askDir = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-ask-'));
   const askT = path.join(askDir, 't.jsonl');
   const row = (o) => JSON.stringify(o) + '\n';

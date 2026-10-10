@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { main, configRoot, settings, stateFile, t, banner, say, sayBlock, coreRepo, uiRepo } = require('./lib.js');
+const { main, configRoot, settings, stateFile, t, banner, say, sayBlock, coreRepo, uiRepo, baseRepo } = require('./lib.js');
 const lib = require('../scripts/kutuphane.js');
 const ag = require('../scripts/agency.js');
 
@@ -118,10 +118,19 @@ const REPORT = /(?:^|[^\p{L}])(core|teknesyum)(?:['’]?(?:a|e|ya|ye))?\s+(?:\S+
 
 const UI_REPORT = /(?:^|[^\p{L}])(teknesyum-ui|ui)(?:['’]?(?:a|e|ya|ye|ı|i|yı|yi))?\s+(?:\S+\s+){0,2}?(raporla|logla|bildir)|\b(report|log)\s+(?:\S+\s+){0,2}?to\s+(teknesyum-)?ui\b/iu;
 
-function report(ui) {
+const BASE_REPORT = /(?:^|[^\p{L}])(teknesyum-base|base)(?:['’]?(?:a|e|ya|ye))?\s+(?:\S+\s+){0,2}?(raporla|logla|bildir)|\b(report|log)\s+(?:\S+\s+){0,2}?to\s+(teknesyum-)?base\b/iu;
+
+const QUOTED = /(raporla|logla|bildir)['’"”]?\s+(de(diğim|diğin|rsem|yince|mek|dim|r)|diye|sözü|komutu)/iu;
+
+function wanted(prompt) {
+  if (QUOTED.test(prompt)) return '';
+  return UI_REPORT.test(prompt) ? 'ui' : BASE_REPORT.test(prompt) ? 'base' : REPORT.test(prompt) ? 'core' : '';
+}
+
+function report(to) {
   shown.push(banner('banner.report'));
-  const text = t('mod.report').replace('%C', cmd('write' + (ui ? ' --to ui' : '') + ' --kind hata|yontem|teklif --title T --symptom S', 'log.js'));
-  return ui ? text.replace(/Teknesyum Core/g, 'teknesyum-ui') : text;
+  const text = t('mod.report').replace('%C', cmd('write' + (to === 'core' ? '' : ' --to ' + to) + ' --kind hata|yontem|teklif --title T --symptom S', 'log.js'));
+  return to === 'core' ? text : text.replace(/Teknesyum Core/g, 'teknesyum-' + to);
 }
 
 function uiPlugin() {
@@ -265,7 +274,7 @@ function asked(j) {
 
 function openLogs(cwd, pre) {
   const here = path.resolve(cwd).toLowerCase() + path.sep;
-  const root = [coreRepo(), uiRepo()].find((d) => d && here.startsWith(path.resolve(d).toLowerCase() + path.sep));
+  const root = [coreRepo(), uiRepo(), baseRepo()].find((d) => d && here.startsWith(path.resolve(d).toLowerCase() + path.sep));
   if (!root) return '';
   let names = [];
   try { names = fs.readdirSync(path.join(root, 'logs', 'openlogs')).filter((f) => f.endsWith('.md') && !pre.includes(f)); } catch {}
@@ -363,8 +372,7 @@ function handle(j) {
     const { rest, key } = m;
     text = key === 'hh' ? help(j.session_id) : key === 'mc' ? memory(rest) : key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : key === 'uc' ? uiCheck(rest, j.cwd || process.cwd()) : library(rest);
   } else if (busy(j)) text = enqueue(j, prompt);
-  else if (UI_REPORT.test(prompt)) text = report(true);
-  else if (REPORT.test(prompt)) text = report(false);
+  else if (wanted(prompt)) text = report(wanted(prompt));
   say(j.session_id, shown);
   const all = [openLogs(j.cwd || process.cwd(), pre), pre, ahead, text, shelve(prompt, j.cwd || process.cwd())].filter(Boolean).join('\n\n');
   if (!all) return '';
@@ -373,4 +381,4 @@ function handle(j) {
 
 if (require.main === module) main(handle, { log: 'mod.js' });
 
-module.exports = { REPORT, UI_REPORT, SHELVE, ASKED, handle, busy, soru, tail, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };
+module.exports = { REPORT, UI_REPORT, BASE_REPORT, wanted, SHELVE, ASKED, handle, busy, soru, tail, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };
