@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.67.0
+
+- yy clean eye: a fresh agent judges a declined request; a refusal in the last reply asks for a fresh judgement; missed refusal wordings are logged to Core
+
 ## v0.66.0
 
 - mod.js detects a provider-appended copyright/do-not-reproduce reminder in recent transcript entries and flags it as noise that does not change the owner's task (Noise Filtered band); zero cost when absent, and it is flagged never obeyed
