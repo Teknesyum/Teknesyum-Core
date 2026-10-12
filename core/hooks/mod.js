@@ -356,6 +356,37 @@ function enqueue(j, prompt) {
   return t('mod.queued');
 }
 
+const PARAZIT = /reproduce copyrighted material|never reproduce song lyrics|at most one quote per response|do(?:es)? not (?:mention|reference) this (?:automated )?reminder|automated[_ ]reminder/i;
+const PARA_OURS = /openlogs|TEKLIF-oturuma|yordam\.md|strings\.json/i;
+
+function parazit(j) {
+  try {
+    const kitap = require('./kitap.js');
+    const file = kitap.transcript(j);
+    if (!file) return '';
+    const list = kitap.entries(file);
+    for (const o of list.slice(-10)) {
+      if (!o || !o.message || o.message.role !== 'user') continue;
+      const c = o.message.content;
+      const texts = [];
+      if (typeof c === 'string') texts.push(c);
+      else if (Array.isArray(c)) {
+        for (const x of c) {
+          if (!x) continue;
+          if (typeof x.text === 'string') texts.push(x.text);
+          if (x.type === 'tool_result') {
+            const tc = x.content;
+            if (typeof tc === 'string') texts.push(tc);
+            else if (Array.isArray(tc)) for (const y of tc) if (y && typeof y.text === 'string') texts.push(y.text);
+          }
+        }
+      }
+      for (const s of texts) if (PARAZIT.test(s) && !PARA_OURS.test(s)) return t('mod.parazit');
+    }
+  } catch {}
+  return '';
+}
+
 function handle(j) {
   if (j.hook_event_name !== 'UserPromptSubmit') return '';
   const prompt = String(j.prompt || '');
@@ -365,6 +396,8 @@ function handle(j) {
   }
   shown = [];
   ahead = '';
+  const para = parazit(j);
+  if (para) shown.push(banner('banner.parazit'));
   const pre = later(j.cwd || process.cwd(), j.session_id);
   const m = mark(prompt);
   expect(j.session_id, m ? m.rest : prompt, j.cwd || process.cwd());
@@ -377,11 +410,11 @@ function handle(j) {
   else if (wanted(prompt)) text = report(wanted(prompt));
   else if (BASE_READY.test(prompt)) text = t('mod.base').replace('%C', cmd('init', 'base.js'));
   say(j.session_id, shown);
-  const all = [openLogs(j.cwd || process.cwd(), pre), pre, ahead, text, shelve(prompt, j.cwd || process.cwd())].filter(Boolean).join('\n\n');
+  const all = [para, openLogs(j.cwd || process.cwd(), pre), pre, ahead, text, shelve(prompt, j.cwd || process.cwd())].filter(Boolean).join('\n\n');
   if (!all) return '';
   return JSON.stringify({ hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: all } });
 }
 
 if (require.main === module) main(handle, { log: 'mod.js' });
 
-module.exports = { REPORT, UI_REPORT, BASE_REPORT, BASE_READY, wanted, SHELVE, ASKED, handle, busy, soru, tail, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };
+module.exports = { REPORT, UI_REPORT, BASE_REPORT, BASE_READY, PARAZIT, parazit, wanted, SHELVE, ASKED, handle, busy, soru, tail, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };
