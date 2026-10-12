@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.66.0
+
+- mod.js detects a provider-appended copyright/do-not-reproduce reminder in recent transcript entries and flags it as noise that does not change the owner's task (Noise Filtered band); zero cost when absent, and it is flagged never obeyed
+
 ## v0.65.2
 
 - A log that mentions scaffold.js, scan.js or setup.js is no longer sent to the UI repo: both repos have those scripts
