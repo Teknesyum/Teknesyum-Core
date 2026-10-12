@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.65.1
+
+- A new repository is stopped only when the user did not ask for it: a yes, or a request to open one in the last three prompts, lets it run
+
 ## v0.65.0
 
 - base.js init/check sets up and checks the .teknesyum folder Base installs from; gh release create/upload is stopped in an installable repo until the check passes. Opening a new repository (gh repo create/fork) is asked first.
