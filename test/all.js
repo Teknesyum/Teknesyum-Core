@@ -2098,6 +2098,9 @@ function testReport() {
   ok('a log about teknesyum-ui goes to the ui repo', fs.existsSync(path.join(uiDir, 'TEKLIF-teknesyum-ui-react-sablonu.md')));
   const uiBook = () => { try { return fs.readFileSync(path.join(uiRoot, '.claude', 'acik.md'), 'utf8'); } catch { return ''; } };
   ok('and the ui ledger is told to read it', /- \[ \] Logu oku: logs\/openlogs\/TEKLIF-teknesyum-ui-react-sablonu\.md/.test(uiBook()), uiBook());
+  lj(['write', '--kind', 'teklif', '--title', 'tkc ortak betik adi', '--symptom', 'olayda scaffold.js, scan.js ve setup.js gecti']);
+  ok('a script name both repos have does not send a log to ui', !fs.existsSync(path.join(uiDir, 'TEKLIF-tkc-ortak-betik-adi.md')));
+  lj(['archive', '--id', 'tkc-ortak-betik-adi']);
   lj(['write', '--to', 'ui', '--title', 'yon secimi']);
   ok('--to ui sends any log there', fs.existsSync(path.join(uiDir, 'BUG-yon-secimi.md')));
   ok('list shows both repos', /Teknesyum|tkc-uirepo/.test(lj(['list']).stdout) && lj(['list']).stdout.includes(uiDir));

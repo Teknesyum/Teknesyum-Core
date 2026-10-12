@@ -11,7 +11,7 @@ function side(file) {
   return Object.keys(REPO).find((k) => REPO[k]() && path.resolve(path.dirname(file)) === path.resolve(openLogs(k)));
 }
 
-const UI = /teknesyum-ui|\bui\s+(eklenti|plugin)|\b(scaffold|scan|uc|artik|raf|esle|setup)\.js\b|\btemplates\/(durum|kur|denetim)\b/i;
+const UI = /teknesyum-ui|\bui\s+(eklenti|plugin)|\b(uc|artik|raf|esle)\.js\b|\btemplates\/(durum|kur|denetim)\b/i;
 
 function target(o) {
   const to = String(o.to || '').toLowerCase();
