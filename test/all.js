@@ -854,6 +854,21 @@ function testYasak() {
   const onayla = (cmd, text) => yasak.decide({ hook_event_name: 'PreToolUse', tool_name: 'Bash', session_id: 'yo', cwd: GARDEN, transcript_path: onayYaz(text), tool_input: { command: cmd } });
   ok('an owner yes lets a branch delete through', onayla('git branch -D a b c', 'evet sil') === null);
   ok('an owner delete request lets a release delete through', onayla('gh release delete v1.0.0 --yes', 'o sürümü silebilirsin') === null);
+  const yeni = 'gh repo create Teknesyum/Yeni --private --source . --push';
+  for (const p of ['Depoyu aç', 'evet', 'yeni bir özel repo aç ve gönder', 'bunu github\'a at', 'create a private repo for this', 'repoyu oluştur'])
+    ok('"' + p + '" lets a new repo through', onayla(yeni, p) === null, JSON.stringify(onayla(yeni, p)));
+  for (const p of ['devam et', 'yeni repo açılamasın', 'depoyu açıkla', 'repo açma', 'repo kurallarını oku'])
+    ok('"' + p + '" does not', !!onayla(yeni, p));
+  {
+    const f = path.join(os.tmpdir(), 'tkc-onay3-' + process.pid + '.jsonl');
+    const satir = (t) => JSON.stringify({ type: 'user', message: { role: 'user', content: t } });
+    fs.writeFileSync(f, [satir('bunu özel bir depo aç, oraya gönder'), satir('adı ne olsun dersen Deneme'), satir('devam et')].join('\n') + '\n');
+    const son = (cmd) => yasak.decide({ hook_event_name: 'PreToolUse', tool_name: 'Bash', session_id: 'yo3', cwd: GARDEN, transcript_path: f, tool_input: { command: cmd } });
+    ok('a repo asked for two prompts ago still goes through', son(yeni) === null, JSON.stringify(son(yeni)));
+    ok('but that request opens nothing else', !!son('git branch -D a'));
+    fs.writeFileSync(f, [satir('bunu özel bir depo aç'), satir('bir'), satir('iki'), satir('üç')].join('\n') + '\n');
+    ok('and it lapses after three prompts', !!son(yeni));
+  }
   ok('no yes keeps the branch delete held', !!onayla('git branch -D a', 'devam et'));
   ok('a word that only contains sil is not a yes', !!onayla('git branch -D a', 'basil kontrol et'));
   ok('a yes never opens disk or root wipes', !!onayla('rm -rf /', 'evet') && !!onayla('mkfs.ext4 /dev/sdb1', 'evet'));

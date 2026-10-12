@@ -193,9 +193,11 @@ Kapı var olan `yasak.js` içinde koşar, yönerge yalnız söz geçince gider: 
 
 Sahibin kararı: bütün projelerin "Bize ulaşın" bildirimi `Teknesyum/Teknesyum-Private` issue'larına düşer; yeni depo yok, aktarıcı yok, anahtar programa gömülür. Tam metin: `logs/openlogs/closed/TEKLIF-butun-projelerin-bize-ulasin-bildirimleri-teknesyum-private-issue-lari.md`.
 
-- [ ] Anahtar — sahipte: ince ayarlı, tek depo, yalnız Issues okuma-yazma; özel rafa konur
-- [ ] Görüntü kararı — sahipte: görüntüsüz, gövdeye gömülü küçük görüntü, ya da ayrı yer
-- [ ] Ortak parça ve sözleşme (başlık `<Proje>: <not>`, etiket `bildirim`, `app:<proje>`) — iki karar bekliyor
+- [x] Görüntü kararı — sahip (2026-10-12): gövdeye gömülü. Ölçüldü: GitHub `data:` adresini sayfada siler, ham gövdede saklar; gövde sınırı 262.144 harf. Görüntüyü RepoWarden çözer.
+- [x] Sözleşme: özel rafta `private/tercihler/bildirim.md` (adres, başlık, etiket, gövde, görüntü kalıbı, anahtar kuralı); bildirim dosyası olan projede kendiliğinden uyar.
+- [ ] Anahtar — sahipte: üretip `tmp/bildirim-anahtar.ps1` ile rafa koyacak (betik Issues okur, dosya okuyamaz diye sınar)
+- [ ] Ortak parça — UI'da: log `--to ui` yazıldı; parça sözleşmeyi uygular
+- [ ] RepoWarden gelen kutusu: `bildirim` etiketli issue'ları listeler, `teknesyum-goruntu` bloğunu çözüp gösterir — anahtar gelince
 - [ ] Tarayıcı kapısı: herkese açık `issues/new` bağlantısı bulgu — parça çıkınca
 - [ ] Quizloop 0028 ve 0031 geçersiz, `tools/bildirim` kalkar — parça çıkınca
 

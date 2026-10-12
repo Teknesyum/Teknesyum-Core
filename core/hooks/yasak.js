@@ -118,22 +118,35 @@ function gate(cmd, cwd) {
 const ASKED = new Set(['yasak.hist', 'yasak.gone', 'yasak.temp', 'yasak.new']);
 const YES = /(^|[^\p{L}])(evet|onay\p{L}*|sil\p{L}*|kaldır\p{L}*|yes|approved?)(?=$|[^\p{L}])/iu;
 
-function lastPrompt(j) {
+const OPEN = /(^|[^\p{L}])(depo|repo)\p{L}*(['’]\p{L}+)?\s+(?:\S+\s+){0,3}?(aç|açar\p{L}*|açabilir\p{L}*|açın|açalım|oluştur\p{L}*|yarat\p{L}*)(?=$|[^\p{L}])|\b(create|open|make)\s+(?:\S+\s+){0,3}?repo(sitory)?\b|(^|[^\p{L}])github\p{L}*(['’]\p{L}+)?\s+(?:\S+\s+){0,2}?(at|yükle|koy|gönder|çıkar)(?=$|[^\p{L}])/iu;
+const RECENT = 3;
+
+function lastPrompts(j, n) {
   const kitap = require('./kitap.js');
   const file = kitap.transcript(j);
-  if (!file) return '';
+  if (!file) return [];
   const list = kitap.entries(file);
-  for (let i = list.length - 1; i >= 0; i--) {
+  const out = [];
+  for (let i = list.length - 1; i >= 0 && out.length < n; i--) {
     const o = list[i];
     if (!kitap.prompt(o)) continue;
     const c = o.message.content;
-    return typeof c === 'string' ? c : c.filter((x) => x && x.type === 'text').map((x) => x.text).join(' ');
+    out.push(typeof c === 'string' ? c : c.filter((x) => x && x.type === 'text').map((x) => x.text).join(' '));
   }
-  return '';
+  return out;
 }
 
-function approved(j) {
-  try { return YES.test(lastPrompt(j)); } catch { return false; }
+function lastPrompt(j) {
+  return lastPrompts(j, 1)[0] || '';
+}
+
+function approved(j, key) {
+  try {
+    if (YES.test(lastPrompt(j))) return true;
+    return key === 'yasak.new' && lastPrompts(j, RECENT).some((p) => OPEN.test(p));
+  } catch {
+    return false;
+  }
 }
 
 function forbid(j) {
@@ -146,7 +159,7 @@ function forbid(j) {
     say(j.session_id, banner('banner.deny', { '%R': why.split(':')[0] }));
     return { hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: why } };
   }
-  if (ASKED.has(key) && approved(j)) return null;
+  if (ASKED.has(key) && approved(j, key)) return null;
   say(j.session_id, banner('banner.deny', { '%R': t(key) }));
   return {
     hookSpecificOutput: {
@@ -163,4 +176,4 @@ function decide(j) {
 
 if (require.main === module) main(decide);
 
-module.exports = { gate, lastPrompt, forbidden, decide, outside, targets, approved, inTemp, RULES, WIPE, YES };
+module.exports = { gate, OPEN, lastPrompts, lastPrompt, forbidden, decide, outside, targets, approved, inTemp, RULES, WIPE, YES };
