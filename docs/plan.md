@@ -216,3 +216,13 @@ istedi. Bağlantı banttan basılır (ekran kanalı), modele gitmez: sıradan tu
 - [ ] Stop'ta "konunun dosyaları değişti, başlık duruyor" uyarısı — başlıktan dosyaya güvenilir eşleme yok
 - [ ] `rr` işareti — teklifte isteğe bağlıydı, söz tetiği yetiyor; sahip isterse eklenir
 - [ ] "rafa koy" tetiği — özel rafla ("rafa yaz") karışıyor, bilerek alınmadı
+
+## Q. Gereksiz Ret Ve İnat: Temiz Göz (danışma 037, sahip 2026-10-13: "d a c kur, b kurma")
+
+Olgu: aynı kamu malı şiir parazitli uzun oturumda 30 dakika reddedildi, temiz oturumda tek istemle yazıldı. B (her tura binen kalıcı kural) sahibin kararıyla kurulmadı.
+
+- [x] D: parazit notuna "eski reddini savunma, baştan değerlendir" tümcesi; yalnız parazit varken
+- [x] A: `yy` işareti, temiz göz yordamı; olguları model doğrular, taze ajana yalın istek gider
+- [x] C: son yanıt ret kalıbına (`RET`) uyarsa tek satır not ve `Ret Görüldü` bandı; kalıp yoksa çıktı yok
+- [x] C kırılma uyarısı: `RET` yakalamadığı yanıttan sonra yalın `yy` gelirse söz Core'da `logs/openlogs/BUG-ret-kalibi-kacirdi.md` dosyasına düşer
+- [ ] Ölçüm: dört kol, kol başına 3 tekrar, telifli kontrol metni dahil (037 madde 5)

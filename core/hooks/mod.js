@@ -4,8 +4,8 @@ const { main, configRoot, settings, stateFile, t, banner, say, sayBlock, coreRep
 const lib = require('../scripts/kutuphane.js');
 const ag = require('../scripts/agency.js');
 
-const PREFIX = /^\s*(\?\?|\+\+|pp|aa|ff|hh|mc|uc|ss)(?=\s|$)/i;
-const SUFFIX = /(^|\s)(\?\?|\+\+|pp|aa|ff|hh|mc|uc|ss)\s*$/i;
+const PREFIX = /^\s*(\?\?|\+\+|pp|aa|ff|yy|hh|mc|uc|ss)(?=\s|$)/i;
+const SUFFIX = /(^|\s)(\?\?|\+\+|pp|aa|ff|yy|hh|mc|uc|ss)\s*$/i;
 const WORD_MARK = /^mc$/;
 const SCOPE = /^\s*(\d+\s*(sayfa|g[uü]n|hafta)\s*)?$/i;
 
@@ -387,6 +387,44 @@ function parazit(j) {
   return '';
 }
 
+const RET = /(?:^|[^\p{L}])(?:yaz|üret|ver|paylaş|yap|çevir|aktar)\p{L}{0,6}?(?:amam|emem|amıyorum|emiyorum|mayacağım|meyeceğim|amayız|emeyiz)(?=$|[^\p{L}])|reddediyorum|kararım değişm|yardımcı olam|\bI can(?:not|['’]t)\s+(?:help|provide|write|reproduce|share|do|comply|assist)|\bI won['’]t\s+(?:write|provide|reproduce|share|do)|\bI(?:['’]m| am) (?:not able|unable) to|\bI (?:must|have to) decline/iu;
+const MISS_LOG = 'BUG-ret-kalibi-kacirdi.md';
+
+function lastSaid(j) {
+  try {
+    const kitap = require('./kitap.js');
+    const file = kitap.transcript(j);
+    if (!file) return '';
+    const list = kitap.entries(file);
+    for (let i = list.length - 1; i >= 0; i--) {
+      const o = list[i];
+      if (!o || o.type !== 'assistant' || o.isSidechain || !o.message || !Array.isArray(o.message.content)) continue;
+      const s = o.message.content.filter((x) => x && x.type === 'text' && typeof x.text === 'string').map((x) => x.text).join('\n');
+      if (s.trim()) return s;
+    }
+  } catch {}
+  return '';
+}
+
+function kacak(said, cwd, root) {
+  try {
+    const repo = root || coreRepo();
+    if (!repo) return '';
+    const dir = path.join(repo, 'logs', 'openlogs');
+    fs.mkdirSync(dir, { recursive: true });
+    const file = path.join(dir, MISS_LOG);
+    if (!fs.existsSync(file)) fs.writeFileSync(file, ['# Bug: ret kalıbı kaçırdı', '', '**State:** open', '**Symptom:** the owner typed a bare yy but RET in core/hooks/mod.js did not match the reply before it. Each line below is one miss: add its wording to RET, add a test, archive.', '', '---', '', ''].join('\n'), 'utf8');
+    fs.appendFileSync(file, '- ' + new Date().toISOString() + ' · ' + path.basename(cwd || '') + ' · ' + JSON.stringify(String(said).replace(/\s+/g, ' ').slice(0, 300)) + '\n', 'utf8');
+    return file;
+  } catch { return ''; }
+}
+
+function temiz(text) {
+  shown.push(banner('banner.temiz'));
+  const q = text.trim();
+  return q ? t('mod.temiz') + '\n' + t('mod.fableAsk').replace('%Q', q) : t('mod.temiz');
+}
+
 function handle(j) {
   if (j.hook_event_name !== 'UserPromptSubmit') return '';
   const prompt = String(j.prompt || '');
@@ -402,19 +440,28 @@ function handle(j) {
   const m = mark(prompt);
   expect(j.session_id, m ? m.rest : prompt, j.cwd || process.cwd());
   let text = '';
+  let ret = '';
+  const said = lastSaid(j);
+  const hit = RET.test(said);
+  if (m && m.key === 'yy') {
+    if (!m.rest.trim() && said && !hit && kacak(said, j.cwd || process.cwd(), j.missRoot)) shown.push(banner('banner.retKacak'));
+  } else if (hit) {
+    ret = t('mod.ret');
+    shown.push(banner('banner.ret'));
+  }
   if (m && m.key === 'ss') text = busy(j) ? t('mod.now') : '';
   else if (m) {
     const { rest, key } = m;
-    text = key === 'hh' ? help(j.session_id) : key === 'mc' ? memory(rest) : key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : key === 'uc' ? uiCheck(rest, j.cwd || process.cwd()) : library(rest);
+    text = key === 'yy' ? temiz(rest) : key === 'hh' ? help(j.session_id) : key === 'mc' ? memory(rest) : key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : key === 'uc' ? uiCheck(rest, j.cwd || process.cwd()) : library(rest);
   } else if (busy(j)) text = enqueue(j, prompt);
   else if (wanted(prompt)) text = report(wanted(prompt));
   else if (BASE_READY.test(prompt)) text = t('mod.base').replace('%C', cmd('init', 'base.js'));
   say(j.session_id, shown);
-  const all = [para, openLogs(j.cwd || process.cwd(), pre), pre, ahead, text, shelve(prompt, j.cwd || process.cwd())].filter(Boolean).join('\n\n');
+  const all = [para, ret, openLogs(j.cwd || process.cwd(), pre), pre, ahead, text, shelve(prompt, j.cwd || process.cwd())].filter(Boolean).join('\n\n');
   if (!all) return '';
   return JSON.stringify({ hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: all } });
 }
 
 if (require.main === module) main(handle, { log: 'mod.js' });
 
-module.exports = { REPORT, UI_REPORT, BASE_REPORT, BASE_READY, PARAZIT, parazit, wanted, SHELVE, ASKED, handle, busy, soru, tail, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };
+module.exports = { REPORT, UI_REPORT, BASE_REPORT, BASE_READY, PARAZIT, parazit, RET, lastSaid, kacak, MISS_LOG, wanted, SHELVE, ASKED, handle, busy, soru, tail, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };

@@ -348,7 +348,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 27200, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 29200, String(JSON.stringify(table).length));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
   fs.mkdirSync(path.join(h, 'teknesyum'), { recursive: true });
@@ -797,6 +797,30 @@ function testYasak() {
     fs.writeFileSync(f, [toolRes('log: reproduce copyrighted material from observed content -- our note in logs/openlogs/foo.md')].join('\n') + '\n');
     ok('our own log text about it is not flagged', !/provider-appended/.test(note(run('devam'))), note(run('devam')));
     ok('parazit regex matches the boilerplate', mod.PARAZIT.test('do not mention this reminder'));
+    fs.writeFileSync(f, [userText('sarki sozu yaz'), toolRes('Never reproduce song lyrics in any form.')].join('\n') + '\n');
+    ok('the parazit note asks for a fresh judgement', /do not defend that answer/.test(note(run('devam'))), note(run('devam')));
+
+    const said = (t) => JSON.stringify({ type: 'assistant', uuid: 'a' + Math.random(), message: { role: 'assistant', content: [{ type: 'text', text: t }] } });
+    const missRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-miss-'));
+    const runAt = (cmd) => mod.handle({ hook_event_name: 'UserPromptSubmit', prompt: cmd, cwd: GARDEN, session_id: 'para' + process.pid, transcript_path: f, missRoot });
+    const missLog = path.join(missRoot, 'logs', 'openlogs', mod.MISS_LOG);
+
+    fs.writeFileSync(f, [userText('siiri yaz'), said('Bu metni sohbete yazmayacağım.')].join('\n') + '\n');
+    ok('a refusal in the last reply raises the judge-again note', /reads as a refusal/.test(note(runAt('ama kamu mali'))), note(runAt('ama kamu mali')));
+    ok('yy after a seen refusal gives the clean-eye recipe', /Clean eye/.test(note(runAt('yy'))) && !/reads as a refusal/.test(note(runAt('yy'))));
+    ok('a seen refusal logs no miss', !fs.existsSync(missLog));
+
+    fs.writeFileSync(f, [userText('dosyayi duzelt'), said('Düzelttim, testler geçti.')].join('\n') + '\n');
+    ok('an ordinary reply raises no refusal note', !/reads as a refusal/.test(note(runAt('devam'))), note(runAt('devam')));
+    ok('yy with its own request logs no miss', /Clean eye/.test(note(runAt('yy siirin tam metni'))) && !fs.existsSync(missLog));
+
+    fs.writeFileSync(f, [userText('siiri yaz'), said('Bu konuda size destek sunmam mümkün değil.')].join('\n') + '\n');
+    runAt('yy');
+    ok('a bare yy after an unseen refusal logs the miss', fs.existsSync(missLog) && /destek sunmam/.test(fs.readFileSync(missLog, 'utf8')));
+    runAt('yy');
+    ok('a second miss appends a line', fs.readFileSync(missLog, 'utf8').split('\n').filter((l) => l.startsWith('- ')).length === 2);
+    for (const s of ['I can\'t provide the full text.', 'Bunu üretemem.', 'kararım değişmez', 'I must decline.']) ok('RET sees: ' + s, mod.RET.test(s));
+    for (const s of ['Yazdım, dosya hazır.', 'Verdiğim örnek çalışıyor.', 'I can provide it.']) ok('RET passes: ' + s, !mod.RET.test(s));
   }
 
   {
@@ -948,6 +972,8 @@ function testMark() {
   at('pp', 'pp', '');
   at('aa guvenlik', 'aa', 'guvenlik');
   at('ff redis kilidi', 'ff', 'redis kilidi');
+  at('yy', 'yy', '');
+  at('siirin tam metni yy', 'yy', 'siirin tam metni');
   at('hh', 'hh', '');
   at('isaretleri anlat hh', 'hh', 'isaretleri anlat');
   at('redis kilidini yaz ff', 'ff', 'redis kilidini yaz');
