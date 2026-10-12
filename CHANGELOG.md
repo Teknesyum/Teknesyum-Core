@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.65.2
+
+- A log that mentions scaffold.js, scan.js or setup.js is no longer sent to the UI repo: both repos have those scripts
+
 ## v0.65.1
 
 - A new repository is stopped only when the user did not ask for it: a yes, or a request to open one in the last three prompts, lets it run
