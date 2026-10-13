@@ -348,7 +348,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 29200, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 29600, String(JSON.stringify(table).length));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
   fs.mkdirSync(path.join(h, 'teknesyum'), { recursive: true });
@@ -809,6 +809,10 @@ function testYasak() {
     ok('a refusal in the last reply raises the judge-again note', /reads as a refusal/.test(note(runAt('ama kamu mali'))), note(runAt('ama kamu mali')));
     ok('yy after a seen refusal gives the clean-eye recipe', /Clean eye/.test(note(runAt('yy'))) && !/reads as a refusal/.test(note(runAt('yy'))));
     ok('a seen refusal logs no miss', !fs.existsSync(missLog));
+    ok('one refusal is not a chain', !/breaks the chain/.test(note(runAt('ama kamu mali'))));
+    fs.writeFileSync(f, [userText('siiri yaz'), said('Bunu üretemem.'), userText('kamu mali'), said('Bu metni sohbete yazmayacağım.')].join('\n') + '\n');
+    ok('a second refusal brings the chain note', /breaks the chain/.test(note(runAt('neden'))), note(runAt('neden')));
+    fs.writeFileSync(f, [userText('siiri yaz'), said('Bu metni sohbete yazmayacağım.')].join('\n') + '\n');
 
     fs.writeFileSync(f, [userText('dosyayi duzelt'), said('Düzelttim, testler geçti.')].join('\n') + '\n');
     ok('an ordinary reply raises no refusal note', !/reads as a refusal/.test(note(runAt('devam'))), note(runAt('devam')));

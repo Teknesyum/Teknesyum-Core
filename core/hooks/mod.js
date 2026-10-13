@@ -451,8 +451,9 @@ function handle(j) {
   if (m && m.key === 'yy') {
     if (!m.rest.trim() && said && !sonlar(j, GERI).some((s) => RET.test(s)) && kacak(said, j.cwd || process.cwd(), j.missRoot)) shown.push(banner('banner.retKacak'));
   } else if (hit) {
-    ret = t('mod.ret');
-    shown.push(banner('banner.ret'));
+    const zincir = sonlar(j, GERI).filter((s) => RET.test(s)).length >= 2;
+    ret = t('mod.ret') + (zincir ? ' ' + t('mod.retZincir') : '');
+    shown.push(banner(zincir ? 'banner.retZincir' : 'banner.ret'));
   }
   if (m && m.key === 'ss') text = busy(j) ? t('mod.now') : '';
   else if (m) {
