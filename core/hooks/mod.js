@@ -387,6 +387,16 @@ function parazit(j) {
 }
 
 const RET = /(?:^|[^\p{L}])(?:yaz|üret|ver|paylaş|yap|çevir|aktar)\p{L}{0,6}?(?:amam|emem|amıyorum|emiyorum|mayacağım|meyeceğim|amayız|emeyiz)(?=$|[^\p{L}])|reddediyorum|kararım değişm|yardımcı olam|\bI can(?:not|['’]t)\s+(?:help|provide|write|reproduce|share|do|comply|assist)|\bI won['’]t\s+(?:write|provide|reproduce|share|do)|\bI(?:['’]m| am) (?:not able|unable) to|\bI (?:must|have to) decline/iu;
+const MUZIK = /music\.youtube\.com|youtube\.com\/watch|youtu\.be\/|open\.spotify\.com|music\.apple\.com|soundcloud\.com/i;
+const SOZ = /(?:^|[^\p{L}])(?:söz|sözler|sözleri|sözlerini|dize|dizeler|dizeleri|lyrics)(?=$|[^\p{L}])/iu;
+const SARKI = /şarkı\s+söz|sarki\s+soz|türkü\s+söz|song\s+lyrics/i;
+
+function kaynak(prompt) {
+  if (!(SARKI.test(prompt) || (MUZIK.test(prompt) && SOZ.test(prompt)))) return '';
+  shown.push(banner('banner.kaynak'));
+  return t('mod.kaynak');
+}
+
 const MISS_LOG = 'BUG-ret-kalibi-kacirdi.md';
 const GERI = 8;
 
@@ -446,6 +456,7 @@ function handle(j) {
   expect(j.session_id, m ? m.rest : prompt, j.cwd || process.cwd());
   let text = '';
   let ret = '';
+  const koken = kaynak(prompt);
   const said = lastSaid(j);
   const hit = RET.test(said);
   if (m && m.key === 'cc') {
@@ -463,11 +474,11 @@ function handle(j) {
   else if (wanted(prompt)) text = report(wanted(prompt));
   else if (BASE_READY.test(prompt)) text = t('mod.base').replace('%C', cmd('init', 'base.js'));
   say(j.session_id, shown);
-  const all = [para, ret, openLogs(j.cwd || process.cwd(), pre), pre, ahead, text, shelve(prompt, j.cwd || process.cwd())].filter(Boolean).join('\n\n');
+  const all = [para, ret, koken, openLogs(j.cwd || process.cwd(), pre), pre, ahead, text, shelve(prompt, j.cwd || process.cwd())].filter(Boolean).join('\n\n');
   if (!all) return '';
   return JSON.stringify({ hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: all } });
 }
 
 if (require.main === module) main(handle, { log: 'mod.js' });
 
-module.exports = { REPORT, UI_REPORT, BASE_REPORT, BASE_READY, PARAZIT, parazit, RET, lastSaid, kacak, MISS_LOG, wanted, SHELVE, ASKED, handle, busy, soru, tail, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };
+module.exports = { kaynak, REPORT, UI_REPORT, BASE_REPORT, BASE_READY, PARAZIT, parazit, RET, lastSaid, kacak, MISS_LOG, wanted, SHELVE, ASKED, handle, busy, soru, tail, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };

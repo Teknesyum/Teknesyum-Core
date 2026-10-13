@@ -348,7 +348,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 29600, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 30500, String(JSON.stringify(table).length));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
   fs.mkdirSync(path.join(h, 'teknesyum'), { recursive: true });
@@ -809,6 +809,8 @@ function testYasak() {
     ok('a refusal in the last reply raises the judge-again note', /reads as a refusal/.test(note(runAt('ama kamu mali'))), note(runAt('ama kamu mali')));
     ok('cc after a seen refusal gives the clean-eye recipe', /Clean eye/.test(note(runAt('cc'))) && !/reads as a refusal/.test(note(runAt('cc'))));
     ok('a seen refusal logs no miss', !fs.existsSync(missLog));
+    ok('a music link with a words request asks for the source first', /where the words come from/.test(note(runAt('https://music.youtube.com/watch?v=x sözleri yaz'))) && /where the words come from/.test(note(runAt('bu şarkı sözlerini açıkla'))));
+    ok('a bare link or an ordinary prompt brings no source note', !/where the words come from/.test(note(runAt('https://music.youtube.com/watch?v=x indir'))) && !/where the words come from/.test(note(runAt('sözleşmeyi oku'))));
     ok('one refusal is not a chain', !/breaks the chain/.test(note(runAt('ama kamu mali'))));
     fs.writeFileSync(f, [userText('siiri yaz'), said('Bunu üretemem.'), userText('kamu mali'), said('Bu metni sohbete yazmayacağım.')].join('\n') + '\n');
     ok('a second refusal brings the chain note', /breaks the chain/.test(note(runAt('neden'))), note(runAt('neden')));
@@ -1795,6 +1797,8 @@ function testKapanis() {
   const tr = path.join(d, 't.jsonl');
   const use = (n) => JSON.stringify({ type: 'assistant', message: { content: Array.from({ length: n }, (_, i) => ({ type: 'tool_use', id: 'u' + i, name: 'Bash', input: {} })) } });
   const yaz = (n) => fs.writeFileSync(tr, JSON.stringify({ type: 'user', message: { content: 'işi yap' } }) + '\n' + use(n) + '\n');
+  ok('a copyright refusal with no year is sent back for the facts', /Fact gate/.test(dur.olgu({ last_assistant_message: 'Şarkı sözlerini tam metin yazamam, telif nedeniyle.' })) && /Fact gate/.test((dur.decide({ hook_event_name: 'Stop', transcript_path: tr, cwd: d, last_assistant_message: 'I cannot reproduce the lyrics.' }) || {}).reason || ''));
+  ok('a refusal that names the year, an ordinary reply and a second pass go through', dur.olgu({ last_assistant_message: 'Söz yazarı 1975 doğumlu, telifli; yazamam.' }) === '' && dur.olgu({ last_assistant_message: 'Telif notunu README dosyasına ekledim.' }) === '' && dur.decide({ hook_event_name: 'Stop', stop_hook_active: true, last_assistant_message: 'I cannot reproduce the lyrics.' }) === null);
   const k = (text) => dur.kapanis({ transcript_path: tr, last_assistant_message: text, cwd: d });
   yaz(6);
   ok('a long turn without the summary heading is sent back', /Ön Özet|Earlier/.test(k('Bitti.\n\nYok')));
