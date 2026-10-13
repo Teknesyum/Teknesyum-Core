@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.69.0
+
+- A song-words prompt asks for the source first; a copyright refusal naming no year is sent back once for the facts (olgu: false turns it off)
+
 ## v0.68.0
 
 - The clean-eye mark is now cc (was yy); its banner reminds that /compact breaks a refusal chain
