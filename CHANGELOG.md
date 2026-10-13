@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.68.0
+
+- The clean-eye mark is now cc (was yy); its banner reminds that /compact breaks a refusal chain
+
 ## v0.67.3
 
 - A second refusal in a row brings a chain note: yy, /compact or a new session breaks it
