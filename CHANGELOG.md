@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.67.2
+
+- Clean eye is always run; the miss log looks eight replies back; every mid-work question goes to the Haiku reader, which hands back what is beyond it
+
 ## v0.67.1
 
 - A Haiku Is Reading band shows when the reader agent is called
