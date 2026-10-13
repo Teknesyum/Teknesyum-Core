@@ -819,6 +819,10 @@ function testYasak() {
     ok('a bare yy after an unseen refusal logs the miss', fs.existsSync(missLog) && /destek sunmam/.test(fs.readFileSync(missLog, 'utf8')));
     runAt('yy');
     ok('a second miss appends a line', fs.readFileSync(missLog, 'utf8').split('\n').filter((l) => l.startsWith('- ')).length === 2);
+    fs.writeFileSync(f, [userText('siiri yaz'), said('Bunu üretemem.'), userText('betik yaz'), said('Betik hazır.')].join('\n') + '\n');
+    runAt('yy');
+    ok('a refusal a few replies back logs no miss', fs.readFileSync(missLog, 'utf8').split('\n').filter((l) => l.startsWith('- ')).length === 2);
+    ok('the clean-eye recipe must be run', /Always run it/.test(note(runAt('yy'))));
     for (const s of ['I can\'t provide the full text.', 'Bunu üretemem.', 'kararım değişmez', 'I must decline.']) ok('RET sees: ' + s, mod.RET.test(s));
     for (const s of ['Yazdım, dosya hazır.', 'Verdiğim örnek çalışıyor.', 'I can provide it.']) ok('RET passes: ' + s, !mod.RET.test(s));
   }
@@ -2098,8 +2102,8 @@ function testReport() {
   const dv = sub('testKapanis kaçıncı satırda?');
   const dvBook = fs.readFileSync(path.join(sq, '.claude', 'acik.md'), 'utf8');
   ok('a code question while working goes to the reader', /^- \[ \] Devredildi: testKapanis kaçıncı satırda\? — .* — okuyucuya verildi$/m.test(dvBook) && /teknesyum-core:okuyucu/.test(dv) && /denetlenmedi/.test(dv), dvBook + dv);
-  ok('a question about the work in hand stays queued', /^- \[ \] Sıra: bunu neden böyle yaptın\? — /m.test((sub('bunu neden böyle yaptın?'), fs.readFileSync(path.join(sq, '.claude', 'acik.md'), 'utf8'))));
-  ok('a job is not a question', !mod.soru('bir de başlığı düzelt') && mod.soru('dur.js hangi olaylara bağlı') && mod.soru('test geçiyor mu') && !mod.soru('az önceki hata nerede?') && !mod.soru('a\n- b?'));
+  ok('a question about the work in hand also goes to the reader', /^- \[ \] Devredildi: bunu neden böyle yaptın\? — /m.test((sub('bunu neden böyle yaptın?'), fs.readFileSync(path.join(sq, '.claude', 'acik.md'), 'utf8'))));
+  ok('a job is not a question', !mod.soru('bir de başlığı düzelt') && mod.soru('dur.js hangi olaylara bağlı') && mod.soru('test geçiyor mu') && mod.soru('az önceki hata nerede?') && /ana ajana/.test(fs.readFileSync(path.join(CORE, 'agents', 'okuyucu.md'), 'utf8')) && !mod.soru('a\n- b?'));
   ok('the reader agent runs on haiku and only reads', /^model: haiku$/m.test(fs.readFileSync(path.join(CORE, 'agents', 'okuyucu.md'), 'utf8')) && !/Write|Edit|Bash/.test(/^tools:.*$/m.exec(fs.readFileSync(path.join(CORE, 'agents', 'okuyucu.md'), 'utf8'))[0]));
   ok('ss skips the queue and says now', /ss/.test(sub('ss dur, yanlış dosya')) && !/yanlış dosya/.test(fs.readFileSync(path.join(sq, '.claude', 'acik.md'), 'utf8')));
   const dur = require(path.join(CORE, 'hooks', 'dur.js'));

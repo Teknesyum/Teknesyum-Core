@@ -323,12 +323,11 @@ function busy(j, now) {
 }
 
 const SORU = /\?|(^|\s)(m[ıiuü]|m[ıiuü]s[ıiuü]n|m[ıiuü]d[ıiuü]r)(\s|$)|^(ne|nedir|nerede|nereden|nasıl|hangi|kaç|kim|what|where|which|how|who)\b|\b(nedir|nerede|hangi|kaçıncı|kaç tane|var mı)\b/i;
-const BAGLAM = /(^|\s)(bu|bunu|bunun|şu|şunu|az önce|az önceki|önceki|demin|demindeki|biraz önce|neden|niye|niçin|yaptın|yaptığın|dedin|dediğin|why|you just|this|that)(\s|$|[,.?])/i;
 
 function soru(prompt) {
   const p = String(prompt || '').trim();
   if (!p || p.length > 400 || /\n\s*[-*\d]/.test(p)) return false;
-  return SORU.test(p) && !BAGLAM.test(p);
+  return SORU.test(p);
 }
 
 function devret(j, prompt) {
@@ -389,21 +388,27 @@ function parazit(j) {
 
 const RET = /(?:^|[^\p{L}])(?:yaz|üret|ver|paylaş|yap|çevir|aktar)\p{L}{0,6}?(?:amam|emem|amıyorum|emiyorum|mayacağım|meyeceğim|amayız|emeyiz)(?=$|[^\p{L}])|reddediyorum|kararım değişm|yardımcı olam|\bI can(?:not|['’]t)\s+(?:help|provide|write|reproduce|share|do|comply|assist)|\bI won['’]t\s+(?:write|provide|reproduce|share|do)|\bI(?:['’]m| am) (?:not able|unable) to|\bI (?:must|have to) decline/iu;
 const MISS_LOG = 'BUG-ret-kalibi-kacirdi.md';
+const GERI = 8;
 
-function lastSaid(j) {
+function sonlar(j, n) {
+  const out = [];
   try {
     const kitap = require('./kitap.js');
     const file = kitap.transcript(j);
-    if (!file) return '';
+    if (!file) return out;
     const list = kitap.entries(file);
     for (let i = list.length - 1; i >= 0; i--) {
       const o = list[i];
       if (!o || o.type !== 'assistant' || o.isSidechain || !o.message || !Array.isArray(o.message.content)) continue;
       const s = o.message.content.filter((x) => x && x.type === 'text' && typeof x.text === 'string').map((x) => x.text).join('\n');
-      if (s.trim()) return s;
+      if (s.trim() && out.push(s) >= n) break;
     }
   } catch {}
-  return '';
+  return out;
+}
+
+function lastSaid(j) {
+  return sonlar(j, 1)[0] || '';
 }
 
 function kacak(said, cwd, root) {
@@ -413,7 +418,7 @@ function kacak(said, cwd, root) {
     const dir = path.join(repo, 'logs', 'openlogs');
     fs.mkdirSync(dir, { recursive: true });
     const file = path.join(dir, MISS_LOG);
-    if (!fs.existsSync(file)) fs.writeFileSync(file, ['# Bug: ret kalıbı kaçırdı', '', '**State:** open', '**Symptom:** the owner typed a bare yy but RET in core/hooks/mod.js did not match the reply before it. Each line below is one miss: add its wording to RET, add a test, archive.', '', '---', '', ''].join('\n'), 'utf8');
+    if (!fs.existsSync(file)) fs.writeFileSync(file, ['# Bug: ret kalıbı kaçırdı', '', '**State:** open', '**Symptom:** the owner typed a bare yy but RET in core/hooks/mod.js matched none of the last replies. Each line below is one miss: add its wording to RET, add a test, archive.', '', '---', '', ''].join('\n'), 'utf8');
     fs.appendFileSync(file, '- ' + new Date().toISOString() + ' · ' + path.basename(cwd || '') + ' · ' + JSON.stringify(String(said).replace(/\s+/g, ' ').slice(0, 300)) + '\n', 'utf8');
     return file;
   } catch { return ''; }
@@ -444,7 +449,7 @@ function handle(j) {
   const said = lastSaid(j);
   const hit = RET.test(said);
   if (m && m.key === 'yy') {
-    if (!m.rest.trim() && said && !hit && kacak(said, j.cwd || process.cwd(), j.missRoot)) shown.push(banner('banner.retKacak'));
+    if (!m.rest.trim() && said && !sonlar(j, GERI).some((s) => RET.test(s)) && kacak(said, j.cwd || process.cwd(), j.missRoot)) shown.push(banner('banner.retKacak'));
   } else if (hit) {
     ret = t('mod.ret');
     shown.push(banner('banner.ret'));
