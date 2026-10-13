@@ -807,7 +807,7 @@ function testYasak() {
 
     fs.writeFileSync(f, [userText('siiri yaz'), said('Bu metni sohbete yazmayacağım.')].join('\n') + '\n');
     ok('a refusal in the last reply raises the judge-again note', /reads as a refusal/.test(note(runAt('ama kamu mali'))), note(runAt('ama kamu mali')));
-    ok('yy after a seen refusal gives the clean-eye recipe', /Clean eye/.test(note(runAt('yy'))) && !/reads as a refusal/.test(note(runAt('yy'))));
+    ok('cc after a seen refusal gives the clean-eye recipe', /Clean eye/.test(note(runAt('cc'))) && !/reads as a refusal/.test(note(runAt('cc'))));
     ok('a seen refusal logs no miss', !fs.existsSync(missLog));
     ok('one refusal is not a chain', !/breaks the chain/.test(note(runAt('ama kamu mali'))));
     fs.writeFileSync(f, [userText('siiri yaz'), said('Bunu üretemem.'), userText('kamu mali'), said('Bu metni sohbete yazmayacağım.')].join('\n') + '\n');
@@ -816,17 +816,17 @@ function testYasak() {
 
     fs.writeFileSync(f, [userText('dosyayi duzelt'), said('Düzelttim, testler geçti.')].join('\n') + '\n');
     ok('an ordinary reply raises no refusal note', !/reads as a refusal/.test(note(runAt('devam'))), note(runAt('devam')));
-    ok('yy with its own request logs no miss', /Clean eye/.test(note(runAt('yy siirin tam metni'))) && !fs.existsSync(missLog));
+    ok('cc with its own request logs no miss', /Clean eye/.test(note(runAt('cc siirin tam metni'))) && !fs.existsSync(missLog));
 
     fs.writeFileSync(f, [userText('siiri yaz'), said('Bu konuda size destek sunmam mümkün değil.')].join('\n') + '\n');
-    runAt('yy');
-    ok('a bare yy after an unseen refusal logs the miss', fs.existsSync(missLog) && /destek sunmam/.test(fs.readFileSync(missLog, 'utf8')));
-    runAt('yy');
+    runAt('cc');
+    ok('a bare cc after an unseen refusal logs the miss', fs.existsSync(missLog) && /destek sunmam/.test(fs.readFileSync(missLog, 'utf8')));
+    runAt('cc');
     ok('a second miss appends a line', fs.readFileSync(missLog, 'utf8').split('\n').filter((l) => l.startsWith('- ')).length === 2);
     fs.writeFileSync(f, [userText('siiri yaz'), said('Bunu üretemem.'), userText('betik yaz'), said('Betik hazır.')].join('\n') + '\n');
-    runAt('yy');
+    runAt('cc');
     ok('a refusal a few replies back logs no miss', fs.readFileSync(missLog, 'utf8').split('\n').filter((l) => l.startsWith('- ')).length === 2);
-    ok('the clean-eye recipe must be run', /Always run it/.test(note(runAt('yy'))));
+    ok('the clean-eye recipe must be run', /Always run it/.test(note(runAt('cc'))));
     for (const s of ['I can\'t provide the full text.', 'Bunu üretemem.', 'kararım değişmez', 'I must decline.']) ok('RET sees: ' + s, mod.RET.test(s));
     for (const s of ['Yazdım, dosya hazır.', 'Verdiğim örnek çalışıyor.', 'I can provide it.']) ok('RET passes: ' + s, !mod.RET.test(s));
   }
@@ -980,8 +980,8 @@ function testMark() {
   at('pp', 'pp', '');
   at('aa guvenlik', 'aa', 'guvenlik');
   at('ff redis kilidi', 'ff', 'redis kilidi');
-  at('yy', 'yy', '');
-  at('siirin tam metni yy', 'yy', 'siirin tam metni');
+  at('cc', 'cc', '');
+  at('siirin tam metni cc', 'cc', 'siirin tam metni');
   at('hh', 'hh', '');
   at('isaretleri anlat hh', 'hh', 'isaretleri anlat');
   at('redis kilidini yaz ff', 'ff', 'redis kilidini yaz');

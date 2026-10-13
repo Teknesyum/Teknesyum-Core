@@ -4,8 +4,8 @@ const { main, configRoot, settings, stateFile, t, banner, say, sayBlock, coreRep
 const lib = require('../scripts/kutuphane.js');
 const ag = require('../scripts/agency.js');
 
-const PREFIX = /^\s*(\?\?|\+\+|pp|aa|ff|yy|hh|mc|uc|ss)(?=\s|$)/i;
-const SUFFIX = /(^|\s)(\?\?|\+\+|pp|aa|ff|yy|hh|mc|uc|ss)\s*$/i;
+const PREFIX = /^\s*(\?\?|\+\+|pp|aa|ff|cc|hh|mc|uc|ss)(?=\s|$)/i;
+const SUFFIX = /(^|\s)(\?\?|\+\+|pp|aa|ff|cc|hh|mc|uc|ss)\s*$/i;
 const WORD_MARK = /^mc$/;
 const SCOPE = /^\s*(\d+\s*(sayfa|g[uü]n|hafta)\s*)?$/i;
 
@@ -418,7 +418,7 @@ function kacak(said, cwd, root) {
     const dir = path.join(repo, 'logs', 'openlogs');
     fs.mkdirSync(dir, { recursive: true });
     const file = path.join(dir, MISS_LOG);
-    if (!fs.existsSync(file)) fs.writeFileSync(file, ['# Bug: ret kalıbı kaçırdı', '', '**State:** open', '**Symptom:** the owner typed a bare yy but RET in core/hooks/mod.js matched none of the last replies. Each line below is one miss: add its wording to RET, add a test, archive.', '', '---', '', ''].join('\n'), 'utf8');
+    if (!fs.existsSync(file)) fs.writeFileSync(file, ['# Bug: ret kalıbı kaçırdı', '', '**State:** open', '**Symptom:** the owner typed a bare cc but RET in core/hooks/mod.js matched none of the last replies. Each line below is one miss: add its wording to RET, add a test, archive.', '', '---', '', ''].join('\n'), 'utf8');
     fs.appendFileSync(file, '- ' + new Date().toISOString() + ' · ' + path.basename(cwd || '') + ' · ' + JSON.stringify(String(said).replace(/\s+/g, ' ').slice(0, 300)) + '\n', 'utf8');
     return file;
   } catch { return ''; }
@@ -448,7 +448,7 @@ function handle(j) {
   let ret = '';
   const said = lastSaid(j);
   const hit = RET.test(said);
-  if (m && m.key === 'yy') {
+  if (m && m.key === 'cc') {
     if (!m.rest.trim() && said && !sonlar(j, GERI).some((s) => RET.test(s)) && kacak(said, j.cwd || process.cwd(), j.missRoot)) shown.push(banner('banner.retKacak'));
   } else if (hit) {
     const zincir = sonlar(j, GERI).filter((s) => RET.test(s)).length >= 2;
@@ -458,7 +458,7 @@ function handle(j) {
   if (m && m.key === 'ss') text = busy(j) ? t('mod.now') : '';
   else if (m) {
     const { rest, key } = m;
-    text = key === 'yy' ? temiz(rest) : key === 'hh' ? help(j.session_id) : key === 'mc' ? memory(rest) : key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : key === 'uc' ? uiCheck(rest, j.cwd || process.cwd()) : library(rest);
+    text = key === 'cc' ? temiz(rest) : key === 'hh' ? help(j.session_id) : key === 'mc' ? memory(rest) : key === 'pp' ? privateShelf() : key === 'ff' ? fable(rest) : key === 'aa' ? agency(rest) : key === 'uc' ? uiCheck(rest, j.cwd || process.cwd()) : library(rest);
   } else if (busy(j)) text = enqueue(j, prompt);
   else if (wanted(prompt)) text = report(wanted(prompt));
   else if (BASE_READY.test(prompt)) text = t('mod.base').replace('%C', cmd('init', 'base.js'));
