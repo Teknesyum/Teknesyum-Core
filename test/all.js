@@ -1769,6 +1769,8 @@ function testHaiku() {
   const tr = path.join(d, 't.jsonl');
   const user = (text) => JSON.stringify({ type: 'user', message: { content: text } }) + '\n';
   const call = (model) => ust.haiku({ tool_name: 'Agent', tool_input: { model, prompt: 'x' }, transcript_path: tr, cwd: d });
+  ok('a reader call shows the haiku band', /Haiku/.test(ust.reader({ tool_name: 'Agent', tool_input: { subagent_type: 'teknesyum-core:okuyucu', description: 'kanca nerede' } })) && /kanca nerede/.test(ust.reader({ tool_name: 'Agent', tool_input: { subagent_type: 'okuyucu', description: 'kanca nerede' } })));
+  ok('another agent shows no haiku band', ust.reader({ tool_name: 'Agent', tool_input: { subagent_type: 'Explore', description: 'x' } }) === '' && ust.reader({ tool_name: 'Bash', tool_input: {} }) === '');
   fs.writeFileSync(tr, user('dosyaları say'));
   const no = call('haiku');
   ok('haiku without the owner is denied', no && no.hookSpecificOutput.permissionDecision === 'deny', JSON.stringify(no));

@@ -60,6 +60,15 @@ function line(j) {
   return BANNER + s;
 }
 
+const READER = /(^|:)okuyucu$/;
+
+function reader(j) {
+  if (j.tool_name !== 'Agent') return '';
+  const input = j.tool_input || {};
+  if (!READER.test(String(input.subagent_type || ''))) return '';
+  return BANNER + t('banner.okuyor').split('%D').join(kisa(input.description || input.prompt || ''));
+}
+
 function haiku(j) {
   if (j.tool_name !== 'Agent' || !/haiku/i.test(String((j.tool_input || {}).model || ''))) return null;
   if (/haiku/i.test(require('./yasak.js').lastPrompt(j))) return null;
@@ -76,9 +85,11 @@ function gate(j) {
   }
   const l = line(j);
   if (l) say(j.session_id, l);
+  const r = deny ? '' : reader(j);
+  if (r) say(j.session_id, r);
   return deny;
 }
 
 if (require.main === module) main(gate);
 
-module.exports = { gate, line, rank, haiku };
+module.exports = { gate, line, rank, haiku, reader };
