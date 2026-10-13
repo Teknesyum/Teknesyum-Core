@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.67.1
+
+- A Haiku Is Reading band shows when the reader agent is called
+
 ## v0.67.0
 
 - yy clean eye: a fresh agent judges a declined request; a refusal in the last reply asks for a fresh judgement; missed refusal wordings are logged to Core
