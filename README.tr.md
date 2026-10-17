@@ -318,7 +318,7 @@ Konuşmanın tamamı bu. Model planı yazar ya da atla der; kanca bir daha sorma
 ### Gösterim
 
 Statusline aynı durumu okur: dokunulan dosyalar eklenen ve silinen satırlarla, plan var mı,
-oturumun koştuğu testler ve kaçının düştüğü, bağlam yüzdesi, `.claude/jobs.md` dosyasından çizilen ilerleme çubuğu (on `▰▱` hücre, her biri %10; satır `(n/m)` alt adım taşıyabilir; kalan süre liste ilk görüldüğünden beri ölçülen hızdan, hiçbir şey bitmeden yazılmaz), bekleyen devir var mı, açık
+oturumun koştuğu testler ve kaçının düştüğü, bağlam yüzdesi, `.claude/jobs.md` dosyasından çizilen ilerleme çubuğu (yirmi `▰▱` hücre, her biri %5; satır `(n/m)` alt adım taşıyabilir; kalan süre liste ilk görüldüğünden beri ölçülen hızdan, hiçbir şey bitmeden yazılmaz), bekleyen devir var mı, açık
 hata günlükleri, varsa kanca hataları. Test bayatlığı state'teki son düzenleme zamanından okunur; git en çok on saniyede bir çalışır. Düz metin; burada renk ya da ölçü uydurulmaz.
 
 Oturumun kabuk üzerinden başlattığı ve otuz dakikadan uzun süredir çalışan süreçleri de

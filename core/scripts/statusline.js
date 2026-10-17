@@ -73,7 +73,7 @@ function hookErrors() {
 }
 
 const ALT = /\((\d+)\s*\/\s*(\d+)\)/;
-const HUCRE = 10;
+const HUCRE = 20;
 
 function oran(text) {
   let sum = 0;

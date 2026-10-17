@@ -318,7 +318,7 @@ function testContextCue() {
   fs.mkdirSync(path.join(root, '.claude'), { recursive: true });
   fs.writeFileSync(path.join(root, '.claude', 'jobs.md'), '- [x] bir\n- [ ] iki (1/2)\n- [ ] uc\n- [ ] dort\n');
   const bar = line(64);
-  ok('jobs.md draws a bar with substeps counted', /▰{4}▱{6} 38% \(1\/4\)/.test(bar), bar);
+  ok('jobs.md draws a bar with substeps counted', /▰{8}▱{12} 38% \(1\/4\)/.test(bar), bar);
   fs.writeFileSync(path.join(root, '.claude', 'jobs.md'), '- [x] bir\n- [x] iki\n');
   ok('a finished list shows no bar', !/%/.test(line(64).replace(/context 64%/, '')), line(64));
   fs.unlinkSync(path.join(root, '.claude', 'jobs.md'));
