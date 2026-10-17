@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.70.2
+
+- The later.md link appears only under the closing message; the progress bar uses ten even ▰▱ cells.
+
 ## v0.70.1
 
 - The map skips trash and tmp; a large trash no longer runs it out of memory.
