@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.70.1
+
+- The map skips trash and tmp; a large trash no longer runs it out of memory.
+
 ## v0.70.0
 
 - The statusline draws a progress bar from .claude/jobs.md: about 1% steps, (n/m) sub-steps, measured time left
