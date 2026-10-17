@@ -17,6 +17,7 @@
   "setup.applies": {"en":"The statusline applies at the next session start.","tr":"Durum satırı bir sonraki oturum açılışında yürürlüğe girer."},
   "line.logs": {"en":"logs","tr":"günlük"},
   "line.context": {"en":"context","tr":"bağlam"},
+  "line.hour": {"en":"h","tr":"sa"},
   "line.files": {"en":"files","tr":"dosya"},
   "line.plan": {"en":"plan"},
   "line.noPlan": {"en":"no plan","tr":"plan yok"},

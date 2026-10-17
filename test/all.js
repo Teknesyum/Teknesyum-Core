@@ -315,6 +315,13 @@ function testContextCue() {
   ok('the statusline shows the handoff', /handoff/.test(r5), r5);
   fs.mkdirSync(path.join(root, 'docs'), { recursive: true });
   fs.writeFileSync(path.join(root, 'docs', 'plan.md'), 'p');
+  fs.mkdirSync(path.join(root, '.claude'), { recursive: true });
+  fs.writeFileSync(path.join(root, '.claude', 'jobs.md'), '- [x] bir\n- [ ] iki (1/2)\n- [ ] uc\n- [ ] dort\n');
+  const bar = line(64);
+  ok('jobs.md draws a bar with substeps counted', /████▉░{8} 38% \(1\/4\)/.test(bar), bar);
+  fs.writeFileSync(path.join(root, '.claude', 'jobs.md'), '- [x] bir\n- [x] iki\n');
+  ok('a finished list shows no bar', !/%/.test(line(64).replace(/context 64%/, '')), line(64));
+  fs.unlinkSync(path.join(root, '.claude', 'jobs.md'));
   const r6 = line(64);
   ok('a plan on disk shows as plan', /· plan ·/.test(r6), r6);
   const quiet = run(process.execPath, [STATUSLINE], { cwd: root, input: JSON.stringify({ workspace: { current_dir: root } }), env: { ...process.env, CLAUDE_CONFIG_DIR: cfg, NO_COLOR: '1' } });

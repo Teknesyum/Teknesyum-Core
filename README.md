@@ -320,7 +320,9 @@ again.
 ### Show
 
 The statusline reads the same state: files touched with added and removed lines, whether a
-plan exists, the tests the session ran and how many failed, the context percentage, whether
+plan exists, the tests the session ran and how many failed, the context percentage, a progress bar drawn from `.claude/jobs.md` (13 cells with
+fractional blocks, about 1%; a line may carry `(n/m)` sub-steps; the time left is measured from
+the pace since the list first appeared, and left out until something is done), whether
 a handoff is waiting, open bug logs, and hook errors if any. Test staleness is read from the last edit time in state; git runs at most once every ten seconds. Plain text, no colours or
 measures invented here.
 

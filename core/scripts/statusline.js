@@ -72,12 +72,62 @@ function hookErrors() {
   }
 }
 
+const ALT = /\((\d+)\s*\/\s*(\d+)\)/;
+const HUCRE = 13;
+const PARCA = ['', '▏', '▎', '▍', '▌', '▋', '▊', '▉'];
+
+function oran(text) {
+  let sum = 0;
+  let n = 0;
+  let done = 0;
+  for (const l of String(text).split(/\r?\n/)) {
+    const m = /^\s*[-*]\s+\[([ xX])\]/.exec(l);
+    if (!m) continue;
+    n++;
+    if (m[1] !== ' ') { sum += 1; done++; continue; }
+    const a = ALT.exec(l);
+    if (a && Number(a[2]) > 0) sum += Math.min(1, Number(a[1]) / Number(a[2]));
+  }
+  return n ? { p: sum / n, n, done } : null;
+}
+
+function cubuk(p) {
+  const eighths = Math.round(Math.max(0, Math.min(1, p)) * HUCRE * 8);
+  const full = Math.floor(eighths / 8);
+  const part = PARCA[eighths % 8];
+  return '█'.repeat(full) + part + '░'.repeat(HUCRE - full - (part ? 1 : 0));
+}
+
+function sure(ms) {
+  const m = Math.max(1, Math.round(ms / 60000));
+  return m < 60 ? m + ' ' + t('line.min') : Math.floor(m / 60) + ' ' + t('line.hour') + ' ' + (m % 60) + ' ' + t('line.min');
+}
+
+function progressPart(cwd, now) {
+  const f = stateFile('ilerleme-' + safe(path.resolve(cwd).toLowerCase()));
+  let text;
+  try { text = fs.readFileSync(path.join(cwd, '.claude', 'jobs.md'), 'utf8'); } catch { text = ''; }
+  const r = oran(text);
+  if (!r || r.done === r.n) {
+    try { fs.unlinkSync(f); } catch {}
+    return '';
+  }
+  const st = read(f) || {};
+  if (!st.start) write(f, { start: now });
+  const start = st.start || now;
+  let s = cubuk(r.p) + ' ' + Math.round(r.p * 100) + '% (' + r.done + '/' + r.n + ')';
+  if (r.p > 0 && now > start) s += ' ~' + sure(((now - start) * (1 - r.p)) / r.p);
+  return s;
+}
+
 function build(input) {
   const cwd = (input && input.workspace && input.workspace.current_dir) || process.cwd();
   const parts = [paint(C.cyan, 'Teknesyum') + ' ' + paint(C.dim, '▸') + ' ' + path.basename(path.resolve(cwd))];
   const st = state(input);
   const ctx = contextPart(Number(input && input.context_window && input.context_window.used_percentage) || Number(st && st.ctx));
   if (ctx) parts.push(ctx);
+  const bar = progressPart(cwd, Date.now());
+  if (bar) parts.push(paint(C.cyan, bar));
   parts.push(...workPart(st, cwd));
   parts.push(...testPart(st, cwd));
   if (fs.existsSync(path.join(cwd, '.claude', 'handoff.md'))) parts.push(paint(C.yellow, t('line.handoff')));

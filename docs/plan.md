@@ -226,3 +226,13 @@ Olgu: aynı kamu malı şiir parazitli uzun oturumda 30 dakika reddedildi, temiz
 - [x] C: son yanıt ret kalıbına (`RET`) uyarsa tek satır not ve `Ret Görüldü` bandı; kalıp yoksa çıktı yok
 - [x] C kırılma uyarısı: `RET` yakalamadığı yanıttan sonra yalın `yy` gelirse söz Core'da `logs/openlogs/BUG-ret-kalibi-kacirdi.md` dosyasına düşer
 - [ ] Ölçüm: dört kol, kol başına 3 tekrar, telifli kontrol metni dahil (037 madde 5)
+
+## R. İlerleme Çubuğunu Core Çizer (log TEKLIF VidShrink 2026-10-15 ve 2026-10-17)
+
+Olgu: çubuğu model her notta elle yazıyordu, 10 hücre, %10 adım, yüzde ve kalan süre tahmindi. İki teklif birleşti.
+
+- [x] statusline `.claude/jobs.md` okur; satırda `(n/m)` alt adımı varsa kesirli sayılır
+- [x] 13 hücre, kesirli bloklar (▏▎▍▌▋▊▉█): yaklaşık %1 çözünürlük
+- [x] kalan süre ölçülen hızdan: ilk görülme anından bu yana geçen süre / yüzde; yüzde 0 iken yazılmaz
+- [ ] later dağıtımı için `.claude/later-run.json` (ajan, başladı, birleşti) ve CI kırılımı — sahip isterse; jobs.md satırı şimdilik yeter
+- [ ] telefonda görünüm: statusline telefonda yok; her nota çubuk yazdırmak model tokenı demek, kurulmadı
