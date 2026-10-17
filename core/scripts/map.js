@@ -4,7 +4,7 @@ const { spawnSync } = require('child_process');
 
 const SKIP = new Set([
   'node_modules','.git','dist','build','out','bin','obj','coverage','target','vendor',
-  '__pycache__','.venv','venv','graphify-out','.next','.claude','Debug','Release',
+  '__pycache__','.venv','venv','graphify-out','.next','.claude','Debug','Release','trash','tmp',
 ]);
 const SOURCE = new Set(['.js', '.jsx', '.mjs', '.cjs', '.ts', '.tsx', '.py', '.cs']);
 const TRY = ['', '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '/index.ts', '/index.tsx', '/index.js'];
