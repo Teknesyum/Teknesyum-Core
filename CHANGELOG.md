@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.70.3
+
+- The progress bar has twenty cells, one per 5%.
+
 ## v0.70.2
 
 - The later.md link appears only under the closing message; the progress bar uses ten even ▰▱ cells.
