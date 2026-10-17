@@ -341,7 +341,7 @@ function testWiring() {
         ok(ev + ' points at a file that exists', m && fs.existsSync(path.join(CORE, 'hooks', m[1])), h.command);
       }
   const speakers = fs.readdirSync(path.join(CORE, 'hooks')).filter((f) => /\.js$/.test(f) && fs.readFileSync(path.join(CORE, 'hooks', f), 'utf8').includes('additionalContext'));
-  ok('only count.js and mod.js write into the context, host.js only relays them', speakers.join(',') === 'count.js,host.js,mod.js', speakers.join(','));
+  ok('only count.js, mod.js and the agent-load note in ust.js write into the context, host.js only relays them', speakers.join(',') === 'count.js,host.js,mod.js,ust.js', speakers.join(','));
   ok('host.js is never wired into Claude Code', !/host\.js/.test(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8')));
   const pkg = JSON.parse(fs.readFileSync(path.resolve(CORE, '..', 'package.json'), 'utf8'));
   const plug = JSON.parse(fs.readFileSync(path.join(CORE, '.claude-plugin', 'plugin.json'), 'utf8'));
@@ -355,7 +355,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 30500, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 31000, String(JSON.stringify(table).length));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
   fs.mkdirSync(path.join(h, 'teknesyum'), { recursive: true });
@@ -1787,6 +1787,14 @@ function testConsult() {
 
 function testHaiku() {
   const ust = require(path.join(CORE, 'hooks', 'ust.js'));
+  const yj = { tool_name: 'Agent', session_id: 'tkc-yogun-' + process.pid };
+  const t0 = 1000000;
+  const yol = [];
+  for (let i = 0; i < ust.ESIK; i++) yol.push(ust.yogun(yj, t0 + i * 1000));
+  ok('agents below the mark stay quiet', yol.slice(0, -1).every((x) => x === ''), yol.join('|'));
+  ok('the sixteenth agent in a window offers side sessions', /spawn_task/.test(yol[yol.length - 1]) && /16/.test(yol[yol.length - 1]), yol[yol.length - 1]);
+  ok('the offer is made once per window', ust.yogun(yj, t0 + 20000) === '');
+  ok('agents spread out over time stay quiet', ust.yogun({ tool_name: 'Agent', session_id: 'tkc-yogun2-' + process.pid }, t0) === '' && ust.yogun({ tool_name: 'Agent', session_id: 'tkc-yogun2-' + process.pid }, t0 + 20 * 60 * 1000) === '');
   const d = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-haiku-'));
   const tr = path.join(d, 't.jsonl');
   const user = (text) => JSON.stringify({ type: 'user', message: { content: text } }) + '\n';

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const fs = require('fs');
-const { main, t, say, BANNER } = require('./lib.js');
+const { main, t, say, banner, stateFile, read, write, BANNER } = require('./lib.js');
 const advice = require('../scripts/advice.js');
 
 const RANK = { haiku: 1, sonnet: 2, opus: 3, fable: 4 };
@@ -75,6 +75,21 @@ function haiku(j) {
   return { hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: t('ust.haiku') } };
 }
 
+const PENCERE = 15 * 60 * 1000;
+const ESIK = 16;
+
+function yogun(j, now = Date.now()) {
+  if (j.tool_name !== 'Agent') return '';
+  const f = stateFile('ajan-yogun-' + (j.session_id || 'x'));
+  const s = read(f) || {};
+  const at = (s.at || []).filter((x) => now - x < PENCERE).concat(now);
+  const uyar = at.length >= ESIK && !(s.uyardi && now - s.uyardi < PENCERE);
+  write(f, { at, uyardi: uyar ? now : s.uyardi });
+  if (!uyar) return '';
+  say(j.session_id, banner('banner.yogun', { '%N': at.length }));
+  return t('ust.yogun').split('%N').join(String(at.length));
+}
+
 function gate(j) {
   const h = haiku(j);
   if (h) return h;
@@ -87,9 +102,11 @@ function gate(j) {
   if (l) say(j.session_id, l);
   const r = deny ? '' : reader(j);
   if (r) say(j.session_id, r);
-  return deny;
+  if (deny) return deny;
+  const y = yogun(j);
+  return y ? { hookSpecificOutput: { hookEventName: 'PreToolUse', additionalContext: y } } : deny;
 }
 
 if (require.main === module) main(gate);
 
-module.exports = { gate, line, rank, haiku, reader };
+module.exports = { gate, line, rank, haiku, reader, yogun, ESIK };
