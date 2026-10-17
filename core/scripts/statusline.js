@@ -73,8 +73,7 @@ function hookErrors() {
 }
 
 const ALT = /\((\d+)\s*\/\s*(\d+)\)/;
-const HUCRE = 13;
-const PARCA = ['', '▏', '▎', '▍', '▌', '▋', '▊', '▉'];
+const HUCRE = 10;
 
 function oran(text) {
   let sum = 0;
@@ -92,10 +91,8 @@ function oran(text) {
 }
 
 function cubuk(p) {
-  const eighths = Math.round(Math.max(0, Math.min(1, p)) * HUCRE * 8);
-  const full = Math.floor(eighths / 8);
-  const part = PARCA[eighths % 8];
-  return '█'.repeat(full) + part + '░'.repeat(HUCRE - full - (part ? 1 : 0));
+  const full = Math.round(Math.max(0, Math.min(1, p)) * HUCRE);
+  return '▰'.repeat(full) + '▱'.repeat(HUCRE - full);
 }
 
 function sure(ms) {

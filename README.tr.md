@@ -318,7 +318,7 @@ Konuşmanın tamamı bu. Model planı yazar ya da atla der; kanca bir daha sorma
 ### Gösterim
 
 Statusline aynı durumu okur: dokunulan dosyalar eklenen ve silinen satırlarla, plan var mı,
-oturumun koştuğu testler ve kaçının düştüğü, bağlam yüzdesi, `.claude/jobs.md` dosyasından çizilen ilerleme çubuğu (kesirli bloklu 13 hücre, yaklaşık %1; satır `(n/m)` alt adım taşıyabilir; kalan süre liste ilk görüldüğünden beri ölçülen hızdan, hiçbir şey bitmeden yazılmaz), bekleyen devir var mı, açık
+oturumun koştuğu testler ve kaçının düştüğü, bağlam yüzdesi, `.claude/jobs.md` dosyasından çizilen ilerleme çubuğu (on `▰▱` hücre, her biri %10; satır `(n/m)` alt adım taşıyabilir; kalan süre liste ilk görüldüğünden beri ölçülen hızdan, hiçbir şey bitmeden yazılmaz), bekleyen devir var mı, açık
 hata günlükleri, varsa kanca hataları. Test bayatlığı state'teki son düzenleme zamanından okunur; git en çok on saniyede bir çalışır. Düz metin; burada renk ya da ölçü uydurulmaz.
 
 Oturumun kabuk üzerinden başlattığı ve otuz dakikadan uzun süredir çalışan süreçleri de
@@ -389,7 +389,7 @@ hiçbir şey götürmez.
 
 Bilerek ertelediğin iş rafa gider. "Rafta dursun" ya da "rafa kaldır" de; model işi
 `docs/later.md` dosyasına `## N. Ad` başlığıyla, tarih, senin sözün ve varılan planla yazar ve
-dokunmaz. Rafta başlık oldukça her yanıtın son mesajı `later.md` bağlantısı ve sayıyla biter,
+dokunmaz. Rafta başlık oldukça kapanış mesajı (`Özet` ya da `Senden istediklerim` başlığı taşıyan) `later.md` bağlantısı ve sayıyla biter,
 durum satırı `raf N` gösterir. İkisi de ekran tarafında çizilir, model fazladan bir şey okumaz.
 İş başlayınca başlığı silinir; istem raftaki bir başlığı anıyorsa model bunun için tek satır
 hatırlatma alır. Bağlantı her zaman son satırdır, tek mesajlık yanıtta da; model kendisi

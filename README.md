@@ -320,8 +320,8 @@ again.
 ### Show
 
 The statusline reads the same state: files touched with added and removed lines, whether a
-plan exists, the tests the session ran and how many failed, the context percentage, a progress bar drawn from `.claude/jobs.md` (13 cells with
-fractional blocks, about 1%; a line may carry `(n/m)` sub-steps; the time left is measured from
+plan exists, the tests the session ran and how many failed, the context percentage, a progress bar drawn from `.claude/jobs.md` (ten `▰▱` cells,
+one per 10%; a line may carry `(n/m)` sub-steps; the time left is measured from
 the pace since the list first appeared, and left out until something is done), whether
 a handoff is waiting, open bug logs, and hook errors if any. Test staleness is read from the last edit time in state; git runs at most once every ten seconds. Plain text, no colours or
 measures invented here.
@@ -398,8 +398,8 @@ quotes them back. On the next prompt the open lines move into the ledger and the
 
 A job you put off on purpose goes on the shelf instead. Say "rafta dursun" or "shelve it" and
 the model writes it to `docs/later.md` as a `## N. Name` heading, with the date, your words and
-the plan so far, and leaves it alone. While the shelf holds a heading, the last message of every
-reply ends with a `later.md` link and the count, and the statusline shows `shelf N`. Both are
+the plan so far, and leaves it alone. While the shelf holds a heading, a closing message (one with
+a `Summary` or `What I need from you` heading) ends with a `later.md` link and the count, and the statusline shows `shelf N`. Both are
 drawn on the display side, so the model reads nothing extra. The heading is deleted when the job
 starts; a prompt that names a shelved heading gets a one-line reminder to do that. The link is
 always the last line, also in a one-message reply, and is not added when the model printed one

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const { main, drain, say, banner } = require('./lib.js');
+const { main, drain, say, banner, stateFile, read, write } = require('./lib.js');
 const kitap = require('./kitap.js');
 
 const BASLIK = [
@@ -13,6 +13,21 @@ function serit(text) {
   return out;
 }
 
+const KAPANIS = /^[ \t]*#{1,6}[ \t]*(Özet|Summary|Senden istediklerim|What I need from you)[ \t]*$/im;
+
+function kapanis(j, raw) {
+  const f = stateFile('kapanis-' + (j.session_id || 'x'));
+  const id = j.message_id || '';
+  const s = read(f) || {};
+  const hit = (id && s.mesaj === id && s.var) || KAPANIS.test(raw);
+  if (!j.final) {
+    if (hit && !s.var) write(f, { mesaj: id, var: true });
+    return false;
+  }
+  if (s.var) write(f, {});
+  return hit;
+}
+
 function build(j) {
   if (!j || j.hook_event_name !== 'MessageDisplay') return '';
   const top = j.index === 0;
@@ -20,11 +35,12 @@ function build(j) {
   const cizik = serit(raw);
   if (!top && !j.final) return cizik === raw ? '' : JSON.stringify({ hookSpecificOutput: { hookEventName: 'MessageDisplay', displayContent: cizik } });
   let raf = '';
+  const son = kapanis(j, raw);
   if (j.final) {
     try { say(j.session_id, kitap.line(j)); } catch {}
     try {
       const r = require('./defter.js').shelf(j.cwd || process.cwd());
-      if (r.n && !/later\.md\)/.test(raw)) raf = '[later.md](' + r.rel + ') · ' + r.n;
+      if (son && r.n && !/later\.md\)/.test(raw)) raf = '[later.md](' + r.rel + ') · ' + r.n;
     } catch {}
   }
   const lines = drain(j.session_id);
