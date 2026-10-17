@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.70.0
+
+- The statusline draws a progress bar from .claude/jobs.md: about 1% steps, (n/m) sub-steps, measured time left
+
 ## v0.69.0
 
 - A song-words prompt asks for the source first; a copyright refusal naming no year is sent back once for the facts (olgu: false turns it off)
