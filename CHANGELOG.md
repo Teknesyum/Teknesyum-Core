@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.72.0
+
+- A reply that draws its own progress bar gets a Stop note; unticked agent lines older than a day leave the ledger.
+
 ## v0.71.1
 
 - A resumed session no longer shows the start banner twice; an unseen older one is replaced.
