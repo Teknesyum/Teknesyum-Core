@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { main, read, write, stateFile, configRoot, safe, t, banner, say, settings } = require('./lib.js');
+const { main, read, write, stateFile, configRoot, safe, t, banner, say, settings, BANNER } = require('./lib.js');
 
 const FILE_MAX = 5;
 const DIFF_MAX = 150;
@@ -221,7 +221,9 @@ function opening(j, cwd) {
     lines.push(book.text);
     parts.push(banner('banner.ledger', { '%N': require('./defter.js').open(cwd).length }));
   }
-  if (j.source !== 'compact') say(j.session_id, parts.join(' · '));
+  const eski = BANNER + t('banner.start').split('%V')[0];
+  const son = t('banner.start').split('%V')[1];
+  if (j.source !== 'compact') say(j.session_id, parts.join(' · '), (l) => l.startsWith(eski) && l.includes(son));
   if (!lines.length) return '';
   return JSON.stringify({ hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext: lines.join('\n') } });
 }

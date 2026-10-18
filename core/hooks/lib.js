@@ -160,12 +160,12 @@ function queue(session) {
   return stateFile('banner-' + String(session || 'none'));
 }
 
-function say(session, lines) {
+function say(session, lines, drop) {
   const add = [].concat(lines || []).filter(Boolean);
   if (!add.length) return;
   try {
     merge(queue(session), (b) => {
-      const now = Array.isArray(b.lines) ? b.lines : [];
+      const now = (Array.isArray(b.lines) ? b.lines : []).filter((l) => !(drop && typeof l === 'string' && drop(l)));
       return { lines: now.concat(add.filter((l) => !now.includes(l))).slice(-6) };
     });
   } catch {}

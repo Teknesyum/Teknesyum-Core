@@ -113,6 +113,10 @@ function testCountSilence() {
   ok('a fresh session start writes nothing to context', !opened.hookSpecificOutput && start.status === 0, start.stdout);
   ok('and queues one Teknesyum Core line with the version for the display', /^Teknesyum Core > v\d+\.\d+\.\d+ /.test(take(cfg, 's1')) && !opened.systemMessage, start.stdout);
   ok('the session start leaves a state file', fs.existsSync(path.join(cfg, 'teknesyum', 'state-s1.json')));
+  fs.writeFileSync(path.join(cfg, 'teknesyum', 'banner-s9.json'), JSON.stringify({ lines: ['Teknesyum Core > v0.1.0 Running · Ledger · 3 Open', 'Teknesyum Core > Other'] }));
+  hook(COUNT, { hook_event_name: 'SessionStart', source: 'resume', session_id: 's9', cwd: root }, cfg);
+  const kuyruk = JSON.parse(fs.readFileSync(path.join(cfg, 'teknesyum', 'banner-s9.json'), 'utf8')).lines;
+  ok('a resumed session replaces a start line nobody saw', kuyruk.length === 2 && !kuyruk.some((l) => /v0\.1\.0/.test(l)) && kuyruk.includes('Teknesyum Core > Other'), JSON.stringify(kuyruk));
 
   for (const rel of ['src/a.js', 'src/b.js', 'src/c.js']) {
     const r = edit(root, cfg, rel, 's1', 'x\n');
