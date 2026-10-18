@@ -359,7 +359,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 31000, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 31500, String(JSON.stringify(table).length));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
   fs.mkdirSync(path.join(h, 'teknesyum'), { recursive: true });
@@ -1178,6 +1178,11 @@ function testJobs() {
     ok('an empty shelf prints nothing', !/later\.md/.test(bos), bos);
     hook(path.join(CORE, 'hooks', 'ust.js'), { hook_event_name: 'PreToolUse', tool_name: 'Agent', session_id: 'j6', cwd, tool_input: { description: 'Ölçüm koşusu', prompt: 'koş' } }, cfg);
     ok('an agent call opens a ledger line', /^- \[ \] ajan: Ölçüm koşusu — /m.test(fs.readFileSync(book, 'utf8')), fs.readFileSync(book, 'utf8'));
+    const eskiDefter = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-bayat-'));
+    fs.mkdirSync(path.join(eskiDefter, '.claude'));
+    fs.writeFileSync(path.join(eskiDefter, '.claude', 'acik.md'), '- [ ] ajan: Eski tarama — 2026-10-06 09:00 — sonucu aktarılacak\n- [ ] ajan: Taze tarama — 2026-10-18 11:00 — sonucu aktarılacak\n- [ ] Eski iş — 2026-10-01 — bekliyor\n');
+    const kalan = defter.prune(eskiDefter, Date.parse('2026-10-18T12:00'));
+    ok('an agent line older than a day leaves the ledger, the rest stays', kalan.length === 2 && !kalan.some((l) => /Eski tarama/.test(l)) && fs.readdirSync(path.join(eskiDefter, 'trash')).length === 1, JSON.stringify(kalan));
     const count = require(path.join(CORE, 'hooks', 'count.js'));
     process.env.TEKNESYUM_NO_REFRESH = '1';
     const opened = count.handle({ hook_event_name: 'SessionStart', source: 'compact', session_id: 'j7', cwd });
@@ -1822,6 +1827,8 @@ function testKapanis() {
   const use = (n) => JSON.stringify({ type: 'assistant', message: { content: Array.from({ length: n }, (_, i) => ({ type: 'tool_use', id: 'u' + i, name: 'Bash', input: {} })) } });
   const yaz = (n) => fs.writeFileSync(tr, JSON.stringify({ type: 'user', message: { content: 'işi yap' } }) + '\n' + use(n) + '\n');
   ok('a copyright refusal with no year is sent back for the facts', /Fact gate/.test(dur.olgu({ last_assistant_message: 'Şarkı sözlerini tam metin yazamam, telif nedeniyle.' })) && /Fact gate/.test((dur.decide({ hook_event_name: 'Stop', transcript_path: tr, cwd: d, last_assistant_message: 'I cannot reproduce the lyrics.' }) || {}).reason || ''));
+  ok('a bar written in a reply is sent back to the statusline', /jobs\.md/.test(dur.cubuk({ last_assistant_message: '```\n[███████░░░] %70 · kalan ~4 dk\n```\nDevam.' })));
+  ok('a reply that describes the statusline bar goes through', dur.cubuk({ last_assistant_message: 'Statusline şöyle: ▰▰▰▰▱▱ 50% (2/5)' }) === '' && dur.cubuk({ last_assistant_message: 'Bitti.' }) === '');
   ok('a refusal that names the year, an ordinary reply and a second pass go through', dur.olgu({ last_assistant_message: 'Söz yazarı 1975 doğumlu, telifli; yazamam.' }) === '' && dur.olgu({ last_assistant_message: 'Telif notunu README dosyasına ekledim.' }) === '' && dur.decide({ hook_event_name: 'Stop', stop_hook_active: true, last_assistant_message: 'I cannot reproduce the lyrics.' }) === null);
   const k = (text) => dur.kapanis({ transcript_path: tr, last_assistant_message: text, cwd: d });
   yaz(6);

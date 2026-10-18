@@ -88,6 +88,16 @@ function language(j) {
 const TELIF = /telif|şarkı sözü|şarkı sözlerini|copyright|lyrics|çoğalt|reproduc/i;
 const YIL = /(?:^|[^\d])(?:1\d{3}|20\d{2})(?!\d)/;
 
+const CUBUK = /[█▰][█░▰▱▓▒]{3,}[^\n]{0,16}%/;
+const ANLATIM = /statusline|durum satır/i;
+
+function cubuk(j) {
+  const s = typeof j.last_assistant_message === 'string' ? j.last_assistant_message : require('./defter.js').lastText(j);
+  if (!s || !CUBUK.test(s) || ANLATIM.test(s)) return '';
+  say(j.session_id, banner('banner.cubuk'));
+  return t('dur.cubuk');
+}
+
 function olgu(j) {
   if (settings().olgu === false) return '';
   const s = typeof j.last_assistant_message === 'string' ? j.last_assistant_message : require('./defter.js').lastText(j);
@@ -237,7 +247,7 @@ function sira(j) {
 function decide(j) {
   if (j.hook_event_name !== 'Stop') return null;
   if (j.stop_hook_active) return null;
-  const why = [olgu(j), sira(j), sil(j), jobs(j), require('./defter.js').short(j), evidence(j), ui(j), language(j), kapanis(j)].filter(Boolean);
+  const why = [olgu(j), cubuk(j), sira(j), sil(j), jobs(j), require('./defter.js').short(j), evidence(j), ui(j), language(j), kapanis(j)].filter(Boolean);
   return why.length ? { decision: 'block', reason: why.join('\n\n') } : null;
 }
 
@@ -251,4 +261,4 @@ function stop(j) {
 
 if (require.main === module) main(stop);
 
-module.exports = { olgu, ui, shot, stop, decide, sira, sil, kapanis, proven, off, code, jobs, english, language, CODE };
+module.exports = { cubuk, CUBUK, olgu, ui, shot, stop, decide, sira, sil, kapanis, proven, off, code, jobs, english, language, CODE };

@@ -144,13 +144,21 @@ function shelf(cwd) {
   return { n: 0, heads: [], rel: SHELF[0].split(path.sep).join('/') };
 }
 
-function prune(cwd) {
+const AJAN = /^\s*[-*]\s+\[ \]\s+ajan: .* — (\d{4}-\d{2}-\d{2} \d{2}:\d{2}) — /;
+const BAYAT = 24 * 3600 * 1000;
+
+function bayat(l, now) {
+  const m = AJAN.exec(l);
+  return !!m && now - Date.parse(m[1].replace(' ', 'T')) > BAYAT;
+}
+
+function prune(cwd, now = Date.now()) {
   const file = path.join(cwd, LEDGER);
   const text = body(file);
   if (text === null) return [];
   const all = lines(text);
-  const done = all.filter((l) => DONE.test(l));
-  const keep = all.filter((l) => !DONE.test(l));
+  const done = all.filter((l) => DONE.test(l) || bayat(l, now));
+  const keep = all.filter((l) => !DONE.test(l) && !bayat(l, now));
   if (done.length) {
     try {
       const bin = path.join(cwd, 'trash');
@@ -230,4 +238,4 @@ function short(j) {
   return t('defter.short').replace('%N', String(left.length)) + '\n' + left.slice(0, MAX_LINES).join('\n');
 }
 
-module.exports = { jobsFile, release, shelf, ledger, agent, short, open, prune, append, entry, job, render, lastText, LEDGER, JOBS, LATER, SHORT };
+module.exports = { bayat, jobsFile, release, shelf, ledger, agent, short, open, prune, append, entry, job, render, lastText, LEDGER, JOBS, LATER, SHORT };
