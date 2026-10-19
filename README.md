@@ -82,7 +82,8 @@ Every feature, in plain words. The technical detail of each is in
 - **Every job, this turn.** A message with several jobs is written down as a checklist. If
   one is dropped without a reason, the reply is held back once.
 - **Messages sent while Claude works.** A message you send mid-turn is queued, not lost, and
-  asked for once the current job is done.
+  asked for once the current job is done. The `Queued` banner shows only when two or more
+  wait.
 - **Questions while Claude works.** A code question you send mid-turn goes to a small, cheap
   reader that only reads files. Its answer comes back in about a minute, marked as not
   checked, and Claude keeps working. A question about what Claude is doing right now waits

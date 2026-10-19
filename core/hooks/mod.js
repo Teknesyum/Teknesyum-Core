@@ -351,7 +351,7 @@ function enqueue(j, prompt) {
   try { list = JSON.parse(fs.readFileSync(f, 'utf8')); } catch {}
   list.push(defter.job(what));
   try { fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, JSON.stringify(list)); } catch {}
-  shown.push(banner('banner.queued', { '%N': list.length }));
+  if (list.length > 1) shown.push(banner('banner.queued', { '%N': list.length }));
   return t('mod.queued');
 }
 

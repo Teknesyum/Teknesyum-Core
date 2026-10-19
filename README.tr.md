@@ -84,7 +84,8 @@ Her özellik, sade dille. Her birinin teknik ayrıntısı
 - **Her iş, bu turda.** Birkaç işli bir mesaj kontrol listesine yazılır. Biri gerekçesiz
   atlanırsa yanıt bir kez geri tutulur.
 - **Claude çalışırken gönderilen mesajlar.** Tur sürerken gönderdiğiniz mesaj kaybolmaz,
-  sıraya alınır; elindeki iş bitince sorulur.
+  sıraya alınır; elindeki iş bitince sorulur. `Sıraya Alındı` bandı yalnız iki ya da daha fazla
+  mesaj beklerken çıkar.
 - **Claude çalışırken sorulan sorular.** Tur sürerken sorduğunuz kod sorusu yalnız dosya
   okuyan küçük, ucuz bir okuyucuya gider. Cevap yaklaşık bir dakikada, denetlenmedi etiketiyle
   gelir; Claude işini bırakmaz. Claude'un o an yaptığı işe dair soru işin bitmesini bekler.
