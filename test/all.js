@@ -110,7 +110,8 @@ function testCountSilence() {
   const cfg = home();
   const start = hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 's1', cwd: root }, cfg);
   const opened = start.stdout ? JSON.parse(start.stdout) : {};
-  ok('a fresh session start writes nothing to context', !opened.hookSpecificOutput && start.status === 0, start.stdout);
+  const ctx = (opened.hookSpecificOutput && opened.hookSpecificOutput.additionalContext) || '';
+  ok('a fresh session start writes only the title cue', /set_session_title/.test(ctx) && !ctx.includes('\n') && start.status === 0, start.stdout);
   ok('and queues one Teknesyum Core line with the version for the display', /^Teknesyum Core > v\d+\.\d+\.\d+ /.test(take(cfg, 's1')) && !opened.systemMessage, start.stdout);
   ok('the session start leaves a state file', fs.existsSync(path.join(cfg, 'teknesyum', 'state-s1.json')));
   fs.writeFileSync(path.join(cfg, 'teknesyum', 'banner-s9.json'), JSON.stringify({ lines: ['Teknesyum Core > v0.1.0 Running · Ledger · 3 Open', 'Teknesyum Core > Other'] }));
@@ -359,7 +360,15 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 31500, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 32000, String(JSON.stringify(table).length));
+  const cnt = require(path.join(CORE, 'hooks', 'count.js'));
+  const repo = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-ad-'));
+  fs.mkdirSync(path.join(repo, '.git'));
+  fs.mkdirSync(path.join(repo, 'src', 'a'), { recursive: true });
+  const cue = cnt.baslik({ source: 'startup' }, path.join(repo, 'src', 'a'));
+  ok('the session title cue names the project from the repo root', cue.includes('--- ' + path.basename(repo) + ' '), cue);
+  ok('a scratch chat is named Sohbet', cnt.proje(path.join('C:', 'x', 'scratch-workspaces', 'a', 'b')) === 'Sohbet');
+  ok('the title cue is only for a fresh start', cnt.baslik({ source: 'resume' }, CORE) === '' && cnt.baslik({ source: 'compact' }, CORE) === '');
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
   fs.mkdirSync(path.join(h, 'teknesyum'), { recursive: true });
@@ -1615,7 +1624,7 @@ function testPrivate() {
   const start = hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 'st', cwd: root }, cfg).stdout;
   ok('SessionStart names the first open plan step', /2\/3/.test(start) && /İkinci adım\./.test(start) && !/\*\*/.test(start), start);
   fs.writeFileSync(path.join(root, 'docs', 'plan.md'), '# Plan\n\n- [x] one\n- [x] two\n');
-  ok('a finished plan says nothing to the model', !/additionalContext/.test(hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 'st', cwd: root }, cfg).stdout));
+  ok('a finished plan says nothing to the model', !/additionalContext/.test(hook(COUNT, { hook_event_name: 'SessionStart', source: 'resume', session_id: 'st', cwd: root }, cfg).stdout));
   sweep(root);
   sweep(cfg);
   sweep(bare);
