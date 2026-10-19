@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.74.0
+
+- A fresh session is titled `--- <Project> <Topic>` by the hook's sessionTitle field; nothing enters the context.
+
 ## v0.73.0
 
 - A fresh session is asked once to rename itself to `--- <Project> <Role>`; "titles": false turns it off.
