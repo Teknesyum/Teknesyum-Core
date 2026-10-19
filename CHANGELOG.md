@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.73.0
+
+- A fresh session is asked once to rename itself to `--- <Project> <Role>`; "titles": false turns it off.
+
 ## v0.72.1
 
 - The Queued banner stays quiet for a single mid-turn message; it shows from two.
