@@ -111,7 +111,7 @@ function testCountSilence() {
   const start = hook(COUNT, { hook_event_name: 'SessionStart', source: 'startup', session_id: 's1', cwd: root }, cfg);
   const opened = start.stdout ? JSON.parse(start.stdout) : {};
   const ctx = (opened.hookSpecificOutput && opened.hookSpecificOutput.additionalContext) || '';
-  ok('a fresh session start writes only the title cue', /set_session_title/.test(ctx) && !ctx.includes('\n') && start.status === 0, start.stdout);
+  ok('a fresh session start writes nothing to context', !ctx && start.status === 0, start.stdout);
   ok('and queues one Teknesyum Core line with the version for the display', /^Teknesyum Core > v\d+\.\d+\.\d+ /.test(take(cfg, 's1')) && !opened.systemMessage, start.stdout);
   ok('the session start leaves a state file', fs.existsSync(path.join(cfg, 'teknesyum', 'state-s1.json')));
   fs.writeFileSync(path.join(cfg, 'teknesyum', 'banner-s9.json'), JSON.stringify({ lines: ['Teknesyum Core > v0.1.0 Running · Ledger · 3 Open', 'Teknesyum Core > Other'] }));
@@ -360,15 +360,19 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 32000, String(JSON.stringify(table).length));
-  const cnt = require(path.join(CORE, 'hooks', 'count.js'));
+  ok('the table is small', JSON.stringify(table).length < 31500, String(JSON.stringify(table).length));
+  const md = require(path.join(CORE, 'hooks', 'mod.js'));
   const repo = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-ad-'));
   fs.mkdirSync(path.join(repo, '.git'));
   fs.mkdirSync(path.join(repo, 'src', 'a'), { recursive: true });
-  const cue = cnt.baslik({ source: 'startup' }, path.join(repo, 'src', 'a'));
-  ok('the session title cue names the project from the repo root', cue.includes('--- ' + path.basename(repo) + ' '), cue);
-  ok('a scratch chat is named Sohbet', cnt.proje(path.join('C:', 'x', 'scratch-workspaces', 'a', 'b')) === 'Sohbet');
-  ok('the title cue is only for a fresh start', cnt.baslik({ source: 'resume' }, CORE) === '' && cnt.baslik({ source: 'compact' }, CORE) === '');
+  ok('the session title names the project from the repo root', md.proje(path.join(repo, 'src', 'a')) === path.basename(repo));
+  ok('a scratch chat is named Sohbet', md.proje(path.join('C:', 'x', 'scratch-workspaces', 'a', 'b')) === 'Sohbet');
+  ok('the topic keeps the content words', md.konu('kulaklıkta cızırtı var ne yapmalı?') === 'Kulaklıkta Cızırtı Yapmalı', md.konu('kulaklıkta cızırtı var ne yapmalı?'));
+  const sid = 'ad-' + Date.now();
+  const first = md.ad({ session_id: sid, cwd: repo }, 'erken dominasyon taktiği', null);
+  ok('the first prompt titles the session', first === '--- ' + path.basename(repo) + ' Erken Dominasyon Taktiği', first);
+  ok('the title is set once', md.ad({ session_id: sid, cwd: repo }, 'başka bir şey', null) === '');
+  ok('a title the owner set stays', md.ad({ session_id: sid + 'x', session_title: 'Benim', cwd: repo }, 'erken dominasyon', null) === '');
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
   fs.mkdirSync(path.join(h, 'teknesyum'), { recursive: true });

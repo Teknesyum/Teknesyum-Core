@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { main, configRoot, settings, stateFile, t, banner, say, sayBlock, coreRepo, uiRepo, baseRepo } = require('./lib.js');
+const { main, configRoot, settings, stateFile, t, banner, say, sayBlock, coreRepo, uiRepo, baseRepo, read, write } = require('./lib.js');
 const lib = require('../scripts/kutuphane.js');
 const ag = require('../scripts/agency.js');
 
@@ -440,6 +440,39 @@ function temiz(text) {
   return q ? t('mod.temiz') + '\n' + t('mod.fableAsk').replace('%Q', q) : t('mod.temiz');
 }
 
+function proje(cwd) {
+  if (/[\\/]scratch-workspaces[\\/]/i.test(cwd)) return 'Sohbet';
+  let dir = cwd;
+  for (;;) {
+    if (fs.existsSync(path.join(dir, '.git'))) break;
+    const up = path.dirname(dir);
+    if (up === dir) { dir = cwd; break; }
+    dir = up;
+  }
+  return path.basename(dir).replace(/^!+/, '') || 'Sohbet';
+}
+
+const BOS = new Set('bu şu o bir ve ile de da mi mı mu mü ne nedir nasıl neden niye için gibi var yok çok daha en ama bana beni sen biz bunu şunu şimdi lütfen yap et olsun olur misal birde hem the a an and or of to for is are what how why please'.split(' '));
+
+function konu(prompt) {
+  const words = String(prompt).split('\n')[0].replace(/[^\p{L}\p{N}\s-]/gu, ' ').split(/\s+/).filter((w) => w.length > 1 && !BOS.has(w.toLocaleLowerCase('tr'))).slice(0, 4);
+  let out = '';
+  for (const w of words.map((x) => x.charAt(0).toLocaleUpperCase('tr') + x.slice(1))) {
+    if ((out + ' ' + w).trim().length > 32) break;
+    out = (out + ' ' + w).trim();
+  }
+  return out;
+}
+
+function ad(j, prompt, m) {
+  if (m || !j.session_id || j.session_title || settings().titles === false) return '';
+  const f = stateFile('ad-' + String(j.session_id || 'none'));
+  if (read(f)) return '';
+  write(f, { at: Date.now() });
+  const k = konu(prompt);
+  return k ? '--- ' + proje(j.cwd || process.cwd()) + ' ' + k : '';
+}
+
 function handle(j) {
   if (j.hook_event_name !== 'UserPromptSubmit') return '';
   const prompt = String(j.prompt || '');
@@ -475,10 +508,14 @@ function handle(j) {
   else if (BASE_READY.test(prompt)) text = t('mod.base').replace('%C', cmd('init', 'base.js'));
   say(j.session_id, shown);
   const all = [para, ret, koken, openLogs(j.cwd || process.cwd(), pre), pre, ahead, text, shelve(prompt, j.cwd || process.cwd())].filter(Boolean).join('\n\n');
-  if (!all) return '';
-  return JSON.stringify({ hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: all } });
+  const title = ad(j, prompt, m);
+  if (!all && !title) return '';
+  const out = { hookEventName: 'UserPromptSubmit' };
+  if (all) out.additionalContext = all;
+  if (title) out.sessionTitle = title;
+  return JSON.stringify({ hookSpecificOutput: out });
 }
 
 if (require.main === module) main(handle, { log: 'mod.js' });
 
-module.exports = { kaynak, REPORT, UI_REPORT, BASE_REPORT, BASE_READY, PARAZIT, parazit, RET, lastSaid, kacak, MISS_LOG, wanted, SHELVE, ASKED, handle, busy, soru, tail, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };
+module.exports = { proje, konu, ad, kaynak, REPORT, UI_REPORT, BASE_REPORT, BASE_READY, PARAZIT, parazit, RET, lastSaid, kacak, MISS_LOG, wanted, SHELVE, ASKED, handle, busy, soru, tail, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };

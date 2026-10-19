@@ -202,23 +202,6 @@ function tidy(j) {
   } catch {}
 }
 
-function proje(cwd) {
-  if (/[\\/]scratch-workspaces[\\/]/i.test(cwd)) return 'Sohbet';
-  let dir = cwd;
-  for (;;) {
-    if (fs.existsSync(path.join(dir, '.git'))) break;
-    const up = path.dirname(dir);
-    if (up === dir) { dir = cwd; break; }
-    dir = up;
-  }
-  return path.basename(dir).replace(/^!+/, '') || 'Sohbet';
-}
-
-function baslik(j, cwd) {
-  if (j.source !== 'startup' || require('./lib.js').settings().titles === false) return '';
-  return t('cue.title').split('%P').join(proje(cwd));
-}
-
 function opening(j, cwd) {
   const lines = [];
   const parts = [banner('banner.start', { '%V': version() })];
@@ -232,8 +215,6 @@ function opening(j, cwd) {
     parts.push(s.line);
   }
   if (j.source === 'compact' && require('./lib.js').replyLang() === 'tr') lines.push(t('cue.lang'));
-  const ad = baslik(j, cwd);
-  if (ad) lines.push(ad);
   let book = { text: '' };
   try { book = require('./defter.js').ledger(cwd, j.session_id); } catch {}
   if (book.text) {
@@ -295,4 +276,4 @@ function handle(j) {
 
 if (require.main === module) main(handle, { log: 'count.js' });
 
-module.exports = { proje, baslik, handle, kural, reason, file, tree, sum, step, FILE_MAX, DIFF_MAX, CTX_MAX, RISK, TEST };
+module.exports = { handle, kural, reason, file, tree, sum, step, FILE_MAX, DIFF_MAX, CTX_MAX, RISK, TEST };
