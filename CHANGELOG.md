@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.72.1
+
+- The Queued banner stays quiet for a single mid-turn message; it shows from two.
+
 ## v0.72.0
 
 - A reply that draws its own progress bar gets a Stop note; unticked agent lines older than a day leave the ledger.
