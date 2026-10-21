@@ -236,3 +236,15 @@ Olgu: çubuğu model her notta elle yazıyordu, 10 hücre, %10 adım, yüzde ve 
 - [x] kalan süre ölçülen hızdan: ilk görülme anından bu yana geçen süre / yüzde; yüzde 0 iken yazılmaz
 - [ ] later dağıtımı için `.claude/later-run.json` (ajan, başladı, birleşti) ve CI kırılımı — sahip isterse; jobs.md satırı şimdilik yeter
 - [ ] telefonda görünüm: statusline telefonda yok; her nota çubuk yazdırmak model tokenı demek, kurulmadı
+
+## S. Ölçmeden Giriş Yok: Balon Raporu (sahip 2026-10-21)
+
+Olgu: graphify 130 bin yıldızlı, "71.5x" tasarruf iddiası tüm depoyu okumakla kıyaslıyor; Grep'li ajana karşı ölçülmemiş. Dışarıdan hiçbir araç ya da fikir ölçülmeden Core'a ya da kurallara girmez.
+
+- [ ] İddia tablosu: Yüksek adayların (piyasa-20 ilk 5, on-tarama a-h Yüksek'ler, graphify) README'deki sayısal iddiası, kıyas tabanı, bağımsız ölçüm var mı — sonnet, kod okumadan
+- [ ] Ölçüm düzeneği: `bench/run.js` kolu olarak A/B; aynı görev seti, kol başına en fazla 3 tekrar; metrik toplam token (girdi, çıktı, önbellek), süre, görev geçti mi, her turda bağlama giren sabit bayt
+- [ ] Sıra: graphify (VidShrink `src/`, 4-5 gerçek soru, Explore'a karşı), sonra iddia tablosunda en büyük iddiadan küçüğe
+- [ ] Her üçüncü taraf indirmesi ad, kaynak, boyutla tek satır onaya sunulur; harcama 50 $ altı sorulmaz
+- [ ] Sınıf: Gerçek (iddianın en az yarısı tuttu), Kısmi, Balon (tutmadı ya da tersine döndü)
+- [ ] `docs/arastirma/balon-raporu.md`: ne incelendi, ölçümler, iddia ile ölçüm yan yana, o iddiaya verilen yıldız sayısı
+- [ ] Gerçek çıkan yalnız çağrılınca çalışan biçimde alınır; her tur yükü varsa önce tek satır pay bildirimi
