@@ -8,15 +8,19 @@ function jsonlOku(dosya) {
   }).filter(Boolean);
 }
 
+function deger(usage, k) {
+  if (k === 'cache_1h_input_tokens' && usage.cache_1h_input_tokens === undefined) {
+    return (usage.cache_creation && usage.cache_creation.ephemeral_1h_input_tokens) || 0;
+  }
+  return usage[k] || 0;
+}
+
 function kalemEkle(sepet, model, usage) {
   if (!sepet[model]) {
-    sepet[model] = { input_tokens: 0, output_tokens: 0, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 };
+    sepet[model] = { input_tokens: 0, output_tokens: 0, cache_creation_input_tokens: 0, cache_read_input_tokens: 0, cache_1h_input_tokens: 0 };
   }
   const satir = sepet[model];
-  satir.input_tokens += usage.input_tokens || 0;
-  satir.output_tokens += usage.output_tokens || 0;
-  satir.cache_creation_input_tokens += usage.cache_creation_input_tokens || 0;
-  satir.cache_read_input_tokens += usage.cache_read_input_tokens || 0;
+  for (const k of KALEMLER) satir[k] += deger(usage, k);
 }
 
 const KALEMLER = [
@@ -24,6 +28,7 @@ const KALEMLER = [
   'output_tokens',
   'cache_creation_input_tokens',
   'cache_read_input_tokens',
+  'cache_1h_input_tokens',
 ];
 
 // Ayni message.id iki satirda dusebilir: biri thinking blogu, digeri metin.
@@ -45,12 +50,12 @@ function kayitlariIsle(kayitlar, sepet, gorulen) {
     const onceki = gorulen.get(id);
     if (!onceki) {
       const kopya = { model: model };
-      for (const k of KALEMLER) kopya[k] = usage[k] || 0;
+      for (const k of KALEMLER) kopya[k] = deger(usage, k);
       gorulen.set(id, kopya);
       continue;
     }
     for (const k of KALEMLER) {
-      const v = usage[k] || 0;
+      const v = deger(usage, k);
       if (v > onceki[k]) onceki[k] = v;
     }
   }
@@ -137,6 +142,8 @@ function usdHesapla(sepet, tarife) {
       }
       usd += (usage[kalem] || 0) * birimFiyat;
     }
+    const yazma1s = typeof fiyat.cacheYazma1s === 'number' ? fiyat.cacheYazma1s : fiyat.girdi * 2;
+    usd += (usage.cache_1h_input_tokens || 0) * (yazma1s - fiyat.cacheYazma);
     usd /= 1000000;
     modelBasina[model] = usd;
     toplam += usd;

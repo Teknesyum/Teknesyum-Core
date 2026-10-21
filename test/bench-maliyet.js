@@ -42,14 +42,14 @@ function sahteOturum() {
 test('dört kalem model başına doğru toplanıyor, tekrarlanan mesaj id çift sayılmıyor', () => {
   const oturumYolu = sahteOturum();
   const sepet = tokenlar(oturumYolu);
-  assert.deepEqual(sepet['claude-sonnet-5'], { input_tokens: 11, output_tokens: 22, cache_creation_input_tokens: 103, cache_read_input_tokens: 1004 });
+  assert.deepEqual(sepet['claude-sonnet-5'], { input_tokens: 11, output_tokens: 22, cache_creation_input_tokens: 103, cache_read_input_tokens: 1004, cache_1h_input_tokens: 0 });
 });
 
 test('alt ajanlar atlanmıyor, her model kendi kovasında', () => {
   const oturumYolu = sahteOturum();
   const sepet = tokenlar(oturumYolu);
-  assert.deepEqual(sepet['claude-haiku-4-5'], { input_tokens: 5, output_tokens: 6, cache_creation_input_tokens: 7, cache_read_input_tokens: 8 });
-  assert.deepEqual(sepet['claude-opus-5'], { input_tokens: 50, output_tokens: 60, cache_creation_input_tokens: 70, cache_read_input_tokens: 80 });
+  assert.deepEqual(sepet['claude-haiku-4-5'], { input_tokens: 5, output_tokens: 6, cache_creation_input_tokens: 7, cache_read_input_tokens: 8, cache_1h_input_tokens: 0 });
+  assert.deepEqual(sepet['claude-opus-5'], { input_tokens: 50, output_tokens: 60, cache_creation_input_tokens: 70, cache_read_input_tokens: 80, cache_1h_input_tokens: 0 });
   assert.equal(Object.keys(sepet).length, 3);
 });
 
@@ -86,6 +86,15 @@ test('usd doğru hesaplanır ve doğrulanmamış kalem usdSource\'a yansır', ()
   assert.equal(sonuc.modelBasina['claude-sonnet-5'], 2 + 10 + 2.5 + 0.2);
   assert.equal(sonuc.toplam, 2 + 10 + 2.5 + 0.2);
   assert.equal(sonuc.usdSource, 'tarife.json:cache-dogrulanmadi');
+  const saatlik = usdHesapla({ 'claude-sonnet-5': { input_tokens: 0, output_tokens: 0, cache_creation_input_tokens: 1000000, cache_read_input_tokens: 0, cache_1h_input_tokens: 1000000 } }, tarife);
+  assert.equal(saatlik.toplam, 4);
+});
+
+test('1 saatlik önbellek yazması usage.cache_creation içinden ayrı sayılır', () => {
+  const kok = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-maliyet-1s-'));
+  const yol = path.join(kok, 'o');
+  fs.writeFileSync(yol + '.jsonl', usageSatiri('claude-sonnet-5', 'm1', { input_tokens: 0, output_tokens: 0, cache_creation_input_tokens: 30, cache_read_input_tokens: 0, cache_creation: { ephemeral_5m_input_tokens: 10, ephemeral_1h_input_tokens: 20 } }));
+  assert.equal(tokenlar(yol)['claude-sonnet-5'].cache_1h_input_tokens, 20);
 });
 
 test('tüm kalemler doğrulanmışsa usdSource yalın tarife.json olur', () => {

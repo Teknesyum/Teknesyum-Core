@@ -46,6 +46,19 @@
       "cikti": 5,
       "cacheYazma": 1.25,
       "cacheOkuma": 0.1
+    },
+    "claude-sonnet-5-5": {
+      "girdi": 2,
+      "cikti": 10,
+      "cacheYazma": 2.5,
+      "cacheOkuma": 0.2
+    },
+    "claude-opus-5-5": {
+      "girdi": 4,
+      "cikti": 20,
+      "cacheYazma": 5,
+      "cacheOkuma": 0.2
     }
-  }
+  },
+  "ek55": "claude-sonnet-5-5 ve claude-opus-5-5 satirlari 2026-10-21de claude-api bilgi tablosundan (onbellek 2026-10-06) eklendi: girdi/cikti/cacheOkuma oradan, cacheYazma 5dk = 1.25 x girdi carpaniyla turetildi."
 }

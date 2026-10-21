@@ -1,0 +1,42 @@
+{"arac":"knip","deney":"olu-kod","depo":"Teknesyum-Core","ayar":"varsayilan","tekrar":3,"ms":[541,554,528],"bulgu":76,"dagilim":{"files":50,"exports":26},"ornek20":{"dp":5,"yp":15},"not":"hooks.json girisleri bilinmiyor; 26 export YP (dosya ulasilamaz sayildigi icin)"}
+{"arac":"knip","deney":"olu-kod","depo":"Teknesyum-Core","ayar":"knip.json entry (1 satir)","tekrar":1,"ms":[580],"bulgu":12,"dagilim":{"files":6,"unresolved":6},"ornek":{"dp":5,"yp":7},"dp_liste":["test/bench-kosu.js","test/bench-maliyet.js","test/bench-onkontrol.js","tools/audit-evidence.js","tools/full-review-probes.js"]}
+{"arac":"knip","deney":"olu-kod","depo":"VidShrink","not":"JS/TS dosyasi 8, package.json yok; kapsam disi (C#)"}
+{"arac":"knip","deney":"olu-kod","depo":"DustyBytes","not":"JS/TS yok; kapsam disi (C#)"}
+{"arac":"core-map.js","deney":"olu-kod-karsilik","depo":"Teknesyum-Core","tekrar":1,"ms":[89],"bulgu":13,"not":"orphans: tools/* 2 DP yakaladi, test/bench-* 3 orphan testi kacirdi (import ettikleri icin)"}
+{"arac":"fallow","deney":"olu-kod+dupes+health","depo":"Teknesyum-Core","ayar":"varsayilan","tekrar":3,"ms":[775,417,419],"bulgu":56,"dagilim":{"unused_files":50,"unresolved_imports":6,"unused_exports":0},"ornek20":{"dp":5,"yp":15},"dupes":{"clone_groups":28,"duplication_pct":4.05},"health":{"functions_above_threshold":300,"critical":108},"not":"unused_files listesi knip ile birebir ayni; node_modules yok uyarisi"}
+{"arac":"betterleaks","deney":"sir-tarama-dir","depo":"Teknesyum-Core","tekrar":3,"ms":[472,328,378],"bulgu":0}
+{"arac":"betterleaks","deney":"sir-tarama-git","depo":"Teknesyum-Core","tekrar":1,"ms":[895],"bulgu":0}
+{"arac":"betterleaks","deney":"sir-tarama-dir","depo":"VidShrink","tekrar":3,"ms":[487,678,479],"bulgu":44,"dagilim":{"generic-password":40,"generic-api-key":3,"generic-credential-uri":1},"ornek20":{"dp":0,"yp":20},"tum":{"dp":0,"yp":44},"not":"40'i Locales/*/settings.json 'Password' etiketi; 4'u test fixture"}
+{"arac":"betterleaks","deney":"sir-tarama-git","depo":"VidShrink","tekrar":1,"ms":[4267],"bulgu":47,"not":"gecmiste docs/arastirma/opensubtitles-istemci-kutuphaneleri.md (5df2536c) 32 karakterlik Api-Key: olasi DP, elle dogrulanmadi; kalan 46 YP"}
+{"arac":"betterleaks","deney":"sir-tarama-dir","depo":"DustyBytes","tekrar":3,"ms":[289,241,350],"bulgu":0}
+{"arac":"betterleaks","deney":"sir-tarama-git","depo":"DustyBytes","tekrar":1,"ms":[458],"bulgu":0}
+{"arac":"betterleaks","deney":"sahte-sir-5","depo":"Core-sir","tekrar":3,"ms":[525,594,414],"yakalanan":5,"eklenen":5,"yp":0,"kurallar":["github-pat","private-key","stripe-access-token","aws-access-token","slack-bot-token"]}
+{"arac":"ripsecrets","deney":"kurulum","sonuc":"kurulamadi","not":"README'deki tek Windows yolu cargo install --git (main ve v0.1.11): std::os::unix kullaniyor, Windows'ta derlenmiyor (E0433). Resmi Windows ikilisi yok, WSL dagitimi yok."}
+{"arac":"scc","deney":"satir-sayimi","depo":"Teknesyum-Core","tekrar":3,"ms":[64,58,60],"dosya":956,"kod_satiri":48762,"dil":10,"dogruluk":{"lang":"JavaScript","files":55,"lines_scc":12043,"lines_bagimsiz":12043,"uyusmayan_dosya":0,"blank_scc":759,"blank_naif":1060,"comment_scc":14,"comment_naif":14},"not":"blank farki sablon dizgelerinin icindeki bos satirlar; scc dogru, naif sayac yanlis"}
+{"arac":"scc","deney":"satir-sayimi","depo":"VidShrink","tekrar":3,"ms":[80,77,75],"dosya":2991,"kod_satiri":497673,"dil":21,"dogruluk":{"lang":"C#","files":1043,"lines_scc":291208,"lines_bagimsiz":291208,"uyusmayan_dosya":0,"blank_scc":37440,"blank_naif":37594,"comment_scc":25669,"comment_naif":25753}}
+{"arac":"scc","deney":"satir-sayimi","depo":"DustyBytes","tekrar":3,"ms":[51,54,55],"dosya":501,"kod_satiri":60461,"dil":11,"dogruluk":{"lang":"C#","files":328,"lines_scc":48541,"lines_bagimsiz":48541,"uyusmayan_dosya":0,"blank_scc":5517,"blank_naif":5544}}
+{"tarih":"2026-10-21","arac":"ccusage","olcum":"usd_core_fark","oturum":"fd5896c9","ccusage":15.6612,"core":12.564,"ttl_duzeltilmis":15.6612}
+{"tarih":"2026-10-21","arac":"ccusage","olcum":"usd_core_fark","oturum":"85a3c31c","ccusage":6.8658,"core":5.7194,"ttl_duzeltilmis":6.8658}
+{"tarih":"2026-10-21","arac":"ccusage","olcum":"usd_core_fark","oturum":"c0fc84d3","ccusage":49.3924,"core":45.8471,"ttl_duzeltilmis":49.3992,"not":"1h cache yazma 2x girdi"}
+{"tarih":"2026-10-21","arac":"claude-crusts","olcum":"baglam_toplam","oturum":"fd5896c9","crusts":92284,"gercek":91435,"sapma_yuzde":0.9,"ms":292}
+{"tarih":"2026-10-21","arac":"claude-crusts","olcum":"baglam_toplam","oturum":"85a3c31c","crusts":105856,"gercek":105707,"sapma_yuzde":0.1,"ms":380}
+{"tarih":"2026-10-21","arac":"claude-crusts","olcum":"baglam_toplam","oturum":"c0fc84d3","crusts":99659,"gercek":98790,"sapma_yuzde":0.9,"ms":390}
+{"tarih":"2026-10-21","arac":"claude-crusts","olcum":"status_kanca","ms":[216,232,237],"bayt":50}
+{"tarih":"2026-10-21","arac":"cc-cache-monitor","olcum":"kanca_sure","ms_soguk":[315,315,298,313,322,303,433,675,434],"cikti_bayt":0,"iddia_ms":45}
+{"tarih":"2026-10-21","arac":"cc-cache-monitor","olcum":"ucurum_tespiti","ornek":"sample-cliffs.jsonl artimli","bulunan":3,"beklenen":3}
+{"tarih":"2026-10-21","arac":"claude-pace","olcum":"tempo_hesabi","vakalar":[{"kul":60,"kalan_dk":30,"beklenen":-30,"cikan":-30},{"kul":60,"kalan_dk":240,"beklenen":40,"cikan":40},{"kul":20,"kalan_dk":120,"beklenen":-40,"cikan":-40}],"ms":[291,602,365]}
+{"tarih":"2026-10-21","arac":"ttok","olcum":"claude_token_sapma","model":"sonnet-5-5 ve opus-5-5 ayni","metin":"en","gercek":1008,"o200k":726,"sapma":-28}
+{"tarih":"2026-10-21","arac":"ttok","olcum":"claude_token_sapma","metin":"tr","gercek":1633,"o200k":1347,"cl100k":1451,"sapma":-17.5}
+{"tarih":"2026-10-21","arac":"ttok","olcum":"claude_token_sapma","metin":"js","gercek":1749,"o200k":1114,"sapma":-36.3}
+{"tarih":"2026-10-21","arac":"ttok","olcum":"claude_token_sapma","metin":"json","gercek":952,"o200k":699,"sapma":-26.6,"ms":[458,465,456,442]}
+{"tarih":"2026-10-21","arac":"tokencost","olcum":"claude_token_sapma","gpt4o":{"en":-28.5,"tr":-33.7,"js":-36.3,"json":-26.7},"claude_sayim":"anahtar gerekir — ölçülemedi","ms":[1907,1778,1758,2070],"fiyat_tablosu":"opus-5/sonnet-5 yok"}
+{"tarih":"2026-10-21","arac":"dbhub","olcum":"islev","arac_sayisi":2,"sema_bayt":1187,"sema_o200k":274,"sorgu_dogru":true,"mcporter_call_ms":[4235,4156,4282]}
+{"tarih":"2026-10-21","arac":"mcporter","olcum":"kopru","dbhub_list_ms":7838,"pw_list_ms":4061,"call_cikti_bayt":369}
+{"tarih":"2026-10-21","arac":"mcp-cli","olcum":"kopru","call_ms":[1065,865,899],"stdout_bayt":{"liste":651,"info_db":544,"info_arac":358,"call":369},"skill_bayt":3446,"not":"stderr sunucu bannerini sızdırıyor ~1.7KB"}
+{"tarih":"2026-10-21","arac":"playwright-cli","olcum":"ayni_is","cli_cikti_bayt":1629,"mcp_cikti_bayt":1668,"mcp_sema_bayt":17616,"mcp_sema_o200k":3747,"mcp_tools_list_bayt":20286,"skill_bayt":15428}
+{"tarih":"2026-10-21","arac":"promptfoo","olcum":"islev","saglayici":["echo","exec"],"dogrulama":11,"dogru_hukum":11,"ms":2477,"not":"icontains Türkçe İ harfinde yerel duyarsız"}
+{"tarih":"2026-10-21","arac":"skill-scanner","olcum":"statik+davranis","kotu_yakalanan":"2/5","temiz_yanlis":"1/10","ms":{"kotu":7177,"temiz":7659},"llm":"anahtar gerekir — ölçülemedi"}
+{"tarih":"2026-10-21","arac":"claudeignore","olcum":"guard","yakalama":"5/7 (yerlesik arac)","bash":"0/1 sandbox yok","yanlis_alarm":"0/4","ms_ort":85,"ret_bayt":86,"check_ms":[1192,462,460],"check_bayt":[320,0,0],"proje_kancasi_bayt":252}
+{"tarih":"2026-10-21","arac":"communique","olcum":"islev","sonuc":"anahtar gerekir — ölçülemedi (ayrıca GitHub remote şart)"}
+{"tarih":"2026-10-21","arac":"koruyucular","olcum":"ret_mesaji_bayt","yasak":169,"cc-safety-net":429,"dcg":5152}
+{"tarih":"2026-10-21","arac":"kol","olcum":"harcama","altajan_usd":0.1341,"ana_usd":7.6302,"toplam_usd":7.7643}
