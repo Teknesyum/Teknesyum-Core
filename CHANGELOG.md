@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.78.0
+
+- gozcu.js: a pass-through proxy that logs request shape, prefix hash, usage and timing, never content; bench can route through BENCH_BASE_URL
+
 ## v0.77.0
 
 - In a repo with 400 or more production files and graphify configured, the session opening says once that graphify may be used for multi-step structural questions
