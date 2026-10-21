@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.77.0
+
+- In a repo with 400 or more production files and graphify configured, the session opening says once that graphify may be used for multi-step structural questions
+
 ## v0.76.0
 
 - PDF, Word, PowerPoint and Excel reads go through markitdown when it is installed; a release is cut only after a betterleaks scan
