@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.75.2
+
+- The session title is put back once when the app's auto-title overwrites it.
+
 ## v0.75.1
 
 - Links into a sibling folder are sent back too: the file pane opens only the working directory.
