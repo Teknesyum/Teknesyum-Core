@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.74.1
+
+- A session whose first prompt opens with pasted content now gets its title.
+
 ## v0.74.0
 
 - A fresh session is titled `--- <Project> <Topic>` by the hook's sessionTitle field; nothing enters the context.
