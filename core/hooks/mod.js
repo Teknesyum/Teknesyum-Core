@@ -455,7 +455,8 @@ function proje(cwd) {
 const BOS = new Set('bu şu o bir ve ile de da mi mı mu mü ne nedir nasıl neden niye için gibi var yok çok daha en ama bana beni sen biz bunu şunu şimdi lütfen yap et olsun olur misal birde hem the a an and or of to for is are what how why please'.split(' '));
 
 function konu(prompt) {
-  const words = String(prompt).split('\n')[0].replace(/[^\p{L}\p{N}\s-]/gu, ' ').split(/\s+/).filter((w) => w.length > 1 && !BOS.has(w.toLocaleLowerCase('tr'))).slice(0, 4);
+  const line = String(prompt).replace(/<\/?[\w-]+(\s[^>]*)?>/g, '\n').split('\n').find((l) => /\p{L}/u.test(l)) || '';
+  const words = line.replace(/[^\p{L}\p{N}\s-]/gu, ' ').split(/\s+/).filter((w) => w.length > 1 && !BOS.has(w.toLocaleLowerCase('tr'))).slice(0, 4);
   let out = '';
   for (const w of words.map((x) => x.charAt(0).toLocaleUpperCase('tr') + x.slice(1))) {
     if ((out + ' ' + w).trim().length > 32) break;
@@ -468,9 +469,10 @@ function ad(j, prompt, m) {
   if (m || !j.session_id || j.session_title || settings().titles === false) return '';
   const f = stateFile('ad-' + String(j.session_id || 'none'));
   if (read(f)) return '';
-  write(f, { at: Date.now() });
   const k = konu(prompt);
-  return k ? '--- ' + proje(j.cwd || process.cwd()) + ' ' + k : '';
+  const title = k ? '--- ' + proje(j.cwd || process.cwd()) + ' ' + k : '';
+  write(f, { at: Date.now(), title });
+  return title;
 }
 
 function handle(j) {

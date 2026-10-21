@@ -368,6 +368,8 @@ function testLanguage(root) {
   ok('the session title names the project from the repo root', md.proje(path.join(repo, 'src', 'a')) === path.basename(repo));
   ok('a scratch chat is named Sohbet', md.proje(path.join('C:', 'x', 'scratch-workspaces', 'a', 'b')) === 'Sohbet');
   ok('the topic keeps the content words', md.konu('kulaklıkta cızırtı var ne yapmalı?') === 'Kulaklıkta Cızırtı Yapmalı', md.konu('kulaklıkta cızırtı var ne yapmalı?'));
+  const pasted = '\n\n<pasted_content id="0b89">\nkulaklıkta cızırtı var\n</pasted_content>';
+  ok('a pasted prompt still gets a topic', md.konu(pasted) === 'Kulaklıkta Cızırtı', md.konu(pasted));
   const sid = 'ad-' + Date.now();
   const first = md.ad({ session_id: sid, cwd: repo }, 'erken dominasyon taktiği', null);
   ok('the first prompt titles the session', first === '--- ' + path.basename(repo) + ' Erken Dominasyon Taktiği', first);
