@@ -215,6 +215,10 @@ function opening(j, cwd) {
     parts.push(s.line);
   }
   if (j.source === 'compact' && require('./lib.js').replyLang() === 'tr') lines.push(t('cue.lang'));
+  if (j.source !== 'compact') {
+    const g = graf(cwd);
+    if (g) lines.push(g);
+  }
   let book = { text: '' };
   try { book = require('./defter.js').ledger(cwd, j.session_id); } catch {}
   if (book.text) {
@@ -226,6 +230,23 @@ function opening(j, cwd) {
   if (j.source !== 'compact') say(j.session_id, parts.join(' · '), (l) => l.startsWith(eski) && l.includes(son));
   if (!lines.length) return '';
   return JSON.stringify({ hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext: lines.join('\n') } });
+}
+
+const KOD = /\.(cs|axaml|xaml|ts|tsx|js|jsx|py|go|rs|java|kt|cpp|c|h|gd|vue|svelte)$/i;
+const DIS = /(^|\/)(tests?|__tests__|spec|node_modules|dist|build|vendor|bin|obj)\/|\.(test|spec|min)\./i;
+const GRAF_MIN = 400;
+
+function uretim(cwd) {
+  const r = spawnSync('git', ['-C', cwd, 'ls-files'], { encoding: 'utf8', windowsHide: true, timeout: 5000, maxBuffer: 64 * 1024 * 1024 });
+  if (r.status !== 0) return 0;
+  return String(r.stdout).split(/\r?\n/).filter((f) => KOD.test(f) && !DIS.test(f)).length;
+}
+
+function graf(cwd, n, bin) {
+  const exe = bin === undefined ? (settings().tools || {}).graphify : bin;
+  if (!exe || !fs.existsSync(exe)) return '';
+  const say = n === undefined ? uretim(cwd) : n;
+  return say >= GRAF_MIN ? t('cue.graf').replace('%N', say).replace(/%X/g, exe) : '';
 }
 
 function step(cwd) {
@@ -276,4 +297,4 @@ function handle(j) {
 
 if (require.main === module) main(handle, { log: 'count.js' });
 
-module.exports = { handle, kural, reason, file, tree, sum, step, FILE_MAX, DIFF_MAX, CTX_MAX, RISK, TEST };
+module.exports = { handle, graf, uretim, GRAF_MIN, kural, reason, file, tree, sum, step, FILE_MAX, DIFF_MAX, CTX_MAX, RISK, TEST };

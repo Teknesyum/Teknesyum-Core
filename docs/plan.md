@@ -268,6 +268,6 @@ Olgu: altı araç kuruldu ama hiçbir yerde anılmıyor; model varlığını bil
 - [x] T2 markitdown: `hooks/belge.js`, Read kancası `if: Read(*.pdf|docx|pptx|xlsx)`; ilk okuma 3,6 sn, sonra önbellek; bağlama yazmaz
 - [x] T3 knip: yeri yok. Ayarlı hâli bile 12 bulgunun 7si yanlış; kendiliğinden çağrılacak yer yok. Alınmadı, silinmesi sahibin onayında
 - [x] T4 scc: yeri yok. map.js satırı zaten kendi sayıyor, scc bir şey katmıyor. Alınmadı, silinmesi sahibin onayında
-- [x] T5 graphify: kapsam taraması (docs/arastirma/kapsam-taramasi.md): eşiği yalnız VidShrink geçiyor, orada istemlerin %0,8i yapı sorusu; toplam etki %1 altı. Alınmadı, silme sahibin onayında
-- [x] T6 headroom: ücretsiz (Apache-2.0); büyük JSON araç çıktısının %0,7si, kazanç ~%0,4. Ücretsiz eşdeğer yazılmadı. Alınmadı, silme sahibin onayında
+- [x] T5 graphify: kapsam taraması (docs/arastirma/kapsam-taramasi.md) eşiği yalnız VidShrink geçiyor. Sahip kararı: 400+ üretim dosyalı depoda oturum başına tek satır hatırlatma (count.js, ~400 B), kullanmak modelin kararı
+- [x] T6 headroom: ücretsiz (Apache-2.0); büyük JSON araç çıktısının %0,7si, kazanç ~%0,4. Ücretsiz eşdeğer yazılmadı. Alınmadı; silinmez, sahip tutmak istiyor olabilir, karar bekliyor
 - [x] T7 Tarama öncesi yer kapısı (sahip 2026-10-21: "doğruysa projeye alınmayacak repolar taranmayacak birdaha"): aday daha taramaya girmeden "tutarsa nereye girer, kim çağırır" satırını taşır; satırı boş olan ne taranır ne ölçülür

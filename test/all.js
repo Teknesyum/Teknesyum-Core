@@ -360,7 +360,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 31500, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 32000, String(JSON.stringify(table).length));
   const md = require(path.join(CORE, 'hooks', 'mod.js'));
   const repo = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-ad-'));
   fs.mkdirSync(path.join(repo, '.git'));
@@ -1988,6 +1988,21 @@ function testCop() {
       belge({ tool_name: 'Read', cwd: p, tool_input: { file_path: path.join(p, 'a.txt') } }, bin) === '' &&
       belge({ tool_name: 'Read', cwd: path.join(p, 'alt'), tool_input: { file_path: doc } }, bin) === '' &&
       belge({ tool_name: 'Read', cwd: p, tool_input: { file_path: doc } }, null) === '');
+  }
+
+  {
+    const { graf, uretim, GRAF_MIN } = require(path.join(CORE, 'hooks', 'count.js'));
+    const p = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-graf-'));
+    for (const f of ['src/a.cs', 'src/b.ts', 'tests/c.cs', 'src/d.test.js', 'node_modules/e.js', 'f.md']) {
+      fs.mkdirSync(path.dirname(path.join(p, f)), { recursive: true });
+      fs.writeFileSync(path.join(p, f), 'x');
+    }
+    run('git', ['-C', p, 'init', '-q']);
+    run('git', ['-C', p, 'add', '-f', '.']);
+    ok('production files skip tests, vendored code and docs', uretim(p) === 2, String(uretim(p)));
+    const exe = process.execPath;
+    ok('a big repo gets the graphify cue, a small one and a missing tool get nothing',
+      /graphify/.test(graf(p, GRAF_MIN, exe)) && graf(p, GRAF_MIN - 1, exe) === '' && graf(p, GRAF_MIN, '') === '');
   }
 
   const cfg2 = home();
