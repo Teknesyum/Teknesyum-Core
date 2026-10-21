@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.76.0
+
+- PDF, Word, PowerPoint and Excel reads go through markitdown when it is installed; a release is cut only after a betterleaks scan
+
 ## v0.75.2
 
 - The session title is put back once when the app's auto-title overwrites it.
