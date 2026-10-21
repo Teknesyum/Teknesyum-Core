@@ -184,13 +184,13 @@ Base is not code-signed yet, so Windows SmartScreen may warn on first launch: ch
 ### Windows - one line
 
 ```powershell
-irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.78.0/install.ps1 | iex
+irm https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.79.0/install.ps1 | iex
 ```
 
 ### macOS / Linux - one line
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.78.0/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Teknesyum/Teknesyum-Core/v0.79.0/install.sh | bash
 ```
 
 **Restart Claude Code afterwards.** Hooks reload mid-session; the desktop client does not
@@ -225,7 +225,7 @@ Cursor and Gemini need only Node.js and a copy of Core; Claude Code is not requi
 from a clone, because the plugin cache path moves on every update:
 
 ```bash
-git clone --depth 1 --branch v0.78.0 https://github.com/Teknesyum/Teknesyum-Core "$HOME/Teknesyum-Core"
+git clone --depth 1 --branch v0.79.0 https://github.com/Teknesyum/Teknesyum-Core "$HOME/Teknesyum-Core"
 ```
 
 ```bash

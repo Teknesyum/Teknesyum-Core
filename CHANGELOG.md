@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.79.0
+
+- yasak.js no longer blocks powering the machine off or restarting it; killing every process stays blocked
+
 ## v0.78.0
 
 - gozcu.js: a pass-through proxy that logs request shape, prefix hash, usage and timing, never content; bench can route through BENCH_BASE_URL
