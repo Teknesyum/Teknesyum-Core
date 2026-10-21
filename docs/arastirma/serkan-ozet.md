@@ -82,7 +82,7 @@ Aşağıdaki 6 aracı aldık. Hepsi yalnız çağrılınca çalışıyor, sürek
 - **markitdown:** PDF'yi %54, Word dosyasını %92 daha az token'la okutuyor; doğruluk aynı.
 - **headroom:** büyük JSON çıktılarını yarıya indiriyor; bilgi kaybı yok.
 - **graphify:** dar kod sorularında %22 tasarruf sağlıyor.
-- **betterleaks:** sızmış anahtar taraması yapıyor; denemede hepsini yakaladı.
+- **betterleaks:** sızmış anahtar taraması yapıyor; denemede hepsini yakaladı. Artık her sürümden önce kendiliğinden çalışıyor.
 - **scc:** satır sayımında birebir doğru ve çok hızlı.
 - **knip:** doğru ayarla, bizim kaçırdığımız 3 yetim test dosyasını buldu.
 
@@ -91,6 +91,5 @@ Aşağıdaki 6 aracı aldık. Hepsi yalnız çağrılınca çalışıyor, sürek
 - **Maliyet hesabında hata:** Core'un maliyet hesabı faturayı %8-20 eksik gösteriyordu. Sebep, 1 saatlik önbellek yazmasının ucuz fiyattan sayılmasıydı. Düzelttik; şimdi ccusage ile kuruşu kuruşuna aynı.
 - **Komut kapısı:** Core'unki 18 tehlikeli komuttan 17'sini yakaladı; en iyi rakip 15'ini.
 - **Token sayımı:** Core rakip araçlardan doğru sayıyor; onlar %17-36 eksik sayıyor.
-- **Sızmış anahtar:** VidShrink'in git geçmişinde olası bir sızmış anahtar bulundu, yenileniyor.
 
 Detaylı rapor istersen gönderirim.

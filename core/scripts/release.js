@@ -214,12 +214,43 @@ function note() {
   return say(['Recorded in .changes/' + path.basename(file) + ' - it goes out with the next cut.']);
 }
 
+function tool(name) {
+  let conf = {};
+  try { conf = JSON.parse(fs.readFileSync(path.join(process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude'), 'teknesyum', 'config.json'), 'utf8')); } catch {}
+  const p = conf.tools && conf.tools[name];
+  if (p && fs.existsSync(p)) return p;
+  const w = spawnSync(process.platform === 'win32' ? 'where' : 'which', [name], { encoding: 'utf8', windowsHide: true });
+  return w.status === 0 ? String(w.stdout).split(/\r?\n/)[0].trim() : null;
+}
+
+function secrets() {
+  if (argv.includes('--no-secrets')) return null;
+  const bin = tool('betterleaks');
+  if (!bin) return null;
+  const last = git(['describe', '--tags', '--abbrev=0']);
+  const args = ['git', '--no-banner', '--redact', '-f', 'json', '-r', '-'];
+  if (last.ok && last.out) args.push('--log-opts=' + last.out + '..HEAD');
+  args.push(ROOT);
+  const r = spawnSync(bin, args, { encoding: 'utf8', windowsHide: true, timeout: 120000, maxBuffer: 8 * 1024 * 1024 });
+  if (r.error || r.status === 0) return null;
+  let found = [];
+  try { found = JSON.parse(r.stdout); } catch {}
+  return [
+    'betterleaks found a possible secret in the commits since ' + (last.out || 'the start') + ', so nothing was cut:',
+    ...found.map((f) => '  ' + f.File + ':' + f.StartLine + '  ' + f.RuleID + '  ' + String(f.Commit).slice(0, 8)),
+    '',
+    'Remove it and rotate the key, or cut with --no-secrets if it is a false alarm.',
+  ];
+}
+
 function cut() {
   const pending = notes();
   if (!pending.length) return say(['Nothing is waiting. Write a note first.'], 1);
   const st = git(['status', '--porcelain']);
   if (!st.ok) return say(['git status failed, so the tree cannot be read:', st.err], 1);
   if (st.out) return say(['The tree is dirty. Commit or stash first.'], 1);
+  const leak = secrets();
+  if (leak) return say(leak, 1);
 
   const now = current();
   const bump = pending.some((n) => n.bump === 'major')

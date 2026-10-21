@@ -259,3 +259,14 @@ Aday: piyasa-20 ilk 5 + graphify + on-tarama a-h Yüksek'ler (~50). Dört kol pa
 - [ ] D Orkestrasyon ve diğerleri (bonsai, claude-worktree-hooks, fleetmates, Archon, claude-code-action, reviewd, sloppy, claude-multisession, beads, claude-handoff, hatel, tdd-guard, context-mode, godot-mcp-go, ffmpeg-skill, claude-real-video, fauxnix, v4-pro): her tur yükü baytı, sayısal iddia varsa A/B
 - Kurulum: yalnız resmi depo, paket adı deponun kendi README'siyle eşleşir; `C:\Users\Administrator\olcum-dis\<araç>` altında yalıtılmış; kullanıcı ayarlarına, CLAUDE.md'ye, gerçek projelerin git hook'larına yazılmaz; ad, kaynak, boyut rapora
 - Bütçe: dört kol toplam 50 $ altı; aşacaksa dur ve bildir
+
+## T. Alınan Araçları Kim Çağırır (sahip 2026-10-21: "ben bilemem ne zaman lazım olur, Opus bilip yapacak mı")
+
+Olgu: altı araç kuruldu ama hiçbir yerde anılmıyor; model varlığını bilmiyor, sahip ne zaman gerektiğini bilemez. Yani bugün kimse çağırmıyor. Kural: çağrıyı model değil betik ya da kanca yapar; yollar `~/.claude/teknesyum/config.json` içindeki `tools` alanında, yoksa PATH, o da yoksa sessizce atlanır.
+
+- [x] T1 betterleaks: `release.js cut` son etiketten bu yana commit'leri tarar, bulgu varsa keser; `--no-secrets` ile geçilir
+- [ ] T2 markitdown: PreToolUse Read kancası `.pdf/.docx/.pptx/.xlsx` okunurken dosyayı `tmp/` altına markdown'a çevirip Read'i oraya yönlendirir; yalnız o dosya türünde çalışır, öteki turlarda 0 bayt
+- [ ] T3 knip: Core'da `npm run olu` ve doctor.js'e isteğe bağlı satır; ayarsız hali gürültülü (15/20 yanlış), yalnız ayarlı depoda çalışır
+- [ ] T4 scc: map.js satır sayımı scc varsa ondan; yoksa bugünkü yol
+- [ ] T5 graphify: kendiliğinden tetiklenecek yeri yok, karar modelin; tek yol skill ya da CLAUDE.md satırı, ikisi de her tur yük. Sahibe tek satır pay bildirimiyle sorulur
+- [ ] T6 headroom: yerleşik araç çıktısını kanca değiştiremez, otomatik yol yalnız MCP (her tur yük). Önerilen: sil, 2,1 GB geri gelir
