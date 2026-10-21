@@ -373,7 +373,9 @@ function testLanguage(root) {
   const sid = 'ad-' + Date.now();
   const first = md.ad({ session_id: sid, cwd: repo }, 'erken dominasyon taktiği', null);
   ok('the first prompt titles the session', first === '--- ' + path.basename(repo) + ' Erken Dominasyon Taktiği', first);
-  ok('the title is set once', md.ad({ session_id: sid, cwd: repo }, 'başka bir şey', null) === '');
+  ok('the title is set once', md.ad({ session_id: sid, cwd: repo, session_title: first }, 'başka bir şey', null) === '');
+  ok('an app title over ours is put back once', md.ad({ session_id: sid, cwd: repo, session_title: 'LetsCode modülü' }, 'x', null) === first);
+  ok('then a rename stays', md.ad({ session_id: sid, cwd: repo, session_title: 'Benim' }, 'x', null) === '');
   ok('a title the owner set stays', md.ad({ session_id: sid + 'x', session_title: 'Benim', cwd: repo }, 'erken dominasyon', null) === '');
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));

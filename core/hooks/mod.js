@@ -466,9 +466,15 @@ function konu(prompt) {
 }
 
 function ad(j, prompt, m) {
-  if (m || !j.session_id || j.session_title || settings().titles === false) return '';
+  if (!j.session_id || settings().titles === false) return '';
   const f = stateFile('ad-' + String(j.session_id || 'none'));
-  if (read(f)) return '';
+  const s = read(f);
+  if (s) {
+    if (!s.title || s.fixed || !j.session_title || j.session_title === s.title || Date.now() - s.at > 3600000) return '';
+    write(f, { ...s, fixed: true });
+    return s.title;
+  }
+  if (m || j.session_title) return '';
   const k = konu(prompt);
   const title = k ? '--- ' + proje(j.cwd || process.cwd()) + ' ' + k : '';
   write(f, { at: Date.now(), title });
