@@ -1,4 +1,4 @@
-Selam Serkan, Kısmi | Kısmi | Gerçek | Balon | Gerçek | Kısmi | Gerçek | Kısmi | Gerçek | Kısmi | Kısmi | Kısmi | Gerçek | Balon | Kısmi |
+Selam Serkan,
 
 Claude Code için piyasada çok konuşulan araçları ölçtük. Kısa özeti aşağıda.
 
@@ -77,14 +77,18 @@ Sınıf yalnız orana bakmıyor, aracın işe yarayıp yaramadığına da bakıy
 
 **Ne Aldık**
 
-Aşağıdaki 6 aracı aldık. Hepsi yalnız çağrılınca çalışıyor, sürekli bir yük bindirmiyor.
+Bir araç ölçümde tutsa bile, onu modelin hatırlamasına bırakırsak hiç çağrılmıyor. Bu yüzden yalnız bir betiğin ya da kancanın kendiliğinden çağırdığı araçları aldık. Sürekli yük bindirmiyorlar.
 
-- **markitdown:** PDF'yi %54, Word dosyasını %92 daha az token'la okutuyor; doğruluk aynı.
-- **headroom:** büyük JSON çıktılarını yarıya indiriyor; bilgi kaybı yok.
-- **graphify:** dar kod sorularında %22 tasarruf sağlıyor.
-- **betterleaks:** sızmış anahtar taraması yapıyor; denemede hepsini yakaladı. Artık her sürümden önce kendiliğinden çalışıyor.
-- **scc:** satır sayımında birebir doğru ve çok hızlı.
-- **knip:** doğru ayarla, bizim kaçırdığımız 3 yetim test dosyasını buldu.
+- **betterleaks:** sızmış anahtar taraması yapıyor; denemede hepsini yakaladı. Her sürümden önce kendiliğinden çalışıyor.
+- **markitdown:** PDF'yi %54, Word dosyasını %92 daha az token'la okutuyor; doğruluk aynı. PDF, Word, PowerPoint ya da Excel dosyası okunurken kendiliğinden devreye giriyor.
+
+Tutan ama yeri olmayanlar:
+
+- **scc:** satır sayımında birebir doğru, ama Core zaten satır sayıyor.
+- **knip:** ayarla bile 12 bulgunun 7'si yanlış; elle kontrol gerektiriyor.
+- **headroom ve graphify:** işe yarıyorlar, ama otomatik çağırmanın tek yolu her tura yük eklemek. Karar bekliyor.
+
+Bundan çıkan kural: "doğru çıkarsa nereye girer, onu kim çağırır" sorusunun cevabı yoksa depo artık taranmıyor bile.
 
 **Kendi Tarafımızda Çıkanlar**
 
