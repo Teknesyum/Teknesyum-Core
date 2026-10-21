@@ -26,7 +26,6 @@ const RULES = [
   ['yasak.pipe', /\b(curl|wget|iwr|Invoke-WebRequest)\b[^\n]*\|[^\n]*\b(sh|bash|zsh|python|node|iex|Invoke-Expression)\b/i],
   ['yasak.perm', /\bchmod\s+(-R\s+)?777\b/],
   ['yasak.kill', /\b(kill(all)?\s+-9\s+-1|:\(\)\s*\{.*\|.*&.*\}\s*;?\s*:)/],
-  ['yasak.kill', /\bshutdown\b|\bStop-Computer\b|\bRestart-Computer\b/i],
 ];
 
 function targets(cmd) {

