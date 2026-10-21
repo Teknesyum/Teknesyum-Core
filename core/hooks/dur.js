@@ -246,18 +246,6 @@ function sira(j) {
 
 const LINK = /\[[^\]\n]*\]\(<?([^)\s>]+)>?\)/g;
 
-function kokler(cwd) {
-  const out = [cwd];
-  const { home } = require('./lib.js');
-  for (const f of [path.join(cwd, '.claude', 'settings.local.json'), path.join(cwd, '.claude', 'settings.json'), path.join(home(), '.claude', 'settings.json')]) {
-    try {
-      const d = JSON.parse(fs.readFileSync(f, 'utf8'));
-      for (const x of (d.permissions && d.permissions.additionalDirectories) || []) out.push(path.resolve(cwd, x));
-    } catch {}
-  }
-  return out;
-}
-
 function icinde(p, roots) {
   const a = path.resolve(p).toLowerCase();
   return roots.some((r) => { const b = path.resolve(r).toLowerCase(); return a === b || a.startsWith(b + path.sep); });
@@ -271,7 +259,7 @@ function hedef(raw, cwd) {
 }
 
 function acilmaz(paths, cwd) {
-  const roots = kokler(cwd);
+  const roots = [cwd];
   return [...new Set(paths)].filter((p) => !fs.existsSync(p) || !icinde(p, roots));
 }
 

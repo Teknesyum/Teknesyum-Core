@@ -1852,6 +1852,9 @@ function testKapanis() {
     ok('a link to a file in the session folder goes through', dur.baglanti({ cwd: root, last_assistant_message: 'Bak: [a](docs/a.md:3) ve [site](https://x.y)' }) === '');
     ok('a link to a missing file is sent back', /docs[\\/]yok\.md/.test(dur.baglanti({ cwd: root, last_assistant_message: '[yok](docs/yok.md)' })));
     ok('a link that climbs out of the session folder is sent back', /tkc-link-out\.md/.test(dur.baglanti({ cwd: root, last_assistant_message: '[dış](' + outside.replace(/\\/g, '/') + ')' })));
+    fs.mkdirSync(path.join(root, '..', path.basename(root) + '-kardes'), { recursive: true });
+    fs.writeFileSync(path.join(root, '..', path.basename(root) + '-kardes', 'b.md'), 'x');
+    ok('a link to an existing sibling folder is sent back', /kardes/.test(dur.baglanti({ cwd: root, last_assistant_message: '[b](../' + path.basename(root) + '-kardes/b.md)' })));
     ok('a link inside a code block is not checked', dur.baglanti({ cwd: root, last_assistant_message: '```\n[yok](docs/yok.md)\n```' }) === '');
     const deny = dur.kart({ hook_event_name: 'PreToolUse', tool_name: 'SendUserFile', cwd: root, tool_input: { files: [outside] } });
     ok('sending a file from outside the session folders is denied', deny && deny.hookSpecificOutput.permissionDecision === 'deny');
