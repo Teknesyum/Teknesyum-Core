@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.75.0
+
+- A reply linking a missing file or one outside the session folders is sent back, and SendUserFile is denied for such a file.
+
 ## v0.74.1
 
 - A session whose first prompt opens with pasted content now gets its title.
