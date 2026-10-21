@@ -248,3 +248,14 @@ Olgu: graphify 130 bin yıldızlı, "71.5x" tasarruf iddiası tüm depoyu okumak
 - [ ] Sınıf: Gerçek (iddianın en az yarısı tuttu), Kısmi, Balon (tutmadı ya da tersine döndü)
 - [ ] `docs/arastirma/balon-raporu.md`: ne incelendi, ölçümler, iddia ile ölçüm yan yana, o iddiaya verilen yıldız sayısı
 - [ ] Gerçek çıkan yalnız çağrılınca çalışan biçimde alınır; her tur yükü varsa önce tek satır pay bildirimi
+
+### S1. Ölçüm Turu (sahip 2026-10-21: "hepsini ölç, gerekli olanları kur, en son net rapor")
+
+Aday: piyasa-20 ilk 5 + graphify + on-tarama a-h Yüksek'ler (~50). Dört kol paralel, her biri kendi ölçüm dosyasına yazar; birleştirme `docs/arastirma/balon-raporu.md`.
+
+- [ ] A Sıkıştırma ve dönüştürme (headroom, toon, distil, context-diff, markitdown, pxpipe, caveman): sabit derlem, `claude -p` usage ile gerçek token, RTK'ya karşı
+- [ ] B Kod bağlamı ve arama (graphify, probe, ast-grep, claude-context, code-review-graph, codebase-memory-mcp, qmd, coding_agent_session_search): VidShrink kopyasında 4 soru, Explore'a karşı A/B, kol başına 3 tekrar
+- [ ] C Belirleyici araçlar (knip, fallow, betterleaks, ripsecrets, scc, cc-safety-net, destructive_command_guard, claudeignore, skill-scanner, tokencost, ttok, promptfoo, ccusage, unclog, claude-crusts, cc-cache-monitor, claude-pace, mcp-cli, mcporter, playwright-cli, dbhub, communique): kendi depolarımızda işlev, süre, yanlış pozitif, her tur yükü
+- [ ] D Orkestrasyon ve diğerleri (bonsai, claude-worktree-hooks, fleetmates, Archon, claude-code-action, reviewd, sloppy, claude-multisession, beads, claude-handoff, hatel, tdd-guard, context-mode, godot-mcp-go, ffmpeg-skill, claude-real-video, fauxnix, v4-pro): her tur yükü baytı, sayısal iddia varsa A/B
+- Kurulum: yalnız resmi depo, paket adı deponun kendi README'siyle eşleşir; `C:\Users\Administrator\olcum-dis\<araç>` altında yalıtılmış; kullanıcı ayarlarına, CLAUDE.md'ye, gerçek projelerin git hook'larına yazılmaz; ad, kaynak, boyut rapora
+- Bütçe: dört kol toplam 50 $ altı; aşacaksa dur ve bildir
