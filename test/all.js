@@ -1843,6 +1843,20 @@ function testKapanis() {
   const yaz = (n) => fs.writeFileSync(tr, JSON.stringify({ type: 'user', message: { content: 'işi yap' } }) + '\n' + use(n) + '\n');
   ok('a copyright refusal with no year is sent back for the facts', /Fact gate/.test(dur.olgu({ last_assistant_message: 'Şarkı sözlerini tam metin yazamam, telif nedeniyle.' })) && /Fact gate/.test((dur.decide({ hook_event_name: 'Stop', transcript_path: tr, cwd: d, last_assistant_message: 'I cannot reproduce the lyrics.' }) || {}).reason || ''));
   ok('a bar written in a reply is sent back to the statusline', /jobs\.md/.test(dur.cubuk({ last_assistant_message: '```\n[███████░░░] %70 · kalan ~4 dk\n```\nDevam.' })));
+  {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-link-'));
+    fs.mkdirSync(path.join(root, 'docs'));
+    fs.writeFileSync(path.join(root, 'docs', 'a.md'), 'x');
+    const outside = path.join(os.tmpdir(), 'tkc-link-out.md');
+    fs.writeFileSync(outside, 'x');
+    ok('a link to a file in the session folder goes through', dur.baglanti({ cwd: root, last_assistant_message: 'Bak: [a](docs/a.md:3) ve [site](https://x.y)' }) === '');
+    ok('a link to a missing file is sent back', /docs[\\/]yok\.md/.test(dur.baglanti({ cwd: root, last_assistant_message: '[yok](docs/yok.md)' })));
+    ok('a link that climbs out of the session folder is sent back', /tkc-link-out\.md/.test(dur.baglanti({ cwd: root, last_assistant_message: '[dış](' + outside.replace(/\\/g, '/') + ')' })));
+    ok('a link inside a code block is not checked', dur.baglanti({ cwd: root, last_assistant_message: '```\n[yok](docs/yok.md)\n```' }) === '');
+    const deny = dur.kart({ hook_event_name: 'PreToolUse', tool_name: 'SendUserFile', cwd: root, tool_input: { files: [outside] } });
+    ok('sending a file from outside the session folders is denied', deny && deny.hookSpecificOutput.permissionDecision === 'deny');
+    ok('sending a file from the session folder is allowed', dur.kart({ hook_event_name: 'PreToolUse', tool_name: 'SendUserFile', cwd: root, tool_input: { files: ['docs/a.md'] } }) === null);
+  }
   ok('a reply that describes the statusline bar goes through', dur.cubuk({ last_assistant_message: 'Statusline şöyle: ▰▰▰▰▱▱ 50% (2/5)' }) === '' && dur.cubuk({ last_assistant_message: 'Bitti.' }) === '');
   ok('a refusal that names the year, an ordinary reply and a second pass go through', dur.olgu({ last_assistant_message: 'Söz yazarı 1975 doğumlu, telifli; yazamam.' }) === '' && dur.olgu({ last_assistant_message: 'Telif notunu README dosyasına ekledim.' }) === '' && dur.decide({ hook_event_name: 'Stop', stop_hook_active: true, last_assistant_message: 'I cannot reproduce the lyrics.' }) === null);
   const k = (text) => dur.kapanis({ transcript_path: tr, last_assistant_message: text, cwd: d });

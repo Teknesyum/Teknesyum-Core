@@ -43,6 +43,15 @@
         ]
       },
       {
+        "matcher": "SendUserFile",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/dur.js\""
+          }
+        ]
+      },
+      {
         "matcher": "Agent",
         "hooks": [
           {

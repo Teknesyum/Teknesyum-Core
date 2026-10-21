@@ -244,14 +244,65 @@ function sira(j) {
   return left.length ? t('dur.queued').replace('%N', String(left.length)) + '\n' + left.join('\n') : '';
 }
 
+const LINK = /\[[^\]\n]*\]\(<?([^)\s>]+)>?\)/g;
+
+function kokler(cwd) {
+  const out = [cwd];
+  const { home } = require('./lib.js');
+  for (const f of [path.join(cwd, '.claude', 'settings.local.json'), path.join(cwd, '.claude', 'settings.json'), path.join(home(), '.claude', 'settings.json')]) {
+    try {
+      const d = JSON.parse(fs.readFileSync(f, 'utf8'));
+      for (const x of (d.permissions && d.permissions.additionalDirectories) || []) out.push(path.resolve(cwd, x));
+    } catch {}
+  }
+  return out;
+}
+
+function icinde(p, roots) {
+  const a = path.resolve(p).toLowerCase();
+  return roots.some((r) => { const b = path.resolve(r).toLowerCase(); return a === b || a.startsWith(b + path.sep); });
+}
+
+function hedef(raw, cwd) {
+  let s = raw.replace(/#.*$/, '').replace(/:\d+(?::\d+)?$/, '');
+  try { s = decodeURIComponent(s); } catch {}
+  if (/^file:\/\/\/?/i.test(s)) s = s.replace(/^file:\/\/\/?/i, '');
+  return path.isAbsolute(s) || /^[a-z]:[\\/]/i.test(s) ? path.resolve(s) : path.resolve(cwd, s);
+}
+
+function acilmaz(paths, cwd) {
+  const roots = kokler(cwd);
+  return [...new Set(paths)].filter((p) => !fs.existsSync(p) || !icinde(p, roots));
+}
+
+function baglanti(j) {
+  if (settings().links === false) return '';
+  const s = typeof j.last_assistant_message === 'string' ? j.last_assistant_message : require('./defter.js').lastText(j);
+  if (!s) return '';
+  const cwd = j.cwd || process.cwd();
+  const raw = [...s.replace(/```[\s\S]*?```/g, '').matchAll(LINK)].map((m) => m[1]).filter((x) => !/^(https?:|mailto:|#)/i.test(x));
+  const bad = acilmaz(raw.map((x) => hedef(x, cwd)), cwd);
+  return bad.length ? t('dur.links').replace('%CWD', cwd) + '\n' + bad.map((p) => '- ' + p).join('\n') : '';
+}
+
+function kart(j) {
+  if (j.hook_event_name !== 'PreToolUse' || j.tool_name !== 'SendUserFile' || settings().links === false) return null;
+  const cwd = j.cwd || process.cwd();
+  const files = ((j.tool_input && j.tool_input.files) || []).map((x) => hedef(String(x), cwd));
+  const bad = acilmaz(files, cwd);
+  if (!bad.length) return null;
+  return { hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: t('dur.links').replace('%CWD', cwd) + '\n' + bad.map((p) => '- ' + p).join('\n') } };
+}
+
 function decide(j) {
   if (j.hook_event_name !== 'Stop') return null;
   if (j.stop_hook_active) return null;
-  const why = [olgu(j), cubuk(j), sira(j), sil(j), jobs(j), require('./defter.js').short(j), evidence(j), ui(j), language(j), kapanis(j)].filter(Boolean);
+  const why = [olgu(j), cubuk(j), baglanti(j), sira(j), sil(j), jobs(j), require('./defter.js').short(j), evidence(j), ui(j), language(j), kapanis(j)].filter(Boolean);
   return why.length ? { decision: 'block', reason: why.join('\n\n') } : null;
 }
 
 function stop(j) {
+  if (j.hook_event_name === 'PreToolUse') return kart(j);
   if (j.hook_event_name === 'Stop') {
     try { count.handle(j); } catch (e) { errorLog('count.js', e); }
     try { require('./kitap.js').audit(j); } catch (e) { errorLog('kitap.js', e); }
@@ -261,4 +312,4 @@ function stop(j) {
 
 if (require.main === module) main(stop);
 
-module.exports = { cubuk, CUBUK, olgu, ui, shot, stop, decide, sira, sil, kapanis, proven, off, code, jobs, english, language, CODE };
+module.exports = { baglanti, kart, hedef, acilmaz, cubuk, CUBUK, olgu, ui, shot, stop, decide, sira, sil, kapanis, proven, off, code, jobs, english, language, CODE };
