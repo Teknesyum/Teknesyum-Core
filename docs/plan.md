@@ -270,3 +270,4 @@ Olgu: altı araç kuruldu ama hiçbir yerde anılmıyor; model varlığını bil
 - [ ] T4 scc: map.js satır sayımı scc varsa ondan; yoksa bugünkü yol
 - [ ] T5 graphify: kendiliğinden tetiklenecek yeri yok, karar modelin; tek yol skill ya da CLAUDE.md satırı, ikisi de her tur yük. Sahibe tek satır pay bildirimiyle sorulur
 - [ ] T6 headroom: yerleşik araç çıktısını kanca değiştiremez, otomatik yol yalnız MCP (her tur yük). Önerilen: sil, 2,1 GB geri gelir
+- [ ] T7 Ölçüm öncesi yer kapısı: aday listesine her araç "tutarsa nereye girer, kim çağırır" satırıyla girer; satırı boş olan ölçülmez (promptfoo 11/11 doğru çıktı, yeri yoktu)
