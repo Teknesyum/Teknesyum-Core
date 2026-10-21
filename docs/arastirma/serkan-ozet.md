@@ -6,9 +6,20 @@ Claude Code için piyasada çok konuşulan araçları ölçtük. Kısa özeti a�
 
 Bu araçların çoğu "token'ı %80 düşürür", "71 kat ucuz" gibi büyük iddialarla geliyor ve on binlerce yıldız topluyor. Biz de Core'a ölçmeden hiçbir şey almama kuralını koyduk. Bu yüzden iddiaları kendi depolarımızda tek tek denedik.
 
+**Ne Kadar Taradık**
+
+| Tur | Tarih | Bakılan depo | Sonuç |
+|---|---|---:|---|
+| İlk piyasa taraması | 8 Eylül 2026 | 963 | 93 al, 165 fikir notu, 705 hayır |
+| Piyasa taraması | 21 Ekim 2026 | 22 | Ölçüm adaylarını belirledi |
+| Ön tarama (8 alan) | 21 Ekim 2026 | 515 | 49 yüksek aday |
+| **Toplam** | | **1.500** | 55 araç ölçüme girdi |
+
+Ekim taramasına Eylül'de bakılan depolar tekrar alınmadı.
+
 **Nasıl Ölçtük**
 
-- Ekosistemde 515 proje taradık, 55 aracı seçip kurduk.
+- 55 aracı seçip kurduk.
 - Her aracı aynı işte, araçlı ve araçsız olarak karşılaştırdık; her deneme en fazla 3 kez tekrarlandı.
 - Her aracı ayrı bir klasöre kurduk; hiçbiri günlük ortama karışmadı.
 - Toplam harcama yaklaşık 32,6 dolar oldu.
