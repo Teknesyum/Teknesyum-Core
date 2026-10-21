@@ -1991,6 +1991,29 @@ function testCop() {
   }
 
   {
+    const log = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-gozcu-')), 'g.jsonl');
+    const kod = `
+      const http = require('http');
+      const { proxy } = require(${JSON.stringify(path.join(CORE, 'scripts', 'gozcu.js'))});
+      const up = http.createServer((q, s) => { q.resume(); q.on('end', () => {
+        s.writeHead(200, { 'content-type': 'text/event-stream', 'x-auth-seen': q.headers['x-api-key'] || '' });
+        s.end('event: message_start\\ndata: {"type":"message_start","message":{"usage":{"input_tokens":7,"cache_read_input_tokens":90}}}\\n\\nevent: message_delta\\ndata: {"type":"message_delta","usage":{"output_tokens":5}}\\n\\n');
+      }); }).listen(0, '127.0.0.1', () => {
+        const g = proxy({ upstream: 'http://127.0.0.1:' + up.address().port, log: ${JSON.stringify(log)} }).listen(0, '127.0.0.1', () => {
+          const body = JSON.stringify({ model: 'm', stream: true, system: 'gizli metin', tools: [{ name: 'a' }], messages: [{ role: 'user', content: 'gizli soru' }] });
+          const r = http.request({ port: g.address().port, host: '127.0.0.1', path: '/v1/messages', method: 'POST', headers: { 'x-api-key': 'sk-deneme', 'content-type': 'application/json' } }, (res) => {
+            let t = ''; res.on('data', (c) => (t += c)); res.on('end', () => { console.log(res.headers['x-auth-seen'] + '|' + /message_delta/.test(t)); process.exit(0); });
+          });
+          r.end(body);
+        });
+      });`;
+    const r = run(process.execPath, ['-e', kod]);
+    const row = fs.existsSync(log) ? fs.readFileSync(log, 'utf8') : '';
+    ok('the watch proxy passes the request and the stream through untouched', String(r.stdout).trim() === 'sk-deneme|true', String(r.stdout) + String(r.stderr));
+    ok('it writes usage and sizes, never the key or the text', /"input_tokens":7/.test(row) && /"output_tokens":5/.test(row) && /"cache_read_input_tokens":90/.test(row) && /"tools":1/.test(row) && !/sk-deneme|gizli/.test(row), row);
+  }
+
+  {
     const { graf, uretim, GRAF_MIN } = require(path.join(CORE, 'hooks', 'count.js'));
     const p = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-graf-'));
     for (const f of ['src/a.cs', 'src/b.ts', 'tests/c.cs', 'src/d.test.js', 'node_modules/e.js', 'f.md']) {

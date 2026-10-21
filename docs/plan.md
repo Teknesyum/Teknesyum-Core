@@ -271,3 +271,12 @@ Olgu: altı araç kuruldu ama hiçbir yerde anılmıyor; model varlığını bil
 - [x] T5 graphify: kapsam taraması (docs/arastirma/kapsam-taramasi.md) eşiği yalnız VidShrink geçiyor. Sahip kararı: 400+ üretim dosyalı depoda oturum başına tek satır hatırlatma (count.js, ~400 B), kullanmak modelin kararı
 - [ ] T6 headroom: ücretsiz (Apache-2.0). Kapsam taramasında yalnız JSON payına bakıldı (%0,7), bu eksikti: kod -%25, git -%33 de ölçüldü. Yer: proxy kipi (ANTHROPIC_BASE_URL), her isteği kendisi sıkıştırır, model çağırmaz. Sıradaki: canlı oturumda proxy A/B (maliyet, önbellek isabeti, gecikme, olgu doğruluğu). Silinmez
 - [x] T7 Tarama öncesi yer kapısı (sahip 2026-10-21: "doğruysa projeye alınmayacak repolar taranmayacak birdaha"): aday daha taramaya girmeden "tutarsa nereye girer, kim çağırır" satırını taşır; satırı boş olan ne taranır ne ölçülür
+
+## U. Gözcü Proxy Ve headroom Ölçümü (sahip 2026-10-22: "gözlemci proxy ve headroom ölçümü başlasın")
+
+Gözcü trafiğe dokunmaz: isteği olduğu gibi iletir, cevabı olduğu gibi döndürür, yalnız sayıları yazar. Başlık ve içerik yazılmaz; anahtar kayda girmez. Yer: `core/scripts/gozcu.js`, çağıran `ANTHROPIC_BASE_URL` (bench kolu ya da sahibin elle açtığı oturum). Her tura yük yok.
+
+- [ ] U1 `gozcu.js`: istek başına zaman, model, sistem/araç/mesaj baytı, önek özeti (önbellek kırılması için), usage (girdi, önbellek yazma/okuma, çıktı), ilk bayt ve toplam süre; `--upstream` ile headroom'un önüne zincirlenir
+- [ ] U2 bench: `BENCH_BASE_URL` koşuya `ANTHROPIC_BASE_URL` olarak geçer
+- [ ] U3 A/B: 5 görev × 3 kol (gözcü→Anthropic / gözcü→headroom geçir / gözcü→headroom sıkıştır) × 3 tekrar, sonnet/low; tahmin ~10 $
+- [ ] U4 rapor: `docs/arastirma/headroom-proxy.md`; fatura, önbellek isabeti, gecikme, kabul testi; karar T6'ya yazılır

@@ -327,6 +327,7 @@ async function koşuYap(kosu, batchId, ccVersion, bagimlar = {}) {
     tokens: null, usd: null, usdSource: null,
     kanca: null,
     varyant: process.env.BENCH_VARYANT || null,
+    baseUrl: process.env.BENCH_BASE_URL || null,
     k0: process.env.BENCH_K0 === undefined ? 'K0' : process.env.BENCH_K0 || 'yok',
   };
   try {
@@ -345,6 +346,7 @@ async function koşuYap(kosu, batchId, ccVersion, bagimlar = {}) {
     }
     if (arm === 'core') eklentiKur(configDizini);
     const env = { ...disEnv, CLAUDE_CONFIG_DIR: configDizini };
+    if (disEnv.BENCH_BASE_URL) env.ANTHROPIC_BASE_URL = disEnv.BENCH_BASE_URL;
     const argumanlar = ['-p', gorev.prompt, '--model', model, '--effort', effort, '--permission-mode', 'bypassPermissions'];
     const { zamanAsimi } = await calistirici('claude', argumanlar, { cwd: calismaDizini, env, windowsHide: true });
     satir.wallMs = Date.now() - baslangic;
