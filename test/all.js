@@ -1974,6 +1974,22 @@ function testCop() {
   ok('a file it cannot delete is named, not counted', say === 0 && kalan.length === 1 && /kilitli\.mp4$/.test(kalan[0].file) && kalan[0].why === 'EBUSY', JSON.stringify({ say, kalan }));
   fs.rmSync(path.join(iki, 'trash', 'kilitli.mp4'));
 
+  {
+    const { belge } = require(path.join(CORE, 'hooks', 'belge.js'));
+    const p = fixture();
+    const doc = path.join(p, 'rapor.pdf');
+    fs.writeFileSync(doc, '%PDF-1.4');
+    const bin = path.join(p, 'md.cmd');
+    fs.writeFileSync(bin, '@echo # rapor> %3\r\n');
+    const r = process.platform === 'win32' ? belge({ tool_name: 'Read', cwd: p, tool_input: { file_path: doc, limit: 50 } }, bin) : null;
+    ok('a pdf read goes to its markdown copy', !r || (r.hookSpecificOutput.updatedInput.limit === 50 && /tmp[\\/]belge[\\/]rapor-\w+\.md$/.test(r.hookSpecificOutput.updatedInput.file_path) && fs.existsSync(r.hookSpecificOutput.updatedInput.file_path)), JSON.stringify(r));
+    ok('pages, other types, outside files and a missing tool keep the plain read',
+      belge({ tool_name: 'Read', cwd: p, tool_input: { file_path: doc, pages: '1' } }, bin) === '' &&
+      belge({ tool_name: 'Read', cwd: p, tool_input: { file_path: path.join(p, 'a.txt') } }, bin) === '' &&
+      belge({ tool_name: 'Read', cwd: path.join(p, 'alt'), tool_input: { file_path: doc } }, bin) === '' &&
+      belge({ tool_name: 'Read', cwd: p, tool_input: { file_path: doc } }, null) === '');
+  }
+
   const cfg2 = home();
   const conf = path.join(cfg2, 'teknesyum', 'config.json');
   fs.mkdirSync(path.dirname(conf), { recursive: true });

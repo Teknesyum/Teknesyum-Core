@@ -59,6 +59,46 @@
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/ust.js\""
           }
         ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Read(*.pdf)",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/belge.js\""
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Read(*.docx)",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/belge.js\""
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Read(*.pptx)",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/belge.js\""
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Read(*.xlsx)",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/belge.js\""
+          }
+        ]
       }
     ],
     "Stop": [
