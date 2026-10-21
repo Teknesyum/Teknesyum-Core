@@ -1965,6 +1965,15 @@ function testCop() {
   const sil = run(process.execPath, [path.join(CORE, 'scripts', 'cop.js'), '--hepsi', top, '--sil'], { env: { ...process.env, NO_COLOR: '1' } });
   ok('--hepsi --sil empties every trash now', sil.status === 0 && !fs.readdirSync(path.join(bir, 'trash')).length && !fs.readdirSync(path.join(iki, 'trash')).length, sil.stdout + sil.stderr);
 
+  fs.writeFileSync(path.join(iki, 'trash', 'kilitli.mp4'), Buffer.alloc(2048));
+  const asil = fs.rmSync;
+  fs.rmSync = () => { const e = new Error('busy'); e.code = 'EBUSY'; throw e; };
+  const kalan = [];
+  let say;
+  try { say = cop.bosalt(cop.proje(iki), kalan); } finally { fs.rmSync = asil; }
+  ok('a file it cannot delete is named, not counted', say === 0 && kalan.length === 1 && /kilitli\.mp4$/.test(kalan[0].file) && kalan[0].why === 'EBUSY', JSON.stringify({ say, kalan }));
+  fs.rmSync(path.join(iki, 'trash', 'kilitli.mp4'));
+
   const cfg2 = home();
   const conf = path.join(cfg2, 'teknesyum', 'config.json');
   fs.mkdirSync(path.dirname(conf), { recursive: true });

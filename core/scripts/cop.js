@@ -77,17 +77,23 @@ function hepsi(top, now) {
   return { top: path.resolve(top), bytes: list.reduce((n, p) => n + p.bytes, 0), count: list.reduce((n, p) => n + p.count, 0), list };
 }
 
-function bosalt(p) {
+function bosalt(p, kalan) {
   let gone = 0;
+  const sil = (full, b) => {
+    let hata = '';
+    try { fs.rmSync(full, { recursive: true, force: true }); } catch (e) { hata = e.code || e.message; }
+    if (!fs.existsSync(full)) return void (gone += b);
+    const geri = boyut(full);
+    gone += Math.max(0, b - geri);
+    if (kalan) kalan.push({ file: full, bytes: geri, why: hata || 'still there' });
+  };
   if (p.trash.var) {
     for (const e of fs.readdirSync(p.trash.base)) {
-      try { fs.rmSync(path.join(p.trash.base, e), { recursive: true, force: true }); } catch {}
+      const full = path.join(p.trash.base, e);
+      sil(full, boyut(full));
     }
-    gone += p.trash.bytes;
   }
-  for (const f of p.tmp) {
-    try { fs.unlinkSync(f.file); gone += f.bytes; } catch {}
-  }
+  for (const f of p.tmp) sil(f.file, f.bytes);
   budama(path.join(p.root, 'tmp'), true);
   return gone;
 }
@@ -260,7 +266,7 @@ function main(argv) {
   const args = argv.slice(2);
   if (args.includes('--help') || args.includes('-h')) {
     process.stdout.write(
-      'Usage: node cop.js [project] [--sil]\n       node cop.js --hepsi [projects root] [--sil]\n\nMeasures <project>/trash and the tmp files older than a day.\n--hepsi does it for every project under the root (default: projectsRoot).\n--sil deletes them for good: the recycle bin frees no space.\nThe Stop hook does this by itself: trash entries a week after they land, tmp files after a day.\nExit: 0 under the ceiling · 1 over it · 2 no trash folder\n'
+      'Usage: node cop.js [project] [--sil]\n       node cop.js --hepsi [projects root] [--sil]\n\nMeasures <project>/trash and the tmp files older than a day.\n--hepsi does it for every project under the root (default: projectsRoot).\n--sil deletes them for good: the recycle bin frees no space.\nThe Stop hook does this by itself: trash entries a week after they land, tmp files after a day.\nExit: 0 under the ceiling · 1 over it · 2 no trash folder · 3 something could not be deleted\n'
     );
     return 0;
   }
@@ -277,9 +283,10 @@ function main(argv) {
     process.stdout.write(String(mb(h.bytes)).padStart(6) + ' MB  total\n');
     if (!args.includes('--sil')) return h.bytes >= CEILING ? 1 : 0;
     let gone = 0;
-    for (const p of h.list) gone += bosalt(p);
+    const kalan = [];
+    for (const p of h.list) gone += bosalt(p, kalan);
     process.stdout.write('deleted: ' + mb(gone) + ' MB\n');
-    return 0;
+    return kalinti(kalan);
   }
   const root = free || process.cwd();
   const s = olc(root);
@@ -289,11 +296,19 @@ function main(argv) {
   }
   if (args.includes('--sil')) {
     process.stdout.write(report(s) + '\n');
-    process.stdout.write('deleted: ' + mb(bosalt(proje(root))) + ' MB\n');
-    return 0;
+    const kalan = [];
+    process.stdout.write('deleted: ' + mb(bosalt(proje(root), kalan)) + ' MB\n');
+    return kalinti(kalan);
   }
   process.stdout.write(report(s) + '\n');
   return s.bytes >= CEILING ? 1 : 0;
+}
+
+function kalinti(kalan) {
+  if (!kalan.length) return 0;
+  for (const k of kalan) process.stderr.write('could not delete: ' + k.file + '  ' + mb(k.bytes) + ' MB  (' + k.why + ')\n');
+  process.stderr.write(kalan.length + ' item(s) left, ' + mb(kalan.reduce((n, k) => n + k.bytes, 0)) + ' MB\n');
+  return 3;
 }
 
 module.exports = { CEILING, WEEK, DAY, oto, projeler, dir, olc, asar, mb, report, sweepState, pruneCache, newer, proje, hepsi, bosalt };
