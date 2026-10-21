@@ -269,5 +269,5 @@ Olgu: altı araç kuruldu ama hiçbir yerde anılmıyor; model varlığını bil
 - [x] T3 knip: yeri yok. Ayarlı hâli bile 12 bulgunun 7si yanlış; kendiliğinden çağrılacak yer yok. Alınmadı, silinmesi sahibin onayında
 - [x] T4 scc: yeri yok. map.js satırı zaten kendi sayıyor, scc bir şey katmıyor. Alınmadı, silinmesi sahibin onayında
 - [x] T5 graphify: kapsam taraması (docs/arastirma/kapsam-taramasi.md) eşiği yalnız VidShrink geçiyor. Sahip kararı: 400+ üretim dosyalı depoda oturum başına tek satır hatırlatma (count.js, ~400 B), kullanmak modelin kararı
-- [x] T6 headroom: ücretsiz (Apache-2.0); büyük JSON araç çıktısının %0,7si, kazanç ~%0,4. Ücretsiz eşdeğer yazılmadı. Alınmadı; silinmez, sahip tutmak istiyor olabilir, karar bekliyor
+- [ ] T6 headroom: ücretsiz (Apache-2.0). Kapsam taramasında yalnız JSON payına bakıldı (%0,7), bu eksikti: kod -%25, git -%33 de ölçüldü. Yer: proxy kipi (ANTHROPIC_BASE_URL), her isteği kendisi sıkıştırır, model çağırmaz. Sıradaki: canlı oturumda proxy A/B (maliyet, önbellek isabeti, gecikme, olgu doğruluğu). Silinmez
 - [x] T7 Tarama öncesi yer kapısı (sahip 2026-10-21: "doğruysa projeye alınmayacak repolar taranmayacak birdaha"): aday daha taramaya girmeden "tutarsa nereye girer, kim çağırır" satırını taşır; satırı boş olan ne taranır ne ölçülür

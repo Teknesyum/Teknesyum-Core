@@ -82,7 +82,7 @@ Tutan ama yeri olmayanlar:
 
 - **scc:** satır sayımında birebir doğru, ama Core zaten satır sayıyor.
 - **knip:** ayarla bile 12 bulgunun 7'si yanlış; elle kontrol gerektiriyor.
-- **headroom:** işe yarıyor, ama bizim araç çıktılarımızın yalnız %0,7'si onun güçlü olduğu büyük JSON türünde.
+- **headroom:** işe yarıyor; her isteği araya girip sıkıştıran proxy kipini kendi oturumlarımızda ölçüyoruz.
 - **graphify:** yalnız 400'den fazla üretim dosyası olan projelerde kazandırıyor. Bu projelerde oturum başında modele bir kez hatırlatılıyor; kullanıp kullanmamak modelin kararı.
 
 Bundan çıkan kural: "doğru çıkarsa nereye girer, onu kim çağırır" sorusunun cevabı yoksa depo artık taranmıyor bile.

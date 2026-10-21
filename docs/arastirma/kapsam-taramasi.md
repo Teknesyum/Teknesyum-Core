@@ -60,4 +60,4 @@ Tarama: `~/.claude/projects` altında son 3 ayın 256 oturumu, 91.030 araç sonu
 | JSON (Bash, MCP, Agent toplamı) | ~43 | ~0,75 |
 | Log | 0 | 0 |
 
-Büyük JSON tüm araç çıktısının %0,7'si. Yarıya indirmek toplamda ~%0,4 eder. Ücretsiz eşdeğer (`belge.js` gibi bir JSON sıkıştırma kancası) yazılabilir ama bu pay için yazılmaz. Karar: alınmaz, silinir.
+Büyük JSON tüm araç çıktısının %0,7si. **Düzeltme:** bu hesap yalnız JSON payına baktı; headroom kodu (-%25) ve git çıktısını (-%33) da sıkıştırıyor ve bizim çıktımızın çoğu bu türde. Karar: silinmez; proxy kipi canlı oturumda ölçülür (plan T6).
