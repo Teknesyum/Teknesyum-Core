@@ -281,3 +281,13 @@ Gözcü trafiğe dokunmaz: isteği olduğu gibi iletir, cevabı olduğu gibi dö
 - [x] U3 A/B: 5 görev × 3 kol (gözcü→Anthropic / gözcü→headroom geçir / gözcü→headroom sıkıştır) × 3 tekrar, sonnet/low; tahmin ~10 $
 - [x] U4 rapor: `docs/arastirma/headroom-proxy.md`; fatura, önbellek isabeti, gecikme, kabul testi; karar T6'ya yazılır
 - [ ] U5 karar sahibin: headroom için isteğe bağlı başlatıcı (proxy + ANTHROPIC_BASE_URL) ve opus/T0 koltuğunda 5 görev × 2 kol × 3 tekrar ikinci ölçüm (~25 $)
+
+## V. Makine Değişince Kaldığı Yerden (sahip 2026-10-24: "yeni bir pc'ye geçsek bile kaldığımız yerden devam edecek")
+
+Bugün git'e girmeyen proje durumu yalnız bu makinede: `logs/openlogs/`, `.claude/acik.md`,
+`.claude/handoff.md`. Loglar herkese açık depoya bilerek girmiyor, içlerinde oturum metni var.
+
+- [ ] V1. `SessionEnd`: bu üç yolu `teknesyum-private/<proje>/durum/` altına kopyala, özel depoda commit at, it.
+- [ ] V2. `SessionStart`: yerelde yoksa ya da özeldeki daha yeniyse geri koy; çakışmada yerel kalır, özel kopya `.onceki` olur.
+- [ ] V3. Test: boş bir makine klasörüne geri yükleme, açık log satırının ilk istemde görünmesi.
+- [ ] V4. T0 yeri makineye bağlı kalır: yeni makinede ilk oturum T0 olur (sahip 2026-10-24).
