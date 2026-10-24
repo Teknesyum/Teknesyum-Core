@@ -52,7 +52,7 @@
         ]
       },
       {
-        "matcher": "Agent",
+        "matcher": "Agent|mcp__ccd_session__start_session|mcp__ccd_session_mgmt__set_session_title",
         "hooks": [
           {
             "type": "command",

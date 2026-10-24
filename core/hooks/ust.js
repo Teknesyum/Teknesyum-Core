@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const fs = require('fs');
+const path = require('path');
 const { main, t, say, banner, stateFile, read, write, BANNER } = require('./lib.js');
 const advice = require('../scripts/advice.js');
 
@@ -90,7 +91,10 @@ function yogun(j, now = Date.now()) {
   return t('ust.yogun').split('%N').join(String(at.length));
 }
 
+const OTURUM = /__(start_session|set_session_title)$/;
+
 function gate(j) {
+  if (OTURUM.test(String(j.tool_name || ''))) return { hookSpecificOutput: { hookEventName: 'PreToolUse', additionalContext: fs.readFileSync(path.join(__dirname, '..', 'oturum-adlari.md'), 'utf8').trim() } };
   const h = haiku(j);
   if (h) return h;
   const deny = advice.gate(j);
@@ -109,4 +113,4 @@ function gate(j) {
 
 if (require.main === module) main(gate);
 
-module.exports = { gate, line, rank, haiku, reader, yogun, ESIK };
+module.exports = { gate, OTURUM, line, rank, haiku, reader, yogun, ESIK };

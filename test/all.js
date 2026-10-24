@@ -370,6 +370,12 @@ function testLanguage(root) {
   ok('the topic keeps the content words', md.konu('kulaklıkta cızırtı var ne yapmalı?') === 'Kulaklıkta Cızırtı Yapmalı', md.konu('kulaklıkta cızırtı var ne yapmalı?'));
   const pasted = '\n\n<pasted_content id="0b89">\nkulaklıkta cızırtı var\n</pasted_content>';
   ok('a pasted prompt still gets a topic', md.konu(pasted) === 'Kulaklıkta Cızırtı', md.konu(pasted));
+  const t0 = md.ad({ session_id: 'ad-t0-' + Date.now(), cwd: repo }, 'ilk iş', null);
+  ok('the first session in a project is its T0', t0 === '--- ' + path.basename(repo) + ' T0', t0);
+  ok('the T0 keeps its seat', md.yonetici(repo, t0 && 'x', true) === false);
+  fs.writeFileSync(path.join(repo, 'README.md'), '# QuizLoop\n');
+  ok('the project is spelled as its README title', md.proje(path.join(repo, 'src')) === 'QuizLoop');
+  fs.unlinkSync(path.join(repo, 'README.md'));
   const sid = 'ad-' + Date.now();
   const first = md.ad({ session_id: sid, cwd: repo }, 'erken dominasyon taktiği', null);
   ok('the first prompt titles the session', first === '--- ' + path.basename(repo) + ' Erken Dominasyon Taktiği', first);
@@ -377,6 +383,10 @@ function testLanguage(root) {
   ok('an app title over ours is put back once', md.ad({ session_id: sid, cwd: repo, session_title: 'LetsCode modülü' }, 'x', null) === first);
   ok('then a rename stays', md.ad({ session_id: sid, cwd: repo, session_title: 'Benim' }, 'x', null) === '');
   ok('a title the owner set stays', md.ad({ session_id: sid + 'x', session_title: 'Benim', cwd: repo }, 'erken dominasyon', null) === '');
+  const us = require(path.join(CORE, 'hooks', 'ust.js'));
+  const kural = us.gate({ tool_name: 'mcp__ccd_session__start_session', tool_input: {} });
+  ok('starting a session hands the agent the naming rule', /T0/.test(kural.hookSpecificOutput.additionalContext));
+  ok('the naming rule rides on the hook that fires', /start_session/.test(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8')));
 
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-lang-'));
   fs.mkdirSync(path.join(h, 'teknesyum'), { recursive: true });
@@ -992,7 +1002,7 @@ function testYasak() {
   const cfgHooks = JSON.parse(fs.readFileSync(path.join(CORE, 'hooks', 'hooks.json'), 'utf8'));
   const bash = cfgHooks.hooks.PreToolUse.find((g) => g.matcher === 'Bash|PowerShell');
   ok('a shell call starts one process, the loop gate runs inside the denylist', bash.hooks.length === 1 && /yasak\.js/.test(bash.hooks[0].command), JSON.stringify(bash.hooks));
-  const agent = cfgHooks.hooks.PreToolUse.find((g) => g.matcher === 'Agent');
+  const agent = cfgHooks.hooks.PreToolUse.find((g) => g.matcher.split('|').includes('Agent'));
   ok('an agent call starts one process, the consult gate runs inside ust.js', agent.hooks.length === 1 && /ust\.js/.test(agent.hooks[0].command), JSON.stringify(agent.hooks));
   ok('a stop starts one process, count runs inside dur.js', cfgHooks.hooks.Stop.length === 1 && cfgHooks.hooks.Stop[0].hooks.length === 1 && /dur\.js/.test(cfgHooks.hooks.Stop[0].hooks[0].command), JSON.stringify(cfgHooks.hooks.Stop));
   const bothRun = run(process.execPath, [YASAK], { input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'Bash', cwd: GARDEN, tool_input: { command: 'while true; do rm -rf ' + '/; sleep 1; done' } }), env: { ...process.env, CLAUDE_CONFIG_DIR: home() } });

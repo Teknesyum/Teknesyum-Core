@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { main, configRoot, settings, stateFile, t, banner, say, sayBlock, coreRepo, uiRepo, baseRepo, read, write } = require('./lib.js');
 const lib = require('../scripts/kutuphane.js');
 const ag = require('../scripts/agency.js');
@@ -440,16 +441,44 @@ function temiz(text) {
   return q ? t('mod.temiz') + '\n' + t('mod.fableAsk').replace('%Q', q) : t('mod.temiz');
 }
 
-function proje(cwd) {
-  if (/[\\/]scratch-workspaces[\\/]/i.test(cwd)) return 'Sohbet';
+function kok(cwd) {
   let dir = cwd;
   for (;;) {
-    if (fs.existsSync(path.join(dir, '.git'))) break;
+    if (fs.existsSync(path.join(dir, '.git'))) return dir;
     const up = path.dirname(dir);
-    if (up === dir) { dir = cwd; break; }
+    if (up === dir) return '';
     dir = up;
   }
-  return path.basename(dir).replace(/^!+/, '') || 'Sohbet';
+}
+
+function yazim(dir) {
+  try {
+    const text = fs.readFileSync(path.join(dir, 'README.md'), 'utf8').slice(0, 4096);
+    const m = /^#\s+(.+)$/m.exec(text) || /<h1[^>]*>([^<]+)<\/h1>/i.exec(text);
+    const name = m ? m[1].replace(/[*_`[\]]/g, '').trim() : '';
+    return name.length <= 32 ? name : '';
+  } catch { return ''; }
+}
+
+function proje(cwd) {
+  if (/[\\/]scratch-workspaces[\\/]/i.test(cwd)) return 'Sohbet';
+  const dir = kok(cwd);
+  if (!dir) return 'Sohbet';
+  return yazim(dir) || path.basename(dir).replace(/^!+/, '') || 'Sohbet';
+}
+
+const T0_SURE = 7 * 24 * 3600000;
+
+function yonetici(cwd, sid, sor) {
+  const dir = kok(cwd);
+  if (!dir) return false;
+  const f = stateFile('t0-' + crypto.createHash('sha1').update(path.resolve(dir).toLowerCase()).digest('hex').slice(0, 12));
+  const s = read(f);
+  const bos = !s || !s.sid || Date.now() - (s.at || 0) > T0_SURE;
+  if (s && s.sid === sid) { write(f, { sid, at: Date.now() }); return true; }
+  if (!bos || !sor) return false;
+  write(f, { sid, at: Date.now() });
+  return true;
 }
 
 const BOS = new Set('bu şu o bir ve ile de da mi mı mu mü ne nedir nasıl neden niye için gibi var yok çok daha en ama bana beni sen biz bunu şunu şimdi lütfen yap et olsun olur misal birde hem the a an and or of to for is are what how why please'.split(' '));
@@ -469,14 +498,16 @@ function ad(j, prompt, m) {
   if (!j.session_id || settings().titles === false) return '';
   const f = stateFile('ad-' + String(j.session_id || 'none'));
   const s = read(f);
+  const cwd = j.cwd || process.cwd();
   if (s) {
+    yonetici(cwd, j.session_id, false);
     if (!s.title || s.fixed || !j.session_title || j.session_title === s.title || Date.now() - s.at > 3600000) return '';
     write(f, { ...s, fixed: true });
     return s.title;
   }
   if (m || j.session_title) return '';
-  const k = konu(prompt);
-  const title = k ? '--- ' + proje(j.cwd || process.cwd()) + ' ' + k : '';
+  const k = yonetici(cwd, j.session_id, true) ? 'T0' : konu(prompt);
+  const title = k ? '--- ' + proje(cwd) + ' ' + k : '';
   write(f, { at: Date.now(), title });
   return title;
 }
@@ -526,4 +557,4 @@ function handle(j) {
 
 if (require.main === module) main(handle, { log: 'mod.js' });
 
-module.exports = { proje, konu, ad, kaynak, REPORT, UI_REPORT, BASE_REPORT, BASE_READY, PARAZIT, parazit, RET, lastSaid, kacak, MISS_LOG, wanted, SHELVE, ASKED, handle, busy, soru, tail, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };
+module.exports = { proje, konu, ad, yonetici, kaynak, REPORT, UI_REPORT, BASE_REPORT, BASE_READY, PARAZIT, parazit, RET, lastSaid, kacak, MISS_LOG, wanted, SHELVE, ASKED, handle, busy, soru, tail, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };
