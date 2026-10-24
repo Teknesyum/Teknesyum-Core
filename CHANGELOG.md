@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.80.0
+
+- The first session of a project is titled --- <Project> T0, the project is spelled as its README title, and start_session / set_session_title get the naming rule
+
 ## v0.79.0
 
 - yasak.js no longer blocks powering the machine off or restarting it; killing every process stays blocked
