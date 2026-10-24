@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.81.0
+
+- SessionEnd copies .claude/acik.md, .claude/handoff.md and logs/openlogs/ to teknesyum-private/<project>/durum/ and pushes it; SessionStart brings back what another machine left, keeping local edits and writing the other copy as .onceki.
+
 ## v0.80.0
 
 - The first session of a project is titled --- <Project> T0, the project is spelled as its README title, and start_session / set_session_title get the naming rule
