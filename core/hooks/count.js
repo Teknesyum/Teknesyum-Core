@@ -270,6 +270,10 @@ function handle(j) {
     const cwd = j.cwd || process.cwd();
     if (j.source !== 'compact') tidy(j);
     if (j.source !== 'compact' && !process.env.TEKNESYUM_NO_REFRESH) try { require('../scripts/kutuphane.js').refresh(cwd); } catch {}
+    if (j.source !== 'compact') try {
+      const g = require('./tasi.js').getir(cwd, { git: j.source === 'startup' });
+      if (g.cakisan.length) say(j.session_id, BANNER + 'Durum çakıştı, öbür makinenin sürümü .onceki: ' + g.cakisan.join(', '));
+    } catch {}
     return opening(j, cwd);
   }
   const st = read(f) || fresh(j);

@@ -99,7 +99,9 @@ function handle(j) {
   try { require('./defter.js').release(cwd, j.session_id); } catch {}
   const st = read(stateFile('state-' + safe(String(j.session_id || 'none')))) || {};
   if (j.transcript_path) st.transcript = j.transcript_path;
-  return generate(cwd, st);
+  const out = generate(cwd, st);
+  try { require('./tasi.js').gonder(cwd); } catch {}
+  return out;
 }
 
 if (require.main === module) main((j) => { handle(j); }, { log: 'handoff.js' });

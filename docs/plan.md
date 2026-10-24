@@ -287,7 +287,7 @@ Gözcü trafiğe dokunmaz: isteği olduğu gibi iletir, cevabı olduğu gibi dö
 Bugün git'e girmeyen proje durumu yalnız bu makinede: `logs/openlogs/`, `.claude/acik.md`,
 `.claude/handoff.md`. Loglar herkese açık depoya bilerek girmiyor, içlerinde oturum metni var.
 
-- [ ] V1. `SessionEnd`: bu üç yolu `teknesyum-private/<proje>/durum/` altına kopyala, özel depoda commit at, it.
-- [ ] V2. `SessionStart`: yerelde yoksa ya da özeldeki daha yeniyse geri koy; çakışmada yerel kalır, özel kopya `.onceki` olur.
-- [ ] V3. Test: boş bir makine klasörüne geri yükleme, açık log satırının ilk istemde görünmesi.
-- [ ] V4. T0 yeri makineye bağlı kalır: yeni makinede ilk oturum T0 olur (sahip 2026-10-24).
+- [x] V1. `SessionEnd`: bu üç yolu `teknesyum-private/<proje>/durum/` altına kopyala, özel depoda commit at, it.
+- [x] V2. `SessionStart`: yerelde yoksa ya da özeldeki daha yeniyse geri koy; çakışmada yerel kalır, özel kopya `.onceki` olur.
+- [x] V3. Test: boş bir makine klasörüne geri yükleme, açık log satırının ilk istemde görünmesi.
+- [x] V4. T0 yeri makineye bağlı kalır: yeni makinede ilk oturum T0 olur (sahip 2026-10-24).

@@ -105,6 +105,64 @@ function stateOf(cfg, sid) {
   return JSON.parse(fs.readFileSync(path.join(cfg, 'teknesyum', 'state-' + (sid || 's1') + '.json'), 'utf8'));
 }
 
+function testTasi() {
+  const T = require(path.join(CORE, 'hooks', 'tasi.js'));
+  const base = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-tasi-'));
+  const ozel = path.join(base, 'ozel');
+  fs.mkdirSync(path.join(ozel, '.git'), { recursive: true });
+  fs.writeFileSync(path.join(ozel, '.git', 'config'), '[remote "origin"]\n\turl = https://github.com/x/Teknesyum-Private.git\n');
+  const makine = (ad) => {
+    const kok = path.join(base, ad, 'Proje');
+    fs.mkdirSync(path.join(kok, '.git'), { recursive: true });
+    fs.mkdirSync(path.join(kok, '.claude'), { recursive: true });
+    const cfg = path.join(base, ad + '-cfg');
+    fs.mkdirSync(path.join(cfg, 'teknesyum'), { recursive: true });
+    return { kok, cfg };
+  };
+  const A = makine('a');
+  const B = makine('b');
+  const env = { p: process.env.TEKNESYUM_PRIVATE, c: process.env.CLAUDE_CONFIG_DIR };
+  const on = (m) => { process.env.CLAUDE_CONFIG_DIR = m.cfg; };
+  try {
+    process.env.TEKNESYUM_PRIVATE = ozel;
+    on(A);
+    fs.writeFileSync(path.join(A.kok, '.claude', 'acik.md'), '- [ ] iş A\n');
+    fs.writeFileSync(path.join(A.kok, '.claude', 'handoff.md'), 'devir A\n');
+    fs.mkdirSync(path.join(A.kok, 'logs', 'openlogs'), { recursive: true });
+    fs.writeFileSync(path.join(A.kok, 'logs', 'openlogs', 'BUG-x.md'), 'hata\n');
+    ok('tasi: sends three files', T.gonder(A.kok, { git: false }) === 3);
+    ok('tasi: mirror is per project', fs.existsSync(path.join(ozel, 'proje', 'durum', 'logs', 'openlogs', 'BUG-x.md')));
+    ok('tasi: nothing changed sends nothing', T.gonder(A.kok, { git: false }) === 0);
+    on(B);
+    const g = T.getir(B.kok, { git: false });
+    ok('tasi: new machine gets all', g.alinan === 3 && fs.readFileSync(path.join(B.kok, '.claude', 'acik.md'), 'utf8') === '- [ ] iş A\n', JSON.stringify(g));
+    ok('tasi: second start is quiet', T.getir(B.kok, { git: false }).alinan === 0);
+    fs.writeFileSync(path.join(B.kok, '.claude', 'acik.md'), '- [ ] iş B\n');
+    fs.unlinkSync(path.join(B.kok, 'logs', 'openlogs', 'BUG-x.md'));
+    T.gonder(B.kok, { git: false });
+    ok('tasi: removed log leaves the mirror', !fs.existsSync(path.join(ozel, 'proje', 'durum', 'logs', 'openlogs', 'BUG-x.md')));
+    on(A);
+    fs.writeFileSync(path.join(A.kok, '.claude', 'handoff.md'), 'devir A yerel\n');
+    const h = T.getir(A.kok, { git: false });
+    ok('tasi: unchanged local file is updated', fs.readFileSync(path.join(A.kok, '.claude', 'acik.md'), 'utf8') === '- [ ] iş B\n');
+    ok('tasi: closed log goes to trash', !fs.existsSync(path.join(A.kok, 'logs', 'openlogs', 'BUG-x.md')) && fs.existsSync(path.join(A.kok, 'trash', 'durum', 'logs', 'openlogs', 'BUG-x.md')));
+    ok('tasi: no conflict when remote did not touch it', h.cakisan.length === 0 && fs.readFileSync(path.join(A.kok, '.claude', 'handoff.md'), 'utf8') === 'devir A yerel\n', JSON.stringify(h));
+    on(B);
+    fs.writeFileSync(path.join(B.kok, '.claude', 'acik.md'), '- [ ] iş B2\n');
+    T.gonder(B.kok, { git: false });
+    on(A);
+    fs.writeFileSync(path.join(A.kok, '.claude', 'acik.md'), '- [ ] iş A2\n');
+    const c = T.getir(A.kok, { git: false });
+    ok('tasi: both edited keeps local, remote as .onceki', c.cakisan.includes('.claude/acik.md') && fs.readFileSync(path.join(A.kok, '.claude', 'acik.md'), 'utf8') === '- [ ] iş A2\n' && fs.readFileSync(path.join(A.kok, '.claude', 'acik.md.onceki'), 'utf8') === '- [ ] iş B2\n', JSON.stringify(c));
+    process.env.TEKNESYUM_PRIVATE = path.join(base, 'yok');
+    ok('tasi: no private repo is a no-op', T.gonder(A.kok, { git: false }) === 0 && T.getir(A.kok, { git: false }).alinan === 0);
+  } finally {
+    process.env.TEKNESYUM_PRIVATE = env.p;
+    if (env.c === undefined) delete process.env.CLAUDE_CONFIG_DIR; else process.env.CLAUDE_CONFIG_DIR = env.c;
+    sweep(base);
+  }
+}
+
 function testCountSilence() {
   const root = fixture();
   const cfg = home();
@@ -2439,6 +2497,7 @@ function main() {
     ['report to core', testReport],
     ['ui check mark', testUiCheck],
     ['ui gate', testUiGate],
+    ['state travels', testTasi],
   ];
   for (const [name, fn] of suites) {
     try {
