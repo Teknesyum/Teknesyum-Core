@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.81.1
+
+- release.js publish now updates the plugin on this machine; a stale 0.79.0 install had kept the T0 naming from running. --no-install skips it.
+
 ## v0.81.0
 
 - SessionEnd copies .claude/acik.md, .claude/handoff.md and logs/openlogs/ to teknesyum-private/<project>/durum/ and pushes it; SessionStart brings back what another machine left, keeping local edits and writing the other copy as .onceki.
