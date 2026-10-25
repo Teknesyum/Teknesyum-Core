@@ -159,7 +159,21 @@ function publish() {
   const u = gh(['release', 'upload', tag, '--clobber'].concat(files.map((f) => path.join(dir, f))));
   if (!u.ok) return say(['gh release upload failed:', u.err], 1);
   fs.rmSync(dir, { recursive: true, force: true });
-  return say([tag + ' is published with ' + files.join(', ') + '.']);
+  return say([tag + ' is published with ' + files.join(', ') + '.', install()]);
+}
+
+function install() {
+  if (argv.includes('--no-install')) return 'The local plugin was left as it is.';
+  const run = (a) => spawnSync('claude', a, { encoding: 'utf8', windowsHide: true, timeout: 180000, shell: process.platform === 'win32' });
+  run(['plugin', 'marketplace', 'update', 'teknesyum']);
+  const u = run(['plugin', 'update', 'teknesyum-core@teknesyum']);
+  const out = String((u && u.stdout) || '') + String((u && u.stderr) || '');
+  if (u.error || u.status !== 0) return 'The local plugin did not update; run: claude plugin update teknesyum-core@teknesyum';
+  return /updated from/i.test(out) ? 'The local plugin is on ' + surum(out) + '; restart Claude Code to load it.' : 'The local plugin was already current.';
+}
+
+function surum(out) {
+  return (out.match(/to (\d+\.\d+\.\d+)/) || [])[1] || 'the new version';
 }
 
 function changelog(version, entries) {
