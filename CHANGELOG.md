@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.83.0
+
+- Every edit of .claude/jobs.md puts the progress bar on the band, since the desktop app does not draw the statusline
+
 ## v0.82.0
 
 - Background shell jobs report their status: a band line when they start, a desktop toast every ten minutes (bekleAra) with age and last output, and one prompt line while they run
