@@ -624,6 +624,15 @@ function testLoop() {
   ok('a while read loop is not a wait', !deny(call('Bash', 'while read l; do echo $l; sleep 1; done < list.txt')));
   ok('a plain command passes', !deny(call('Bash', 'npm test --silent && git status')));
   ok('a Write is not looked at', !deny(call('Write', 'until x; do sleep 1; done')));
+  const callIn = (tool_input) =>
+    run(process.execPath, [LOOP], { cwd: CORE, input: JSON.stringify({ tool_name: 'Bash', tool_input }), env: { ...process.env, CLAUDE_CONFIG_DIR: home() } });
+  const murphy = 'for i in $(seq 1 110); do [ $(grep -c KZP out.txt) -ge 5 ] && break; sleep 5; done; cat out.txt';
+  const held = callIn({ command: murphy, timeout: 590000 });
+  ok('a ten-minute foreground wait is denied', deny(held), held.stdout);
+  ok('the denial sends it to the background and asks for a line first', /run_in_background/.test(held.stdout), held.stdout);
+  ok('the same wait in the background passes', !deny(callIn({ command: murphy, timeout: 590000, run_in_background: true })));
+  ok('a short foreground wait passes', !deny(callIn({ command: murphy, timeout: 120000 })));
+  ok('a long build with no sleep passes', !deny(callIn({ command: 'cargo build --release', timeout: 600000 })));
   const junk = run(process.execPath, [LOOP], { cwd: CORE, input: '{nope', env: { ...process.env, CLAUDE_CONFIG_DIR: home() } });
   ok('bad input exits quietly', junk.status === 0 && junk.stdout === '');
 }

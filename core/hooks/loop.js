@@ -24,18 +24,28 @@ function unbounded(cmd) {
   return !BOUND.some((r) => r.test(s));
 }
 
+const ON_PLAN = 180000;
+const SLEEP = /\b(sleep|Start-Sleep)\b/i;
+const LONG = 'A foreground wait over three minutes holds the owner\'s messages until it ends. Tell the owner in one line what you are waiting for, then rerun the same command with run_in_background: true; the end of the job wakes you.';
+
+function long(input) {
+  const i = input || {};
+  return !i.run_in_background && Number(i.timeout) > ON_PLAN && SLEEP.test(String(i.command || ''));
+}
+
 function decide(j) {
   if (!/^(Bash|PowerShell)$/.test(j.tool_name || '')) return null;
-  const cmd = (j.tool_input || {}).command;
-  if (!unbounded(cmd)) return null;
-  say(j.session_id, banner('banner.loop'));
+  const input = j.tool_input || {};
+  const key = unbounded(input.command) ? 'loop' : long(input) ? 'long' : '';
+  if (!key) return null;
+  say(j.session_id, banner(key === 'loop' ? 'banner.loop' : 'banner.long'));
   return {
     hookSpecificOutput: {
       hookEventName: 'PreToolUse',
       permissionDecision: 'deny',
-      permissionDecisionReason: t('loop.bound'),
+      permissionDecisionReason: key === 'loop' ? t('loop.bound') : LONG,
     },
   };
 }
 
-module.exports = { unbounded, decide, LOOP, BOUND };
+module.exports = { unbounded, long, decide, LOOP, BOUND, ON_PLAN };

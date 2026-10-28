@@ -80,6 +80,7 @@
   "banner.context": {"en":"Context %N% · Handoff Note Prepared","tr":"Bağlam %%N · Devir Notu Hazırlandı"},
   "banner.evidence": {"en":"Evidence Gate · %N Code Files Changed, Nothing Ran · Proof Comes Next","tr":"Kanıt Kapısı · %N Kod Dosyası Değişti, Hiçbir Şey Koşmadı · Sırada Kanıt Var"},
   "banner.deny": {"en":"Denylist Stopped A Command · %R","tr":"Yasak Liste Bir Komutu Durdurdu · %R"},
+  "banner.long": {"en":"Long Wait · To Background","tr":"Uzun Bekleme · Arka Plana"},
   "banner.loop": {"en":"Endless Wait Stopped · It Reruns With A Bound","tr":"Sınırsız Bekleme Durduruldu · Sınırla Yeniden Koşacak"},
   "cue.resume": {"en":"Resume: .claude/handoff.md","tr":"Devam: .claude/handoff.md"},
   "handoff.rule": {"en":"Read task, then changed_files. Continue from the first unfinished part; do not redo or re-verify what the diff already shows.","tr":"Önce task, sonra changed_files oku. İlk bitmemiş parçadan sür; diff'in gösterdiğini yeniden yapma, yeniden doğrulama."},
