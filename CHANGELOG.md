@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.81.2
+
+- loop.js denies a foreground wait that sleeps with a timeout over three minutes; the model writes the owner one line and reruns it with run_in_background. A MurphyEngine session had left a question unanswered for 52 minutes through five ten-minute polls.
+
 ## v0.81.1
 
 - release.js publish now updates the plugin on this machine; a stale 0.79.0 install had kept the T0 naming from running. --no-install skips it.
