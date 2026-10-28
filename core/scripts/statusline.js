@@ -117,6 +117,14 @@ function progressPart(cwd, now) {
   return s;
 }
 
+function bant(cwd) {
+  let text;
+  try { text = fs.readFileSync(path.join(cwd, '.claude', 'jobs.md'), 'utf8'); } catch { return ''; }
+  const r = oran(text);
+  if (!r) return '';
+  return r.done === r.n ? cubuk(1) + ' 100% (' + r.n + '/' + r.n + ')' : progressPart(cwd, Date.now());
+}
+
 function build(input) {
   const cwd = (input && input.workspace && input.workspace.current_dir) || process.cwd();
   const parts = [paint(C.cyan, 'Teknesyum') + ' ' + paint(C.dim, '▸') + ' ' + path.basename(path.resolve(cwd))];
@@ -172,4 +180,4 @@ function summary(cwd) {
 }
 
 if (require.main === module) main();
-module.exports = { build, main, summary };
+module.exports = { build, main, summary, bant };

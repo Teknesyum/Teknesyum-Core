@@ -324,6 +324,8 @@ Statusline aynı durumu okur: dokunulan dosyalar eklenen ve silinen satırlarla,
 oturumun koştuğu testler ve kaçının düştüğü, bağlam yüzdesi, `.claude/jobs.md` dosyasından çizilen ilerleme çubuğu (yirmi `▰▱` hücre, her biri %5; satır `(n/m)` alt adım taşıyabilir; kalan süre liste ilk görüldüğünden beri ölçülen hızdan, hiçbir şey bitmeden yazılmaz), bekleyen devir var mı, açık
 hata günlükleri, varsa kanca hataları. Test bayatlığı state'teki son düzenleme zamanından okunur; git en çok on saniyede bir çalışır. Düz metin; burada renk ya da ölçü uydurulmaz.
 
+Masaüstü uygulaması statusline çizmez; bu yüzden `.claude/jobs.md` her düzenlendiğinde aynı çubuk banda da düşer (`count.js`, PostToolUse), son işarette dolu; token yok.
+
 Oturumun kabuk üzerinden başlattığı ve otuz dakikadan uzun süredir çalışan süreçleri de
 sayar: `⏳ 2 süreç 40 dk`. Sayımı ayrık bir süreç en çok dakikada bir tazeler, statusline
 onu hiç beklemez; ilk takılı süreç göründüğünde zil bir kez çalar. Hiçbir şey durdurulmaz;

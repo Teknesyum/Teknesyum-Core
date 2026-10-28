@@ -255,6 +255,19 @@ function testCountThreshold() {
   const line = j ? j.hookSpecificOutput.additionalContext : '';
   ok('the line says how many files and asks for a plan', /5 files touched/.test(line) && /docs\/plan\.md/.test(line), line);
   ok('the line stays under 40 tokens', line.split(/\s+/).length <= 40, String(line.split(/\s+/).length));
+  {
+    const jr = fixture();
+    fs.mkdirSync(path.join(jr, '.claude'), { recursive: true });
+    fs.writeFileSync(path.join(jr, '.claude', 'jobs.md'), '- [x] a\n- [ ] b (1/2)\n');
+    hook(COUNT, { hook_event_name: 'PostToolUse', tool_name: 'Write', session_id: 'jb', cwd: jr, tool_input: { file_path: path.join(jr, '.claude', 'jobs.md') }, tool_response: {} }, cfg);
+    const bar = take(cfg, 'jb');
+    ok('a jobs.md edit draws the progress bar on the band', /^Teknesyum Core > ▰+▱+ 75% \(1\/2\)/.test(bar), bar);
+    fs.writeFileSync(path.join(jr, '.claude', 'jobs.md'), '- [x] a\n- [x] b\n');
+    hook(COUNT, { hook_event_name: 'PostToolUse', tool_name: 'Edit', session_id: 'jb', cwd: jr, tool_input: { file_path: path.join(jr, '.claude', 'jobs.md') }, tool_response: {} }, cfg);
+    const son = take(cfg, 'jb');
+    ok('and the last tick shows it full', /100% \(2\/2\)/.test(son), son);
+    sweep(jr);
+  }
   ok('and the display queue gets the threshold, the model does not', /^Teknesyum Core > Threshold · 5 files touched · /m.test(take(cfg, 's1')) && !/Teknesyum Core/.test(line) && !(j && j.systemMessage), fifth.stdout);
   const sixth = edit(root, cfg, 'src/f.js', 's1', 'x\n');
   ok('the sixth file is silent again', sixth.stdout === '', sixth.stdout);

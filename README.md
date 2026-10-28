@@ -329,6 +329,8 @@ the pace since the list first appeared, and left out until something is done), w
 a handoff is waiting, open bug logs, and hook errors if any. Test staleness is read from the last edit time in state; git runs at most once every ten seconds. Plain text, no colours or
 measures invented here.
 
+The desktop app does not draw the statusline, so every edit of `.claude/jobs.md` also queues the same bar on the band (`count.js`, PostToolUse), full at the last tick; no tokens.
+
 It also counts processes the session spawned through a shell that have been running for
 more than thirty minutes: `⏳ 2 processes 40 min`. The count is refreshed by a detached
 process at most once a minute, so the statusline never waits on it, and the chime rings

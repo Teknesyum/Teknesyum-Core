@@ -281,8 +281,12 @@ function handle(j) {
   if (j.transcript_path) st.transcript = j.transcript_path;
   let out = '';
   if (ev === 'PostToolUse') {
-    if (EDITS.test(j.tool_name)) out = onEdit(j, st) || kural(j);
-    else if (SHELLS.test(j.tool_name)) {
+    if (EDITS.test(j.tool_name)) {
+      out = onEdit(j, st) || kural(j);
+      if (/[\\/]\.claude[\\/]jobs\.md$/i.test(String((j.tool_input || {}).file_path || ''))) {
+        try { const b = require('../scripts/statusline.js').bant(j.cwd || process.cwd()); if (b) say(st.session, BANNER + b); } catch {}
+      }
+    } else if (SHELLS.test(j.tool_name)) {
       out = onShell(j, st);
       onSeat(st);
       try { const b = require('./bekle.js').kaydet(j); if (b) say(st.session, BANNER + (lang() === 'tr' ? 'Arka Planda · ' : 'In The Background · ') + b.ad); } catch {}
