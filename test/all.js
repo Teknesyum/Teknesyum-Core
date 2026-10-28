@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 process.env.TEKNESYUM_NO_REFRESH = '1';
+process.env.TEKNESYUM_BEKLE_IZLEME = '1';
+process.env.TEKNESYUM_BEKLE_SESSIZ = '1';
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -103,6 +105,38 @@ function take(cfg, sid) {
 
 function stateOf(cfg, sid) {
   return JSON.parse(fs.readFileSync(path.join(cfg, 'teknesyum', 'state-' + (sid || 's1') + '.json'), 'utf8'));
+}
+
+function testBekle() {
+  const B = require(path.join(CORE, 'hooks', 'bekle.js'));
+  const cfg = home();
+  const was = process.env.CLAUDE_CONFIG_DIR;
+  process.env.CLAUDE_CONFIG_DIR = cfg;
+  try {
+    const proj = path.join(cfg, 'projects', 'C--x');
+    fs.mkdirSync(proj, { recursive: true });
+    const tr = path.join(proj, 'sid1.jsonl');
+    fs.writeFileSync(tr, '{"type":"user"}\n');
+    const out = B.cikti(tr, 'bq1');
+    ok('bekle: output path follows the harness task folder', /claude[\\/]C--x[\\/]sid1[\\/]tasks[\\/]bq1\.output$/.test(out), out);
+    fs.mkdirSync(path.dirname(out), { recursive: true });
+    fs.writeFileSync(out, 'oyun 1\noyun 2 bitti\n\n');
+    ok('bekle: a foreground call is not recorded', B.kaydet({ session_id: 's1', transcript_path: tr, tool_input: { command: 'ls' }, tool_response: { stdout: 'x' } }) === null);
+    const is = B.kaydet({ session_id: 's1', transcript_path: tr, tool_input: { command: 'python run.py', description: 'T79 turunu koş' }, tool_response: { backgroundTaskId: 'bq1' } });
+    ok('bekle: a background call is recorded with its description', is && is.ad === 'T79 turunu koş');
+    const d = B.durum('s1');
+    ok('bekle: the prompt line names the job and its last output', /T79 turunu koş/.test(d) && /oyun 2 bitti/.test(d), d);
+    ok('bekle: a tick builds the toast text', /T79 turunu koş · \d+ /.test(B.tur('s1', 'bq1')));
+    ok('bekle: another session sees nothing', B.durum('s2') === '');
+    fs.appendFileSync(tr, '{"attachment":{"prompt":"<task-notification>\\n<task-id>bq1</task-id>\\n<status>completed</status>"}}\n');
+    ok('bekle: the completion notice ends it', B.durum('s1') === '' && B.tur('s1', 'bq1') === '');
+    const eski = B.kaydet({ session_id: 's3', transcript_path: tr, tool_input: { command: 'x' }, tool_response: { backgroundTaskId: 'bq9' } });
+    fs.writeFileSync(B.dosya('s3'), JSON.stringify([{ ...eski, at: Date.now() - 13 * 3600000 }]));
+    ok('bekle: a job older than twelve hours is dropped', B.durum('s3') === '');
+  } finally {
+    if (was === undefined) delete process.env.CLAUDE_CONFIG_DIR; else process.env.CLAUDE_CONFIG_DIR = was;
+    sweep(cfg);
+  }
 }
 
 function testTasi() {
@@ -2507,6 +2541,7 @@ function main() {
     ['ui check mark', testUiCheck],
     ['ui gate', testUiGate],
     ['state travels', testTasi],
+    ['background waits', testBekle],
   ];
   for (const [name, fn] of suites) {
     try {

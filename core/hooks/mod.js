@@ -546,7 +546,9 @@ function handle(j) {
   else if (wanted(prompt)) text = report(wanted(prompt));
   else if (BASE_READY.test(prompt)) text = t('mod.base').replace('%C', cmd('init', 'base.js'));
   say(j.session_id, shown);
-  const all = [para, ret, koken, openLogs(j.cwd || process.cwd(), pre), pre, ahead, text, shelve(prompt, j.cwd || process.cwd())].filter(Boolean).join('\n\n');
+  let bekleyen = '';
+  try { bekleyen = require('./bekle.js').durum(j.session_id); } catch {}
+  const all = [para, ret, koken, openLogs(j.cwd || process.cwd(), pre), pre, ahead, text, shelve(prompt, j.cwd || process.cwd()), bekleyen].filter(Boolean).join('\n\n');
   const title = ad(j, prompt, m);
   if (!all && !title) return '';
   const out = { hookEventName: 'UserPromptSubmit' };

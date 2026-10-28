@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { main, read, write, stateFile, configRoot, safe, t, banner, say, settings, BANNER } = require('./lib.js');
+const { main, read, write, stateFile, configRoot, safe, t, banner, say, settings, BANNER, lang } = require('./lib.js');
 
 const FILE_MAX = 5;
 const DIFF_MAX = 150;
@@ -285,6 +285,7 @@ function handle(j) {
     else if (SHELLS.test(j.tool_name)) {
       out = onShell(j, st);
       onSeat(st);
+      try { const b = require('./bekle.js').kaydet(j); if (b) say(st.session, BANNER + (lang() === 'tr' ? 'Arka Planda · ' : 'In The Background · ') + b.ad); } catch {}
     }
     if (!out) out = onContext(st);
   } else if (ev === 'PostToolUseFailure') {
