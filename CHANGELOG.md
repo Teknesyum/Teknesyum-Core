@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.82.0
+
+- Background shell jobs report their status: a band line when they start, a desktop toast every ten minutes (bekleAra) with age and last output, and one prompt line while they run
+
 ## v0.81.2
 
 - loop.js denies a foreground wait that sleeps with a timeout over three minutes; the model writes the owner one line and reruns it with run_in_background. A MurphyEngine session had left a question unanswered for 52 minutes through five ten-minute polls.
