@@ -291,3 +291,8 @@ Bugün git'e girmeyen proje durumu yalnız bu makinede: `logs/openlogs/`, `.clau
 - [x] V2. `SessionStart`: yerelde yoksa ya da özeldeki daha yeniyse geri koy; çakışmada yerel kalır, özel kopya `.onceki` olur.
 - [x] V3. Test: boş bir makine klasörüne geri yükleme, açık log satırının ilk istemde görünmesi.
 - [x] V4. T0 yeri makineye bağlı kalır: yeni makinede ilk oturum T0 olur (sahip 2026-10-24).
+
+## W. Dosya Bağlantısı Panelde Açılsın (log TEKLIF 1-MustafaÖzel-AksarayTıp 2026-11-06)
+
+- [ ] `dur.js` Stop: PDF/docx bağlantısı çalışma klasörünün alt yolu değilse (kökten uzun yol) geri çevir: "çalışma klasörünü dosyanın klasörüne al, kısa göreli yolla bağla".
+- [ ] yordam.md'ye kural: bağlantı = dosyanın klasörüne göre en kısa göreli yol, `..` yok, boşluk `%20`.
