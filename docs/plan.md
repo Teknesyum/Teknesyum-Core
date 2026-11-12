@@ -296,3 +296,11 @@ Bugün git'e girmeyen proje durumu yalnız bu makinede: `logs/openlogs/`, `.clau
 
 - [ ] `dur.js` Stop: PDF/docx bağlantısı çalışma klasörünün alt yolu değilse (kökten uzun yol) geri çevir: "çalışma klasörünü dosyanın klasörüne al, kısa göreli yolla bağla".
 - [ ] yordam.md'ye kural: bağlantı = dosyanın klasörüne göre en kısa göreli yol, `..` yok, boşluk `%20`.
+
+## X. T0 Koltuğu Fable Mı Opus Mu (sahip 2026-11-12: "şimdilik ölçmeyelim ama gelecekte bu ölçümü planlayalım")
+
+Bekliyor: sahip "ölç" deyince başlar.
+
+- [ ] Bench A/B: aynı orkestra işi (plan kur, 2–3 alt ajana böl, sonucu denetle, sürüm çıkar), T0 kolu Fable 5.2 ($8/$40) ile Opus 5.5 ($4/$20); kol başına en fazla 3 tekrar, bütçe 50 $ altı.
+- [ ] Ölçülecek: iş başı maliyet (önbellek okuması ikisinde de $0,20), süre, sonuç doğruluğu, alt ajana doğru bölme.
+- [ ] Karar: Fable farkı maliyete değerse `ust.js`'de T0 koltuğu Fable; değmezse Fable karar ortağı olarak kalır. Sonuç `bench/rapor.md`'ye.
