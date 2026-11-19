@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.83.1
+
+- A project folder with no git repo now names its sessions after itself instead of Sohbet
+
 ## v0.83.0
 
 - Every edit of .claude/jobs.md puts the progress bar on the band, since the desktop app does not draw the statusline
