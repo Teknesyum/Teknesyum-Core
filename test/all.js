@@ -472,6 +472,12 @@ function testLanguage(root) {
   fs.mkdirSync(path.join(repo, 'src', 'a'), { recursive: true });
   ok('the session title names the project from the repo root', md.proje(path.join(repo, 'src', 'a')) === path.basename(repo));
   ok('a scratch chat is named Sohbet', md.proje(path.join('C:', 'x', 'scratch-workspaces', 'a', 'b')) === 'Sohbet');
+  const yeni = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-bos-'));
+  ok('an empty folder with no repo is named after itself', md.proje(yeni) === path.basename(yeni), md.proje(yeni));
+  const ilk = md.ad({ session_id: 'ad-bos-' + Date.now(), cwd: yeni }, 'orkestrator sensin görevin', null);
+  ok('and its first session is the T0', ilk === '--- ' + path.basename(yeni) + ' T0', ilk);
+  ok('the home folder stays Sohbet', md.proje(os.homedir()) === 'Sohbet' && md.proje(path.join(os.homedir(), 'Desktop')) === 'Sohbet');
+  sweep(yeni);
   ok('the topic keeps the content words', md.konu('kulaklıkta cızırtı var ne yapmalı?') === 'Kulaklıkta Cızırtı Yapmalı', md.konu('kulaklıkta cızırtı var ne yapmalı?'));
   const pasted = '\n\n<pasted_content id="0b89">\nkulaklıkta cızırtı var\n</pasted_content>';
   ok('a pasted prompt still gets a topic', md.konu(pasted) === 'Kulaklıkta Cızırtı', md.konu(pasted));

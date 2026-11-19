@@ -446,9 +446,16 @@ function kok(cwd) {
   for (;;) {
     if (fs.existsSync(path.join(dir, '.git'))) return dir;
     const up = path.dirname(dir);
-    if (up === dir) return '';
+    if (up === dir) return kendi(cwd);
     dir = up;
   }
+}
+
+function kendi(cwd) {
+  const d = path.resolve(cwd);
+  const home = path.resolve(require('os').homedir());
+  if (path.dirname(d) === d || d === home || path.dirname(d) === home) return '';
+  return d;
 }
 
 function yazim(dir) {
