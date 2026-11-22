@@ -304,3 +304,11 @@ Bekliyor: sahip "ölç" deyince başlar.
 - [ ] Bench A/B: aynı orkestra işi (plan kur, 2–3 alt ajana böl, sonucu denetle, sürüm çıkar), T0 kolu Fable 5.2 ($8/$40) ile Opus 5.5 ($4/$20); kol başına en fazla 3 tekrar, bütçe 50 $ altı.
 - [ ] Ölçülecek: iş başı maliyet (önbellek okuması ikisinde de $0,20), süre, sonuç doğruluğu, alt ajana doğru bölme.
 - [ ] Karar: Fable farkı maliyete değerse `ust.js`'de T0 koltuğu Fable; değmezse Fable karar ortağı olarak kalır. Sonuç `bench/rapor.md`'ye.
+
+## Y. Watermarks Remover Denemesi: Ölç, Sonra Karar (sahip 2026-11-22: "şimdilik kur, ölçüm iyimserse dahili Core elemanı, değilse komple kaldır")
+
+Kurulu, Core'un dışında: `~/.claude/deneme/watermarks-remover/` (depo `5a62be6` sabit, MIT). Kanca kullanıcı `settings.json` PostToolUse'ta, `olc.js` sarmalayıcısı; yalnız `check` kipi, çıktıyı yutar, model hiçbir şey görmez (0 token). Skill kurulmadı (listeye girip token yerdi).
+
+- [ ] Veri topla: her Write/Edit için gecikme (sarmalayıcı + python), işaret var mı, bulgu türü → `olcum.jsonl`. Rapor: `node ~/.claude/deneme/watermarks-remover/rapor.js`.
+- [ ] Karar eşiği: p95 gecikme ≤ 150 ms ve gerçek (yanlış olmayan) işaret çıkarsa → Katman A (`text_unicode.py`) Node'a taşınıp Core kancasına girer, Python bağımlılığı olmadan. Aksi halde: kancayı `settings.json`'dan sil, klasörü `trash/`e.
+- [ ] Geri dönüş: `settings.yedek.json` aynı klasörde (kurulum öncesi kopya).
