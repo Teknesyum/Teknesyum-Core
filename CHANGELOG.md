@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.84.0
+
+- The Stop gate sends back replies that name files, folders or the ledger without a link, request lists without --- between items, and no longer asks a second closing for work already summarised
+
 ## v0.83.1
 
 - A project folder with no git repo now names its sessions after itself instead of Sohbet
