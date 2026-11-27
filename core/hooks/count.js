@@ -283,13 +283,14 @@ function handle(j) {
   if (ev === 'PostToolUse') {
     if (EDITS.test(j.tool_name)) {
       out = onEdit(j, st) || kural(j);
-      if (/[\\/]\.claude[\\/]jobs\.md$/i.test(String((j.tool_input || {}).file_path || ''))) {
-        try { const b = require('../scripts/statusline.js').bant(j.cwd || process.cwd()); if (b) say(st.session, BANNER + b); } catch {}
+      const jf = String((j.tool_input || {}).file_path || '');
+      if (/[\\/]\.claude[\\/]jobs\.md$/i.test(jf)) {
+        try { const b = require('../scripts/statusline.js').bant(path.dirname(path.dirname(path.resolve(j.cwd || process.cwd(), jf)))); if (b) say(st.session, BANNER + b); } catch {}
       }
     } else if (SHELLS.test(j.tool_name)) {
       out = onShell(j, st);
       onSeat(st);
-      try { const b = require('./bekle.js').kaydet(j); if (b) say(st.session, BANNER + (lang() === 'tr' ? 'Arka Planda · ' : 'In The Background · ') + b.ad); } catch {}
+      try { const b = require('./bekle.js').kaydet(j); if (b) out = speak(st, t('bekle.cubuk'), BANNER + (lang() === 'tr' ? 'Arka Planda · ' : 'In The Background · ') + b.ad); } catch {}
     }
     if (!out) out = onContext(st);
   } else if (ev === 'PostToolUseFailure') {

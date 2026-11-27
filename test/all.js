@@ -3,6 +3,7 @@
 process.env.TEKNESYUM_NO_REFRESH = '1';
 process.env.TEKNESYUM_BEKLE_IZLEME = '1';
 process.env.TEKNESYUM_BEKLE_SESSIZ = '1';
+process.env.TEKNESYUM_ISSUE_SESSIZ = '1';
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -128,8 +129,23 @@ function testBekle() {
     ok('bekle: the prompt line names the job and its last output', /T79 turunu koş/.test(d) && /oyun 2 bitti/.test(d), d);
     ok('bekle: a tick builds the toast text', /T79 turunu koş · \d+ /.test(B.tur('s1', 'bq1')));
     ok('bekle: another session sees nothing', B.durum('s2') === '');
+    const D = require(path.join(CORE, 'hooks', 'defter.js'));
+    const pj = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-isler-'));
+    const jm = path.join(pj, '.claude', 'jobs.md');
+    fs.mkdirSync(path.dirname(jm), { recursive: true });
+    fs.writeFileSync(jm, '- [ ] indir (10/40)\n');
+    D.ledger(pj, 's1');
+    ok('bekle: the jobs list stays while a background job runs', fs.existsSync(jm));
     fs.appendFileSync(tr, '{"attachment":{"prompt":"<task-notification>\\n<task-id>bq1</task-id>\\n<status>completed</status>"}}\n');
     ok('bekle: the completion notice ends it', B.durum('s1') === '' && B.tur('s1', 'bq1') === '');
+    D.ledger(pj, 's1');
+    fs.writeFileSync(jm, '- [ ] indir (30/40)\n');
+    D.ledger(pj, 's1');
+    const led = fs.readFileSync(path.join(pj, '.claude', 'acik.md'), 'utf8');
+    ok('bekle: once it ends the list moves to the ledger, one line per job whatever its count', !fs.existsSync(jm) && (led.match(/indir/g) || []).length === 1, led);
+    sweep(pj);
+    const r = hook(path.join(CORE, 'hooks', 'count.js'), { hook_event_name: 'PostToolUse', session_id: 's4', transcript_path: tr, cwd: proj, tool_name: 'Bash', tool_input: { command: 'x', description: 'indir' }, tool_response: { backgroundTaskId: 'bq4' } }, cfg);
+    ok('bekle: a background call tells the model where the bar comes from', /jobs\.md/.test(r.stdout || ''), (r.stdout || '') + (r.stderr || ''));
     const eski = B.kaydet({ session_id: 's3', transcript_path: tr, tool_input: { command: 'x' }, tool_response: { backgroundTaskId: 'bq9' } });
     fs.writeFileSync(B.dosya('s3'), JSON.stringify([{ ...eski, at: Date.now() - 13 * 3600000 }]));
     ok('bekle: a job older than twelve hours is dropped', B.durum('s3') === '');
@@ -465,7 +481,7 @@ function testLanguage(root) {
   const table = JSON.parse(fs.readFileSync(path.join(CORE, 'strings.json'), 'utf8'));
   const keys = Object.keys(table);
   ok('every string has an English original', keys.every((k) => typeof table[k].en === 'string' && table[k].en.length));
-  ok('the table is small', JSON.stringify(table).length < 32000, String(JSON.stringify(table).length));
+  ok('the table is small', JSON.stringify(table).length < 33000, String(JSON.stringify(table).length));
   const md = require(path.join(CORE, 'hooks', 'mod.js'));
   const repo = fs.mkdtempSync(path.join(os.tmpdir(), 'tkc-ad-'));
   fs.mkdirSync(path.join(repo, '.git'));
@@ -476,6 +492,18 @@ function testLanguage(root) {
   ok('an empty folder with no repo is named after itself', md.proje(yeni) === path.basename(yeni), md.proje(yeni));
   const ilk = md.ad({ session_id: 'ad-bos-' + Date.now(), cwd: yeni }, 'orkestrator sensin görevin', null);
   ok('and its first session is the T0', ilk === '--- ' + path.basename(yeni) + ' T0', ilk);
+  {
+    const ic = home();
+    const eski = process.env.CLAUDE_CONFIG_DIR;
+    process.env.CLAUDE_CONFIG_DIR = ic;
+    fs.mkdirSync(path.join(ic, 'teknesyum'), { recursive: true });
+    fs.writeFileSync(path.join(ic, 'teknesyum', 'issues-Proje.json'), JSON.stringify({ at: Date.now(), list: [{ number: 4, title: 'Bar' }] }));
+    const li = md.issues(path.join(os.tmpdir(), 'Proje'));
+    ok('a fresh issue cache is read without asking GitHub', li.length === 1 && li[0].number === 4, JSON.stringify(li));
+    ok('no cache yet means no issues this prompt', md.issues(path.join(os.tmpdir(), 'Baska')).length === 0);
+    if (eski === undefined) delete process.env.CLAUDE_CONFIG_DIR; else process.env.CLAUDE_CONFIG_DIR = eski;
+    sweep(ic);
+  }
   ok('the home folder stays Sohbet', md.proje(os.homedir()) === 'Sohbet' && md.proje(path.join(os.homedir(), 'Desktop')) === 'Sohbet');
   sweep(yeni);
   ok('the topic keeps the content words', md.konu('kulaklıkta cızırtı var ne yapmalı?') === 'Kulaklıkta Cızırtı Yapmalı', md.konu('kulaklıkta cızırtı var ne yapmalı?'));

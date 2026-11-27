@@ -40,7 +40,7 @@ function lines(text) {
 }
 
 function job(line) {
-  return line.replace(/^\s*[-*]\s+(\[[ xX]\]\s*)?/, '').split(SEP)[0].trim();
+  return line.replace(/^\s*[-*]\s+(\[[ xX]\]\s*)?/, '').split(SEP)[0].replace(/\s*\(\d+\/\d+\)/g, '').trim();
 }
 
 function entry(line, source) {
@@ -112,7 +112,9 @@ function stale(cwd, mine) {
 
 function absorbJobs(cwd, session) {
   const own = path.join(cwd, jobsFile(cwd, session, true));
-  return [own, ...stale(cwd, own)].reduce((n, f) => n + absorbFile(cwd, f), 0);
+  let busy = false;
+  try { busy = require('./bekle.js').acik(session).length > 0; } catch {}
+  return [...(busy ? [] : [own]), ...stale(cwd, own)].reduce((n, f) => n + absorbFile(cwd, f), 0);
 }
 
 function absorbFile(cwd, file) {

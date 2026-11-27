@@ -275,14 +275,33 @@ function asked(j) {
   return '';
 }
 
+const TAZE = 30 * 60 * 1000;
+
+function issues(root) {
+  const f = path.join(configRoot(), 'teknesyum', 'issues-' + path.basename(root) + '.json');
+  let c = null;
+  try { c = JSON.parse(fs.readFileSync(f, 'utf8')); } catch {}
+  if ((!c || Date.now() - c.at > TAZE) && !process.env.TEKNESYUM_ISSUE_SESSIZ) {
+    try {
+      fs.mkdirSync(path.dirname(f), { recursive: true });
+      fs.writeFileSync(f, JSON.stringify({ at: Date.now(), list: (c && c.list) || [] }));
+      const js = "const fs=require('fs');const[r,f]=process.argv.slice(1);try{const o=require('child_process').execFileSync('gh',['issue','list','--state','open','--limit','30','--json','number,title'],{cwd:r,encoding:'utf8',timeout:20000,windowsHide:true});fs.writeFileSync(f,JSON.stringify({at:Date.now(),list:JSON.parse(o)}))}catch{}";
+      require('child_process').spawn(process.execPath, ['-e', js, root, f], { detached: true, stdio: 'ignore', windowsHide: true }).unref();
+    } catch {}
+  }
+  return (c && Array.isArray(c.list)) ? c.list : [];
+}
+
 function openLogs(cwd, pre) {
   const here = path.resolve(cwd).toLowerCase() + path.sep;
   const root = [coreRepo(), uiRepo(), baseRepo()].find((d) => d && here.startsWith(path.resolve(d).toLowerCase() + path.sep));
   if (!root) return '';
   let names = [];
   try { names = fs.readdirSync(path.join(root, 'logs', 'openlogs')).filter((f) => f.endsWith('.md') && !pre.includes(f)); } catch {}
-  if (!names.length) return '';
-  return t('mod.logs').replace('%N', String(names.length)).replace('%L', names.map((f) => f.replace(/\.md$/, '')).join(', ')).replace('%C', cmd('archive --id X', 'log.js'));
+  const is = issues(root);
+  const ek = is.length ? t('mod.issues').replace('%N', String(is.length)).replace('%L', is.map((x) => '#' + x.number + ' ' + x.title).join(', ')) : '';
+  if (!names.length) return ek;
+  return (ek ? ek + '\n' : '') + t('mod.logs').replace('%N', String(names.length)).replace('%L', names.map((f) => f.replace(/\.md$/, '')).join(', ')).replace('%C', cmd('archive --id X', 'log.js'));
 }
 
 const TAIL = 256 * 1024;
@@ -566,4 +585,4 @@ function handle(j) {
 
 if (require.main === module) main(handle, { log: 'mod.js' });
 
-module.exports = { proje, konu, ad, yonetici, kaynak, REPORT, UI_REPORT, BASE_REPORT, BASE_READY, PARAZIT, parazit, RET, lastSaid, kacak, MISS_LOG, wanted, SHELVE, ASKED, handle, busy, soru, tail, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };
+module.exports = { issues, proje, konu, ad, yonetici, kaynak, REPORT, UI_REPORT, BASE_REPORT, BASE_READY, PARAZIT, parazit, RET, lastSaid, kacak, MISS_LOG, wanted, SHELVE, ASKED, handle, busy, soru, tail, words, mark, later, expect, open, items, JOBS, PREFIX, SUFFIX, configRoot };
