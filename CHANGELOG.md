@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.85.0
+
+- Open GitHub issues join the open-log line before each request; a running background job keeps its jobs list, and ledger lines no longer repeat per (n/m) count
+
 ## v0.84.0
 
 - The Stop gate sends back replies that name files, folders or the ledger without a link, request lists without --- between items, and no longer asks a second closing for work already summarised
