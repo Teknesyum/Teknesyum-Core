@@ -1991,6 +1991,16 @@ function testKapanis() {
     ok('a link inside a code block is not checked', dur.baglanti({ cwd: root, last_assistant_message: '```\n[yok](docs/yok.md)\n```' }) === '');
     const deny = dur.kart({ hook_event_name: 'PreToolUse', tool_name: 'SendUserFile', cwd: root, tool_input: { files: [outside] } });
     ok('sending a file from outside the session folders is denied', deny && deny.hookSpecificOutput.permissionDecision === 'deny');
+    fs.mkdirSync(path.join(root, '.claude'));
+    fs.writeFileSync(path.join(root, '.claude', 'acik.md'), 'x');
+    ok('a file named without a link is sent back', /docs\/a\.md/.test(dur.yalin({ cwd: root, last_assistant_message: 'Rapor `docs/a.md` içinde.' })));
+    ok('a bare file name with an extension is sent back too', /docs\/a\.md/.test(dur.yalin({ cwd: root, last_assistant_message: 'Rapor docs/a.md içinde.' })));
+    ok('the ledger named without a link is sent back', /acik\.md/.test(dur.yalin({ cwd: root, last_assistant_message: 'Gerekçeleri defterde yazılı.' })));
+    ok('a linked file, a missing name and a command pass', dur.yalin({ cwd: root, last_assistant_message: '[a](docs/a.md) yani `docs/a.md`; `npm test`, `yok/b.md`, [defter](.claude/acik.md)' }) === '');
+    ok('a file inside a code block is not checked', dur.yalin({ cwd: root, last_assistant_message: '```\ndocs/a.md\n```' }) === '');
+    const iki = '## Senden istediklerim\n1. Bir\n2. İki';
+    ok('two requests with no line between them are sent back', /---/.test(dur.ayirici({ last_assistant_message: iki })));
+    ok('two requests split by a line, or one request, pass', dur.ayirici({ last_assistant_message: '## Senden istediklerim\n1. Bir\n\n---\n\n2. İki' }) === '' && dur.ayirici({ last_assistant_message: '## Senden istediklerim\n1. Bir\n\n## Sonra\n1. a\n2. b' }) === '');
     ok('sending a file from the session folder is allowed', dur.kart({ hook_event_name: 'PreToolUse', tool_name: 'SendUserFile', cwd: root, tool_input: { files: ['docs/a.md'] } }) === null);
   }
   ok('a reply that describes the statusline bar goes through', dur.cubuk({ last_assistant_message: 'Statusline şöyle: ▰▰▰▰▱▱ 50% (2/5)' }) === '' && dur.cubuk({ last_assistant_message: 'Bitti.' }) === '');
@@ -2001,6 +2011,11 @@ function testKapanis() {
   ok('a long turn with the summary heading passes', k('## Ön Özet\nx\n\n## Özet\nBitti.\n\nYok') === '');
   fs.appendFileSync(tr, JSON.stringify({ type: 'user', message: { content: '<task-notification>bitti</task-notification>' } }) + '\n' + use(1) + '\n');
   ok('a background notice after a long turn starts a short one', k('Bitti.') === '');
+  yaz(6);
+  fs.appendFileSync(tr, JSON.stringify({ type: 'assistant', message: { content: [{ type: 'text', text: '## Özet\nBitti.' }] } }) + '\n' + JSON.stringify({ type: 'user', message: { content: '<task-notification>bitti</task-notification>' } }) + '\n' + use(6) + '\n');
+  ok('a background notice for work already summarised asks for no closing', k('Kontrol ettim.') === '');
+  yaz(6);
+  ok('the send-back asks not to repeat the reply', /tekrarlama|Do not repeat/.test(k('Bitti.')));
   yaz(2);
   ok('a short turn passes', k('Bitti.') === '');
   const cizik = bant.serit('Giriş\n\n## Ön Özet\nx\n\n## Özet\ny');

@@ -62,6 +62,11 @@ function uyanis(o) {
   return typeof c === 'string' ? /^\s*<task-notification/.test(c) : Array.isArray(c) && c.some((x) => x && x.type === 'text' && /^\s*<task-notification/.test(x.text || ''));
 }
 
+function ozetli(o) {
+  if (!o || o.type !== 'assistant' || o.isSidechain || !o.message || !Array.isArray(o.message.content)) return false;
+  return o.message.content.some((x) => x && x.type === 'text' && OZET.test(x.text || ''));
+}
+
 function kapanis(j) {
   if (settings().closing === false) return '';
   const kitap = require('./kitap.js');
@@ -70,6 +75,7 @@ function kapanis(j) {
   const list = kitap.entries(f);
   let at = -1;
   for (let i = list.length - 1; i >= 0; i--) if (uyanis(list[i])) { at = i; break; }
+  if (at >= 0) for (let i = at - 1; i >= 0 && !kitap.prompt(list[i]); i--) if (ozetli(list[i])) return '';
   const n = kitap.turn(list.slice(at)).uses.length;
   if (n < UZUN) return '';
   const said = typeof j.last_assistant_message === 'string' ? j.last_assistant_message : require('./defter.js').lastText(j);
@@ -273,6 +279,48 @@ function baglanti(j) {
   return bad.length ? t('dur.links').replace('%CWD', cwd) + '\n' + bad.map((p) => '- ' + p).join('\n') : '';
 }
 
+const ISTEK = /^\s*#{1,6}\s*(Senden istediklerim|Senden bekleyenler|What I need from you)\s*$/im;
+const UZANTI = /[^\s`()[\]<>"'*|,;]+\.(md|docx?|pdf|pptx?|xlsx?|csv|json|jsonl|js|ts|tsx|txt|png|jpe?g|svg|html?|ps1|sh|cs|py|xaml|mp4|zip)\b/gi;
+
+function son(j) {
+  return String((typeof j.last_assistant_message === 'string' ? j.last_assistant_message : require('./defter.js').lastText(j)) || '');
+}
+
+function ayirici(j) {
+  const s = son(j);
+  const m = ISTEK.exec(s);
+  if (!m) return '';
+  let body = s.slice(m.index + m[0].length);
+  const next = /^\s*#{1,6}\s/m.exec(body);
+  if (next) body = body.slice(0, next.index);
+  const items = body.split(/^(?=\d+[.)]\s)/m).filter((x) => /^\d+[.)]\s/.test(x));
+  return items.length >= 2 && items.slice(0, -1).some((x) => !/^\s*-{3,}\s*$/m.test(x)) ? t('dur.ayirici') : '';
+}
+
+function yalin(j) {
+  if (settings().links === false) return '';
+  const s = son(j);
+  if (!s) return '';
+  const cwd = j.cwd || process.cwd();
+  const text = s.replace(/```[\s\S]*?```/g, '');
+  const linked = new Set([...text.matchAll(LINK)].map((m) => hedef(m[1], cwd).toLowerCase()));
+  const bare = text.replace(/\[[^\]\n]*\]\((<[^>\n]*>|[^)\n]*)\)/g, ' ');
+  const cand = [];
+  for (const m of bare.matchAll(/`([^`\n]+)`/g)) if (/[\\/]|\.[a-z0-9]{1,5}(:\d+)?$/i.test(m[1])) cand.push(m[1].trim());
+  for (const m of bare.replace(/`[^`\n]*`/g, ' ').matchAll(UZANTI)) cand.push(m[0]);
+  const out = [];
+  for (const c of cand) {
+    if (/^(https?:|~|\$|-)/i.test(c)) continue;
+    const p = hedef(c.replace(/[\\/]+$/, ''), cwd);
+    if (!icinde(p, [cwd]) || p.toLowerCase() === path.resolve(cwd).toLowerCase() || !fs.existsSync(p) || linked.has(p.toLowerCase())) continue;
+    out.push(path.relative(cwd, p).replace(/\\/g, '/'));
+  }
+  const defter = path.join(cwd, '.claude', 'acik.md');
+  if (/\bdefter/i.test(bare) && fs.existsSync(defter) && !linked.has(defter.toLowerCase())) out.push('.claude/acik.md');
+  const u = [...new Set(out)];
+  return u.length ? t('dur.yalin') + '\n' + u.map((p) => '- ' + p).join('\n') : '';
+}
+
 function kart(j) {
   if (j.hook_event_name !== 'PreToolUse' || j.tool_name !== 'SendUserFile' || settings().links === false) return null;
   const cwd = j.cwd || process.cwd();
@@ -285,7 +333,7 @@ function kart(j) {
 function decide(j) {
   if (j.hook_event_name !== 'Stop') return null;
   if (j.stop_hook_active) return null;
-  const why = [olgu(j), cubuk(j), baglanti(j), sira(j), sil(j), jobs(j), require('./defter.js').short(j), evidence(j), ui(j), language(j), kapanis(j)].filter(Boolean);
+  const why = [olgu(j), cubuk(j), baglanti(j), yalin(j), ayirici(j), sira(j), sil(j), jobs(j), require('./defter.js').short(j), evidence(j), ui(j), language(j), kapanis(j)].filter(Boolean);
   return why.length ? { decision: 'block', reason: why.join('\n\n') } : null;
 }
 
@@ -300,4 +348,4 @@ function stop(j) {
 
 if (require.main === module) main(stop);
 
-module.exports = { baglanti, kart, hedef, acilmaz, cubuk, CUBUK, olgu, ui, shot, stop, decide, sira, sil, kapanis, proven, off, code, jobs, english, language, CODE };
+module.exports = { yalin, ayirici, baglanti, kart, hedef, acilmaz, cubuk, CUBUK, olgu, ui, shot, stop, decide, sira, sil, kapanis, proven, off, code, jobs, english, language, CODE };
