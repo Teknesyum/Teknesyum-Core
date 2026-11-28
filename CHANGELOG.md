@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.85.1
+
+- A closed issue is no longer named from a stale cache: gh issue close/create drops it, and a list older than six hours is not shown
+
 ## v0.85.0
 
 - Open GitHub issues join the open-log line before each request; a running background job keeps its jobs list, and ledger lines no longer repeat per (n/m) count
