@@ -89,6 +89,11 @@ function kural(j) {
   return JSON.stringify({ hookSpecificOutput: { hookEventName: 'PostToolUse', additionalContext: t('kural.yasak') + '\n' + bad.join('\n') } });
 }
 
+function unutIssue() {
+  const d = path.join(configRoot(), 'teknesyum');
+  try { for (const n of fs.readdirSync(d)) if (/^issues-.*\.json$/.test(n)) fs.rmSync(path.join(d, n), { force: true }); } catch {}
+}
+
 function speak(st, text, line) {
   say(st.session, line);
   return JSON.stringify({ hookSpecificOutput: { hookEventName: 'PostToolUse', additionalContext: text } });
@@ -289,6 +294,7 @@ function handle(j) {
       }
     } else if (SHELLS.test(j.tool_name)) {
       out = onShell(j, st);
+      if (/\bgh\s+issue\s+(close|create|reopen|delete|transfer)\b/.test(String((j.tool_input || {}).command || ''))) unutIssue();
       onSeat(st);
       try { const b = require('./bekle.js').kaydet(j); if (b) out = speak(st, t('bekle.cubuk'), BANNER + (lang() === 'tr' ? 'Arka Planda · ' : 'In The Background · ') + b.ad); } catch {}
     }

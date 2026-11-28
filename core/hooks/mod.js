@@ -276,20 +276,22 @@ function asked(j) {
 }
 
 const TAZE = 30 * 60 * 1000;
+const BAYAT = 6 * 3600 * 1000;
 
 function issues(root) {
   const f = path.join(configRoot(), 'teknesyum', 'issues-' + path.basename(root) + '.json');
   let c = null;
   try { c = JSON.parse(fs.readFileSync(f, 'utf8')); } catch {}
-  if ((!c || Date.now() - c.at > TAZE) && !process.env.TEKNESYUM_ISSUE_SESSIZ) {
+  const now = Date.now();
+  if ((!c || (now - c.at > TAZE && now - (c.asked || 0) > TAZE)) && !process.env.TEKNESYUM_ISSUE_SESSIZ) {
     try {
       fs.mkdirSync(path.dirname(f), { recursive: true });
-      fs.writeFileSync(f, JSON.stringify({ at: Date.now(), list: (c && c.list) || [] }));
+      fs.writeFileSync(f, JSON.stringify({ at: (c && c.at) || 0, asked: now, list: (c && c.list) || [] }));
       const js = "const fs=require('fs');const[r,f]=process.argv.slice(1);try{const o=require('child_process').execFileSync('gh',['issue','list','--state','open','--limit','30','--json','number,title'],{cwd:r,encoding:'utf8',timeout:20000,windowsHide:true});fs.writeFileSync(f,JSON.stringify({at:Date.now(),list:JSON.parse(o)}))}catch{}";
       require('child_process').spawn(process.execPath, ['-e', js, root, f], { detached: true, stdio: 'ignore', windowsHide: true }).unref();
     } catch {}
   }
-  return (c && Array.isArray(c.list)) ? c.list : [];
+  return (c && Array.isArray(c.list) && now - c.at < BAYAT) ? c.list : [];
 }
 
 function openLogs(cwd, pre) {

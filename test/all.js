@@ -500,6 +500,10 @@ function testLanguage(root) {
     fs.writeFileSync(path.join(ic, 'teknesyum', 'issues-Proje.json'), JSON.stringify({ at: Date.now(), list: [{ number: 4, title: 'Bar' }] }));
     const li = md.issues(path.join(os.tmpdir(), 'Proje'));
     ok('a fresh issue cache is read without asking GitHub', li.length === 1 && li[0].number === 4, JSON.stringify(li));
+    fs.writeFileSync(path.join(ic, 'teknesyum', 'issues-Eski.json'), JSON.stringify({ at: Date.now() - 7 * 3600000, asked: Date.now(), list: [{ number: 9, title: 'Eski' }] }));
+    ok('a cache older than six hours is not shown', md.issues(path.join(os.tmpdir(), 'Eski')).length === 0);
+    hook(path.join(CORE, 'hooks', 'count.js'), { hook_event_name: 'PostToolUse', session_id: 'is1', cwd: os.tmpdir(), tool_name: 'Bash', tool_input: { command: 'gh issue close 4 --comment x' }, tool_response: { stdout: '' } }, ic);
+    ok('closing an issue drops the cache', !fs.existsSync(path.join(ic, 'teknesyum', 'issues-Proje.json')));
     ok('no cache yet means no issues this prompt', md.issues(path.join(os.tmpdir(), 'Baska')).length === 0);
     if (eski === undefined) delete process.env.CLAUDE_CONFIG_DIR; else process.env.CLAUDE_CONFIG_DIR = eski;
     sweep(ic);
